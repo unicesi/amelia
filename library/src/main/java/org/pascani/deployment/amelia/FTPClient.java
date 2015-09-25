@@ -7,8 +7,27 @@ import java.io.InputStream;
 
 import org.apache.commons.net.ftp.FTP;
 
+/**
+ * Wrapper implementation of the Apache commons net FTP client. In essence, this
+ * class (re)implements:
+ * 
+ * <ul>
+ * <li>{@link #makeDirectory(String)}: allows to create several directories at
+ * once. The remote path can be either a file or a directory.</li>
+ * <li>{@link #upload(String, String)}: allows to upload either a file or a
+ * directory. It automatically checks if the directories exist or not. In case
+ * they do not, {@link #makeDirectory(String)} is called.</li>
+ * </ul>
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.commons.net.ftp.FTPClient#makeDirectory(java.lang.String)
+	 */
 	@Override
 	public boolean makeDirectory(String remotePath) throws IOException {
 		mlistDir(remotePath);
@@ -22,16 +41,19 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 		return super.makeDirectory(remotePath);
 	}
 
-	protected String getParent(String path) {
-		int last = path.length();
-
-		if (path.contains(File.separator))
-			last = path.lastIndexOf(File.separator);
-
-		String parent = path.substring(0, last);
-		return parent;
-	}
-
+	/**
+	 * Uploads either a file or directory to the specified remote location. It
+	 * automatically creates the directories if necessary.
+	 * 
+	 * @param localPath
+	 *            The pathname of the local file/directory to upload
+	 * @param remotePath
+	 *            The destination pathname of the remote file/directory
+	 * @return whether the specified file was uploaded or not
+	 * @throws IOException
+	 *             If an I/O error occurs while either sending a command to the
+	 *             server or receiving a reply from the server
+	 */
 	public boolean upload(String localPath, String remotePath)
 			throws IOException {
 
@@ -96,6 +118,16 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 		}
 
 		return success;
+	}
+
+	private String getParent(String path) {
+		int last = path.length();
+
+		if (path.contains(File.separator))
+			last = path.lastIndexOf(File.separator);
+
+		String parent = path.substring(0, last);
+		return parent;
 	}
 
 }
