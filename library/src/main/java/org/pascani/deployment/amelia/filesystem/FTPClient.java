@@ -1,4 +1,4 @@
-package org.pascani.deployment.amelia;
+package org.pascani.deployment.amelia.filesystem;
 
 import java.io.File;
 import java.io.FileInputStream;
