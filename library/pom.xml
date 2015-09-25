@@ -27,4 +27,11 @@
 	<artifactId>library</artifactId>
 	<name>library</name>
 	<description>Class library containing the basic classes and utilities to implement and use deployment descriptors</description>
+	<dependencies>
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>3.3</version>
+		</dependency>
+	</dependencies>
 </project>
