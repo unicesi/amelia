@@ -1,0 +1,65 @@
+<!--
+ Copyright © 2015 Universidad Icesi
+ 
+ This file is part of the Amelia library.
+ 
+ The Amelia library is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or (at your
+ option) any later version.
+ 
+ The Amelia library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with The Amelia library. If not, see http://www.gnu.org/licenses/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.pascani.deployment</groupId>
+	<artifactId>amelia</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>amelia</name>
+	<description>Parent project for the Amelia modules</description>
+	<modules>
+		<module>library</module>
+	</modules>
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License, Version 3</name>
+			<url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<organization>
+		<name>Universidad Icesi</name>
+		<url>http://www.icesi.edu.co</url>
+	</organization>
+	<developers>
+		<developer>
+			<id>jachinte</id>
+			<name>Miguel Jiménez</name>
+			<email>migueljimenezachinte@gmail.com</email>
+			<url>http://migueljimenez.co</url>
+			<organization>Universidad Icesi</organization>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>gtamura</id>
+			<name>Gabriel Tamura</name>
+			<email>gtamura@icesi.edu.co</email>
+			<url>https://www.icesi.edu.co/profesores/cv/gabriel-tamura</url>
+			<organization>Universidad Icesi</organization>
+			<roles>
+				<role>architect</role>
+			</roles>
+		</developer>
+	</developers>
+</project>
