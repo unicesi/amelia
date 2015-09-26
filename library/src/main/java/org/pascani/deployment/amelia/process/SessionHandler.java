@@ -26,10 +26,15 @@ import java.io.IOException;
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectBuilder;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.util.AmeliaRuntime;
+
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UserInfo;
 
 public class SessionHandler {
 
@@ -49,6 +54,12 @@ public class SessionHandler {
 
 	private Expect expect;
 
+	/**
+	 * The logger
+	 */
+	private final static Logger logger = LogManager
+			.getLogger(SessionHandler.class);
+
 	public SessionHandler(final String host, final int port, final String user,
 			final String password) {
 		this.host = host;
@@ -56,36 +67,51 @@ public class SessionHandler {
 		this.user = user;
 		this.password = password;
 
-		// TODO: get from .properties
-		this.timeout = 10000;
+		String _timeout = AmeliaRuntime
+				.getConfigurationEntry("connection_timeout");
+
+		if (_timeout != null && !_timeout.isEmpty())
+			this.timeout = Integer.parseInt(_timeout);
+		else
+			this.timeout = 0;
 	}
 
-	public Expect run() {
+	public SessionHandler(final String host, final int port, final String user) {
+		this(host, port, user, null);
+	}
+
+	public Expect start() {
 		try {
 
 			connect();
 			initialize();
 
 		} catch (JSchException e) {
+			logger.error("Error establishing connection with " + this.user
+					+ "@" + this.host, e);
 			e.printStackTrace();
 		} catch (IOException e) {
+			logger.error("Error initializing Expect for " + this.user + "@"
+					+ this.host, e);
 			e.printStackTrace();
 		}
-		
+
 		return this.expect;
 	}
 
 	private void connect() throws JSchException {
 		JSch jsch = new JSch();
 
-		// TODO: get from .properties
-		String home = System.getProperty("user.home");
-
-		jsch.addIdentity(home + "/.ssh/id_rsa");
-		jsch.setKnownHosts(home + "/.ssh/known_hosts");
+		jsch.addIdentity(AmeliaRuntime.getConfigurationEntry("identity"));
+		jsch.setKnownHosts(AmeliaRuntime.getConfigurationEntry("known_hosts"));
 
 		this.session = jsch.getSession(this.user, this.host, this.port);
-		this.session.setPassword(this.password);
+		if (this.password != null)
+			this.session.setPassword(this.password);
+
+		UserInfo ui = new AuthenticationUserInfo();
+		session.setUserInfo(ui);
+
 		this.session.connect(this.timeout);
 
 		this.channel = session.openChannel("shell");
@@ -100,7 +126,7 @@ public class SessionHandler {
 				.withInputs(this.channel.getInputStream(),
 						this.channel.getExtInputStream())
 				.withEchoInput(System.out)
-//				.withEchoOutput(System.out)
+				// .withEchoOutput(System.out)
 				.withInputFilters(removeColors(), removeNonPrintable())
 				.withExceptionOnFailure().build();
 	}
