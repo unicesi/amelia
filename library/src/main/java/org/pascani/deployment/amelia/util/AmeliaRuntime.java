@@ -22,12 +22,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.process.FTPHandler;
+import org.pascani.deployment.amelia.process.SSHHandler;
 
+/**
+ * TODO
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class AmeliaRuntime {
 
 	/**
@@ -35,12 +43,43 @@ public class AmeliaRuntime {
 	 */
 	private static Map<String, String> configuration;
 
+	private static Map<String, SSHHandler> sshConnections = new Hashtable<String, SSHHandler>();
+
+	private static Map<String, FTPHandler> ftpConnections = new Hashtable<String, FTPHandler>();
+
 	/**
 	 * The logger
 	 */
 	private final static Logger logger = LogManager
 			.getLogger(AmeliaRuntime.class);
 
+	public static void storeConnection(String key, SSHHandler handler) {
+		sshConnections.put(key, handler);
+	}
+
+	public static void storeConnection(String key, FTPHandler handler) {
+		ftpConnections.put(key, handler);
+	}
+
+	public static SSHHandler getSSHConnection(String key) {
+		return sshConnections.get(key);
+	}
+
+	public static FTPHandler getFTPConnection(String key) {
+		return ftpConnections.get(key);
+	}
+
+	public static Map<String, SSHHandler> SSHConnections() {
+		return sshConnections;
+	}
+
+	public static Map<String, FTPHandler> FTPConnections() {
+		return ftpConnections;
+	}
+
+	/**
+	 * @return the configured value for the specified entry
+	 */
 	public static String getConfigurationEntry(String key) {
 		if (configuration == null)
 			readConfiguration();
@@ -48,6 +87,9 @@ public class AmeliaRuntime {
 		return configuration.get(key);
 	}
 
+	/**
+	 * Reads configuration properties
+	 */
 	private static void readConfiguration() {
 		Properties config = new Properties();
 		InputStream input = null;
@@ -78,13 +120,14 @@ public class AmeliaRuntime {
 				try {
 					input.close();
 				} catch (IOException e) {
-					logger.error("Error closing stream of configuration file", e);
+					logger.error("Error closing stream of configuration file",
+							e);
 				}
 			}
 		}
 
 		configuration = new HashMap<String, String>();
-		
+
 		for (Object key : config.keySet()) {
 			String name = (String) key;
 			configuration.put(name, config.getProperty(name));
