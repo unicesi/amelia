@@ -30,6 +30,34 @@ public class AssetBundle {
 	public AssetBundle(Map<String, List<String>> transfers) {
 		this.transfers = transfers;
 	}
+	
+	/**
+	 * \{>\s*variable_name\s*\} where variable_name is the name of the variable to replace.
+	 * 
+	 * @param variables
+	 * @return
+	 */
+	public AssetBundle resolveVariables(Map<String, String> variables) {
+		AssetBundle bundle = new AssetBundle();
+		
+		for(Map.Entry<String, List<String>> entry : this.transfers.entrySet()) {
+			String local = replaceAll(entry.getKey(), variables);
+			
+			for(String remote : entry.getValue())
+				bundle.add(local, replaceAll(remote, variables));
+		}
+		return bundle;
+	}
+
+	private String replaceAll(String text, Map<String, String> variables) {
+		String newText = text;
+		
+		for (Map.Entry<String, String> entry : variables.entrySet()) {
+			String regexp = "\\{>\\s*" + entry.getKey() + "\\s*\\}";
+			newText = newText.replaceAll(regexp, entry.getValue());
+		}
+		return newText;
+	}
 
 	public static AssetBundle fromFile(String pathname) throws IOException {
 		AssetBundle bundle = new AssetBundle();
