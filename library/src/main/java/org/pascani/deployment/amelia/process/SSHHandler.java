@@ -28,7 +28,7 @@ import net.sf.expectit.ExpectBuilder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.pascani.deployment.amelia.descriptors.HostAccess;
+import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.AmeliaRuntime;
 
 import com.jcraft.jsch.Channel;
@@ -44,7 +44,7 @@ import com.jcraft.jsch.UserInfo;
  */
 public class SSHHandler extends Thread {
 
-	private final HostAccess host;
+	private final Host host;
 
 	private Session session;
 
@@ -54,12 +54,14 @@ public class SSHHandler extends Thread {
 
 	private final int timeout;
 
+	private PrintStream outputStream;
+
 	/**
 	 * The logger
 	 */
 	private final static Logger logger = LogManager.getLogger(SSHHandler.class);
 
-	public SSHHandler(final HostAccess host) {
+	public SSHHandler(final Host host) {
 		this.host = host;
 
 		String _timeout = AmeliaRuntime
@@ -82,7 +84,6 @@ public class SSHHandler extends Thread {
 			logger.error("Error establishing connection with " + this.host, e);
 			e.printStackTrace();
 		} catch (IOException e) {
-			logger.error("Error initializing Expect for " + this.host, e);
 			e.printStackTrace();
 		}
 	}

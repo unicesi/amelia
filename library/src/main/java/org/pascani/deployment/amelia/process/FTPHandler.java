@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
-import org.pascani.deployment.amelia.descriptors.HostAccess;
+import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.filesystem.FTPClient;
 
 /**
@@ -18,7 +18,7 @@ import org.pascani.deployment.amelia.filesystem.FTPClient;
  */
 public class FTPHandler extends Thread {
 
-	private final HostAccess host;
+	private final Host host;
 
 	private final FTPClient client;
 
@@ -27,7 +27,7 @@ public class FTPHandler extends Thread {
 	 */
 	private final static Logger logger = LogManager.getLogger(FTPHandler.class);
 
-	public FTPHandler(final HostAccess host) {
+	public FTPHandler(final Host host) {
 		this.host = host;
 		this.client = new FTPClient();
 	}

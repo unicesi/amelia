@@ -11,7 +11,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class HostAccess {
+public class Host {
 
 	private final String hostname;
 
@@ -26,9 +26,9 @@ public class HostAccess {
 	/**
 	 * The logger
 	 */
-	private final static Logger logger = LogManager.getLogger(HostAccess.class);
+	private final static Logger logger = LogManager.getLogger(Host.class);
 
-	public HostAccess(final String hostname, final int ftpPort,
+	public Host(final String hostname, final int ftpPort,
 			final int sshPort, final String username, final String password) {
 		this.hostname = hostname;
 		this.ftpPort = ftpPort;
@@ -37,8 +37,8 @@ public class HostAccess {
 		this.password = password;
 	}
 
-	public static List<HostAccess> fromFile(String pathname) throws IOException {
-		List<HostAccess> hosts = new ArrayList<HostAccess>();
+	public static List<Host> fromFile(String pathname) throws IOException {
+		List<Host> hosts = new ArrayList<Host>();
 		
 		InputStream in = new FileInputStream(pathname);
 		InputStreamReader streamReader = null;
@@ -57,7 +57,7 @@ public class HostAccess {
 				if (d.length == 5) {
 					int ftpPort = Integer.parseInt(d[1]);
 					int sshPort = Integer.parseInt(d[2]);
-					hosts.add(new HostAccess(d[0], ftpPort, sshPort, d[3], d[4]));
+					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4]));
 
 				} else {
 					logger.warn("Bad format in hosts file: [" + l + "] " + line);
