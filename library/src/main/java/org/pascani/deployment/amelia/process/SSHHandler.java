@@ -21,7 +21,9 @@ package org.pascani.deployment.amelia.process;
 import static net.sf.expectit.filter.Filters.removeColors;
 import static net.sf.expectit.filter.Filters.removeNonPrintable;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectBuilder;
@@ -84,11 +86,12 @@ public class SSHHandler extends Thread {
 			logger.error("Error establishing connection with " + this.host, e);
 			e.printStackTrace();
 		} catch (IOException e) {
+			logger.error("Error initializing connection for " + this.host, e);
 			e.printStackTrace();
 		}
 	}
 
-	private void connect() throws JSchException {
+	private void connect() throws JSchException, IOException {
 		JSch jsch = new JSch();
 
 		jsch.addIdentity(AmeliaRuntime.getConfigurationEntry("identity"));
@@ -101,27 +104,26 @@ public class SSHHandler extends Thread {
 			this.session.setPassword(this.host.password());
 
 		UserInfo ui = new AuthenticationUserInfo();
-		session.setUserInfo(ui);
 
+		this.session.setUserInfo(ui);
 		this.session.connect(this.timeout);
 
 		this.channel = session.openChannel("shell");
-		
-		// TODO: create a new buffer for input and output
-		this.channel.setInputStream(System.in);
-		this.channel.setOutputStream(System.out);
 		this.channel.connect(this.timeout);
 	}
 
 	private void initialize() throws IOException {
+		File file = createOutputFile();
+		this.outputStream = new PrintStream(file, "UTF-8");
+		
 		this.expect = new ExpectBuilder()
 				.withOutput(this.channel.getOutputStream())
-				.withInputs(this.channel.getInputStream(),
-						this.channel.getExtInputStream())
-				.withEchoInput(System.out)
-				// .withEchoOutput(System.out)
+				.withInputs(this.channel.getInputStream(), this.channel.getExtInputStream())
+				.withEchoInput(outputStream)
+				.withEchoOutput(outputStream)
 				.withInputFilters(removeColors(), removeNonPrintable())
-				.withExceptionOnFailure().build();
+				.withExceptionOnFailure()
+				.build();
 	}
 
 	public Expect expect() {
@@ -132,6 +134,20 @@ public class SSHHandler extends Thread {
 		expect.close();
 		channel.disconnect();
 		session.disconnect();
+	}
+
+	private File createOutputFile() throws IOException {
+		String fileName = this.host + "-" + System.nanoTime() + ".txt";
+
+		File parent = new File("sessions");
+		File file = new File(parent, fileName);
+
+		if (!parent.exists())
+			parent.mkdir();
+		
+		file.createNewFile();
+
+		return file;
 	}
 
 }
