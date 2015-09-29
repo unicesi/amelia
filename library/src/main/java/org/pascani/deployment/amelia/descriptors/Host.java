@@ -7,11 +7,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Host {
+
+	private final String identifier;
 
 	private final String hostname;
 
@@ -28,8 +31,20 @@ public class Host {
 	 */
 	private final static Logger logger = LogManager.getLogger(Host.class);
 
-	public Host(final String hostname, final int ftpPort,
-			final int sshPort, final String username, final String password) {
+	public Host(final String hostname,
+			final int ftpPort, final int sshPort, final String username,
+			final String password, final String identifier) {
+		this.identifier = identifier;
+		this.hostname = hostname;
+		this.ftpPort = ftpPort;
+		this.sshPort = sshPort;
+		this.username = username;
+		this.password = password;
+	}
+
+	public Host(final String hostname, final int ftpPort, final int sshPort,
+			final String username, final String password) {
+		this.identifier = UUID.randomUUID().toString();
 		this.hostname = hostname;
 		this.ftpPort = ftpPort;
 		this.sshPort = sshPort;
@@ -39,7 +54,7 @@ public class Host {
 
 	public static List<Host> fromFile(String pathname) throws IOException {
 		List<Host> hosts = new ArrayList<Host>();
-		
+
 		InputStream in = new FileInputStream(pathname);
 		InputStreamReader streamReader = null;
 		BufferedReader bufferedReader = null;
@@ -59,8 +74,17 @@ public class Host {
 					int sshPort = Integer.parseInt(d[2]);
 					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4]));
 
+				} else if (d.length == 6) {
+					int ftpPort = Integer.parseInt(d[1]);
+					int sshPort = Integer.parseInt(d[2]);
+					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4], d[5]));
+
 				} else {
-					logger.warn("Bad format in hosts file: [" + l + "] " + line);
+					String message = "Bad format in hosts file: [" + l + "] " + line;
+					RuntimeException e = new RuntimeException(message);
+					logger.error(message, e);
+					
+					throw e;
 				}
 
 				++l;
@@ -72,6 +96,10 @@ public class Host {
 		}
 
 		return hosts;
+	}
+	
+	public String identifier() {
+		return this.identifier;
 	}
 
 	public String hostname() {
