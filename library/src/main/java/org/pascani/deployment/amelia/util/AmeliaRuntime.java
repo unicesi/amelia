@@ -23,11 +23,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.process.FTPHandler;
 import org.pascani.deployment.amelia.process.SSHHandler;
 
@@ -53,12 +55,38 @@ public class AmeliaRuntime {
 	private final static Logger logger = LogManager
 			.getLogger(AmeliaRuntime.class);
 
-	public static void storeConnection(String key, SSHHandler handler) {
-		sshConnections.put(key, handler);
+	public static void openConnections(List<Host> hosts, boolean ssh,
+			boolean ftp) throws InterruptedException {
+
+		for (Host host : hosts) {
+			if (ssh) {
+				SSHHandler sshHandler = new SSHHandler(host);
+				sshConnections.put(host.identifier(), sshHandler);
+				sshHandler.run();
+				sshHandler.join();
+
+				logger.info("SSH connection for " + host
+						+ " was successfully established");
+			}
+
+			if (ftp) {
+				FTPHandler ftpHandler = new FTPHandler(host);
+				ftpConnections.put(host.identifier(), ftpHandler);
+				ftpHandler.run();
+				ftpHandler.join();
+
+				logger.info("FTP connection for " + host
+						+ " was successfully established");
+			}
+		}
 	}
 
-	public static void storeConnection(String key, FTPHandler handler) {
-		ftpConnections.put(key, handler);
+	public static void closeConnections() throws IOException {
+		for (FTPHandler handler : ftpConnections.values())
+			handler.close();
+
+		for (SSHHandler handler : sshConnections.values())
+			handler.close();
 	}
 
 	public static SSHHandler getSSHConnection(String key) {
@@ -69,11 +97,11 @@ public class AmeliaRuntime {
 		return ftpConnections.get(key);
 	}
 
-	public static Map<String, SSHHandler> SSHConnections() {
+	public static Map<String, SSHHandler> sshConnections() {
 		return sshConnections;
 	}
 
-	public static Map<String, FTPHandler> FTPConnections() {
+	public static Map<String, FTPHandler> ftpConnections() {
 		return ftpConnections;
 	}
 
