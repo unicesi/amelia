@@ -181,5 +181,9 @@ public class SSHHandler extends Thread {
 
 		return file;
 	}
+	
+	public Host host() {
+		return this.host;
+	}
 
 }

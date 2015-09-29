@@ -70,5 +70,9 @@ public class FTPHandler extends Thread {
 
 		return uploaded;
 	}
+	
+	public Host host() {
+		return this.host;
+	}
 
 }
