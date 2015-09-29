@@ -20,6 +20,7 @@ package org.pascani.deployment.amelia.process;
 
 import static net.sf.expectit.filter.Filters.removeColors;
 import static net.sf.expectit.filter.Filters.removeNonPrintable;
+import static net.sf.expectit.matcher.Matchers.regexp;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +28,13 @@ import java.io.PrintStream;
 
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectBuilder;
+import net.sf.expectit.Result;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.AmeliaRuntime;
+import org.pascani.deployment.amelia.util.ShellUtils;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
@@ -81,6 +84,7 @@ public class SSHHandler extends Thread {
 
 			connect();
 			initialize();
+			configure();
 
 		} catch (JSchException e) {
 			logger.error("Error establishing connection with " + this.host, e);
@@ -124,6 +128,34 @@ public class SSHHandler extends Thread {
 				.withInputFilters(removeColors(), removeNonPrintable())
 				.withExceptionOnFailure()
 				.build();
+	}
+	
+	private void configure() throws IOException {
+		String prompt = ShellUtils.ameliaPromptRegexp();
+		String initialPrompt = "\\$|#";
+		
+		this.expect.expect(regexp(initialPrompt));
+		
+		// Switch off echo
+		this.expect.sendLine("stty -echo");
+		this.expect.expect(regexp(initialPrompt));
+		
+		// Query the current shell
+		this.expect.sendLine(ShellUtils.currentShellCommand());
+		Result result = this.expect.expect(regexp(initialPrompt));
+		
+		String shell = result.getBefore().split("\n")[0].trim();
+		
+		if(!shell.matches("bash|zsh")) {
+			RuntimeException e = new RuntimeException("Shell not supported: " + shell);
+			logger.error("Shell not supported: " + shell, e);
+			
+			throw e;
+		}
+
+		// Change shell prompt to the Amelia prompt
+		this.expect.sendLine(ShellUtils.ameliaPromptFormat(shell));
+		this.expect.expect(regexp(prompt));
 	}
 
 	public Expect expect() {
