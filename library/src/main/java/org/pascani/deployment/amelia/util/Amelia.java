@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -34,75 +33,125 @@ import org.pascani.deployment.amelia.process.FTPHandler;
 import org.pascani.deployment.amelia.process.SSHHandler;
 
 /**
- * TODO
+ * This class is a repository of the SSH and FTP connections.
+ * 
+ * <p>
+ * Additionally, it contains the initial configuration parameters of execution.
+ * </p>
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class AmeliaRuntime {
+public class Amelia {
 
 	/**
 	 * A map to store initial configuration parameters
 	 */
 	private static Map<String, String> configuration;
 
+	/**
+	 * A map to store SSH handlers per host (host id)
+	 */
 	private static Map<String, SSHHandler> sshConnections = new Hashtable<String, SSHHandler>();
 
+	/**
+	 * A map to store FTP handlers per host (host id)
+	 */
 	private static Map<String, FTPHandler> ftpConnections = new Hashtable<String, FTPHandler>();
 
 	/**
 	 * The logger
 	 */
-	private final static Logger logger = LogManager
-			.getLogger(AmeliaRuntime.class);
+	private final static Logger logger = LogManager.getLogger(Amelia.class);
 
-	public static void openConnections(List<Host> hosts, boolean ssh,
-			boolean ftp) throws InterruptedException {
+	/**
+	 * Opens FTP connections with the specified hosts
+	 * 
+	 * @param hosts
+	 *            The array of hosts containing the FTP connection data
+	 * @throws InterruptedException
+	 *             If any thread interrupts any of the handler threads
+	 */
+	public static void openFTPConnections(Host... hosts)
+			throws InterruptedException {
 
 		for (Host host : hosts) {
-			if (ssh) {
-				SSHHandler sshHandler = new SSHHandler(host);
-				sshConnections.put(host.identifier(), sshHandler);
-				sshHandler.run();
-				sshHandler.join();
+			FTPHandler ftpHandler = new FTPHandler(host);
+			ftpConnections.put(host.identifier(), ftpHandler);
+			ftpHandler.run();
+			ftpHandler.join();
 
-				logger.info("SSH connection for " + host
-						+ " was successfully established");
-			}
-
-			if (ftp) {
-				FTPHandler ftpHandler = new FTPHandler(host);
-				ftpConnections.put(host.identifier(), ftpHandler);
-				ftpHandler.run();
-				ftpHandler.join();
-
-				logger.info("FTP connection for " + host
-						+ " was successfully established");
-			}
+			logger.info("FTP connection for " + host
+					+ " was successfully established");
 		}
 	}
 
-	public static void closeConnections() throws IOException {
-		for (FTPHandler handler : ftpConnections.values())
-			handler.close();
+	/**
+	 * Opens SSH connections with the specified hosts
+	 * 
+	 * @param hosts
+	 *            The array of hosts containing the SSH connection data
+	 * @throws InterruptedException
+	 *             If any thread interrupts any of the handler threads
+	 */
+	public static void openSSHConnections(Host... hosts)
+			throws InterruptedException {
 
-		for (SSHHandler handler : sshConnections.values())
-			handler.close();
+		for (Host host : hosts) {
+			SSHHandler sshHandler = new SSHHandler(host);
+			sshConnections.put(host.identifier(), sshHandler);
+			sshHandler.run();
+			sshHandler.join();
+
+			logger.info("SSH connection for " + host
+					+ " was successfully established");
+		}
 	}
 
-	public static SSHHandler getSSHConnection(String key) {
-		return sshConnections.get(key);
+	/**
+	 * Closes the FTP connection with the specified hosts, and removes it from
+	 * the FTP connections.
+	 * 
+	 * @param hosts
+	 *            The array of hosts to close the connection with
+	 * @throws IOException
+	 *             If an I/O error occurs while either sending a command to the
+	 *             server or receiving a reply from the server.
+	 */
+	public static void closeFTPConnections(Host... hosts) throws IOException {
+		for (Host host : hosts) {
+			ftpConnections.get(host.identifier()).close();
+			ftpConnections.remove(host.identifier());
+		}
 	}
 
-	public static FTPHandler getFTPConnection(String key) {
-		return ftpConnections.get(key);
+	/**
+	 * Closes the SSH connection with the specified hosts, and removes it from
+	 * the SSH connections.
+	 * 
+	 * @param hosts
+	 *            The array of hosts to close the connection with
+	 * @throws IOException
+	 *             If I/O error occurs.
+	 */
+	public static void closeSSHConnections(Host... hosts) throws IOException {
+		for (Host host : hosts) {
+			sshConnections.get(host.identifier()).close();
+			sshConnections.remove(host.identifier());
+		}
 	}
 
-	public static Map<String, SSHHandler> sshConnections() {
-		return sshConnections;
-	}
-
+	/**
+	 * @return the handlers of the FTP connections
+	 */
 	public static Map<String, FTPHandler> ftpConnections() {
 		return ftpConnections;
+	}
+
+	/**
+	 * @return the handlers of the SSH connections
+	 */
+	public static Map<String, SSHHandler> sshConnections() {
+		return sshConnections;
 	}
 
 	/**
@@ -124,7 +173,7 @@ public class AmeliaRuntime {
 		boolean ok = false;
 
 		try {
-			input = AmeliaRuntime.class.getClassLoader().getResourceAsStream(
+			input = Amelia.class.getClassLoader().getResourceAsStream(
 					"amelia.properties");
 			if (input != null) {
 				config.load(input);

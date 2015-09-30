@@ -33,7 +33,7 @@ import net.sf.expectit.Result;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.util.AmeliaRuntime;
+import org.pascani.deployment.amelia.util.Amelia;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 import com.jcraft.jsch.Channel;
@@ -69,7 +69,7 @@ public class SSHHandler extends Thread {
 	public SSHHandler(final Host host) {
 		this.host = host;
 
-		String _timeout = AmeliaRuntime
+		String _timeout = Amelia
 				.getConfigurationEntry("connection_timeout");
 
 		if (_timeout != null && !_timeout.isEmpty())
@@ -98,8 +98,8 @@ public class SSHHandler extends Thread {
 	private void connect() throws JSchException, IOException {
 		JSch jsch = new JSch();
 
-		jsch.addIdentity(AmeliaRuntime.getConfigurationEntry("identity"));
-		jsch.setKnownHosts(AmeliaRuntime.getConfigurationEntry("known_hosts"));
+		jsch.addIdentity(Amelia.getConfigurationEntry("identity"));
+		jsch.setKnownHosts(Amelia.getConfigurationEntry("known_hosts"));
 
 		this.session = jsch.getSession(this.host.username(),
 				this.host.hostname(), this.host.sshPort());
