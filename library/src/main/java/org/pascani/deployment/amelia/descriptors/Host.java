@@ -52,7 +52,7 @@ public class Host {
 		this.password = password;
 	}
 
-	public static List<Host> fromFile(String pathname) throws IOException {
+	public static Host[] fromFile(String pathname) throws IOException {
 		List<Host> hosts = new ArrayList<Host>();
 
 		InputStream in = new FileInputStream(pathname);
@@ -95,7 +95,7 @@ public class Host {
 			bufferedReader.close();
 		}
 
-		return hosts;
+		return hosts.toArray(new Host[0]);
 	}
 	
 	public String identifier() {
