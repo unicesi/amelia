@@ -70,4 +70,33 @@ public class ShellUtils {
 		return regexp.toString();
 	}
 
+	/**
+	 * @param criteria
+	 *            A string to search the programs in execution
+	 * @return the kill command to terminate certain processes that meet the
+	 *         specified criterion. The returned command uses the SIGTERM
+	 *         signal.
+	 */
+	public static String killCommand(String criterion) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("for pid in ");
+		sb.append("$(" + searchPIDs(criterion) + "); ");
+		sb.append("do kill -SIGTERM $pid; ");
+		sb.append("done");
+
+		return sb.toString();
+	}
+
+	private static String searchPIDs(String criterion) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("ps -ef ");
+		sb.append("| grep \"" + criterion + "\" ");
+		sb.append("| grep -v grep ");
+		sb.append("| awk '{ print $2 }'");
+
+		return sb.toString();
+	}
+
 }
