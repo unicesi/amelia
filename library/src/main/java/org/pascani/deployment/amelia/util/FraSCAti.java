@@ -12,87 +12,53 @@ import org.pascani.deployment.amelia.descriptors.FrascatiExecution;
 
 public class FraSCAti {
 
-	private final String workingDirectory;
-
-	public FraSCAti() {
-		this("/");
-	}
-
-	public FraSCAti(String workingDirectory) {
-		this.workingDirectory = workingDirectory;
-	}
-
-	/**
-	 * The working directory of the current instance will remain the same. A new
-	 * instance is returned with the working directory set to the specified one.
-	 * 
-	 * @param directoryPath
-	 * @return
-	 */
-	public FraSCAti withWorkingDirectory(String directoryPath) {
-		return new FraSCAti(directoryPath);
-	}
-
 	public void compile(Expect e, FrascatiCompilation descriptor)
 			throws DeploymentException, IOException {
 
 		// The Amelia prompt
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
-		// Change current directory
-		e.sendLine("cd " + workingDirectory);
-		String cd = e.expect(regexp(prompt)).getBefore().toLowerCase();
-
-		if (cd.contains("no such file or directory"))
-			throw new DeploymentException("No such file or directory \""
-					+ workingDirectory + "\"");
-
 		// Perform the compilation
 		e.sendLine(descriptor.toCommandString());
-		String compile = e.expect(regexp(prompt)).getBefore().toLowerCase();
+		String compile = e.expect(regexp(prompt)).getBefore();
 
-		if (compile.contains("no such file or directory"))
+		if (compile.contains("No such file or directory"))
 			throw new DeploymentException("No such file or directory \""
 					+ descriptor.sourceDirectory() + "\"");
 	}
 
-	public void run(Expect e, FrascatiExecution descriptor)
+	public int run(Expect e, FrascatiExecution descriptor)
 			throws DeploymentException, IOException {
+
+		int PID = -1;
 
 		// The Amelia prompt
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
-		String errorMessage = "Cannot instantiate the FraSCAti factory!";
-		String[] errors = { "Cannot instantiate the FraSCAti factory!",
-				"OW2 FraSCAti Standalone Runtime\nException in thread" };
+		// Send the run command
+		e.sendLine(descriptor.toCommandString() + " &");
+		String _pid = e.expect(regexp("\\[\\d+\\] (\\d+)")).group(1);
 
-		// Change current directory
-		e.sendLine("cd " + workingDirectory);
-		String cd = e.expect(regexp(prompt)).getBefore().toLowerCase();
-
-		if (cd.contains("no such file or directory"))
-			throw new DeploymentException("No such file or directory \""
-					+ workingDirectory + "\"");
-
-		// Perform the execution
-		e.sendLine(descriptor.toCommandString());
-		boolean ok = true;
+		// Update the process ID
+		PID = Integer.parseInt(_pid);
 
 		try {
-			
-			String run = e.expect(regexp(prompt)).getBefore();
-			
-			if (Strings.containsAnyOf(run, errors))
-				ok = false;
-			
+			// Expect a successful execution
+			e.expect(regexp("Press Ctrl\\+C to quit\\.\\.\\.|Call done!"));
+			e.sendLine();
+			e.expect(regexp(prompt));
+
 		} catch (ExpectIOException ex) {
-			// TODO: System.out.println(Arrays.toString(ex.getInputBuffer().split("\n")));
-			if (Strings.containsAnyOf(ex.getInputBuffer(), errors))
-				ok = false;
-		} finally {
-			if(!ok)
-				throw new DeploymentException(errorMessage);
+
+			// First, kill the remaining processes (if any)
+			String criterion = descriptor.toCommandSearchString();
+			e.sendLine(ShellUtils.killCommand(criterion));
+
+			throw new DeploymentException(
+					"Cannot instantiate the FraSCAti factory!");
 		}
+
+		return PID;
 	}
 
 }
