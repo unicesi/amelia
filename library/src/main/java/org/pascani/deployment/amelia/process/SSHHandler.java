@@ -25,6 +25,9 @@ import static net.sf.expectit.matcher.Matchers.regexp;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectBuilder;
@@ -32,8 +35,12 @@ import net.sf.expectit.Result;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.descriptors.FrascatiCompilation;
+import org.pascani.deployment.amelia.descriptors.FrascatiExecution;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Amelia;
+import org.pascani.deployment.amelia.util.DeploymentException;
+import org.pascani.deployment.amelia.util.FraSCAti;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 import com.jcraft.jsch.Channel;
@@ -57,9 +64,13 @@ public class SSHHandler extends Thread {
 
 	private Expect expect;
 
-	private final int timeout;
+	private final int connectionTimeout;
+
+	private final int executionTimeout;
 
 	private File output;
+
+	private final List<FrascatiExecution> executions;
 
 	/**
 	 * The logger
@@ -69,13 +80,14 @@ public class SSHHandler extends Thread {
 	public SSHHandler(final Host host) {
 		this.host = host;
 
-		String _timeout = Amelia
+		String _connectionTimeout = Amelia
 				.getConfigurationEntry("connection_timeout");
+		String _executionTimeout = Amelia
+				.getConfigurationEntry("execution_timeout");
 
-		if (_timeout != null && !_timeout.isEmpty())
-			this.timeout = Integer.parseInt(_timeout);
-		else
-			this.timeout = 0;
+		this.connectionTimeout = Integer.parseInt(_connectionTimeout);
+		this.executionTimeout = Integer.parseInt(_executionTimeout);
+		this.executions = new ArrayList<FrascatiExecution>();
 	}
 
 	@Override
@@ -90,7 +102,7 @@ public class SSHHandler extends Thread {
 			logger.error("Error establishing connection with " + this.host, e);
 			e.printStackTrace();
 		} catch (IOException e) {
-			logger.error("Error initializing connection for " + this.host, e);
+			logger.error("Error initializing connection with " + this.host, e);
 			e.printStackTrace();
 		}
 	}
@@ -110,52 +122,105 @@ public class SSHHandler extends Thread {
 		UserInfo ui = new AuthenticationUserInfo();
 
 		this.session.setUserInfo(ui);
-		this.session.connect(this.timeout);
+		this.session.connect(this.connectionTimeout);
 
 		this.channel = session.openChannel("shell");
-		this.channel.connect(this.timeout);
+		this.channel.connect(this.connectionTimeout);
 	}
 
 	private void initialize() throws IOException {
 		this.output = createOutputFile();
 		PrintStream outputStream = new PrintStream(this.output, "UTF-8");
-		
+
 		this.expect = new ExpectBuilder()
 				.withOutput(this.channel.getOutputStream())
-				.withInputs(this.channel.getInputStream(), this.channel.getExtInputStream())
-				.withEchoInput(outputStream)
-				.withEchoOutput(outputStream)
+				.withInputs(this.channel.getInputStream(),
+						this.channel.getExtInputStream())
+				.withEchoInput(outputStream).withEchoOutput(outputStream)
 				.withInputFilters(removeColors(), removeNonPrintable())
 				.withExceptionOnFailure()
+				.withTimeout(this.executionTimeout, TimeUnit.MILLISECONDS)
 				.build();
 	}
-	
+
 	private void configure() throws IOException {
 		String prompt = ShellUtils.ameliaPromptRegexp();
 		String initialPrompt = "\\$|#";
-		
+
 		this.expect.expect(regexp(initialPrompt));
-		
+
 		// Switch off echo
 		this.expect.sendLine("stty -echo");
 		this.expect.expect(regexp(initialPrompt));
-		
+
 		// Query the current shell
 		this.expect.sendLine(ShellUtils.currentShellCommand());
 		Result result = this.expect.expect(regexp(initialPrompt));
-		
+
 		String shell = result.getBefore().split("\n")[0].trim();
-		
-		if(!shell.matches("bash|zsh")) {
-			RuntimeException e = new RuntimeException("Shell not supported: " + shell);
+
+		if (!shell.matches("bash|zsh")) {
+			RuntimeException e = new RuntimeException("Shell not supported: "
+					+ shell);
 			logger.error("Shell not supported: " + shell, e);
-			
+
 			throw e;
 		}
 
 		// Change shell prompt to the Amelia prompt
 		this.expect.sendLine(ShellUtils.ameliaPromptFormat(shell));
 		this.expect.expect(regexp(prompt));
+	}
+
+	public void changeDirectory(String directory) throws IOException,
+			DeploymentException {
+
+		String prompt = ShellUtils.ameliaPromptRegexp();
+
+		this.expect.sendLine("cd \"" + directory + "\"");
+		String cd = this.expect.expect(regexp(prompt)).getBefore();
+
+		if (cd.contains("No such file or directory"))
+			throw new DeploymentException("No such file or directory \""
+					+ directory + "\"");
+	}
+
+	public void compileFrascatiComponent(FrascatiCompilation descriptor)
+			throws DeploymentException, IOException {
+
+		new FraSCAti().compile(this.expect, descriptor);
+	}
+
+	public int runFrascatiComponent(FrascatiExecution descriptor)
+			throws DeploymentException, IOException {
+
+		// This shell is already in the working directory
+		int PID = new FraSCAti().run(this.expect, descriptor);
+
+		// Successful execution
+		this.executions.add(descriptor);
+		logger.info("Composite " + descriptor.compositeName()
+				+ " was successfully deployed in " + this.host);
+
+		return PID;
+	}
+
+	public void stopExecutions() throws IOException {
+
+		String prompt = ShellUtils.ameliaPromptRegexp();
+
+		for (FrascatiExecution descriptor : this.executions) {
+			String criterion = descriptor.toCommandSearchString();
+			this.expect.sendLine(ShellUtils.killCommand(criterion));
+			this.expect.expect(regexp(prompt));
+
+			logger.info("Execution of composite " + descriptor.compositeName()
+					+ " was successfully stopped in " + this.host);
+		}
+	}
+
+	public List<FrascatiExecution> executions() {
+		return this.executions;
 	}
 
 	public Expect expect() {
@@ -176,12 +241,12 @@ public class SSHHandler extends Thread {
 
 		if (!parent.exists())
 			parent.mkdir();
-		
+
 		file.createNewFile();
 
 		return file;
 	}
-	
+
 	public Host host() {
 		return this.host;
 	}
