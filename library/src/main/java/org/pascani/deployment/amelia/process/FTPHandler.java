@@ -64,8 +64,9 @@ public class FTPHandler extends Thread {
 
 		for (Map.Entry<String, List<String>> pair : bundle.transfers()
 				.entrySet()) {
-			for (String remote : pair.getValue())
+			for (String remote : pair.getValue()) {
 				uploaded &= this.client.upload(pair.getKey(), remote);
+			}
 		}
 
 		return uploaded;
