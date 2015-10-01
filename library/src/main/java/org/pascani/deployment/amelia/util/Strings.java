@@ -1,7 +1,7 @@
 package org.pascani.deployment.amelia.util;
 
 public class Strings {
-	
+
 	public static String join(String[] args, String separator) {
 		String output = "";
 
@@ -13,14 +13,14 @@ public class Strings {
 
 		return output;
 	}
-	
+
 	public static boolean containsAnyOf(String source, String[] strings) {
 		boolean contains = false;
-		
-		for(int i = 0; i < strings.length && !contains; i++) {
+
+		for (int i = 0; i < strings.length && !contains; i++) {
 			contains = source.contains(strings[i]);
 		}
-		
+
 		return contains;
 	}
 
