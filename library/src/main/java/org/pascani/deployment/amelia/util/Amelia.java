@@ -129,7 +129,8 @@ public class Amelia {
 
 	/**
 	 * Closes the SSH connection with the specified hosts, and removes it from
-	 * the SSH connections.
+	 * the SSH connections. Before closing the connections, all FraSCAti
+	 * executions are killed.
 	 * 
 	 * @param hosts
 	 *            The array of hosts to close the connection with
@@ -138,7 +139,11 @@ public class Amelia {
 	 */
 	public static void closeSSHConnections(Host... hosts) throws IOException {
 		for (Host host : hosts) {
-			sshConnections.get(host.identifier()).close();
+			
+			SSHHandler handler = sshConnections.get(host.identifier());
+			handler.stopExecutions();
+			handler.close();
+			
 			sshConnections.remove(host.identifier());
 
 			logger.info("SSH connection for " + host
