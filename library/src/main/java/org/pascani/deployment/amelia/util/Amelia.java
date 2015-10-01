@@ -121,6 +121,9 @@ public class Amelia {
 		for (Host host : hosts) {
 			ftpConnections.get(host.identifier()).close();
 			ftpConnections.remove(host.identifier());
+
+			logger.info("FTP connection for " + host
+					+ " was successfully closed");
 		}
 	}
 
@@ -137,6 +140,9 @@ public class Amelia {
 		for (Host host : hosts) {
 			sshConnections.get(host.identifier()).close();
 			sshConnections.remove(host.identifier());
+
+			logger.info("SSH connection for " + host
+					+ " was successfully closed");
 		}
 	}
 
