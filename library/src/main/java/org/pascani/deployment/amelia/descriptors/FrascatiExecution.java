@@ -35,6 +35,16 @@ public class FrascatiExecution {
 		this(compositeName, libpath, serviceName, methodName);
 		this.arguments = arguments;
 	}
+	
+	public String toCommandSearchString() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(compositeName + " ");
+		sb.append("-libpath ");
+		sb.append(Strings.join(this.libpath, ":"));
+		
+		return sb.toString();
+	}	
 
 	public String toCommandString() {
 		StringBuilder sb = new StringBuilder();
