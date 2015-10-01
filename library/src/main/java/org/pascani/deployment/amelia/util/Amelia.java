@@ -202,14 +202,14 @@ public class Amelia {
 				config.put("identity", home + "/.ssh/id_rsa");
 				config.put("known_hosts", home + "/.ssh/known_hosts");
 				config.put("connection_timeout", "0"); // No timeout
+				config.put("execution_timeout", "10000"); // 10s
 			}
 
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					logger.error("Error closing stream of configuration file",
-							e);
+					logger.error("Error closing stream of configuration file", e);
 				}
 			}
 		}
