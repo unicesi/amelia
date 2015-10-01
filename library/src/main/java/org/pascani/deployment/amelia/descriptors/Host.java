@@ -124,7 +124,7 @@ public class Host {
 
 	@Override
 	public String toString() {
-		return this.username + "@" + this.hostname;
+		return this.username + "@" + this.hostname + " (" + this.identifier + ")";
 	}
 
 }
