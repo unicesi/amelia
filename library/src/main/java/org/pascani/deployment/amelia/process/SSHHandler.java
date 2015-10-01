@@ -59,7 +59,7 @@ public class SSHHandler extends Thread {
 
 	private final int timeout;
 
-	private PrintStream outputStream;
+	private File output;
 
 	/**
 	 * The logger
@@ -117,8 +117,8 @@ public class SSHHandler extends Thread {
 	}
 
 	private void initialize() throws IOException {
-		File file = createOutputFile();
-		this.outputStream = new PrintStream(file, "UTF-8");
+		this.output = createOutputFile();
+		PrintStream outputStream = new PrintStream(this.output, "UTF-8");
 		
 		this.expect = new ExpectBuilder()
 				.withOutput(this.channel.getOutputStream())
