@@ -56,8 +56,8 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 		String s = remoteFileSeparator();
 		super.mlistDir(pathname);
 
-		// No such file or directory
-		if (getReplyCode() == 550 && pathname.contains(s)) {
+		// No such file or directory (Mac) || Unknown command (Linux)
+		if ((getReplyCode() == 550 || getReplyCode() == 500) && pathname.contains(s)) {
 			String parent = getPathParent(pathname);
 			makeDirectories(parent);
 		}
@@ -126,7 +126,7 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 
 		// Makes sure the directories exists in the remote machine
 		makeDirectories(isDir ? remotePath : getPathParent(remotePath));
-
+		
 		if (isDir)
 			uploaded = uploadDirectory(localPath, remotePath);
 		else
