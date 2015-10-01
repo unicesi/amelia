@@ -13,5 +13,15 @@ public class Strings {
 
 		return output;
 	}
+	
+	public static boolean containsAnyOf(String source, String[] strings) {
+		boolean contains = false;
+		
+		for(int i = 0; i < strings.length && !contains; i++) {
+			contains = source.contains(strings[i]);
+		}
+		
+		return contains;
+	}
 
 }
