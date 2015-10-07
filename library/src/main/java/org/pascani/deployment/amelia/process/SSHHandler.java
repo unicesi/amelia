@@ -41,7 +41,6 @@ import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Amelia;
 import org.pascani.deployment.amelia.util.AuthenticationUserInfo;
 import org.pascani.deployment.amelia.util.DeploymentException;
-import org.pascani.deployment.amelia.util.FraSCAti;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 import com.jcraft.jsch.Channel;
@@ -187,21 +186,23 @@ public class SSHHandler extends Thread {
 	}
 
 	public void compileFrascatiComponent(CompilationDescriptor descriptor)
-			throws DeploymentException, IOException {
-
-		new FraSCAti().compile(this.expect, descriptor);
+			throws Exception {
+		
+		new Compilation(this.expect, descriptor).call();
 	}
 
 	public int runFrascatiComponent(ExecutionDescriptor descriptor)
-			throws DeploymentException, IOException {
+			throws Exception {
 
 		// This shell is already in the working directory
-		int PID = new FraSCAti().run(this.expect, descriptor);
+		int PID = new Execution(this.expect, descriptor).call();
 
 		// Successful execution
-		this.executions.add(descriptor);
-		logger.info("Composite " + descriptor.compositeName()
-				+ " was successfully deployed in " + this.host);
+		if(PID != -1) {
+			this.executions.add(descriptor);
+			logger.info("Composite " + descriptor.compositeName()
+					+ " was successfully deployed in " + this.host);
+		}
 
 		return PID;
 	}
