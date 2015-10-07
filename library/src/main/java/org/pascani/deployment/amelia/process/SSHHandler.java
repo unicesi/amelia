@@ -35,10 +35,11 @@ import net.sf.expectit.Result;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.pascani.deployment.amelia.descriptors.FrascatiCompilation;
-import org.pascani.deployment.amelia.descriptors.FrascatiExecution;
+import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
+import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Amelia;
+import org.pascani.deployment.amelia.util.AuthenticationUserInfo;
 import org.pascani.deployment.amelia.util.DeploymentException;
 import org.pascani.deployment.amelia.util.FraSCAti;
 import org.pascani.deployment.amelia.util.ShellUtils;
@@ -70,7 +71,7 @@ public class SSHHandler extends Thread {
 
 	private File output;
 
-	private final List<FrascatiExecution> executions;
+	private final List<ExecutionDescriptor> executions;
 
 	/**
 	 * The logger
@@ -87,7 +88,7 @@ public class SSHHandler extends Thread {
 
 		this.connectionTimeout = Integer.parseInt(_connectionTimeout);
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
-		this.executions = new ArrayList<FrascatiExecution>();
+		this.executions = new ArrayList<ExecutionDescriptor>();
 	}
 
 	@Override
@@ -185,13 +186,13 @@ public class SSHHandler extends Thread {
 					+ directory + "\"");
 	}
 
-	public void compileFrascatiComponent(FrascatiCompilation descriptor)
+	public void compileFrascatiComponent(CompilationDescriptor descriptor)
 			throws DeploymentException, IOException {
 
 		new FraSCAti().compile(this.expect, descriptor);
 	}
 
-	public int runFrascatiComponent(FrascatiExecution descriptor)
+	public int runFrascatiComponent(ExecutionDescriptor descriptor)
 			throws DeploymentException, IOException {
 
 		// This shell is already in the working directory
@@ -209,7 +210,7 @@ public class SSHHandler extends Thread {
 
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
-		for (FrascatiExecution descriptor : this.executions) {
+		for (ExecutionDescriptor descriptor : this.executions) {
 			String criterion = descriptor.toCommandSearchString();
 			this.expect.sendLine(ShellUtils.killCommand(criterion));
 			this.expect.expect(regexp(prompt));
@@ -219,7 +220,7 @@ public class SSHHandler extends Thread {
 		}
 	}
 
-	public List<FrascatiExecution> executions() {
+	public List<ExecutionDescriptor> executions() {
 		return this.executions;
 	}
 

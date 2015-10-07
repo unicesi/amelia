@@ -2,7 +2,7 @@ package org.pascani.deployment.amelia.descriptors;
 
 import org.pascani.deployment.amelia.util.Strings;
 
-public class FrascatiExecution {
+public class ExecutionDescriptor {
 
 	private final String compositeName;
 
@@ -14,12 +14,12 @@ public class FrascatiExecution {
 
 	private String[] arguments;
 
-	public FrascatiExecution(final String compositeName, final String[] libpath) {
+	public ExecutionDescriptor(final String compositeName, final String[] libpath) {
 		this.compositeName = compositeName;
 		this.libpath = libpath;
 	}
 
-	public FrascatiExecution(final String compositeName,
+	public ExecutionDescriptor(final String compositeName,
 			final String[] libpath, final String serviceName,
 			final String methodName) {
 
@@ -28,7 +28,7 @@ public class FrascatiExecution {
 		this.methodName = methodName;
 	}
 
-	public FrascatiExecution(final String compositeName,
+	public ExecutionDescriptor(final String compositeName,
 			final String[] libpath, final String serviceName,
 			final String methodName, final String[] arguments) {
 

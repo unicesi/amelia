@@ -2,7 +2,7 @@ package org.pascani.deployment.amelia.descriptors;
 
 import org.pascani.deployment.amelia.util.Strings;
 
-public class FrascatiCompilation {
+public class CompilationDescriptor {
 
 	private final String sourceDirectory;
 
@@ -10,7 +10,7 @@ public class FrascatiCompilation {
 
 	private final String[] classpath;
 
-	public FrascatiCompilation(final String sourceDirectory,
+	public CompilationDescriptor(final String sourceDirectory,
 			final String outputFile, final String... classpath) {
 
 		this.sourceDirectory = sourceDirectory;
