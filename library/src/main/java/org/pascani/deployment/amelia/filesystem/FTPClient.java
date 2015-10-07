@@ -56,7 +56,7 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 		String s = remoteFileSeparator();
 		super.mlistDir(pathname);
 
-		// No such file or directory (Mac) || Unknown command (Linux)
+		// No such file or directory || Unknown command (CentOS)
 		if ((getReplyCode() == 550 || getReplyCode() == 500) && pathname.contains(s)) {
 			String parent = getPathParent(pathname);
 			makeDirectories(parent);
