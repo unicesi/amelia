@@ -1,4 +1,4 @@
-package org.pascani.deployment.amelia.process;
+package org.pascani.deployment.amelia.util;
 
 import java.awt.Container;
 import java.awt.GridBagConstraints;
