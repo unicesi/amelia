@@ -1,5 +1,6 @@
 package org.pascani.deployment.amelia.descriptors;
 
+import java.util.Arrays;
 import java.util.Observable;
 
 import org.pascani.deployment.amelia.util.Strings;
@@ -75,6 +76,55 @@ public class ExecutionDescriptor extends Observable {
 	@Override
 	public String toString() {
 		return "[run " + this.compositeName + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(this.arguments);
+		result = prime
+				* result
+				+ ((this.compositeName == null) ? 0 : this.compositeName
+						.hashCode());
+		result = prime * result + Arrays.hashCode(this.libpath);
+		result = prime * result
+				+ ((this.methodName == null) ? 0 : this.methodName.hashCode());
+		result = prime
+				* result
+				+ ((this.serviceName == null) ? 0 : this.serviceName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ExecutionDescriptor other = (ExecutionDescriptor) obj;
+		if (!Arrays.equals(this.arguments, other.arguments))
+			return false;
+		if (this.compositeName == null) {
+			if (other.compositeName != null)
+				return false;
+		} else if (!this.compositeName.equals(other.compositeName))
+			return false;
+		if (!Arrays.equals(this.libpath, other.libpath))
+			return false;
+		if (this.methodName == null) {
+			if (other.methodName != null)
+				return false;
+		} else if (!this.methodName.equals(other.methodName))
+			return false;
+		if (this.serviceName == null) {
+			if (other.serviceName != null)
+				return false;
+		} else if (!this.serviceName.equals(other.serviceName))
+			return false;
+		return true;
 	}
 
 	public String compositeName() {
