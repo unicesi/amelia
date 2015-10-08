@@ -8,7 +8,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.CountDownLatch;
 
-public class DependencyTree<T extends Observable> extends HashMap<T, List<T>> {
+public class DependencyGraph<T extends Observable> extends HashMap<T, List<T>> {
 
 	public class DependencyThread extends Thread implements Observer {
 
@@ -50,7 +50,7 @@ public class DependencyTree<T extends Observable> extends HashMap<T, List<T>> {
 
 	private final Map<T, Runnable> tasks;
 
-	public DependencyTree() {
+	public DependencyGraph() {
 		this.tasks = new HashMap<T, Runnable>();
 	}
 
