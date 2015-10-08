@@ -1,11 +1,10 @@
 package org.pascani.deployment.amelia.descriptors;
 
 import java.util.Arrays;
-import java.util.Observable;
 
 import org.pascani.deployment.amelia.util.Strings;
 
-public class ExecutionDescriptor extends Observable {
+public class ExecutionDescriptor extends CommandDescriptor {
 
 	private final String compositeName;
 
@@ -49,6 +48,7 @@ public class ExecutionDescriptor extends Observable {
 		return sb.toString();
 	}	
 
+	@Override
 	public String toCommandString() {
 		StringBuilder sb = new StringBuilder();
 

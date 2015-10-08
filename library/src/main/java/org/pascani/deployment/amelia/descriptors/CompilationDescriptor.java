@@ -1,11 +1,10 @@
 package org.pascani.deployment.amelia.descriptors;
 
 import java.util.Arrays;
-import java.util.Observable;
 
 import org.pascani.deployment.amelia.util.Strings;
 
-public class CompilationDescriptor  extends Observable {
+public class CompilationDescriptor  extends CommandDescriptor {
 
 	private final String sourceDirectory;
 
@@ -21,6 +20,7 @@ public class CompilationDescriptor  extends Observable {
 		this.classpath = classpath;
 	}
 
+	@Override
 	public String toCommandString() {
 		StringBuilder sb = new StringBuilder();
 
