@@ -11,23 +11,15 @@ import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
-public class Execution implements Callable<Integer>, Runnable {
+public class Run implements Callable<Integer> {
 	
 	private final Expect expect;
 
 	private final ExecutionDescriptor descriptor;
 
-	public Execution(final Expect expect, final ExecutionDescriptor descriptor) {
+	public Run(final Expect expect, final ExecutionDescriptor descriptor) {
 		this.expect = expect;
 		this.descriptor = descriptor;
-	}
-	
-	public void run() {
-		try {
-			call();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	public Integer call() throws Exception {
@@ -60,6 +52,10 @@ public class Execution implements Callable<Integer>, Runnable {
 		}
 
 		return PID;
+	}
+	
+	public ExecutionDescriptor descriptor() {
+		return this.descriptor;
 	}
 
 }

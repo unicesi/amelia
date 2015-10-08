@@ -27,6 +27,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.expectit.Expect;
@@ -36,8 +39,6 @@ import net.sf.expectit.Result;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.Amelia;
-import org.pascani.deployment.amelia.DeploymentException;
-import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.AuthenticationUserInfo;
@@ -171,40 +172,14 @@ public class SSHHandler extends Thread {
 		this.expect.sendLine(ShellUtils.ameliaPromptFormat(shell));
 		this.expect.expect(regexp(prompt));
 	}
-
-	public void changeDirectory(String directory) throws IOException,
-			DeploymentException {
-
-		String prompt = ShellUtils.ameliaPromptRegexp();
-
-		this.expect.sendLine("cd \"" + directory + "\"");
-		String cd = this.expect.expect(regexp(prompt)).getBefore();
-
-		if (cd.contains("No such file or directory"))
-			throw new DeploymentException("No such file or directory \""
-					+ directory + "\"");
-	}
-
-	public void compileFrascatiComponent(CompilationDescriptor descriptor)
-			throws Exception {
+	
+	public <V> Future<V> executeCommand(Callable<V> callable) {
+		Future<V> future = Executors.newSingleThreadExecutor().submit(callable);
 		
-		new Compilation(this.expect, descriptor).call();
-	}
-
-	public int runFrascatiComponent(ExecutionDescriptor descriptor)
-			throws Exception {
-
-		// This shell is already in the working directory
-		int PID = new Execution(this.expect, descriptor).call();
-
-		// Successful execution
-		if(PID != -1) {
-			this.executions.add(descriptor);
-			logger.info("Composite " + descriptor.compositeName()
-					+ " was successfully deployed in " + this.host);
-		}
-
-		return PID;
+		if(callable instanceof Run)
+			this.executions.add(((Run) callable).descriptor());
+		
+		return future;
 	}
 
 	public void stopExecutions() throws IOException {
