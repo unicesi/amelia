@@ -1,8 +1,10 @@
 package org.pascani.deployment.amelia.descriptors;
 
+import java.util.Observable;
+
 import org.pascani.deployment.amelia.util.Strings;
 
-public class CompilationDescriptor {
+public class CompilationDescriptor  extends Observable {
 
 	private final String sourceDirectory;
 

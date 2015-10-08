@@ -35,12 +35,12 @@ import net.sf.expectit.Result;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.Amelia;
+import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.util.Amelia;
 import org.pascani.deployment.amelia.util.AuthenticationUserInfo;
-import org.pascani.deployment.amelia.util.DeploymentException;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 import com.jcraft.jsch.Channel;

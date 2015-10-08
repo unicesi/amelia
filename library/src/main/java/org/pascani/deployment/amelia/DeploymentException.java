@@ -1,4 +1,4 @@
-package org.pascani.deployment.amelia.util;
+package org.pascani.deployment.amelia;
 
 public class DeploymentException extends Exception {
 

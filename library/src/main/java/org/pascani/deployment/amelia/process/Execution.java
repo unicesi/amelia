@@ -7,8 +7,8 @@ import java.util.concurrent.Callable;
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectIOException;
 
+import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
-import org.pascani.deployment.amelia.util.DeploymentException;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 public class Execution implements Callable<Integer>, Runnable {

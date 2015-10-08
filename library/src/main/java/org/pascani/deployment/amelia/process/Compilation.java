@@ -4,8 +4,8 @@ import static net.sf.expectit.matcher.Matchers.regexp;
 
 import java.util.concurrent.Callable;
 
+import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
-import org.pascani.deployment.amelia.util.DeploymentException;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 import net.sf.expectit.Expect;
