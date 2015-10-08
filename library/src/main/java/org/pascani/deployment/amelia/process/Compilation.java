@@ -10,7 +10,7 @@ import org.pascani.deployment.amelia.util.ShellUtils;
 
 import net.sf.expectit.Expect;
 
-public class Compilation implements Callable<Boolean> {
+public class Compilation implements Callable<Boolean>, Runnable {
 
 	private final Expect expect;
 
@@ -19,6 +19,14 @@ public class Compilation implements Callable<Boolean> {
 	public Compilation(final Expect expect, final CompilationDescriptor descriptor) {
 		this.expect = expect;
 		this.descriptor = descriptor;
+	}
+	
+	public void run() {
+		try {
+			call();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public Boolean call() throws Exception {

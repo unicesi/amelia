@@ -11,7 +11,7 @@ import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.util.DeploymentException;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
-public class Execution implements Callable<Integer> {
+public class Execution implements Callable<Integer>, Runnable {
 	
 	private final Expect expect;
 
@@ -20,6 +20,14 @@ public class Execution implements Callable<Integer> {
 	public Execution(final Expect expect, final ExecutionDescriptor descriptor) {
 		this.expect = expect;
 		this.descriptor = descriptor;
+	}
+	
+	public void run() {
+		try {
+			call();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public Integer call() throws Exception {
