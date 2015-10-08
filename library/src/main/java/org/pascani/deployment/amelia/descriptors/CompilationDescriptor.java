@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.pascani.deployment.amelia.util.Strings;
 
-public class CompilationDescriptor  extends CommandDescriptor {
+public class CompilationDescriptor extends CommandDescriptor {
 
 	private final String sourceDirectory;
 
@@ -14,7 +14,7 @@ public class CompilationDescriptor  extends CommandDescriptor {
 
 	public CompilationDescriptor(final String sourceDirectory,
 			final String outputFile, final String... classpath) {
-
+		super(null, null, null);
 		this.sourceDirectory = sourceDirectory;
 		this.outputFile = outputFile;
 		this.classpath = classpath;
