@@ -16,7 +16,9 @@ public class ExecutionDescriptor extends CommandDescriptor {
 
 	private String[] arguments;
 
-	public ExecutionDescriptor(final String compositeName, final String[] libpath) {
+	public ExecutionDescriptor(final String compositeName,
+			final String[] libpath) {
+		super(null, null, null);
 		this.compositeName = compositeName;
 		this.libpath = libpath;
 	}
@@ -37,16 +39,16 @@ public class ExecutionDescriptor extends CommandDescriptor {
 		this(compositeName, libpath, serviceName, methodName);
 		this.arguments = arguments;
 	}
-	
+
 	public String toCommandSearchString() {
 		StringBuilder sb = new StringBuilder();
-		
+
 		sb.append(compositeName + " ");
 		sb.append("-libpath ");
 		sb.append(Strings.join(this.libpath, ":"));
-		
+
 		return sb.toString();
-	}	
+	}
 
 	@Override
 	public String toCommandString() {
