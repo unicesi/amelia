@@ -1,6 +1,6 @@
 package org.pascani.deployment.amelia.descriptors;
 
-import static org.pascani.deployment.amelia.util.Strings.emoji;
+import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import java.util.Observable;
 
@@ -41,14 +41,14 @@ public class CommandDescriptor extends Observable {
 	}
 
 	public String doneMessage() {
-		String message = emoji(128522) + " "; // check mark: \u2713
+		String message = ascii(128522) + "  "; // check mark: \u2713
 		message += successMessage == null ? toString() : successMessage;
 
 		return message;
 	}
 
 	public String failMessage() {
-		String message = emoji(128557) + " "; // X mark: \u2717
+		String message = ascii(128557) + "  "; // X mark: \u2717
 		message += errorMessage == null ? toString() : errorMessage;
 
 		return message;

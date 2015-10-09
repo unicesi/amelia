@@ -18,7 +18,7 @@
  */
 package org.pascani.deployment.amelia;
 
-import static org.pascani.deployment.amelia.util.Strings.emoji;
+import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class Amelia {
 	 */
 	public static final Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
 		public void uncaughtException(Thread t, Throwable e) {
-			System.out.println(emoji(128561) + " Stopping deployment. Cause: " + e.getMessage());
+			System.out.println(ascii(128561) + "  Stopping deployment. Cause: " + e.getMessage());
 			Amelia.shutdown();
 		}
 	};
@@ -183,7 +183,7 @@ public class Amelia {
 	 * Terminates the execution
 	 */
 	public static void shutdown() {
-		String message = emoji(128074) + " Shutting down deployment";
+		String message = ascii(128074) + "  Shutting down deployment";
 		try {
 			String[] sshHosts = sshConnections.keySet().toArray(new String[0]);
 			String[] ftpHosts = ftpConnections.keySet().toArray(new String[0]);
@@ -192,7 +192,7 @@ public class Amelia {
 			closeFTPConnections(ftpHosts);
 		} catch (IOException e) {
 			String str = "Deployment shutdown unsuccessful. Shutting system down abruptly";
-			message = emoji(128078) + " " + str;
+			message = ascii(128078) + "  " + str;
 			logger.error(str);
 		} finally {
 			System.out.println(message);

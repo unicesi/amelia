@@ -24,7 +24,7 @@ public class Strings {
 		return contains;
 	}
 	
-	public static String emoji(int codePoint) {
+	public static String ascii(int codePoint) {
 		return String.valueOf(Character.toChars(codePoint));
 	}
 
