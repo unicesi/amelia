@@ -135,6 +135,8 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 				dependency.addObserver(thread);
 			}
 			
+			// Handle uncaught exceptions
+			thread.setUncaughtExceptionHandler(Amelia.exceptionHandler);
 			thread.start();
 		}
 
