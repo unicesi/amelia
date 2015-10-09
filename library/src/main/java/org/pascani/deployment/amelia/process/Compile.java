@@ -12,23 +12,25 @@ import net.sf.expectit.Expect;
 
 public class Compile implements Callable<Boolean> {
 
-	private final Expect expect;
+	private final SSHHandler handler;
 
 	private final CompilationDescriptor descriptor;
 
-	public Compile(final Expect expect, final CompilationDescriptor descriptor) {
-		this.expect = expect;
+	public Compile(final SSHHandler handler, final CompilationDescriptor descriptor) {
+		this.handler = handler;
 		this.descriptor = descriptor;
 	}
 
 	public Boolean call() throws Exception {
+		
+		Expect expect = this.handler.expect();
 
 		// The Amelia prompt
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
 		// Perform the compilation
-		this.expect.sendLine(descriptor.toCommandString());
-		String compile = this.expect.expect(regexp(prompt)).getBefore();
+		expect.sendLine(descriptor.toCommandString());
+		String compile = expect.expect(regexp(prompt)).getBefore();
 
 		if (compile.contains("No such file or directory"))
 			throw new DeploymentException("No such file or directory \""

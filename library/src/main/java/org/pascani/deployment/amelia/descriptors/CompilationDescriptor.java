@@ -14,7 +14,7 @@ public class CompilationDescriptor extends CommandDescriptor {
 
 	public CompilationDescriptor(final String sourceDirectory,
 			final String outputFile, final String... classpath) {
-		super(null, null, null);
+		super(null, null, null, outputFile + ".jar has been generated");
 		this.sourceDirectory = sourceDirectory;
 		this.outputFile = outputFile;
 		this.classpath = classpath;

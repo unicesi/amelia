@@ -22,24 +22,27 @@ import net.sf.expectit.Expect;
  */
 public class Command implements Callable<Boolean> {
 
-	private final Expect expect;
+	private final SSHHandler handler;
 
 	private final CommandDescriptor descriptor;
 
-	public Command(final Expect expect, final CommandDescriptor descriptor) {
-		this.expect = expect;
+	public Command(final SSHHandler handler, final CommandDescriptor descriptor) {
+		this.handler = handler;
 		this.descriptor = descriptor;
 	}
 
 	public Boolean call() throws Exception {
 
+		Expect expect = this.handler.expect();
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
-		this.expect.sendLine(this.descriptor.toCommandString());
-		String response = this.expect.expect(regexp(prompt)).getBefore();
+		expect.sendLine(this.descriptor.toCommandString());
+		String response = expect.expect(regexp(prompt)).getBefore();
 
-		if (!this.descriptor.isOk(response))
+		if (!this.descriptor.isOk(response)) {
+			this.descriptor.fail(this.handler.host());
 			throw new DeploymentException(this.descriptor.errorMessage());
+		}
 
 		return true;
 	}

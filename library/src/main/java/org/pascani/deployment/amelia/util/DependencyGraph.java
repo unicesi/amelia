@@ -9,6 +9,7 @@ import java.util.Observer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
+import org.pascani.deployment.amelia.Amelia;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
@@ -44,7 +45,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 				this.handler.executeCommand(this.callable);
 
 				// Release this dependency
-				this.element.done();
+				this.element.done(this.handler.host());
 				this.element.notifyObservers();
 
 				// Notify to main thread
@@ -99,11 +100,11 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		Callable<?> callable = null;
 
 		if (a instanceof CompilationDescriptor)
-			callable = new Compile(handler.expect(), (CompilationDescriptor) a);
+			callable = new Compile(handler, (CompilationDescriptor) a);
 		else if (a instanceof ExecutionDescriptor)
-			callable = new Run(handler.expect(), (ExecutionDescriptor) a);
+			callable = new Run(handler, (ExecutionDescriptor) a);
 		else
-			callable = new Command(handler.expect(), (CommandDescriptor) a);
+			callable = new Command(handler, (CommandDescriptor) a);
 
 		this.tasks.put(a, callable);
 	}
