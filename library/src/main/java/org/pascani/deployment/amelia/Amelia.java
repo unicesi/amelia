@@ -18,8 +18,6 @@
  */
 package org.pascani.deployment.amelia;
 
-import static org.pascani.deployment.amelia.util.Strings.ascii;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
