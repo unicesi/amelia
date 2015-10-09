@@ -139,13 +139,12 @@ public class Amelia {
 	 */
 	public static void closeSSHConnections(Host... hosts) throws IOException {
 		for (Host host : hosts) {
-			
+
 			SSHHandler handler = sshConnections.get(host.identifier());
 			handler.stopExecutions();
 			handler.close();
-			
-			sshConnections.remove(host.identifier());
 
+			sshConnections.remove(host.identifier());
 			logger.info("SSH connection for " + host
 					+ " was successfully closed");
 		}
@@ -209,7 +208,8 @@ public class Amelia {
 				try {
 					input.close();
 				} catch (IOException e) {
-					logger.error("Error closing stream of configuration file", e);
+					logger.error("Error closing stream of configuration file",
+							e);
 				}
 			}
 		}
