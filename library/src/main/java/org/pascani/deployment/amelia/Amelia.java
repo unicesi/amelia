@@ -195,7 +195,7 @@ public class Amelia {
 	 * Terminates the execution
 	 */
 	public static void shutdown() {
-		String message = ascii(128074) + "  Shutting down deployment";
+		String message = "Shutting down deployment";
 		try {
 			String[] sshHosts = sshConnections.keySet().toArray(new String[0]);
 			String[] ftpHosts = ftpConnections.keySet().toArray(new String[0]);
