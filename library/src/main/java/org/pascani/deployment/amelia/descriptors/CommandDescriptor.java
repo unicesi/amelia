@@ -16,6 +16,10 @@ public class CommandDescriptor extends Observable {
 		this.errorText = errorText;
 		this.errorMessage = errorMessage;
 	}
+	
+	public void done() {
+		setChanged();
+	}
 
 	public String toCommandString() {
 		return this.command;
@@ -23,7 +27,7 @@ public class CommandDescriptor extends Observable {
 
 	@Override
 	public String toString() {
-		return this.command;
+		return "[" + this.command + "]";
 	}
 
 	public String errorText() {
