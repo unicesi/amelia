@@ -17,6 +17,14 @@ public class CommandDescriptor extends Observable {
 		this.errorMessage = errorMessage;
 	}
 	
+	public CommandDescriptor(final String command) {
+		this(command, null, null);
+	}
+	
+	public boolean isOk(String response) {
+		return this.errorText == null || !response.contains(this.errorText);
+	}
+	
 	public void done() {
 		setChanged();
 	}

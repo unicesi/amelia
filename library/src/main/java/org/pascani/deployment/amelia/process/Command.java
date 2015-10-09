@@ -36,9 +36,9 @@ public class Command implements Callable<Boolean> {
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
 		this.expect.sendLine(this.descriptor.toCommandString());
-		String cd = this.expect.expect(regexp(prompt)).getBefore();
+		String response = this.expect.expect(regexp(prompt)).getBefore();
 
-		if (cd.contains(this.descriptor.errorText()))
+		if (!this.descriptor.isOk(response))
 			throw new DeploymentException(this.descriptor.errorMessage());
 
 		return true;
