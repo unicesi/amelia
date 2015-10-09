@@ -91,6 +91,9 @@ public class SSHHandler extends Thread {
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
 		this.executions = new ArrayList<ExecutionDescriptor>();
 		this.taskQueue = new SingleThreadTaskQueue();
+		
+		// Handle uncaught exceptions
+		this.taskQueue.setUncaughtExceptionHandler(Amelia.exceptionHandler);
 	}
 
 	@Override
