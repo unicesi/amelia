@@ -28,8 +28,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.expectit.Expect;
@@ -43,6 +41,7 @@ import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.AuthenticationUserInfo;
 import org.pascani.deployment.amelia.util.ShellUtils;
+import org.pascani.deployment.amelia.util.SingleThreadTaskQueue;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
@@ -73,6 +72,8 @@ public class SSHHandler extends Thread {
 
 	private final List<ExecutionDescriptor> executions;
 
+	private final SingleThreadTaskQueue taskQueue;
+
 	/**
 	 * The logger
 	 */
@@ -89,6 +90,7 @@ public class SSHHandler extends Thread {
 		this.connectionTimeout = Integer.parseInt(_connectionTimeout);
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
 		this.executions = new ArrayList<ExecutionDescriptor>();
+		this.taskQueue = new SingleThreadTaskQueue();
 	}
 
 	@Override
@@ -98,6 +100,9 @@ public class SSHHandler extends Thread {
 			connect();
 			initialize();
 			configure();
+
+			// Once it's configured, it's ready to execute commands
+			this.taskQueue.start();
 
 		} catch (JSchException e) {
 			logger.error("Error establishing connection with " + this.host, e);
@@ -161,10 +166,8 @@ public class SSHHandler extends Thread {
 		String shell = result.getBefore().split("\n")[0].trim();
 
 		if (!shell.matches("bash|zsh")) {
-			RuntimeException e = new RuntimeException("Shell not supported: "
-					+ shell);
+			RuntimeException e = new RuntimeException("Shell not supported: " + shell);
 			logger.error("Shell not supported: " + shell, e);
-
 			throw e;
 		}
 
@@ -172,21 +175,25 @@ public class SSHHandler extends Thread {
 		this.expect.sendLine(ShellUtils.ameliaPromptFormat(shell));
 		this.expect.expect(regexp(prompt));
 	}
-	
-	public <V> Future<V> executeCommand(Callable<V> callable) {
-		Future<V> future = Executors.newSingleThreadExecutor().submit(callable);
-		
-		if(callable instanceof Run)
+
+	public <V> V executeCommand(Callable<V> callable)
+			throws InterruptedException {
+		V result = this.taskQueue.execute(callable);
+
+		if (callable instanceof Run)
 			this.executions.add(((Run) callable).descriptor());
-		
-		return future;
+
+		return result;
 	}
 
 	public void stopExecutions() throws IOException {
 
 		String prompt = ShellUtils.ameliaPromptRegexp();
-
-		for (ExecutionDescriptor descriptor : this.executions) {
+		
+		// Stop executions in reverse order (to avoid abruptly stopping components)
+		for(int i = this.executions.size() - 1; i >= 0; i--) {
+			ExecutionDescriptor descriptor = this.executions.get(i);
+			
 			String criterion = descriptor.toCommandSearchString();
 			this.expect.sendLine(ShellUtils.killCommand(criterion));
 			this.expect.expect(regexp(prompt));
