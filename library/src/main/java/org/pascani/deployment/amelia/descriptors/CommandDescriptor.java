@@ -41,14 +41,14 @@ public class CommandDescriptor extends Observable {
 	}
 
 	public String doneMessage() {
-		String message = ascii(128522) + "  "; // check mark: \u2713
+		String message = ascii(10003) + " ";
 		message += successMessage == null ? toString() : successMessage;
 
 		return message;
 	}
 
 	public String failMessage() {
-		String message = ascii(128557) + "  "; // X mark: \u2717
+		String message = ascii(10007) + " ";
 		message += errorMessage == null ? toString() : errorMessage;
 
 		return message;

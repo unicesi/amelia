@@ -65,7 +65,16 @@ public class Amelia {
 	 */
 	public static final Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
 		public void uncaughtException(Thread t, Throwable e) {
-			System.out.println(ascii(128561) + "  Stopping deployment. Cause: " + e.getMessage());
+
+			String message = e
+					.getMessage()
+					.replace("java.util.concurrent.ExecutionException: ", "")
+					.replace("java.lang.RuntimeException: ", "")
+					.replace("org.pascani.deployment.amelia.DeploymentException: ", "");
+
+			logger.error(message, e);
+
+			System.out.println("Stopping deployment. Cause: " + message);
 			Amelia.shutdown();
 		}
 	};
@@ -131,14 +140,15 @@ public class Amelia {
 	 */
 	public static void closeFTPConnections(Host... hosts) throws IOException {
 		String[] ids = new String[hosts.length];
-		
+
 		for (int i = 0; i < ids.length; i++)
 			ids[i] = hosts[i].identifier();
-		
+
 		closeFTPConnections(ids);
 	}
-	
-	private static void closeFTPConnections(String... hostsIds) throws IOException {
+
+	private static void closeFTPConnections(String... hostsIds)
+			throws IOException {
 		for (String id : hostsIds) {
 			FTPHandler handler = ftpConnections.get(id);
 			handler.close();
@@ -161,24 +171,26 @@ public class Amelia {
 	 */
 	public static void closeSSHConnections(Host... hosts) throws IOException {
 		String[] ids = new String[hosts.length];
-		
+
 		for (int i = 0; i < ids.length; i++)
 			ids[i] = hosts[i].identifier();
-		
+
 		closeSSHConnections(ids);
 	}
-	
-	private static void closeSSHConnections(String... hostsIds) throws IOException {
+
+	private static void closeSSHConnections(String... hostsIds)
+			throws IOException {
 		for (String id : hostsIds) {
 			SSHHandler handler = sshConnections.get(id);
 			handler.stopExecutions();
 			handler.close();
 
 			sshConnections.remove(handler.host().identifier());
-			logger.info("SSH connection for " + handler.host() + " was successfully closed");
+			logger.info("SSH connection for " + handler.host()
+					+ " was successfully closed");
 		}
 	}
-	
+
 	/**
 	 * Terminates the execution
 	 */
@@ -192,7 +204,7 @@ public class Amelia {
 			closeFTPConnections(ftpHosts);
 		} catch (IOException e) {
 			String str = "Deployment shutdown unsuccessful. Shutting system down abruptly";
-			message = ascii(128078) + "  " + str;
+			message = str;
 			logger.error(str);
 		} finally {
 			System.out.println(message);
