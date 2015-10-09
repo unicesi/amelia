@@ -18,6 +18,8 @@
  */
 package org.pascani.deployment.amelia;
 
+import static org.pascani.deployment.amelia.util.Strings.emoji;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +59,16 @@ public class Amelia {
 	 * A map to store FTP handlers per host (host id)
 	 */
 	private static Map<String, FTPHandler> ftpConnections = new Hashtable<String, FTPHandler>();
+
+	/**
+	 * An uncaught exception handler
+	 */
+	public static final Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
+		public void uncaughtException(Thread t, Throwable e) {
+			System.out.println(emoji(128561) + " Stopping deployment. Cause: " + e.getMessage());
+			Amelia.shutdown();
+		}
+	};
 
 	/**
 	 * The logger
@@ -118,11 +130,21 @@ public class Amelia {
 	 *             server or receiving a reply from the server.
 	 */
 	public static void closeFTPConnections(Host... hosts) throws IOException {
-		for (Host host : hosts) {
-			ftpConnections.get(host.identifier()).close();
-			ftpConnections.remove(host.identifier());
+		String[] ids = new String[hosts.length];
+		
+		for (int i = 0; i < ids.length; i++)
+			ids[i] = hosts[i].identifier();
+		
+		closeFTPConnections(ids);
+	}
+	
+	private static void closeFTPConnections(String... hostsIds) throws IOException {
+		for (String id : hostsIds) {
+			FTPHandler handler = ftpConnections.get(id);
+			handler.close();
+			ftpConnections.remove(id);
 
-			logger.info("FTP connection for " + host
+			logger.info("FTP connection for " + handler.host()
 					+ " was successfully closed");
 		}
 	}
@@ -138,15 +160,43 @@ public class Amelia {
 	 *             If I/O error occurs.
 	 */
 	public static void closeSSHConnections(Host... hosts) throws IOException {
-		for (Host host : hosts) {
-
-			SSHHandler handler = sshConnections.get(host.identifier());
+		String[] ids = new String[hosts.length];
+		
+		for (int i = 0; i < ids.length; i++)
+			ids[i] = hosts[i].identifier();
+		
+		closeSSHConnections(ids);
+	}
+	
+	private static void closeSSHConnections(String... hostsIds) throws IOException {
+		for (String id : hostsIds) {
+			SSHHandler handler = sshConnections.get(id);
 			handler.stopExecutions();
 			handler.close();
 
-			sshConnections.remove(host.identifier());
-			logger.info("SSH connection for " + host
-					+ " was successfully closed");
+			sshConnections.remove(handler.host().identifier());
+			logger.info("SSH connection for " + handler.host() + " was successfully closed");
+		}
+	}
+	
+	/**
+	 * Terminates the execution
+	 */
+	public static void shutdown() {
+		String message = emoji(128074) + " Shutting down deployment";
+		try {
+			String[] sshHosts = sshConnections.keySet().toArray(new String[0]);
+			String[] ftpHosts = ftpConnections.keySet().toArray(new String[0]);
+
+			closeSSHConnections(sshHosts);
+			closeFTPConnections(ftpHosts);
+		} catch (IOException e) {
+			String str = "Deployment shutdown unsuccessful. Shutting system down abruptly";
+			message = emoji(128078) + " " + str;
+			logger.error(str);
+		} finally {
+			System.out.println(message);
+			System.exit(0);
 		}
 	}
 
@@ -175,6 +225,10 @@ public class Amelia {
 	}
 
 	/**
+	 * TODO: When only some of the properties are set, the rest will be null.
+	 * Instead of setting the default values when the file is not found, set
+	 * variables for each variable when it is null.
+	 * 
 	 * Reads configuration properties
 	 */
 	private static void readConfiguration() {
