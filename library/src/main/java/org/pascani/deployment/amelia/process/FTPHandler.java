@@ -56,7 +56,10 @@ public class FTPHandler extends Thread {
 	}
 
 	public boolean close() throws IOException {
-		return this.client.logout();
+		if(this.client != null && this.client.isConnected())
+			return this.client.logout();
+		else
+			return false;
 	}
 
 	public boolean upload(AssetBundle bundle) throws IOException {
