@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.process.FTPHandler;
 import org.pascani.deployment.amelia.process.SSHHandler;
+import org.pascani.deployment.amelia.util.Log;
 
 /**
  * This class is a repository of the SSH and FTP connections.
@@ -51,12 +52,7 @@ public class Amelia {
 	/**
 	 * A map to store SSH handlers per host (host id)
 	 */
-	private static Map<String, SSHHandler> sshConnections = new Hashtable<String, SSHHandler>();
-
-	/**
-	 * A map to store FTP handlers per host (host id)
-	 */
-	private static Map<String, FTPHandler> ftpConnections = new Hashtable<String, FTPHandler>();
+	private static Map<String, Host> hosts = new Hashtable<String, Host>();
 
 	/**
 	 * An uncaught exception handler
@@ -72,8 +68,8 @@ public class Amelia {
 
 			logger.error(message, e);
 
-			System.out.println("Stopping deployment. Cause: " + message);
-			Amelia.shutdown();
+			Log.error("Stopping deployment: " + message);
+			Amelia.shutdown(true);
 		}
 	};
 
@@ -86,19 +82,21 @@ public class Amelia {
 	 * Opens FTP connections with the specified hosts
 	 * 
 	 * @param hosts
-	 *            The array of hosts containing the FTP connection data
+	 *            The array of hosts containing the FTP handler
 	 * @throws InterruptedException
 	 *             If any thread interrupts any of the handler threads
 	 */
-	public static void openFTPConnections(Host... hosts)
+	public static void openFTPConnections(Host... _hosts)
 			throws InterruptedException {
 
-		for (Host host : hosts) {
-			FTPHandler ftpHandler = new FTPHandler(host);
-			ftpConnections.put(host.identifier(), ftpHandler);
-			ftpHandler.run();
+		for (Host host : _hosts) {
+			FTPHandler ftpHandler = host.ftp();
+			ftpHandler.start();
 			ftpHandler.join();
-
+			
+			if(!hosts.containsKey(host.identifier()))
+				hosts.put(host.identifier(), host);
+			
 			logger.info("FTP connection for " + host
 					+ " was successfully established");
 		}
@@ -108,18 +106,20 @@ public class Amelia {
 	 * Opens SSH connections with the specified hosts
 	 * 
 	 * @param hosts
-	 *            The array of hosts containing the SSH connection data
+	 *            The array of hosts containing the SSH handler
 	 * @throws InterruptedException
 	 *             If any thread interrupts any of the handler threads
 	 */
-	public static void openSSHConnections(Host... hosts)
+	public static void openSSHConnections(Host... _hosts)
 			throws InterruptedException {
 
-		for (Host host : hosts) {
-			SSHHandler sshHandler = new SSHHandler(host);
-			sshConnections.put(host.identifier(), sshHandler);
-			sshHandler.run();
+		for (Host host : _hosts) {
+			SSHHandler sshHandler = host.ssh();
+			sshHandler.start();
 			sshHandler.join();
+			
+			if(!hosts.containsKey(host.identifier()))
+				hosts.put(host.identifier(), host);
 
 			logger.info("SSH connection for " + host
 					+ " was successfully established");
@@ -127,8 +127,7 @@ public class Amelia {
 	}
 
 	/**
-	 * Closes the FTP connection with the specified hosts, and removes it from
-	 * the FTP connections.
+	 * Closes the FTP connection with the specified hosts.
 	 * 
 	 * @param hosts
 	 *            The array of hosts to close the connection with
@@ -148,9 +147,8 @@ public class Amelia {
 	private static void closeFTPConnections(String... hostsIds)
 			throws IOException {
 		for (String id : hostsIds) {
-			FTPHandler handler = ftpConnections.get(id);
+			FTPHandler handler = hosts.get(id).ftp();
 			handler.close();
-			ftpConnections.remove(id);
 
 			logger.info("FTP connection for " + handler.host()
 					+ " was successfully closed");
@@ -158,9 +156,8 @@ public class Amelia {
 	}
 
 	/**
-	 * Closes the SSH connection with the specified hosts, and removes it from
-	 * the SSH connections. Before closing the connections, all FraSCAti
-	 * executions are killed.
+	 * Closes the SSH connection with the specified hosts. Before closing the connections, all FraSCAti
+	 * executions are stopped.
 	 * 
 	 * @param hosts
 	 *            The array of hosts to close the connection with
@@ -179,49 +176,69 @@ public class Amelia {
 	private static void closeSSHConnections(String... hostsIds)
 			throws IOException {
 		for (String id : hostsIds) {
-			SSHHandler handler = sshConnections.get(id);
-			handler.stopExecutions();
+			SSHHandler handler = hosts.get(id).ssh();
 			handler.close();
 
-			sshConnections.remove(handler.host().identifier());
 			logger.info("SSH connection for " + handler.host()
 					+ " was successfully closed");
+		}
+	}
+	
+	/**
+	 * Stops FraSCAti components in execution, within the specified hosts.
+	 * 
+	 * @param hosts
+	 *            The array of hosts
+	 * @throws IOException
+	 *             If I/O error occurs.
+	 */
+	public static void stopExecutions(Host... hosts) throws IOException {
+		String[] ids = new String[hosts.length];
+
+		for (int i = 0; i < ids.length; i++)
+			ids[i] = hosts[i].identifier();
+
+		stopExecutions(ids);
+	}
+	
+	private static void stopExecutions(String... hostsIds) 
+			throws IOException {
+		for (String id : hostsIds) {
+			SSHHandler handler = hosts.get(id).ssh();
+			handler.stopExecutions();
 		}
 	}
 
 	/**
 	 * Terminates the execution
 	 */
-	public static void shutdown() {
-		String message = "Shutting down deployment";
+	public static void shutdown(boolean stopExecutedComponents) {
+		Log.heading("Starting deployment shutdown");
 		try {
-			String[] sshHosts = sshConnections.keySet().toArray(new String[0]);
-			String[] ftpHosts = ftpConnections.keySet().toArray(new String[0]);
-
-			closeSSHConnections(sshHosts);
-			closeFTPConnections(ftpHosts);
+			String[] _hosts = hosts.keySet().toArray(new String[0]);
+			
+			if(stopExecutedComponents)
+				stopExecutions(_hosts);
+				
+			closeFTPConnections(_hosts);
+			closeSSHConnections(_hosts);
+			
 		} catch (IOException e) {
-			String str = "Deployment shutdown unsuccessful. Shutting system down abruptly";
-			message = str;
-			logger.error(str);
+			Log.error("Deployment shutdown unsuccessful; see logs for more information");
+			Log.info("Shutting system down abruptly");
+			
+			logger.error(e);
 		} finally {
-			System.out.println(message);
+			Log.heading("Deployment shutdown successful");
 			System.exit(0);
 		}
 	}
 
 	/**
-	 * @return the handlers of the FTP connections
+	 * @return registered hosts
 	 */
-	public static Map<String, FTPHandler> ftpConnections() {
-		return ftpConnections;
-	}
-
-	/**
-	 * @return the handlers of the SSH connections
-	 */
-	public static Map<String, SSHHandler> sshConnections() {
-		return sshConnections;
+	public static Map<String, Host> hosts() {
+		return hosts;
 	}
 
 	/**
