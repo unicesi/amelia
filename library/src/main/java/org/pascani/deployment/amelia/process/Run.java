@@ -9,22 +9,20 @@ import net.sf.expectit.ExpectIOException;
 
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
+import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
-public class Run implements Callable<Integer> {
+public class Run extends Command<Integer> implements Callable<Integer> {
 	
-	private final SSHHandler handler;
-
-	private final ExecutionDescriptor descriptor;
-
-	public Run(final SSHHandler handler, final ExecutionDescriptor descriptor) {
-		this.handler = handler;
-		this.descriptor = descriptor;
+	public Run(final Host host, final ExecutionDescriptor descriptor) {
+		super(host, descriptor);
 	}
 
 	public Integer call() throws Exception {
+		
 		int PID = -1;
-		Expect expect = this.handler.expect();
+		ExecutionDescriptor descriptor = (ExecutionDescriptor) super.descriptor;
+		Expect expect = this.host.ssh().expect();
 
 		// The Amelia prompt
 		String prompt = ShellUtils.ameliaPromptRegexp();
@@ -32,10 +30,11 @@ public class Run implements Callable<Integer> {
 		// Send the run command
 		expect.sendLine(descriptor.toCommandString() + " &");
 		String _pid = expect.expect(regexp("\\[\\d+\\] (\\d+)")).group(1);
+		
+		// Detach the process
+		expect.sendLine(ShellUtils.detachProcess());
 
-		// Update the process ID
 		PID = Integer.parseInt(_pid);
-
 		try {
 			// Expect a successful execution
 			expect.expect(regexp("Press Ctrl\\+C to quit\\.\\.\\.|Call done!"));
@@ -43,20 +42,11 @@ public class Run implements Callable<Integer> {
 			expect.expect(regexp(prompt));
 
 		} catch (ExpectIOException ex) {
-
-			// First, kill the remaining processes (if any)
-			String criterion = descriptor.toCommandSearchString();
-			expect.sendLine(ShellUtils.killCommand(criterion));
-
 			throw new DeploymentException(
 					"Cannot instantiate the FraSCAti factory!");
 		}
 
 		return PID;
-	}
-	
-	public ExecutionDescriptor descriptor() {
-		return this.descriptor;
 	}
 
 }

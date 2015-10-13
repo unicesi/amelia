@@ -6,45 +6,56 @@ import java.util.concurrent.Callable;
 
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
-import org.pascani.deployment.amelia.util.DependencyGraph;
+import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 import net.sf.expectit.Expect;
 
 /**
- * 
- * New child classes need to add a case in:
- * {@link DependencyGraph#addElement(java.util.Observable, SSHHandler)}
- * 
- * @see DependencyGraph#addElement(java.util.Observable, SSHHandler)
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class Command implements Callable<Boolean> {
+public abstract class Command<T> implements Callable<T> {
+	
+	public static class Simple extends Command<Boolean> {
 
-	private final SSHHandler handler;
+		public Simple(Host host, CommandDescriptor descriptor) {
+			super(host, descriptor);
+		}
+		
+		public Boolean call() throws Exception {
+			
+			Expect expect = this.host.ssh().expect();
+			String prompt = ShellUtils.ameliaPromptRegexp();
 
-	private final CommandDescriptor descriptor;
+			expect.sendLine(this.descriptor.toCommandString());
+			String response = expect.expect(regexp(prompt)).getBefore();
 
-	public Command(final SSHHandler handler, final CommandDescriptor descriptor) {
-		this.handler = handler;
+			if (!this.descriptor.isOk(response)) {
+				this.descriptor.fail(this.host);
+				throw new DeploymentException(this.descriptor.errorMessage());
+			}
+
+			return true;
+		}
+	}
+	
+	protected final Host host;
+
+	protected final CommandDescriptor descriptor;
+
+	public Command(final Host host, final CommandDescriptor descriptor) {
+		this.host = host;
 		this.descriptor = descriptor;
 	}
 
-	public Boolean call() throws Exception {
-
-		Expect expect = this.handler.expect();
-		String prompt = ShellUtils.ameliaPromptRegexp();
-
-		expect.sendLine(this.descriptor.toCommandString());
-		String response = expect.expect(regexp(prompt)).getBefore();
-
-		if (!this.descriptor.isOk(response)) {
-			this.descriptor.fail(this.handler.host());
-			throw new DeploymentException(this.descriptor.errorMessage());
-		}
-
-		return true;
+	public abstract T call() throws Exception;
+	
+	public Host host() {
+		return this.host;
+	}
+	
+	public CommandDescriptor descriptor() {
+		return this.descriptor;
 	}
 
 }

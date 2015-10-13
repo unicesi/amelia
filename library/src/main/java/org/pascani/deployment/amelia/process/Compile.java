@@ -2,28 +2,23 @@ package org.pascani.deployment.amelia.process;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 
-import java.util.concurrent.Callable;
-
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
+import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 import net.sf.expectit.Expect;
 
-public class Compile implements Callable<Boolean> {
+public class Compile extends Command<Boolean> {
 
-	private final SSHHandler handler;
-
-	private final CompilationDescriptor descriptor;
-
-	public Compile(final SSHHandler handler, final CompilationDescriptor descriptor) {
-		this.handler = handler;
-		this.descriptor = descriptor;
+	public Compile(final Host host, final CompilationDescriptor descriptor) {
+		super(host, descriptor);
 	}
 
 	public Boolean call() throws Exception {
 		
-		Expect expect = this.handler.expect();
+		CompilationDescriptor descriptor = (CompilationDescriptor) super.descriptor;
+		Expect expect = this.host.ssh().expect();
 
 		// The Amelia prompt
 		String prompt = ShellUtils.ameliaPromptRegexp();
