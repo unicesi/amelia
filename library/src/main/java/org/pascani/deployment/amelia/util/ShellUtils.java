@@ -99,4 +99,17 @@ public class ShellUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * TODO: Only bash, zsh, and ksh93 are supported
+	 * 
+	 * From http://superuser.com/a/705448
+	 * 
+	 * @return A command to detach a previously executed command from the
+	 *         current connection. This way, the execution remains after the
+	 *         connection is closed.
+	 */
+	public static String detachProcess() {
+		return "disown";
+	}
+
 }
