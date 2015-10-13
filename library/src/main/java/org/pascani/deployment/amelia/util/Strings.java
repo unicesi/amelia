@@ -1,17 +1,24 @@
 package org.pascani.deployment.amelia.util;
 
 public class Strings {
-
-	public static String join(String[] args, String separator) {
+	
+	public static String join(String[] args, String separator, String lastSeparator) {
 		String output = "";
 
 		for (int i = 0; i < args.length; i++) {
+			if (i == args.length - 2)
+				separator = lastSeparator;
 			if (i == args.length - 1)
 				separator = "";
+			
 			output += args[i] + separator;
 		}
 
 		return output;
+	}
+
+	public static String join(String[] args, String separator) {
+		return join(args, separator, separator);
 	}
 
 	public static boolean containsAnyOf(String source, String[] strings) {
