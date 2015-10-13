@@ -5,8 +5,7 @@ import java.net.SocketException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.Amelia;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.filesystem.FTPClient;
@@ -22,27 +21,23 @@ public class FTPHandler extends Thread {
 
 	private final FTPClient client;
 
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = LogManager.getLogger(FTPHandler.class);
-
 	public FTPHandler(final Host host) {
 		this.host = host;
 		this.client = new FTPClient();
+		
+		// Handle uncaught exceptions
+		this.setUncaughtExceptionHandler(Amelia.exceptionHandler);
 	}
 
 	public void run() {
 		try {
-
 			connect();
-
 		} catch (SocketException e) {
-			logger.error("Error opening FTP connection for " + this.host, e);
-			e.printStackTrace();
+			String message = "Error establishing FTP connection for " + this.host;
+			throw new RuntimeException(message, e);
 		} catch (IOException e) {
-			logger.error("Error opening FTP connection for " + this.host, e);
-			e.printStackTrace();
+			String message = "Error establishing FTP connection for " + this.host;
+			throw new RuntimeException(message, e);
 		}
 	}
 
