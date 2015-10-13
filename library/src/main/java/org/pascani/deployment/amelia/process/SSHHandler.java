@@ -93,15 +93,15 @@ public class SSHHandler extends Thread {
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
 		this.executions = new ArrayList<ExecutionDescriptor>();
 		this.taskQueue = new SingleThreadTaskQueue();
-		
+
 		// Handle uncaught exceptions
+		this.setUncaughtExceptionHandler(Amelia.exceptionHandler);
 		this.taskQueue.setUncaughtExceptionHandler(Amelia.exceptionHandler);
 	}
 
 	@Override
 	public void run() {
 		try {
-
 			connect();
 			initialize();
 			configure();
@@ -110,11 +110,11 @@ public class SSHHandler extends Thread {
 			this.taskQueue.start();
 
 		} catch (JSchException e) {
-			logger.error("Error establishing connection with " + this.host, e);
-			e.printStackTrace();
+			String message = "Error establishing SSH connection with " + this.host;
+			throw new RuntimeException(message, e);
 		} catch (IOException e) {
-			logger.error("Error initializing connection with " + this.host, e);
-			e.printStackTrace();
+			String message = "Error initializing SSH connection with " + this.host;
+			throw new RuntimeException(message, e);
 		}
 	}
 
@@ -171,7 +171,8 @@ public class SSHHandler extends Thread {
 		String shell = result.getBefore().split("\n")[0].trim();
 
 		if (!shell.matches("bash|zsh")) {
-			RuntimeException e = new RuntimeException("Shell not supported: " + shell);
+			RuntimeException e = new RuntimeException("Shell not supported: "
+					+ shell);
 			logger.error("Shell not supported: " + shell, e);
 			throw e;
 		}
@@ -181,13 +182,13 @@ public class SSHHandler extends Thread {
 		this.expect.expect(regexp(prompt));
 	}
 
-	public <V> V executeCommand(Command<V> command)
-			throws InterruptedException {
+	public <V> V executeCommand(Command<V> command) throws InterruptedException {
 		V result = this.taskQueue.execute(command);
 
 		if (command instanceof Run) {
 			Run run = (Run) command;
-			ExecutionDescriptor descriptor = (ExecutionDescriptor) run.descriptor();
+			ExecutionDescriptor descriptor = (ExecutionDescriptor) run
+					.descriptor();
 			this.executions.add(descriptor);
 		}
 
@@ -199,11 +200,12 @@ public class SSHHandler extends Thread {
 		String prompt = ShellUtils.ameliaPromptRegexp();
 		String[] components = new String[this.executions.size()];
 		boolean atLeastOne = !this.executions.isEmpty();
-		
-		// Stop executions in reverse order (to avoid abruptly stopping components)
-		for(int i = this.executions.size() - 1; i >= 0; i--) {
+
+		// Stop executions in reverse order (to avoid abruptly stopping
+		// components)
+		for (int i = this.executions.size() - 1; i >= 0; i--) {
 			ExecutionDescriptor descriptor = this.executions.remove(i);
-			
+
 			String criterion = descriptor.toCommandSearchString();
 			this.expect.sendLine(ShellUtils.killCommand(criterion));
 			this.expect.expect(regexp(prompt));
@@ -212,15 +214,16 @@ public class SSHHandler extends Thread {
 			logger.info("Execution of composite " + descriptor.compositeName()
 					+ " was successfully stopped in " + this.host);
 		}
-		
-		if(atLeastOne) {
+
+		if (atLeastOne) {
 			int executions = this.executions.size();
-			String have = executions == 1 ? " has " : " have ",
-					s = executions == 1 ? "" : "s";
-			
-			Log.info(this.host.toFixedString() + " " + ascii(10003) + " " + 
-					"Component" + s + " " + Strings.join(components, ", ", " and ") + 
-					have + "been stopped");
+			String have = executions == 1 ? " has " : " have ";
+			String s = executions == 1 ? "" : "s";
+
+			Log.info(this.host.toFixedString() + " " + ascii(10003) + " "
+					+ "Component" + s + " "
+					+ Strings.join(components, ", ", " and ") + have
+					+ "been stopped");
 		}
 	}
 
@@ -233,14 +236,18 @@ public class SSHHandler extends Thread {
 	}
 
 	public void close() throws IOException {
-		if(this.expect != null)
+		if (this.expect != null)
 			this.expect.close();
-		
-		if(this.channel != null && this.channel.isConnected())
+
+		if (this.channel != null && this.channel.isConnected())
 			this.channel.disconnect();
-		
-		if(this.session != null && this.session.isConnected())
+
+		if (this.session != null && this.session.isConnected())
 			this.session.disconnect();
+	}
+
+	public boolean isConnected() {
+		return this.session.isConnected() && this.channel.isConnected();
 	}
 
 	private File createOutputFile() throws IOException {
