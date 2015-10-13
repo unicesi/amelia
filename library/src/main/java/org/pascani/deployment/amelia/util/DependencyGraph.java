@@ -9,14 +9,14 @@ import java.util.Observer;
 import java.util.concurrent.CountDownLatch;
 
 import org.pascani.deployment.amelia.Amelia;
+import org.pascani.deployment.amelia.SSHHandler;
+import org.pascani.deployment.amelia.commands.Command;
+import org.pascani.deployment.amelia.commands.Compile;
+import org.pascani.deployment.amelia.commands.Run;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.process.Command;
-import org.pascani.deployment.amelia.process.Compile;
-import org.pascani.deployment.amelia.process.Run;
-import org.pascani.deployment.amelia.process.SSHHandler;
 
 public class DependencyGraph<T extends CommandDescriptor> extends HashMap<T, List<T>> {
 

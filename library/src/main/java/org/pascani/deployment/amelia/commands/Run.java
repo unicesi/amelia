@@ -1,4 +1,4 @@
-package org.pascani.deployment.amelia.process;
+package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 import static org.pascani.deployment.amelia.util.Strings.ascii;

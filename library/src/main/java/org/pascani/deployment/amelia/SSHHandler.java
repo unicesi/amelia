@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the Amelia library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.deployment.amelia.process;
+package org.pascani.deployment.amelia;
 
 import static net.sf.expectit.filter.Filters.removeColors;
 import static net.sf.expectit.filter.Filters.removeNonPrintable;
@@ -32,7 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.pascani.deployment.amelia.Amelia;
+import org.pascani.deployment.amelia.commands.Command;
+import org.pascani.deployment.amelia.commands.Run;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.AuthenticationUserInfo;

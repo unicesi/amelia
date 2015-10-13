@@ -13,8 +13,8 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.pascani.deployment.amelia.process.FTPHandler;
-import org.pascani.deployment.amelia.process.SSHHandler;
+import org.pascani.deployment.amelia.FTPHandler;
+import org.pascani.deployment.amelia.SSHHandler;
 import org.pascani.deployment.amelia.util.Log;
 
 public class Host {

@@ -1,11 +1,10 @@
-package org.pascani.deployment.amelia.process;
+package org.pascani.deployment.amelia;
 
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.List;
 import java.util.Map;
 
-import org.pascani.deployment.amelia.Amelia;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.filesystem.FTPClient;
