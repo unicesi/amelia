@@ -4,6 +4,8 @@ import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import java.util.Observable;
 
+import org.pascani.deployment.amelia.util.Log;
+
 public class CommandDescriptor extends Observable {
 
 	private final String command;
@@ -33,11 +35,11 @@ public class CommandDescriptor extends Observable {
 
 	public void done(Host host) {
 		setChanged();
-		System.out.println(host + ": " + doneMessage());
+		Log.info(host + ": " + doneMessage());
 	}
 
 	public void fail(Host host) {
-		System.out.println(host + ": " + failMessage());
+		Log.error(host + ": " + failMessage());
 	}
 
 	public String doneMessage() {
@@ -61,6 +63,31 @@ public class CommandDescriptor extends Observable {
 	@Override
 	public String toString() {
 		return "[" + this.command + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((command == null) ? 0 : command.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CommandDescriptor other = (CommandDescriptor) obj;
+		if (command == null) {
+			if (other.command != null)
+				return false;
+		} else if (!command.equals(other.command))
+			return false;
+		return true;
 	}
 
 	public String errorText() {
