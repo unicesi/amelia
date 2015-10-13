@@ -18,7 +18,7 @@ public class ExecutionDescriptor extends CommandDescriptor {
 
 	public ExecutionDescriptor(final String compositeName,
 			final String[] libpath) {
-		super(null, null, null, compositeName + " has been run");
+		super(null, null, null, compositeName + " has started");
 		this.compositeName = compositeName;
 		this.libpath = libpath;
 	}
