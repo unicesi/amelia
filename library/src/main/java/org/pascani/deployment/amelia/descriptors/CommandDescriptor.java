@@ -35,11 +35,11 @@ public class CommandDescriptor extends Observable {
 
 	public void done(Host host) {
 		setChanged();
-		Log.info(host + ": " + doneMessage());
+		Log.info(host.toFixedString() + " " + doneMessage());
 	}
 
 	public void fail(Host host) {
-		Log.error(host + ": " + failMessage());
+		Log.error(host.toFixedString() + " " + failMessage());
 	}
 
 	public String doneMessage() {

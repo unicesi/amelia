@@ -43,6 +43,8 @@ import org.pascani.deployment.amelia.util.Log;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Amelia {
+	
+	private static int hostFixedWidth = 0;
 
 	/**
 	 * A map to store initial configuration parameters
@@ -118,11 +120,20 @@ public class Amelia {
 			sshHandler.start();
 			sshHandler.join();
 			
-			if(!hosts.containsKey(host.identifier()))
+			if(!hosts.containsKey(host.identifier())) {
 				hosts.put(host.identifier(), host);
+				
+				if(hostFixedWidth < host.toString().length())
+					hostFixedWidth = host.toString().length();
+			}
 
 			logger.info("SSH connection for " + host
 					+ " was successfully established");
+		}
+		
+		// set a common (fixed) with for all hosts
+		for(Map.Entry<String, Host> entry : hosts.entrySet()) {
+			entry.getValue().setFixedWidth(hostFixedWidth);
 		}
 	}
 

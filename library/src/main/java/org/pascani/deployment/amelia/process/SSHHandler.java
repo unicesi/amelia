@@ -205,7 +205,6 @@ public class SSHHandler extends Thread {
 			ExecutionDescriptor descriptor = this.executions.remove(i);
 			
 			String criterion = descriptor.toCommandSearchString();
-
 			this.expect.sendLine(ShellUtils.killCommand(criterion));
 			this.expect.expect(regexp(prompt));
 
@@ -219,7 +218,7 @@ public class SSHHandler extends Thread {
 			String have = executions == 1 ? " has " : " have ",
 					s = executions == 1 ? "" : "s";
 			
-			Log.info(this.host + ": " + ascii(10003) + " " + 
+			Log.info(this.host.toFixedString() + " " + ascii(10003) + " " + 
 					"Component" + s + " " + Strings.join(components, ", ", " and ") + 
 					have + "been stopped");
 		}

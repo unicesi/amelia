@@ -31,6 +31,8 @@ public class Host {
 	private final SSHHandler ssh;
 	
 	private final FTPHandler ftp;
+	
+	private int fixedWith;
 
 	/**
 	 * The logger
@@ -47,6 +49,8 @@ public class Host {
 		this.password = password;
 		this.ssh = new SSHHandler(this);
 		this.ftp = new FTPHandler(this);
+		
+		this.fixedWith = toString().length();
 	}
 
 	public Host(final String hostname, final int ftpPort, final int sshPort, final String username,
@@ -130,6 +134,14 @@ public class Host {
 	
 	public FTPHandler ftp() {
 		return this.ftp;
+	}
+	
+	public void setFixedWidth(int width) {
+		this.fixedWith = width;
+	}
+	
+	public String toFixedString() {
+		return String.format("  %" + this.fixedWith + "s", toString());
 	}
 
 	@Override
