@@ -6,35 +6,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import org.pascani.deployment.amelia.Amelia;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
+import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.process.Command;
 import org.pascani.deployment.amelia.process.Compile;
 import org.pascani.deployment.amelia.process.Run;
 import org.pascani.deployment.amelia.process.SSHHandler;
 
-public class DependencyGraph<T extends CommandDescriptor> extends
-		HashMap<T, Map.Entry<SSHHandler, List<T>>> {
+public class DependencyGraph<T extends CommandDescriptor> extends HashMap<T, List<T>> {
 
 	public class DependencyThread extends Thread implements Observer {
 
 		private final T element;
 		private final SSHHandler handler;
-		private final Callable<?> callable;
+		private final Command<?> command;
 		private final CountDownLatch doneSignal;
 		private final CountDownLatch mainDoneSignal;
 
-		public DependencyThread(final T element, final SSHHandler handler,
-				final Callable<?> callable, final int dependencies,
-				final CountDownLatch doneSignal) {
+		public DependencyThread(final T element, final SSHHandler handler, final Command<?> command,
+				final int dependencies, final CountDownLatch doneSignal) {
 			this.element = element;
 			this.handler = handler;
-			this.callable = callable;
+			this.command = command;
 			this.doneSignal = new CountDownLatch(dependencies);
 			this.mainDoneSignal = doneSignal;
 		}
@@ -42,7 +40,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		public void run() {
 			try {
 				this.doneSignal.await();
-				this.handler.executeCommand(this.callable);
+				this.handler.executeCommand(this.command);
 
 				// Release this dependency
 				this.element.done(this.handler.host());
@@ -60,53 +58,35 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		}
 	}
 
-	private class Entry<K, V> implements Map.Entry<K, V> {
-
-		private K key;
-		private V value;
-
-		public Entry(K key, V value) {
-			this.key = key;
-			this.value = value;
-		}
-
-		public K getKey() {
-			return this.key;
-		}
-
-		public V getValue() {
-			return this.value;
-		}
-
-		public V setValue(V value) {
-			this.value = value;
-			return this.value;
-		}
-	}
-
 	/**
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = -6806533450294013309L;
 
-	private final Map<T, Callable<?>> tasks;
+	private final Map<T, List<Command<?>>> tasks;
 
 	public DependencyGraph() {
-		this.tasks = new HashMap<T, Callable<?>>();
+		this.tasks = new HashMap<T, List<Command<?>>>();
 	}
 
-	public void addElement(T a, SSHHandler handler) {
-		put(a, new Entry<SSHHandler, List<T>>(handler, new ArrayList<T>()));
-		Callable<?> callable = null;
+	public void addElement(T a, Host... hosts) {
+		// Add the element with an empty list of dependencies
+		put(a, new ArrayList<T>());
+		this.tasks.put(a, new ArrayList<Command<?>>());
 
-		if (a instanceof CompilationDescriptor)
-			callable = new Compile(handler, (CompilationDescriptor) a);
-		else if (a instanceof ExecutionDescriptor)
-			callable = new Run(handler, (ExecutionDescriptor) a);
-		else
-			callable = new Command(handler, (CommandDescriptor) a);
-
-		this.tasks.put(a, callable);
+		// Add a executable task per host
+		for (Host host : hosts) {
+			Command<?> task = null;
+			
+			if(a instanceof CompilationDescriptor)
+				task = new Compile(host, (CompilationDescriptor) a);
+			else if(a instanceof ExecutionDescriptor)
+				task = new Run(host, (ExecutionDescriptor) a);
+			else
+				task = new Command.Simple(host, a);
+			
+			this.tasks.get(a).add(task);
+		}
 	}
 
 	public boolean addDependency(T a, T b) {
@@ -114,33 +94,50 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 			return false;
 
 		// FIXME: search for transitive dependencies
-		if (get(b).getValue().contains(a))
-			throw new RuntimeException(String.format(
-					"Circular reference detected: %s <-> %s", a, b));
+		if (get(b).contains(a))
+			throw new RuntimeException(
+					String.format("Circular reference detected: %s <-> %s", a, b));
 
-		get(a).getValue().add(b);
+		get(a).add(b);
 
 		return true;
 	}
 
 	public void resolve() throws InterruptedException {
+		Log.heading("Starting deployment");
 		CountDownLatch doneSignal = new CountDownLatch(keySet().size());
 
 		for (T e : keySet()) {
-			DependencyThread thread = new DependencyThread(e, get(e).getKey(),
-					this.tasks.get(e), get(e).getValue().size(), doneSignal);
+			List<T> dependencies = get(e);
+			List<Command<?>> tasks = this.tasks.get(e);
+			int deps = countDependencyThreads(dependencies, tasks);
 
-			// Make the thread observe the configured dependencies
-			for (T dependency : get(e).getValue()) {
-				dependency.addObserver(thread);
+			for(Command<?> task : tasks) {
+				DependencyThread thread = 
+						new DependencyThread(e, task.host().ssh(), task, deps, doneSignal);
+
+				// Make the thread observe the corresponding dependencies
+				for (T dependency : get(e))
+					dependency.addObserver(thread);
+
+				// Handle uncaught exceptions
+				thread.setUncaughtExceptionHandler(Amelia.exceptionHandler);
+				thread.start();
 			}
-			
-			// Handle uncaught exceptions
-			thread.setUncaughtExceptionHandler(Amelia.exceptionHandler);
-			thread.start();
 		}
 
 		doneSignal.await();
+	}
+	
+	private int countDependencyThreads(List<T> dependencies, List<Command<?>> tasks) {
+		int n = dependencies.size();
+		
+		for(T e : dependencies)
+			for(Command<?> c : tasks)
+				if(c.descriptor().equals(e))
+					++n;
+
+		return n;
 	}
 
 }
