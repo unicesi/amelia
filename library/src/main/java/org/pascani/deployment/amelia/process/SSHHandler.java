@@ -21,18 +21,14 @@ package org.pascani.deployment.amelia.process;
 import static net.sf.expectit.filter.Filters.removeColors;
 import static net.sf.expectit.filter.Filters.removeNonPrintable;
 import static net.sf.expectit.matcher.Matchers.regexp;
+import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import net.sf.expectit.Expect;
-import net.sf.expectit.ExpectBuilder;
-import net.sf.expectit.Result;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,14 +36,20 @@ import org.pascani.deployment.amelia.Amelia;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.AuthenticationUserInfo;
+import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 import org.pascani.deployment.amelia.util.SingleThreadTaskQueue;
+import org.pascani.deployment.amelia.util.Strings;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
+
+import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectBuilder;
+import net.sf.expectit.Result;
 
 /**
  * TODO
@@ -179,12 +181,15 @@ public class SSHHandler extends Thread {
 		this.expect.expect(regexp(prompt));
 	}
 
-	public <V> V executeCommand(Callable<V> callable)
+	public <V> V executeCommand(Command<V> command)
 			throws InterruptedException {
-		V result = this.taskQueue.execute(callable);
+		V result = this.taskQueue.execute(command);
 
-		if (callable instanceof Run)
-			this.executions.add(((Run) callable).descriptor());
+		if (command instanceof Run) {
+			Run run = (Run) command;
+			ExecutionDescriptor descriptor = (ExecutionDescriptor) run.descriptor();
+			this.executions.add(descriptor);
+		}
 
 		return result;
 	}
@@ -192,17 +197,31 @@ public class SSHHandler extends Thread {
 	public void stopExecutions() throws IOException {
 
 		String prompt = ShellUtils.ameliaPromptRegexp();
+		String[] components = new String[this.executions.size()];
+		boolean atLeastOne = !this.executions.isEmpty();
 		
 		// Stop executions in reverse order (to avoid abruptly stopping components)
 		for(int i = this.executions.size() - 1; i >= 0; i--) {
-			ExecutionDescriptor descriptor = this.executions.get(i);
+			ExecutionDescriptor descriptor = this.executions.remove(i);
 			
 			String criterion = descriptor.toCommandSearchString();
+
 			this.expect.sendLine(ShellUtils.killCommand(criterion));
 			this.expect.expect(regexp(prompt));
 
+			components[i] = descriptor.compositeName();
 			logger.info("Execution of composite " + descriptor.compositeName()
 					+ " was successfully stopped in " + this.host);
+		}
+		
+		if(atLeastOne) {
+			int executions = this.executions.size();
+			String have = executions == 1 ? " has " : " have ",
+					s = executions == 1 ? "" : "s";
+			
+			Log.info(this.host + ": " + ascii(10003) + " " + 
+					"Component" + s + " " + Strings.join(components, ", ", " and ") + 
+					have + "been stopped");
 		}
 	}
 
@@ -215,9 +234,14 @@ public class SSHHandler extends Thread {
 	}
 
 	public void close() throws IOException {
-		expect.close();
-		channel.disconnect();
-		session.disconnect();
+		if(this.expect != null)
+			this.expect.close();
+		
+		if(this.channel != null && this.channel.isConnected())
+			this.channel.disconnect();
+		
+		if(this.session != null && this.session.isConnected())
+			this.session.disconnect();
 	}
 
 	private File createOutputFile() throws IOException {
