@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.process.FTPHandler;
+import org.pascani.deployment.amelia.process.SSHHandler;
 
 public class Host {
 
@@ -25,14 +27,17 @@ public class Host {
 	private final String username;
 
 	private final String password;
+	
+	private final SSHHandler ssh;
+	
+	private final FTPHandler ftp;
 
 	/**
 	 * The logger
 	 */
 	private final static Logger logger = LogManager.getLogger(Host.class);
 
-	public Host(final String hostname,
-			final int ftpPort, final int sshPort, final String username,
+	public Host(final String hostname, final int ftpPort, final int sshPort, final String username,
 			final String password, final String identifier) {
 		this.identifier = identifier;
 		this.hostname = hostname;
@@ -40,16 +45,13 @@ public class Host {
 		this.sshPort = sshPort;
 		this.username = username;
 		this.password = password;
+		this.ssh = new SSHHandler(this);
+		this.ftp = new FTPHandler(this);
 	}
 
-	public Host(final String hostname, final int ftpPort, final int sshPort,
-			final String username, final String password) {
-		this.identifier = UUID.randomUUID().toString();
-		this.hostname = hostname;
-		this.ftpPort = ftpPort;
-		this.sshPort = sshPort;
-		this.username = username;
-		this.password = password;
+	public Host(final String hostname, final int ftpPort, final int sshPort, final String username,
+			final String password) {
+		this(hostname, ftpPort, sshPort, username, password, UUID.randomUUID().toString());
 	}
 
 	public static Host[] fromFile(String pathname) throws IOException {
@@ -83,7 +85,7 @@ public class Host {
 					String message = "Bad format in hosts file: [" + l + "] " + line;
 					RuntimeException e = new RuntimeException(message);
 					logger.error(message, e);
-					
+
 					throw e;
 				}
 
@@ -97,7 +99,7 @@ public class Host {
 
 		return hosts.toArray(new Host[0]);
 	}
-	
+
 	public String identifier() {
 		return this.identifier;
 	}
@@ -120,6 +122,14 @@ public class Host {
 
 	public String password() {
 		return this.password;
+	}
+	
+	public SSHHandler ssh() {
+		return this.ssh;
+	}
+	
+	public FTPHandler ftp() {
+		return this.ftp;
 	}
 
 	@Override
