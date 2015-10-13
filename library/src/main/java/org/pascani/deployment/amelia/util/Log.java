@@ -5,7 +5,7 @@ import static org.pascani.deployment.amelia.util.Strings.ascii;
 public class Log {
 	
 	public static void heading(String message) {
-		message = "\n" + ascii(187) + " " + cyan(message);
+		message = ascii(187) + " " + cyan(message);
 		System.out.println(message);
 	}
 	
@@ -17,7 +17,7 @@ public class Log {
 	}
 	
 	public static void error(String message) {
-		message = red(message);
+		message = ascii(9632) + " " +  red(message);
 		System.out.println(message);
 	}
 	
