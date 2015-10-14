@@ -13,6 +13,8 @@ import org.pascani.deployment.amelia.SSHHandler;
 import org.pascani.deployment.amelia.commands.Command;
 import org.pascani.deployment.amelia.commands.Compile;
 import org.pascani.deployment.amelia.commands.Run;
+import org.pascani.deployment.amelia.commands.Transfer;
+import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
@@ -82,6 +84,8 @@ public class DependencyGraph<T extends CommandDescriptor> extends HashMap<T, Lis
 				task = new Compile(host, (CompilationDescriptor) a);
 			else if(a instanceof ExecutionDescriptor)
 				task = new Run(host, (ExecutionDescriptor) a);
+			else if(a instanceof AssetBundle)
+				task = new Transfer(host, (AssetBundle) a);
 			else
 				task = new Command.Simple(host, a);
 			
