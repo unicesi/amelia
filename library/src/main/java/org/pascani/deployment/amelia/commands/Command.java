@@ -4,26 +4,28 @@ import static net.sf.expectit.matcher.Matchers.regexp;
 
 import java.util.concurrent.Callable;
 
+import net.sf.expectit.Expect;
+
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
+import org.pascani.deployment.amelia.util.DependencyGraph;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
-import net.sf.expectit.Expect;
-
 /**
+ * @see DependencyGraph#addElement(CommandDescriptor, Host...)
  * @author Miguel Jiménez - Initial contribution and API
  */
 public abstract class Command<T> implements Callable<T> {
-	
+
 	public static class Simple extends Command<Boolean> {
 
 		public Simple(Host host, CommandDescriptor descriptor) {
 			super(host, descriptor);
 		}
-		
+
 		public Boolean call() throws Exception {
-			
+
 			Expect expect = this.host.ssh().expect();
 			String prompt = ShellUtils.ameliaPromptRegexp();
 
@@ -38,7 +40,7 @@ public abstract class Command<T> implements Callable<T> {
 			return true;
 		}
 	}
-	
+
 	protected final Host host;
 
 	protected final CommandDescriptor descriptor;
@@ -49,11 +51,11 @@ public abstract class Command<T> implements Callable<T> {
 	}
 
 	public abstract T call() throws Exception;
-	
+
 	public Host host() {
 		return this.host;
 	}
-	
+
 	public CommandDescriptor descriptor() {
 		return this.descriptor;
 	}

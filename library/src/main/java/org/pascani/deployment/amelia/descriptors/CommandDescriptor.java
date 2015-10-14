@@ -4,17 +4,22 @@ import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import java.util.Observable;
 
+import org.pascani.deployment.amelia.util.DependencyGraph;
 import org.pascani.deployment.amelia.util.Log;
 
+/**
+ * @see DependencyGraph#addElement(CommandDescriptor, Host...)
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class CommandDescriptor extends Observable {
 
-	private final String command;
+	protected final String command;
 
-	private final String errorText;
+	protected final String errorText;
 
-	private final String errorMessage;
+	protected final String errorMessage;
 
-	private final String successMessage;
+	protected final String successMessage;
 
 	public CommandDescriptor(final String command, final String errorText,
 			final String errorMessage, final String successMessage) {
