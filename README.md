@@ -1,2 +1,2 @@
-# amelia
-:airplane: Deployment library for the FraSCAti middleware
+# Amelia
+:airplane: A deployment library for the FraSCAti middleware
