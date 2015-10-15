@@ -44,9 +44,6 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 		ExecutionDescriptor descriptor = (ExecutionDescriptor) super.descriptor;
 		Expect expect = this.host.ssh().expect();
 
-		// The Amelia prompt
-		String prompt = ShellUtils.ameliaPromptRegexp();
-
 		// Send the run command
 		expect.sendLine(descriptor.toCommandString() + " &");
 		String _pid = expect.expect(regexp("\\[\\d+\\] (\\d+)")).group(1);
@@ -55,18 +52,21 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 		expect.sendLine(ShellUtils.detachProcess());
 
 		PID = Integer.parseInt(_pid);
+
 		try {
 			// Expect for a successful execution
 			expect.expect(regexp("Press Ctrl\\+C to quit\\.\\.\\.|Call done!"));
-			expect.sendLine();
-			expect.expect(regexp(prompt));
-
+			
 		} catch (ExpectIOException ex) {
 			String message = "Cannot instantiate the FraSCAti factory!";
-
-			Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
-					+ message);
-			throw new DeploymentException(message);
+			if (ex.getInputBuffer().contains(message)) {
+				Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
+						+ message);
+				throw new DeploymentException(message);
+			} else {
+				throw new RuntimeException("Expect operation timeout: "
+						+ ex.getInputBuffer());
+			}
 		}
 
 		return PID;
