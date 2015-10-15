@@ -21,6 +21,7 @@ package org.pascani.deployment.amelia.descriptors;
 import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import java.util.Observable;
+import java.util.UUID;
 
 import org.pascani.deployment.amelia.util.DependencyGraph;
 import org.pascani.deployment.amelia.util.Log;
@@ -30,6 +31,8 @@ import org.pascani.deployment.amelia.util.Log;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class CommandDescriptor extends Observable {
+	
+	protected final UUID internalId;
 
 	protected final String command;
 
@@ -41,6 +44,7 @@ public class CommandDescriptor extends Observable {
 
 	public CommandDescriptor(final String command, final String errorText,
 			final String errorMessage, final String successMessage) {
+		this.internalId = UUID.randomUUID();
 		this.command = command;
 		this.errorText = errorText;
 		this.errorMessage = errorMessage;
@@ -92,24 +96,30 @@ public class CommandDescriptor extends Observable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((command == null) ? 0 : command.hashCode());
+		result = prime * result
+				+ ((this.internalId == null) ? 0 : this.internalId.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		CommandDescriptor other = (CommandDescriptor) obj;
-		if (command == null) {
-			if (other.command != null)
+		if (this.internalId == null) {
+			if (other.internalId != null) {
 				return false;
-		} else if (!command.equals(other.command))
+			}
+		} else if (!this.internalId.equals(other.internalId)) {
 			return false;
+		}
 		return true;
 	}
 
