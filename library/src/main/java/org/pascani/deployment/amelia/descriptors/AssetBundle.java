@@ -139,6 +139,32 @@ public class AssetBundle extends CommandDescriptor {
 		return message;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((this.transfers == null) ? 0 : this.transfers.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AssetBundle other = (AssetBundle) obj;
+		if (this.transfers == null) {
+			if (other.transfers != null)
+				return false;
+		} else if (!this.transfers.equals(other.transfers))
+			return false;
+		return true;
+	}
+
 	public Map<String, List<String>> transfers() {
 		return this.transfers;
 	}
