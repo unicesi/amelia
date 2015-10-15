@@ -19,17 +19,21 @@
 package org.pascani.deployment.amelia.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import org.pascani.deployment.amelia.Amelia;
 import org.pascani.deployment.amelia.SSHHandler;
 import org.pascani.deployment.amelia.commands.Command;
 import org.pascani.deployment.amelia.commands.Compile;
+import org.pascani.deployment.amelia.commands.PrerrequisiteCheck;
 import org.pascani.deployment.amelia.commands.Run;
 import org.pascani.deployment.amelia.commands.Transfer;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
@@ -37,6 +41,7 @@ import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
+import org.pascani.deployment.amelia.descriptors.PrerrequisitesDescriptor;
 
 public class DependencyGraph<T extends CommandDescriptor> extends HashMap<T, List<T>> {
 
@@ -84,12 +89,18 @@ public class DependencyGraph<T extends CommandDescriptor> extends HashMap<T, Lis
 	private static final long serialVersionUID = -6806533450294013309L;
 
 	private final Map<T, List<Command<?>>> tasks;
+	
+	private final Set<Host> hosts;
 
 	public DependencyGraph() {
 		this.tasks = new HashMap<T, List<Command<?>>>();
+		this.hosts = new HashSet<Host>();
 	}
 
 	public void addElement(T a, Host... hosts) {
+		// Store the hosts
+		this.hosts.addAll(Arrays.asList(hosts));
+		
 		// Add the element with an empty list of dependencies
 		put(a, new ArrayList<T>());
 		this.tasks.put(a, new ArrayList<Command<?>>());
@@ -98,12 +109,15 @@ public class DependencyGraph<T extends CommandDescriptor> extends HashMap<T, Lis
 		for (Host host : hosts) {
 			Command<?> task = null;
 			
+			// TODO: Create a Factory
 			if(a instanceof CompilationDescriptor)
 				task = new Compile(host, (CompilationDescriptor) a);
 			else if(a instanceof ExecutionDescriptor)
 				task = new Run(host, (ExecutionDescriptor) a);
 			else if(a instanceof AssetBundle)
 				task = new Transfer(host, (AssetBundle) a);
+			else if(a instanceof PrerrequisitesDescriptor)
+				task = new PrerrequisiteCheck(host, (PrerrequisitesDescriptor) a);
 			else
 				task = new Command.Simple(host, a);
 			
@@ -126,6 +140,11 @@ public class DependencyGraph<T extends CommandDescriptor> extends HashMap<T, Lis
 	}
 
 	public void resolve() throws InterruptedException {
+		// Open SSH and FTP connections before dependencies resolution
+		Host[] _hosts = this.hosts.toArray(new Host[0]);
+		Amelia.openSSHConnections(_hosts);
+		Amelia.openFTPConnections(_hosts);
+		
 		Log.heading("Starting deployment");
 		CountDownLatch doneSignal = new CountDownLatch(keySet().size());
 
