@@ -46,7 +46,7 @@ public class CompilationDescriptor extends CommandDescriptor {
 		sb.append("compile ");
 		sb.append(this.sourceDirectory + " ");
 		sb.append(this.outputFile + " ");
-		sb.append(Strings.join(this.classpath, ":") + " ");
+		sb.append(Strings.join(this.classpath, ":"));
 
 		return sb.toString();
 	}
