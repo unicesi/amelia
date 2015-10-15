@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.util.Pair;
 import org.pascani.deployment.amelia.util.Strings;
 
 public class AssetBundle extends CommandDescriptor {
@@ -54,6 +55,15 @@ public class AssetBundle extends CommandDescriptor {
 
 	public AssetBundle() {
 		this(new HashMap<String, List<String>>());
+	}
+	
+	public AssetBundle resolveVariables(Pair<String, String>... variables) {
+		Map<String, String> _variables = new HashMap<String, String>();
+		
+		for(Pair<String, String> variable : variables)
+			_variables.put(variable.getKey(), variable.getValue());
+		
+		return resolveVariables(_variables);
 	}
 
 	/**
