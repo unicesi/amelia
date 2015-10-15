@@ -20,6 +20,7 @@ package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import net.sf.expectit.Expect;
@@ -58,12 +59,15 @@ public abstract class Command<T> implements Callable<T> {
 			return true;
 		}
 	}
+	
+	protected final UUID internalId;
 
 	protected final Host host;
 
 	protected final CommandDescriptor descriptor;
 
 	public Command(final Host host, final CommandDescriptor descriptor) {
+		this.internalId = UUID.randomUUID();
 		this.host = host;
 		this.descriptor = descriptor;
 	}
@@ -76,6 +80,37 @@ public abstract class Command<T> implements Callable<T> {
 
 	public CommandDescriptor descriptor() {
 		return this.descriptor;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((this.internalId == null) ? 0 : this.internalId.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Command<?> other = (Command<?>) obj;
+		if (this.internalId == null) {
+			if (other.internalId != null) {
+				return false;
+			}
+		} else if (!this.internalId.equals(other.internalId)) {
+			return false;
+		}
+		return true;
 	}
 
 }
