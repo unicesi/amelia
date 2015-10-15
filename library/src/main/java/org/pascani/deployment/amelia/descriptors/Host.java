@@ -198,13 +198,12 @@ public class Host {
 	}
 
 	public String toFixedString() {
-		return String.format("  %" + this.fixedWith + "s", toString());
+		return String.format("  %-" + this.fixedWith + "s", toString());
 	}
 
 	@Override
 	public String toString() {
-		return this.username + "@" + this.hostname + " (" + this.identifier
-				+ ")";
+		return this.identifier;
 	}
 
 }
