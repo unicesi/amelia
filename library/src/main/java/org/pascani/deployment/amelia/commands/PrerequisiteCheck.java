@@ -26,12 +26,12 @@ import net.sf.expectit.Result;
 import net.sf.expectit.matcher.Matchers;
 
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.descriptors.PrerrequisitesDescriptor;
+import org.pascani.deployment.amelia.descriptors.PrerequisitesDescriptor;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
-public class PrerrequisiteCheck extends Command<Boolean> {
+public class PrerequisiteCheck extends Command<Boolean> {
 
-	public PrerrequisiteCheck(Host host, PrerrequisitesDescriptor descriptor) {
+	public PrerequisiteCheck(Host host, PrerequisitesDescriptor descriptor) {
 		super(host, descriptor);
 	}
 
@@ -42,7 +42,7 @@ public class PrerrequisiteCheck extends Command<Boolean> {
 
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
-		PrerrequisitesDescriptor descriptor = (PrerrequisitesDescriptor) super.descriptor;
+		PrerequisitesDescriptor descriptor = (PrerequisitesDescriptor) super.descriptor;
 		Expect expect = super.host.ssh().expect();
 
 		// Check Java and FraSCAti are installed
