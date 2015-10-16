@@ -69,7 +69,7 @@ public class Host {
 		this.sshPort = sshPort;
 		this.username = username;
 		this.password = password;
-		
+
 		this.ssh = new SSHHandler(this);
 		this.ftp = new FTPHandler(this);
 
@@ -86,32 +86,37 @@ public class Host {
 		this.ssh.start();
 		this.ssh.join();
 
-		if(this.ssh.isConnected())
+		if (this.ssh.isConnected())
 			Log.info("  " + ascii(10003) + " " + this);
 		else
 			Log.info("  " + ascii(10007) + " " + this);
 	}
-	
+
 	public void closeSSHConnection() throws IOException {
 		this.ssh.close();
 	}
-	
+
 	public void openFTPConnection() throws InterruptedException {
 		this.ftp.start();
 		this.ftp.join();
 
-		if(this.ftp.client().isConnected())
+		if (this.ftp.client().isConnected())
 			Log.info("  " + ascii(10003) + " " + this);
 		else
 			Log.info("  " + ascii(10007) + " " + this);
 	}
-	
+
 	public boolean closeFTPConnection() throws IOException {
 		return this.ftp.close();
 	}
-	
+
 	public void stopExecutions() throws IOException {
 		this.ssh.stopExecutions();
+	}
+
+	public void stopExecutions(List<ExecutionDescriptor> executions)
+			throws IOException {
+		this.ssh.stopExecutions(executions);
 	}
 
 	public static Host[] fromFile(String pathname) throws IOException {

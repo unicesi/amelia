@@ -18,6 +18,7 @@
  */
 package org.pascani.deployment.amelia.util;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -120,8 +121,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 			else if (a instanceof AssetBundle)
 				task = new Transfer(host, (AssetBundle) a);
 			else if (a instanceof PrerequisitesDescriptor)
-				task = new PrerequisiteCheck(host,
-						(PrerequisitesDescriptor) a);
+				task = new PrerequisiteCheck(host, (PrerequisitesDescriptor) a);
 			else
 				task = new Command.Simple(host, a);
 
@@ -143,14 +143,19 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		return true;
 	}
 
-	public void resolve() throws InterruptedException {
-		
+	public void resolve(boolean stopPreviousExecutions)
+			throws InterruptedException, IOException {
+
 		Log.printBanner();
-		
+
 		// Open SSH and FTP connections before dependencies resolution
 		Host[] _hosts = this.hosts.toArray(new Host[0]);
 		Amelia.openSSHConnections(_hosts);
 		Amelia.openFTPConnections(_hosts);
+
+		if (stopPreviousExecutions) {
+			stopPreviousExecutions();
+		}
 
 		Log.heading("Starting deployment");
 		CountDownLatch doneSignal = new CountDownLatch(keySet().size());
@@ -175,6 +180,33 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		}
 
 		doneSignal.await();
+	}
+
+	private void stopPreviousExecutions() throws IOException {
+		Log.heading("Stopping previous executions");
+
+		Map<Host, List<ExecutionDescriptor>> executionsPerHost = new HashMap<Host, List<ExecutionDescriptor>>();
+
+		for (T descriptor : this.tasks.keySet()) {
+			if (descriptor instanceof ExecutionDescriptor) {
+				List<Command<?>> commands = this.tasks.get(descriptor);
+				for (Command<?> command : commands) {
+					if (!executionsPerHost.containsKey(command.host()))
+						executionsPerHost.put(command.host(),
+								new ArrayList<ExecutionDescriptor>());
+
+					executionsPerHost.get(command.host()).add(
+							(ExecutionDescriptor) descriptor);
+				}
+			}
+		}
+
+		for (Host host : executionsPerHost.keySet()) {
+			List<ExecutionDescriptor> executions = new ArrayList<ExecutionDescriptor>();
+			executions.addAll(executionsPerHost.get(host));
+
+			host.stopExecutions(executions);
+		}
 	}
 
 	private int countDependencyThreads(List<T> dependencies,

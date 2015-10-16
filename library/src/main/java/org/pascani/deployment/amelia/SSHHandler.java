@@ -195,17 +195,16 @@ public class SSHHandler extends Thread {
 
 		return result;
 	}
-
-	public void stopExecutions() throws IOException {
-
+	
+	public void stopExecutions(List<ExecutionDescriptor> executions) throws IOException {
 		String prompt = ShellUtils.ameliaPromptRegexp();
-		String[] components = new String[this.executions.size()];
-		boolean atLeastOne = !this.executions.isEmpty();
+		String[] components = new String[executions.size()];
+		boolean atLeastOne = !executions.isEmpty();
 
 		// Stop executions in reverse order (to avoid abruptly stopping
 		// components)
-		for (int i = this.executions.size() - 1; i >= 0; i--) {
-			ExecutionDescriptor descriptor = this.executions.remove(i);
+		for (int i = executions.size() - 1; i >= 0; i--) {
+			ExecutionDescriptor descriptor = executions.remove(i);
 
 			String criterion = descriptor.toCommandSearchString();
 			this.expect.sendLine(ShellUtils.killCommand(criterion));
@@ -217,15 +216,19 @@ public class SSHHandler extends Thread {
 		}
 
 		if (atLeastOne) {
-			int executions = this.executions.size();
-			String have = executions == 1 ? " has " : " have ";
-			String s = executions == 1 ? "" : "s";
+			int nExecutions = executions.size();
+			String have = nExecutions == 1 ? " has " : " have ";
+			String s = nExecutions == 1 ? "" : "s";
 
 			Log.info(this.host.toFixedString() + " " + ascii(10003) + " "
 					+ "Component" + s + " "
 					+ Strings.join(components, ", ", " and ") + have
 					+ "been stopped");
 		}
+	}
+
+	public void stopExecutions() throws IOException {
+		stopExecutions(this.executions);
 	}
 
 	public List<ExecutionDescriptor> executions() {
