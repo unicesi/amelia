@@ -52,6 +52,10 @@ public class Log {
 		return "\u001b[1;43m" + text + reset();
 	}
 	
+	private static String blue(String text) {
+		return "\u001b[1;34m" + text + reset();
+	}
+	
 	private static String cyan(String text) {
 		return "\u001b[1;36m" + text + reset();
 	}
@@ -59,5 +63,39 @@ public class Log {
 	private static String reset() {
 		return "\u001b[0m";
 	}
+	
+	private static String blink(String text) {
+		return "\u001B[5m" + text + reset();
+	}
+	
+	public static void printBanner() {
+		// From
+		// http://www.chris.com/ascii/index.php?art=transportation/airplanes
+		String e = Strings.ascii(233), c = Strings.ascii(169);
+		String banner = "\n" + "               __"
+				+ blue("/\\")
+				+ "__              .----------------------------------------. \n"
+				+ "              `=="
+				+ blue("/\\")
+				+ "==`             |                                        | \n"
+				+ "    " + red("____________") + blue("/") + red("__") + blue("\\")
+				+ red("____________")
+				+ "   |              A M E L I A               | \n" + "   "
+				+ red("/____________________________\\")
+				+ "  |                                        | \n" + "     "
+				+ red("__") + "||" + red("__") + "||" + red("__") + blue("/") + ".--."
+				+ blue("\\") + red("__") + "||" + red("__") + "||" + red("__")
+				+ "    | A deployment library by Miguel Jim" + e + "nez | \n"
+				+ "    " + red("/__") + "|" + red("___") + "|" + red("___") + "( "
+				+ blink(cyan("><")) + " )" + red("___") + "|" + red("___") + "|"
+				+ red("__\\") + "   |        " + c
+				+ " Universidad Icesi 2015        | \n" + "              _"
+				+ blue("/") + "`--`" + blue("\\")
+				+ "_             |                                        | \n"
+				+ "             (" + blue("/") + "------" + blue("\\")
+				+ ")            '----------------------------------------' \n";
 
+		System.out.printf("%s\n", banner);
+	}
+	
 }
