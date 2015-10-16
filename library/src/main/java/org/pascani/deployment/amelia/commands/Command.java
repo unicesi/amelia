@@ -32,7 +32,7 @@ import org.pascani.deployment.amelia.util.DependencyGraph;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 /**
- * @see DependencyGraph#addElement(CommandDescriptor, Host...)
+ * @see DependencyGraph#addDescriptor(CommandDescriptor, Host...)
  * @author Miguel Jiménez - Initial contribution and API
  */
 public abstract class Command<T> implements Callable<T> {

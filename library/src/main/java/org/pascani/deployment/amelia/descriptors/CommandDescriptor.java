@@ -27,7 +27,7 @@ import org.pascani.deployment.amelia.util.DependencyGraph;
 import org.pascani.deployment.amelia.util.Log;
 
 /**
- * @see DependencyGraph#addElement(CommandDescriptor, Host...)
+ * @see DependencyGraph#addDescriptor(CommandDescriptor, Host...)
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class CommandDescriptor extends Observable {
@@ -66,7 +66,7 @@ public class CommandDescriptor extends Observable {
 	}
 
 	public void fail(Host host) {
-		Log.error(host.toFixedString() + " " + failMessage());
+		Log.info(host.toFixedString() + " " + failMessage());
 	}
 
 	public String doneMessage() {
