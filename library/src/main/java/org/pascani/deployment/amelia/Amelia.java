@@ -54,9 +54,9 @@ public class Amelia {
 	 */
 	private static Map<String, Host> hosts = new Hashtable<String, Host>();
 
-	private static boolean aborting = false;
+	public static volatile boolean aborting = false;
 	
-	private static boolean shuttingDown = false;
+	public static volatile boolean shuttingDown = false;
 
 	/**
 	 * An uncaught exception handler
