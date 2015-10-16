@@ -65,14 +65,15 @@ public class DependencyGraph<T extends CommandDescriptor> extends HashMap<T, Lis
 		public void run() {
 			try {
 				this.doneSignal.await();
-				this.handler.executeCommand(this.command);
+				if (!Amelia.aborting) {
+					this.handler.executeCommand(this.command);
+					// Release this dependency
+					this.element.done(this.handler.host());
+					this.element.notifyObservers();
 
-				// Release this dependency
-				this.element.done(this.handler.host());
-				this.element.notifyObservers();
-
-				// Notify to main thread
-				this.mainDoneSignal.countDown();
+					// Notify to main thread
+					this.mainDoneSignal.countDown();
+				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
