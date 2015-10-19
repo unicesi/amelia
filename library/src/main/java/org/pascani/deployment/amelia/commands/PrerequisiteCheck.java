@@ -18,6 +18,8 @@
  */
 package org.pascani.deployment.amelia.commands;
 
+import static org.pascani.deployment.amelia.util.Strings.ascii;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +29,7 @@ import net.sf.expectit.matcher.Matchers;
 
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.descriptors.PrerequisitesDescriptor;
+import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 public class PrerequisiteCheck extends Command<Boolean> {
@@ -49,9 +52,11 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		expect.sendLine("frascati --help");
 		Result frascati = expect.expect(Matchers.regexp(prompt));
 
-		if (!frascati.getBefore().contains("Usage: frascati"))
+		if (!frascati.getBefore().contains("Usage: frascati")) {
+			Log.info(super.host.toFixedString() + " " + ascii(10007));
 			throw new RuntimeException(super.host
 					+ " does not have installed the FraSCAti middleware");
+		}
 
 		// Check the FraSCAti version
 		expect.sendLine("frascati --version");
@@ -61,10 +66,12 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		Matcher fmatcher = fpattern.matcher(frascatiVersion.getBefore());
 
 		if (fmatcher.find()
-				&& !fmatcher.group(1).equals(descriptor.frascatiVersion()))
+				&& !fmatcher.group(1).equals(descriptor.frascatiVersion())) {
+			Log.info(super.host.toFixedString() + " " + ascii(10007));
 			throw new RuntimeException("FraSCAti version in host " + super.host
 					+ " is " + fmatcher.group(1) + " instead of "
 					+ descriptor.frascatiVersion());
+		}
 
 		// Check the Java version
 		expect.sendLine("java -version");
@@ -74,10 +81,12 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		Matcher jmatcher = jpattern.matcher(javaVersion.getBefore());
 
 		if (jmatcher.find()
-				&& !jmatcher.group(1).equals(descriptor.javaVersion()))
+				&& !jmatcher.group(1).equals(descriptor.javaVersion())) {
+			Log.info(super.host.toFixedString() + " " + ascii(10007));
 			throw new RuntimeException("Java version in host " + super.host
 					+ " is " + jmatcher.group(1) + " instead of "
 					+ descriptor.javaVersion());
+		}
 
 		return ok;
 	}

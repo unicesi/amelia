@@ -88,8 +88,6 @@ public class Host {
 
 		if (this.ssh.isConnected())
 			Log.info("  " + ascii(10003) + " " + this);
-		else
-			Log.info("  " + ascii(10007) + " " + this);
 	}
 
 	public void closeSSHConnection() throws IOException {
@@ -102,8 +100,6 @@ public class Host {
 
 		if (this.ftp.client().isConnected())
 			Log.info("  " + ascii(10003) + " " + this);
-		else
-			Log.info("  " + ascii(10007) + " " + this);
 	}
 
 	public boolean closeFTPConnection() throws IOException {

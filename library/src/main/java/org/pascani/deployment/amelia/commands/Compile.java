@@ -19,10 +19,12 @@
 package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
+import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
+import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 import net.sf.expectit.Expect;
@@ -34,7 +36,7 @@ public class Compile extends Command<Boolean> {
 	}
 
 	public Boolean call() throws Exception {
-		
+
 		CompilationDescriptor descriptor = (CompilationDescriptor) super.descriptor;
 		Expect expect = this.host.ssh().expect();
 
@@ -45,9 +47,17 @@ public class Compile extends Command<Boolean> {
 		expect.sendLine(descriptor.toCommandString());
 		String compile = expect.expect(regexp(prompt)).getBefore();
 
-		if (compile.contains("No such file or directory"))
-			throw new DeploymentException("No such file or directory \""
-					+ descriptor.sourceDirectory() + "\"");
+		if (compile.contains("No such file or directory")) {
+			String message = "No such file or directory '" + descriptor.sourceDirectory() + "'";
+			
+			Log.info(super.host.toFixedString() + " " + ascii(10007) + " " + message);
+			throw new DeploymentException(message);
+		} else if (compile.contains("Permission denied")) {
+			String message = "Permission denied to access '" + descriptor.sourceDirectory() + "'";
+			
+			Log.info(super.host.toFixedString() + " " + ascii(10007) + " " + message);
+			throw new DeploymentException(message);
+		}
 
 		return true;
 	}
