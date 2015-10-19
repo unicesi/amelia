@@ -55,7 +55,7 @@ public class Amelia {
 	private static Map<String, Host> hosts = new Hashtable<String, Host>();
 
 	public static volatile boolean aborting = false;
-	
+
 	public static volatile boolean shuttingDown = false;
 
 	/**
@@ -68,15 +68,12 @@ public class Amelia {
 				// reported error
 				aborting = true;
 
-				String message = e
-						.getMessage()
-						.replace("java.util.concurrent.ExecutionException: ", "")
-						.replace("java.lang.RuntimeException: ", "")
-						.replace("org.pascani.deployment.amelia.DeploymentException: ", "");
+				String message = e.getMessage().replaceAll(
+						"^((\\w)+(\\.\\w+)+:\\s)*", "");
 
 				logger.error(message, e);
 				Log.error("Stopping deployment: " + message);
-				
+
 				Amelia.shutdown(true);
 			}
 		}
@@ -97,8 +94,8 @@ public class Amelia {
 	 */
 	public static void openFTPConnections(Host... _hosts)
 			throws InterruptedException {
-		Log.heading("Establishing FTP connections");
-		
+		Log.heading("Establishing FTP connections (" + _hosts.length + ")");
+
 		for (Host host : _hosts) {
 			host.openFTPConnection();
 
@@ -120,8 +117,8 @@ public class Amelia {
 	 */
 	public static void openSSHConnections(Host... _hosts)
 			throws InterruptedException {
-		Log.heading("Establishing SSH connections");
-		
+		Log.heading("Establishing SSH connections (" + _hosts.length + ")");
+
 		for (Host host : _hosts) {
 			host.openSSHConnection();
 
@@ -132,7 +129,7 @@ public class Amelia {
 					hostFixedWidth = host.toString().length();
 			}
 
-			if(host.ssh().isConnected())
+			if (host.ssh().isConnected())
 				logger.info("SSH connection for " + host
 						+ " was successfully established");
 		}
@@ -227,26 +224,29 @@ public class Amelia {
 
 	/**
 	 * Terminates the execution
+	 * 
+	 * TODO: wait until all threads have terminated their execution before doing
+	 * anything
 	 */
 	public static void shutdown(boolean stopExecutedComponents) {
-		if(!shuttingDown) {
+		if (!shuttingDown) {
 			// Prevent shutting down more than once
 			shuttingDown = true;
-			
+
 			Log.heading("Starting deployment shutdown");
 			try {
 				String[] _hosts = hosts.keySet().toArray(new String[0]);
-	
+
 				if (stopExecutedComponents)
 					stopExecutions(_hosts);
-	
+
 				closeFTPConnections(_hosts);
 				closeSSHConnections(_hosts);
-	
+
 			} catch (IOException e) {
 				Log.error("Deployment shutdown unsuccessful; see logs for more information");
 				Log.info("Shutting system down abruptly");
-	
+
 				logger.error(e);
 			} finally {
 				Log.heading("Deployment shutdown successful");
@@ -288,7 +288,7 @@ public class Amelia {
 					"amelia.properties");
 			if (input != null)
 				config.load(input);
-			
+
 		} catch (FileNotFoundException e) {
 			logger.warn("No configuration file was found. Execution is started with default values");
 		} catch (IOException e) {
@@ -297,13 +297,14 @@ public class Amelia {
 			String home = System.getProperty("user.home");
 
 			// Set defaults
-			if(!config.containsKey("identity"))
+			if (!config.containsKey("identity"))
 				config.put("identity", home + "/.ssh/id_rsa");
-			if(!config.containsKey("known_hosts"))
+			if (!config.containsKey("known_hosts"))
 				config.put("known_hosts", home + "/.ssh/known_hosts");
-			if(!config.containsKey("connection_timeout"))
-				config.put("connection_timeout", "10000"); // 10s. 0 for no timeout
-			if(!config.containsKey("execution_timeout"))
+			if (!config.containsKey("connection_timeout"))
+				config.put("connection_timeout", "10000"); // 10s. 0 for no
+															// timeout
+			if (!config.containsKey("execution_timeout"))
 				config.put("execution_timeout", "10000"); // 10s
 
 			if (input != null) {
