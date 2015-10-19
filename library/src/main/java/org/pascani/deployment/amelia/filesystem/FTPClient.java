@@ -77,6 +77,32 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 	}
 
 	/**
+	 * <b>Note</b>: returns false if the user does not have the permission to
+	 * access the directory.
+	 * 
+	 * @param pathname
+	 *            The path of the directory
+	 * @return whether or not the directory exists (supposing the user has the
+	 *         necessary permissions)
+	 * @throws IOException
+	 */
+	public boolean directoryExists(String pathname) throws IOException {
+		String workingDirectory = super.printWorkingDirectory();
+		boolean exists = changeWorkingDirectory(pathname);
+		int replyCode = getReplyCode();
+
+		// No such file or directory || Failed to change directory
+		if (replyCode == 550) {
+			exists = false;
+		}
+
+		// Return to working directory
+		changeWorkingDirectory(workingDirectory);
+
+		return exists;
+	}
+
+	/**
 	 * Removes a directory on the FTP server (with all of its contents)
 	 * 
 	 * @param pathname
@@ -135,15 +161,24 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 	 *            The pathname of the local file/directory to upload
 	 * @param remotePath
 	 *            The destination pathname of the remote file/directory
+	 * @param overwrite
+	 *            If the remote path is an existing directory, it will be
+	 *            overwritten if {@code overwrite} is {@code true}
 	 * @return whether the specified file was uploaded or not
 	 * @throws IOException
 	 *             If an I/O error occurs while either sending a command to the
 	 *             server or receiving a reply from the server
 	 */
-	public void upload(String localPath, String remotePath) throws IOException {
+	public void upload(String localPath, String remotePath, boolean overwrite)
+			throws IOException {
 
 		File file = new File(localPath);
 		boolean isDir = file.isDirectory();
+
+		// Unless an existing directory is removed, an IOException will be
+		// thrown
+		if (isDir && overwrite && directoryExists(remotePath))
+			removeDirectoryWithContents(remotePath);
 
 		// Makes sure the directories exists in the remote machine
 		makeDirectories(isDir ? remotePath : getPathParent(remotePath));
@@ -188,10 +223,13 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 					uploadFile(localFilePath, remoteFilePath);
 				} else {
 					// create directory on the server
-					if (!super.makeDirectory(remoteFilePath))
-						throw new IOException(
-								"Unable to create remote directory "
-										+ remoteFilePath);
+					if (!super.makeDirectory(remoteFilePath)) {
+						String existing = directoryExists(remoteFilePath) ? "existing "
+								: "";
+						throw new IOException("Unable to create the "
+								+ existing + "remote directory "
+								+ remoteFilePath);
+					}
 
 					uploadDirectory(localFilePath, remoteFilePath);
 				}

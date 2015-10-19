@@ -37,9 +37,11 @@ import org.pascani.deployment.amelia.util.Strings;
 
 public class AssetBundle extends CommandDescriptor {
 
-	private Map<String, List<String>> transfers;
-	
+	private final Map<String, List<String>> transfers;
+
 	private int currentPadding;
+
+	private boolean overwrite;
 
 	/**
 	 * The logger
@@ -47,22 +49,24 @@ public class AssetBundle extends CommandDescriptor {
 	private final static Logger logger = LogManager
 			.getLogger(AssetBundle.class);
 
-	public AssetBundle(Map<String, List<String>> transfers) {
+	public AssetBundle(Map<String, List<String>> transfers,
+			final boolean overwrite) {
 		super("put [...]", "Transfer completed", "Transfer failure");
 		this.transfers = transfers;
 		this.currentPadding = 0;
+		this.overwrite = overwrite;
 	}
 
 	public AssetBundle() {
-		this(new HashMap<String, List<String>>());
+		this(new HashMap<String, List<String>>(), true);
 	}
-	
+
 	public AssetBundle resolveVariables(Pair<String, String>... variables) {
 		Map<String, String> _variables = new HashMap<String, String>();
-		
-		for(Pair<String, String> variable : variables)
+
+		for (Pair<String, String> variable : variables)
 			_variables.put(variable.getKey(), variable.getValue());
-		
+
 		return resolveVariables(_variables);
 	}
 
@@ -134,17 +138,18 @@ public class AssetBundle extends CommandDescriptor {
 		this.transfers.get(local).add(remote);
 		return this;
 	}
-	
+
 	@Override
 	public void done(Host host) {
 		currentPadding = host.toString().length();
 		super.done(host);
 	}
-	
+
 	@Override
 	public String doneMessage() {
 		String message = ascii(10003) + " ";
-		message += successMessage == null ? toString(currentPadding + 4) : successMessage;
+		message += successMessage == null ? toString(currentPadding + 4)
+				: successMessage;
 
 		return message;
 	}
@@ -178,7 +183,7 @@ public class AssetBundle extends CommandDescriptor {
 	public Map<String, List<String>> transfers() {
 		return this.transfers;
 	}
-	
+
 	public String toString(int leftPadding) {
 		StringBuilder sb = new StringBuilder();
 
@@ -188,16 +193,18 @@ public class AssetBundle extends CommandDescriptor {
 
 		for (Map.Entry<String, List<String>> pair : this.transfers.entrySet()) {
 			String key = Strings.truncate(pair.getKey(), maxLength, maxLength);
-			
+
 			int c = i == 0 ? 0 : maxLength;
 			String left = i == 0 ? description : "";
 
 			String local = String.format("%" + (l + c) + "s", key);
-			String remotes = Strings.join(pair.getValue(),
-					String.format("%-" + (l + c + 5 + leftPadding) + "s", "\n"));
+			String remotes = Strings
+					.join(pair.getValue(),
+							String.format("%-" + (l + c + 5 + leftPadding)
+									+ "s", "\n"));
 
 			sb.append(String.format("%s%s -> %s", left, local, remotes) + "\n");
-			
+
 			i++;
 		}
 
@@ -208,6 +215,14 @@ public class AssetBundle extends CommandDescriptor {
 	@Override
 	public String toString() {
 		return toString(0);
+	}
+	
+	public void overwrite(boolean overwrite) {
+		this.overwrite = overwrite;
+	}
+	
+	public boolean overwrite() {
+		return this.overwrite;
 	}
 
 }
