@@ -113,10 +113,14 @@ public class SSHHandler extends Thread {
 		} catch (JSchException e) {
 			String message = "Error establishing SSH connection with "
 					+ this.host;
+
+			Log.info("  " + ascii(10007) + " " + this.host);
 			throw new RuntimeException(message, e);
 		} catch (IOException e) {
 			String message = "Error initializing SSH connection with "
 					+ this.host;
+
+			Log.info("  " + ascii(10007) + " " + this.host);
 			throw new RuntimeException(message, e);
 		}
 	}
@@ -210,29 +214,33 @@ public class SSHHandler extends Thread {
 		return result;
 	}
 
-	public void stopExecutions(List<ExecutionDescriptor> executions)
+	public int stopExecutions(List<ExecutionDescriptor> executions)
 			throws IOException {
 		String prompt = ShellUtils.ameliaPromptRegexp();
-		String[] components = new String[executions.size()];
-		boolean atLeastOne = !executions.isEmpty();
+		List<String> components = new ArrayList<String>();
 
 		// Stop executions in reverse order (to avoid abruptly stopping
 		// components)
 		for (int i = executions.size() - 1; i >= 0; i--) {
 			ExecutionDescriptor descriptor = executions.remove(i);
 
-			// TODO: Kill only components that are running
 			String criterion = descriptor.toCommandSearchString();
-			this.expect.sendLine(ShellUtils.killCommand(criterion));
-			this.expect.expect(regexp(prompt));
+			this.expect.sendLine(ShellUtils.runningCompositeName(criterion));
+			Result r = this.expect.expect(regexp(prompt));
 
-			components[i] = descriptor.compositeName();
-			logger.info("Execution of composite " + descriptor.compositeName()
-					+ " was successfully stopped in " + this.host);
+			if (r.getBefore().contains(descriptor.compositeName())) {
+				this.expect.sendLine(ShellUtils.killCommand(criterion));
+				this.expect.expect(regexp(prompt));
+
+				components.add(descriptor.compositeName());
+				logger.info("Execution of composite "
+						+ descriptor.compositeName()
+						+ " was successfully stopped in " + this.host);
+			}
 		}
 
-		if (atLeastOne) {
-			int nExecutions = executions.size();
+		if (!components.isEmpty()) {
+			int nExecutions = components.size();
 			String have = nExecutions == 1 ? " has " : " have ";
 			String s = nExecutions == 1 ? "" : "s";
 
@@ -241,6 +249,8 @@ public class SSHHandler extends Thread {
 					+ Strings.join(components, ", ", " and ") + have
 					+ "been stopped");
 		}
+
+		return components.size();
 	}
 
 	public void stopExecutions() throws IOException {

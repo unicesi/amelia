@@ -110,9 +110,9 @@ public class Host {
 		this.ssh.stopExecutions();
 	}
 
-	public void stopExecutions(List<ExecutionDescriptor> executions)
+	public int stopExecutions(List<ExecutionDescriptor> executions)
 			throws IOException {
-		this.ssh.stopExecutions(executions);
+		return this.ssh.stopExecutions(executions);
 	}
 
 	public static Host[] fromFile(String pathname) throws IOException {
