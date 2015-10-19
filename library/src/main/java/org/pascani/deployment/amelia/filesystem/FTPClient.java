@@ -31,11 +31,11 @@ import org.apache.commons.net.ftp.FTPFile;
  * class implements:
  * 
  * <ul>
- * <li>{@link #makeDirectory(String)}: allows to create several directories at
+ * <li>{@link #makeDirectories(String)}: allows to create several directories at
  * once. The remote path can be either a file or a directory.</li>
  * <li>{@link #upload(String, String)}: allows to upload either a file or a
  * directory. It automatically checks if the directories exist or not. In case
- * they do not, {@link #makeDirectory(String)} is called.</li>
+ * they do not, {@link #makeDirectories(String)} is called.</li>
  * </ul>
  * 
  * @author Miguel Jiménez - Initial contribution and API
@@ -52,17 +52,28 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 	 * @return whether the sub-directories were successfully created or not
 	 * @throws IOException
 	 */
-	public boolean makeDirectories(String pathname) throws IOException {
-		String s = remoteFileSeparator();
-		super.mlistDir(pathname);
+	public void makeDirectories(String pathname) throws IOException {
+		String workingDirectory = super.printWorkingDirectory();
+		internalMakeDirectories(pathname);
 
-		// No such file or directory || Unknown command (CentOS)
-		if ((getReplyCode() == 550 || getReplyCode() == 500) && pathname.contains(s)) {
+		// Return to working directory
+		super.changeWorkingDirectory(workingDirectory);
+	}
+
+	private void internalMakeDirectories(String pathname) throws IOException {
+		String s = remoteFileSeparator();
+		boolean cd = super.changeWorkingDirectory(pathname);
+
+		// No such file or directory || Failed to change directory
+		if (getReplyCode() == 550 && pathname.contains(s)) {
 			String parent = getPathParent(pathname);
 			makeDirectories(parent);
 		}
 
-		return super.makeDirectory(pathname);
+		if (!cd)
+			if (!super.makeDirectory(pathname))
+				throw new IOException("Unable to create remote directory "
+						+ pathname + ". Error is: " + super.getReplyString());
 	}
 
 	/**
@@ -73,35 +84,47 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean removeDirectoryWithContents(String pathname)
-			throws IOException {
+	public void removeDirectoryWithContents(String pathname) throws IOException {
+
+		// Show hidden files
+		boolean hiddenFiles = super.getListHiddenFiles();
+		super.setListHiddenFiles(true);
 
 		boolean removed = true;
 		String s = remoteFileSeparator();
 
 		// List the remote files
-		FTPFile[] files = mlistDir(pathname);
+		/*
+		 * FIXME: Does not work in Mac when hidden files are shown. It's always
+		 * returning an empty array
+		 */
+		FTPFile[] files = super.listFiles(pathname);
 
 		if (files.length == 0)
 			removed = super.removeDirectory(pathname);
 		else {
-			// Remove all of the contents. files[0] is the directory itself
-			for (int i = 1; i < files.length && removed; i++) {
+			// Remove all of the contents.
+			for (int i = 0; i < files.length && removed; i++) {
 				String name = files[i].getName();
 				if (name.equals(".") || name.equals(".."))
 					continue;
 
 				if (files[i].isDirectory())
-					removed = removeDirectoryWithContents(pathname + s + name);
-				else
-					removed = super.deleteFile(pathname + s + name);
+					removeDirectoryWithContents(pathname + s + name);
+				else if (!super.deleteFile(pathname + s + name))
+					throw new IOException("Unable to delete remote file "
+							+ pathname + s + name + ". Error is: "
+							+ super.getReplyString());
 			}
 
 			// Remove the directory
-			super.removeDirectory(pathname);
+			if (!super.removeDirectory(pathname))
+				throw new IOException("Unable to remove remote directory "
+						+ pathname + ". Error is: " + super.getReplyString());
 		}
 
-		return removed;
+		// Return to previous state
+		super.setListHiddenFiles(hiddenFiles);
 	}
 
 	/**
@@ -117,42 +140,38 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 	 *             If an I/O error occurs while either sending a command to the
 	 *             server or receiving a reply from the server
 	 */
-	public boolean upload(String localPath, String remotePath)
-			throws IOException {
+	public void upload(String localPath, String remotePath) throws IOException {
 
 		File file = new File(localPath);
 		boolean isDir = file.isDirectory();
-		boolean uploaded = true;
 
 		// Makes sure the directories exists in the remote machine
 		makeDirectories(isDir ? remotePath : getPathParent(remotePath));
-		
-		if (isDir)
-			uploaded = uploadDirectory(localPath, remotePath);
-		else
-			uploaded = uploadFile(localPath, remotePath);
 
-		return uploaded;
+		if (isDir)
+			uploadDirectory(localPath, remotePath);
+		else
+			uploadFile(localPath, remotePath);
 	}
 
-	private boolean uploadFile(String localPath, String remotePath)
+	private void uploadFile(String localPath, String remotePath)
 			throws IOException {
 
 		setFileType(FTP.BINARY_FILE_TYPE);
 
 		File localFile = new File(localPath);
 		InputStream stream = new FileInputStream(localFile);
-		boolean uploaded = storeFile(remotePath, stream);
+		if (!super.storeFile(remotePath, stream))
+			throw new IOException("Unable to upload local file " + localPath
+					+ ". Error is: " + getReplyString());
 
 		stream.close();
-		return uploaded;
 	}
 
-	private boolean uploadDirectory(String localPath, String remotePath)
+	private void uploadDirectory(String localPath, String remotePath)
 			throws IOException {
 
 		String separator = remoteFileSeparator();
-		boolean uploaded = true;
 
 		File localDirectory = new File(localPath);
 		File[] subFiles = localDirectory.listFiles();
@@ -166,23 +185,19 @@ public class FTPClient extends org.apache.commons.net.ftp.FTPClient {
 				String remoteFilePath = remotePath + file.getName();
 
 				if (file.isFile()) {
-					uploaded = uploadFile(localFilePath, remoteFilePath);
-					if (!uploaded)
-						break;
-
+					uploadFile(localFilePath, remoteFilePath);
 				} else {
 					// create directory on the server
-					boolean created = super.makeDirectory(remoteFilePath);
-					uploaded = created
-							&& uploadDirectory(localFilePath, remoteFilePath);
+					if (!super.makeDirectory(remoteFilePath))
+						throw new IOException(
+								"Unable to create remote directory "
+										+ remoteFilePath);
 
-					if (!uploaded)
-						break;
+					uploadDirectory(localFilePath, remoteFilePath);
 				}
 			}
 		}
 
-		return uploaded;
 	}
 
 	/**
