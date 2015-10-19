@@ -282,29 +282,29 @@ public class Amelia {
 	private static void readConfiguration() {
 		Properties config = new Properties();
 		InputStream input = null;
-		boolean ok = false;
 
 		try {
 			input = Amelia.class.getClassLoader().getResourceAsStream(
 					"amelia.properties");
-			if (input != null) {
+			if (input != null)
 				config.load(input);
-				ok = true;
-			}
+			
 		} catch (FileNotFoundException e) {
 			logger.warn("No configuration file was found. Execution is started with default values");
 		} catch (IOException e) {
 			logger.error("Error loading configuration file. Execution is started with default values");
 		} finally {
-			if (!ok) {
-				String home = System.getProperty("user.home");
+			String home = System.getProperty("user.home");
 
-				// Set defaults
+			// Set defaults
+			if(!config.containsKey("identity"))
 				config.put("identity", home + "/.ssh/id_rsa");
+			if(!config.containsKey("known_hosts"))
 				config.put("known_hosts", home + "/.ssh/known_hosts");
+			if(!config.containsKey("connection_timeout"))
 				config.put("connection_timeout", "10000"); // 10s. 0 for no timeout
+			if(!config.containsKey("execution_timeout"))
 				config.put("execution_timeout", "10000"); // 10s
-			}
 
 			if (input != null) {
 				try {
