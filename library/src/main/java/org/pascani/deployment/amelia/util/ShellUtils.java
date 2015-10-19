@@ -106,6 +106,23 @@ public class ShellUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * @param criterion
+	 *            A string to search the FraSCAti component in execution
+	 * @return a command to know whether or not the given component is running
+	 */
+	public static String runningCompositeName(String criterion) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("ps -ef ");
+		sb.append("| grep \"" + criterion + "\" ");
+		sb.append("| grep -v grep ");
+		sb.append("| awk '{ print $11 }' ");
+		sb.append("| head -1");
+
+		return sb.toString();
+	}
+
 	private static String searchPIDs(String criterion) {
 		StringBuilder sb = new StringBuilder();
 

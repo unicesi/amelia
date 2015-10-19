@@ -18,6 +18,8 @@
  */
 package org.pascani.deployment.amelia;
 
+import static org.pascani.deployment.amelia.util.Strings.ascii;
+
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Map;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.filesystem.FTPClient;
+import org.pascani.deployment.amelia.util.Log;
 
 /**
  * TODO
@@ -51,9 +54,13 @@ public class FTPHandler extends Thread {
 			connect();
 		} catch (SocketException e) {
 			String message = "Error establishing FTP connection for " + this.host;
+			
+			Log.info("  " + ascii(10007) + " " + this.host);
 			throw new RuntimeException(message, e);
 		} catch (IOException e) {
 			String message = "Error establishing FTP connection for " + this.host;
+			
+			Log.info("  " + ascii(10007) + " " + this.host);
 			throw new RuntimeException(message, e);
 		}
 	}
