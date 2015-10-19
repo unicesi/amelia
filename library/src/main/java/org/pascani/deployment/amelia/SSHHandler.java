@@ -111,10 +111,12 @@ public class SSHHandler extends Thread {
 			this.taskQueue.start();
 
 		} catch (JSchException e) {
-			String message = "Error establishing SSH connection with " + this.host;
+			String message = "Error establishing SSH connection with "
+					+ this.host;
 			throw new RuntimeException(message, e);
 		} catch (IOException e) {
-			String message = "Error initializing SSH connection with " + this.host;
+			String message = "Error initializing SSH connection with "
+					+ this.host;
 			throw new RuntimeException(message, e);
 		}
 	}
@@ -122,8 +124,20 @@ public class SSHHandler extends Thread {
 	private void connect() throws JSchException, IOException {
 		JSch jsch = new JSch();
 
-		jsch.addIdentity(Amelia.getConfigurationEntry("identity"));
-		jsch.setKnownHosts(Amelia.getConfigurationEntry("known_hosts"));
+		String identity = Amelia.getConfigurationEntry("identity");
+		String knownHosts = Amelia.getConfigurationEntry("known_hosts");
+
+		if (new File(identity).exists())
+			jsch.addIdentity(identity);
+		else
+			logger.warn("Identity file '" + identity
+					+ "' not found. Execution will continue without it");
+
+		if (new File(knownHosts).exists())
+			jsch.setKnownHosts(knownHosts);
+		else
+			logger.warn("Known hosts file '" + knownHosts
+					+ "' not found. Execution will continue without it");
 
 		this.session = jsch.getSession(this.host.username(),
 				this.host.hostname(), this.host.sshPort());
@@ -195,8 +209,9 @@ public class SSHHandler extends Thread {
 
 		return result;
 	}
-	
-	public void stopExecutions(List<ExecutionDescriptor> executions) throws IOException {
+
+	public void stopExecutions(List<ExecutionDescriptor> executions)
+			throws IOException {
 		String prompt = ShellUtils.ameliaPromptRegexp();
 		String[] components = new String[executions.size()];
 		boolean atLeastOne = !executions.isEmpty();
@@ -206,6 +221,7 @@ public class SSHHandler extends Thread {
 		for (int i = executions.size() - 1; i >= 0; i--) {
 			ExecutionDescriptor descriptor = executions.remove(i);
 
+			// TODO: Kill only components that are running
 			String criterion = descriptor.toCommandSearchString();
 			this.expect.sendLine(ShellUtils.killCommand(criterion));
 			this.expect.expect(regexp(prompt));
