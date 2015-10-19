@@ -74,17 +74,15 @@ public class FTPHandler extends Thread {
 			return false;
 	}
 
-	public boolean upload(AssetBundle bundle) throws IOException {
-		boolean uploaded = true;
+	public void upload(AssetBundle bundle) throws IOException {
 
 		for (Map.Entry<String, List<String>> pair : bundle.transfers()
 				.entrySet()) {
 			for (String remote : pair.getValue()) {
-				uploaded &= this.client.upload(pair.getKey(), remote);
+				this.client.upload(pair.getKey(), remote);
 			}
 		}
 
-		return uploaded;
 	}
 	
 	public Host host() {

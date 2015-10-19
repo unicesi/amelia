@@ -21,15 +21,16 @@ package org.pascani.deployment.amelia.commands;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
 
-public class Transfer extends Command<Boolean> {
+public class Transfer extends Command<Void> {
 
 	public Transfer(final Host host, final AssetBundle bundle) {
 		super(host, bundle);
 	}
 
 	@Override
-	public Boolean call() throws Exception {
-		return super.host.ftp().upload((AssetBundle) super.descriptor);
+	public Void call() throws Exception {
+		super.host.ftp().upload((AssetBundle) super.descriptor);
+		return null;
 	}
 
 }
