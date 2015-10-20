@@ -51,7 +51,7 @@ public class AssetBundle extends CommandDescriptor {
 
 	public AssetBundle(Map<String, List<String>> transfers,
 			final boolean overwrite) {
-		super("put [...]", "Transfer completed", "Transfer failure");
+		super("put [...]", null, null);
 		this.transfers = transfers;
 		this.currentPadding = 0;
 		this.overwrite = overwrite;
@@ -146,11 +146,27 @@ public class AssetBundle extends CommandDescriptor {
 	}
 
 	@Override
+	public void fail(Host host) {
+		currentPadding = host.toString().length();
+		super.fail(host);
+	}
+
+	@Override
 	public String doneMessage() {
 		String message = ascii(10003) + " ";
 		// 5 = __<identifier>_✓_
 		message += successMessage == null ? toString(currentPadding + 5)
 				: successMessage;
+
+		return message;
+	}
+
+	@Override
+	public String failMessage() {
+		String message = ascii(10007) + " ";
+		// 5 = __<identifier>_✗_
+		message += errorMessage == null ? toString(currentPadding + 5)
+				: errorMessage;
 
 		return message;
 	}

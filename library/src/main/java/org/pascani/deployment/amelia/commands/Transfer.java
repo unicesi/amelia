@@ -18,11 +18,8 @@
  */
 package org.pascani.deployment.amelia.commands;
 
-import static org.pascani.deployment.amelia.util.Strings.ascii;
-
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.util.Log;
 
 public class Transfer extends Command<Void> {
 
@@ -33,12 +30,12 @@ public class Transfer extends Command<Void> {
 	@Override
 	public Void call() throws Exception {
 
+		AssetBundle descriptor = (AssetBundle) super.descriptor;
+		
 		try {
-			AssetBundle descriptor = (AssetBundle) super.descriptor;
 			super.host.ftp().upload(descriptor);
 		} catch (Exception e) {
-			Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
-					+ descriptor);
+			descriptor.fail(super.host);
 			throw e;
 		}
 
