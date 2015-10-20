@@ -34,12 +34,14 @@ import java.util.concurrent.CountDownLatch;
 
 import org.pascani.deployment.amelia.Amelia;
 import org.pascani.deployment.amelia.SSHHandler;
+import org.pascani.deployment.amelia.commands.Cd;
 import org.pascani.deployment.amelia.commands.Command;
 import org.pascani.deployment.amelia.commands.Compile;
 import org.pascani.deployment.amelia.commands.PrerequisiteCheck;
 import org.pascani.deployment.amelia.commands.Run;
 import org.pascani.deployment.amelia.commands.Transfer;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
+import org.pascani.deployment.amelia.descriptors.ChangeDirectory;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Compilation;
 import org.pascani.deployment.amelia.descriptors.Execution;
@@ -124,6 +126,8 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 				task = new Transfer(host, (AssetBundle) a);
 			else if (a instanceof Prerequisites)
 				task = new PrerequisiteCheck(host, (Prerequisites) a);
+			else if (a instanceof ChangeDirectory)
+				task = new Cd(host, (ChangeDirectory) a);
 			else
 				task = new Command.Simple(host, a);
 
