@@ -48,16 +48,24 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		Prerequisites descriptor = (Prerequisites) super.descriptor;
 		Expect expect = host.ssh().expect();
 
-		// TODO: Check environment variables
+		// Check environment variables
+		expect.sendLine("echo $FRASCATI_HOME");
+		Result frascatiHome = expect.expect(Matchers.regexp(prompt));
+		
+		if(frascatiHome.getBefore().trim().isEmpty()) {
+			String message = "Environment variable FRASCATI_HOME not found";
+			Log.info(super.host.toFixedString() + " " + ascii(9888) + " " + message);
+			throw new RuntimeException(message + " in host " + host);
+		}
 
 		// Check Java and FraSCAti are installed
 		expect.sendLine("frascati --help");
 		Result frascati = expect.expect(Matchers.regexp(prompt));
 
 		if (!frascati.getBefore().contains("Usage: frascati")) {
-			Log.info(super.host.toFixedString() + " " + ascii(10007));
-			throw new RuntimeException(host
-					+ " does not have installed the FraSCAti middleware");
+			String message = "FraSCAti not found";
+			Log.info(super.host.toFixedString() + " " + ascii(10007) + " " + message);
+			throw new RuntimeException(message + " in host " + host);
 		}
 
 		// Check the FraSCAti version
