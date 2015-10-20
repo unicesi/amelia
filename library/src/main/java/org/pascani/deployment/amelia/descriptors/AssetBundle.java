@@ -187,30 +187,32 @@ public class AssetBundle extends CommandDescriptor {
 
 	public String toString(int _padding) {
 		StringBuilder sb = new StringBuilder();
-		String padding = String.format("%" + _padding + "s", "File transfer");
+		String padding = String.format("%" + (_padding > 0 ? _padding : "")
+				+ "s", "File transfer");
 		_padding = _padding + 13; // "File transfer".length
 		boolean firstKey = true;
-		
-		for(String key : transfers.keySet()) {
-			if(!firstKey)
+
+		for (String key : transfers.keySet()) {
+			if (!firstKey)
 				padding = String.format("%" + _padding + "s", "");
-			
+
 			String _key = Strings.truncate(key, 20, 20);
 			sb.append(padding + " " + _key);
 			boolean firstValue = true;
-			
-			for(String value : transfers.get(key)) {
-				String initial = String.format("%-" + _key.length() + "s", "") + padding;
-				if(firstValue)
+
+			for (String value : transfers.get(key)) {
+				String initial = String.format("%-" + _key.length() + "s", "")
+						+ padding;
+				if (firstValue)
 					initial = "";
-				
+
 				sb.append(initial + " -> " + value + "\n");
 				firstValue = false;
 			}
-			
+
 			firstKey = false;
 		}
-		
+
 		sb.deleteCharAt(sb.length() - 1); // remove last line break
 		return sb.toString();
 	}
@@ -219,11 +221,11 @@ public class AssetBundle extends CommandDescriptor {
 	public String toString() {
 		return toString(0);
 	}
-	
+
 	public void overwrite(boolean overwrite) {
 		this.overwrite = overwrite;
 	}
-	
+
 	public boolean overwrite() {
 		return this.overwrite;
 	}
