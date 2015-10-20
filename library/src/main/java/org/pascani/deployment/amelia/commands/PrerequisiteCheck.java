@@ -47,6 +47,8 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 		PrerequisitesDescriptor descriptor = (PrerequisitesDescriptor) super.descriptor;
 		Expect expect = super.host.ssh().expect();
+		
+		// TODO: Check environment variables
 
 		// Check Java and FraSCAti are installed
 		expect.sendLine("frascati --help");
