@@ -50,10 +50,7 @@ public class Compile extends Command<Boolean> {
 
 		String[] _404 = { "No existe el fichero o el directorio",
 				"No such file or directory" };
-		String[] _denied = {
-				"Permission denied",
-				"Permiso denegado"
-		};
+		String[] _denied = { "Permission denied", "Permiso denegado" };
 
 		if (Strings.containsAnyOf(compile, _404)) {
 			String message = "No such file or directory '"
