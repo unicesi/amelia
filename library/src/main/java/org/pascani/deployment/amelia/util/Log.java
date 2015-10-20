@@ -49,7 +49,7 @@ public class Log {
 	}
 	
 	private static String yellow(String text) {
-		return "\u001b[1;43m" + text + reset();
+		return "\u001b[1;33m" + text + reset();
 	}
 	
 	private static String blue(String text) {
