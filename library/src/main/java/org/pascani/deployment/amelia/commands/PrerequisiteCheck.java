@@ -42,12 +42,12 @@ public class PrerequisiteCheck extends Command<Boolean> {
 	public Boolean call() throws Exception {
 
 		boolean ok = true;
-
+		Host host = super.host;
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
 		Prerequisites descriptor = (Prerequisites) super.descriptor;
-		Expect expect = super.host.ssh().expect();
-		
+		Expect expect = host.ssh().expect();
+
 		// TODO: Check environment variables
 
 		// Check Java and FraSCAti are installed
@@ -56,7 +56,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 		if (!frascati.getBefore().contains("Usage: frascati")) {
 			Log.info(super.host.toFixedString() + " " + ascii(10007));
-			throw new RuntimeException(super.host
+			throw new RuntimeException(host
 					+ " does not have installed the FraSCAti middleware");
 		}
 
@@ -64,15 +64,18 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		expect.sendLine("frascati --version");
 		Result frascatiVersion = expect.expect(Matchers.regexp(prompt));
 
-		Pattern fpattern = Pattern.compile("OW2 FraSCAti version (([0-9]|\\.)*)");
+		Pattern fpattern = Pattern
+				.compile("OW2 FraSCAti version (([0-9]|\\.)*)");
 		Matcher fmatcher = fpattern.matcher(frascatiVersion.getBefore());
 
 		if (fmatcher.find()
 				&& !fmatcher.group(1).equals(descriptor.frascatiVersion())) {
-			Log.info(super.host.toFixedString() + " " + ascii(10007));
-			throw new RuntimeException("FraSCAti version in host " + super.host
-					+ " is " + fmatcher.group(1) + " instead of "
-					+ descriptor.frascatiVersion());
+
+			String message = "FraSCAti version is " + fmatcher.group(1)
+					+ " instead of " + descriptor.frascatiVersion();
+
+			Log.info(host.toFixedString() + " " + ascii(10007) + " " + message);
+			throw new RuntimeException(message + " in host " + host);
 		}
 
 		// Check the Java version
@@ -84,10 +87,12 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 		if (jmatcher.find()
 				&& !jmatcher.group(1).equals(descriptor.javaVersion())) {
-			Log.info(super.host.toFixedString() + " " + ascii(10007));
-			throw new RuntimeException("Java version in host " + super.host
-					+ " is " + jmatcher.group(1) + " instead of "
-					+ descriptor.javaVersion());
+
+			String message = "Java version is " + jmatcher.group(1)
+					+ " instead of " + descriptor.javaVersion();
+
+			Log.info(host.toFixedString() + " " + ascii(10007) + " " + message);
+			throw new RuntimeException(message + " in host " + host);
 		}
 
 		return ok;
