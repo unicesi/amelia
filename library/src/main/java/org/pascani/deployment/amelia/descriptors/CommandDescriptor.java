@@ -23,11 +23,11 @@ import static org.pascani.deployment.amelia.util.Strings.ascii;
 import java.util.Observable;
 import java.util.UUID;
 
-import org.pascani.deployment.amelia.util.DependencyGraph;
+import org.pascani.deployment.amelia.commands.CommandFactory;
 import org.pascani.deployment.amelia.util.Log;
 
 /**
- * @see DependencyGraph#addDescriptor(CommandDescriptor, Host...)
+ * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class CommandDescriptor extends Observable {

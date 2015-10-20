@@ -28,11 +28,10 @@ import net.sf.expectit.Expect;
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.util.DependencyGraph;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 /**
- * @see DependencyGraph#addDescriptor(CommandDescriptor, Host...)
+ * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
 public abstract class Command<T> implements Callable<T> {

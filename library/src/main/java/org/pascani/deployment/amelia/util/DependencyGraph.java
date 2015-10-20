@@ -34,19 +34,11 @@ import java.util.concurrent.CountDownLatch;
 
 import org.pascani.deployment.amelia.Amelia;
 import org.pascani.deployment.amelia.SSHHandler;
-import org.pascani.deployment.amelia.commands.Cd;
 import org.pascani.deployment.amelia.commands.Command;
-import org.pascani.deployment.amelia.commands.Compile;
-import org.pascani.deployment.amelia.commands.PrerequisiteCheck;
-import org.pascani.deployment.amelia.commands.Run;
-import org.pascani.deployment.amelia.commands.Transfer;
-import org.pascani.deployment.amelia.descriptors.AssetBundle;
-import org.pascani.deployment.amelia.descriptors.ChangeDirectory;
+import org.pascani.deployment.amelia.commands.CommandFactory;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
-import org.pascani.deployment.amelia.descriptors.Compilation;
 import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.descriptors.Prerequisites;
 
 public class DependencyGraph<T extends CommandDescriptor> extends
 		HashMap<T, List<T>> {
@@ -115,22 +107,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 
 		// Add a executable task per host
 		for (Host host : hosts) {
-			Command<?> task = null;
-
-			// TODO: Create a Factory
-			if (a instanceof Compilation)
-				task = new Compile(host, (Compilation) a);
-			else if (a instanceof Execution)
-				task = new Run(host, (Execution) a);
-			else if (a instanceof AssetBundle)
-				task = new Transfer(host, (AssetBundle) a);
-			else if (a instanceof Prerequisites)
-				task = new PrerequisiteCheck(host, (Prerequisites) a);
-			else if (a instanceof ChangeDirectory)
-				task = new Cd(host, (ChangeDirectory) a);
-			else
-				task = new Command.Simple(host, a);
-
+			Command<?> task = CommandFactory.getInstance().getCommand(host, a);
 			this.tasks.get(a).add(task);
 		}
 	}
@@ -215,10 +192,10 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 
 			stopped += host.stopExecutions(executions);
 		}
-		
-		if(stopped == 0)
+
+		if (stopped == 0)
 			Log.info("  " + ascii(10003) + " 0 components were running");
-			
+
 	}
 
 	private int countDependencyThreads(List<T> dependencies,
