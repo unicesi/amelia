@@ -305,7 +305,7 @@ public class Amelia {
 				config.put("connection_timeout", "10000"); // 10s. 0 for no
 															// timeout
 			if (!config.containsKey("execution_timeout"))
-				config.put("execution_timeout", "10000"); // 10s
+				config.put("execution_timeout", "15000"); // 15s
 
 			if (input != null) {
 				try {
