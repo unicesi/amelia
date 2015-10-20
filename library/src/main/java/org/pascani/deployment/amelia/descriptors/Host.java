@@ -110,7 +110,7 @@ public class Host {
 		this.ssh.stopExecutions();
 	}
 
-	public int stopExecutions(List<ExecutionDescriptor> executions)
+	public int stopExecutions(List<Execution> executions)
 			throws IOException {
 		return this.ssh.stopExecutions(executions);
 	}

@@ -34,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.commands.Command;
 import org.pascani.deployment.amelia.commands.Run;
-import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
+import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.AuthenticationUserInfo;
 import org.pascani.deployment.amelia.util.Log;
@@ -73,7 +73,7 @@ public class SSHHandler extends Thread {
 
 	private File output;
 
-	private final List<ExecutionDescriptor> executions;
+	private final List<Execution> executions;
 
 	private final SingleThreadTaskQueue taskQueue;
 
@@ -92,7 +92,7 @@ public class SSHHandler extends Thread {
 
 		this.connectionTimeout = Integer.parseInt(_connectionTimeout);
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
-		this.executions = new ArrayList<ExecutionDescriptor>();
+		this.executions = new ArrayList<Execution>();
 		this.taskQueue = new SingleThreadTaskQueue();
 
 		// Handle uncaught exceptions
@@ -206,7 +206,7 @@ public class SSHHandler extends Thread {
 
 		if (command instanceof Run) {
 			Run run = (Run) command;
-			ExecutionDescriptor descriptor = (ExecutionDescriptor) run
+			Execution descriptor = (Execution) run
 					.descriptor();
 			this.executions.add(descriptor);
 		}
@@ -214,7 +214,7 @@ public class SSHHandler extends Thread {
 		return result;
 	}
 
-	public int stopExecutions(List<ExecutionDescriptor> executions)
+	public int stopExecutions(List<Execution> executions)
 			throws IOException {
 		String prompt = ShellUtils.ameliaPromptRegexp();
 		List<String> components = new ArrayList<String>();
@@ -222,7 +222,7 @@ public class SSHHandler extends Thread {
 		// Stop executions in reverse order (to avoid abruptly stopping
 		// components)
 		for (int i = executions.size() - 1; i >= 0; i--) {
-			ExecutionDescriptor descriptor = executions.remove(i);
+			Execution descriptor = executions.remove(i);
 
 			String criterion = descriptor.toCommandSearchString();
 			this.expect.sendLine(ShellUtils.runningCompositeName(criterion));
@@ -257,7 +257,7 @@ public class SSHHandler extends Thread {
 		stopExecutions(this.executions);
 	}
 
-	public List<ExecutionDescriptor> executions() {
+	public List<Execution> executions() {
 		return this.executions;
 	}
 

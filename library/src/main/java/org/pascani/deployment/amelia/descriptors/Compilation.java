@@ -20,7 +20,7 @@ package org.pascani.deployment.amelia.descriptors;
 
 import org.pascani.deployment.amelia.util.Strings;
 
-public class CompilationDescriptor extends CommandDescriptor {
+public class Compilation extends CommandDescriptor {
 
 	private final String sourceDirectory;
 
@@ -28,7 +28,7 @@ public class CompilationDescriptor extends CommandDescriptor {
 
 	private final String[] classpath;
 
-	public CompilationDescriptor(final String sourceDirectory,
+	public Compilation(final String sourceDirectory,
 			final String outputFile, final String... classpath) {
 		super(null, null, null, outputFile + ".jar has been generated");
 		this.sourceDirectory = sourceDirectory;

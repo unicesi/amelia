@@ -28,13 +28,13 @@ import net.sf.expectit.Result;
 import net.sf.expectit.matcher.Matchers;
 
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.descriptors.PrerequisitesDescriptor;
+import org.pascani.deployment.amelia.descriptors.Prerequisites;
 import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 public class PrerequisiteCheck extends Command<Boolean> {
 
-	public PrerequisiteCheck(Host host, PrerequisitesDescriptor descriptor) {
+	public PrerequisiteCheck(Host host, Prerequisites descriptor) {
 		super(host, descriptor);
 	}
 
@@ -45,7 +45,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
-		PrerequisitesDescriptor descriptor = (PrerequisitesDescriptor) super.descriptor;
+		Prerequisites descriptor = (Prerequisites) super.descriptor;
 		Expect expect = super.host.ssh().expect();
 		
 		// TODO: Check environment variables

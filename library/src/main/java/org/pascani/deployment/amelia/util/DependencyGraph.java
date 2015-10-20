@@ -41,10 +41,10 @@ import org.pascani.deployment.amelia.commands.Run;
 import org.pascani.deployment.amelia.commands.Transfer;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
-import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
-import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
+import org.pascani.deployment.amelia.descriptors.Compilation;
+import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.descriptors.PrerequisitesDescriptor;
+import org.pascani.deployment.amelia.descriptors.Prerequisites;
 
 public class DependencyGraph<T extends CommandDescriptor> extends
 		HashMap<T, List<T>> {
@@ -116,14 +116,14 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 			Command<?> task = null;
 
 			// TODO: Create a Factory
-			if (a instanceof CompilationDescriptor)
-				task = new Compile(host, (CompilationDescriptor) a);
-			else if (a instanceof ExecutionDescriptor)
-				task = new Run(host, (ExecutionDescriptor) a);
+			if (a instanceof Compilation)
+				task = new Compile(host, (Compilation) a);
+			else if (a instanceof Execution)
+				task = new Run(host, (Execution) a);
 			else if (a instanceof AssetBundle)
 				task = new Transfer(host, (AssetBundle) a);
-			else if (a instanceof PrerequisitesDescriptor)
-				task = new PrerequisiteCheck(host, (PrerequisitesDescriptor) a);
+			else if (a instanceof Prerequisites)
+				task = new PrerequisiteCheck(host, (Prerequisites) a);
 			else
 				task = new Command.Simple(host, a);
 
@@ -189,24 +189,24 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		Log.heading("Stopping previous executions");
 		int stopped = 0;
 
-		Map<Host, List<ExecutionDescriptor>> executionsPerHost = new HashMap<Host, List<ExecutionDescriptor>>();
+		Map<Host, List<Execution>> executionsPerHost = new HashMap<Host, List<Execution>>();
 
 		for (T descriptor : this.tasks.keySet()) {
-			if (descriptor instanceof ExecutionDescriptor) {
+			if (descriptor instanceof Execution) {
 				List<Command<?>> commands = this.tasks.get(descriptor);
 				for (Command<?> command : commands) {
 					if (!executionsPerHost.containsKey(command.host()))
 						executionsPerHost.put(command.host(),
-								new ArrayList<ExecutionDescriptor>());
+								new ArrayList<Execution>());
 
 					executionsPerHost.get(command.host()).add(
-							(ExecutionDescriptor) descriptor);
+							(Execution) descriptor);
 				}
 			}
 		}
 
 		for (Host host : executionsPerHost.keySet()) {
-			List<ExecutionDescriptor> executions = new ArrayList<ExecutionDescriptor>();
+			List<Execution> executions = new ArrayList<Execution>();
 			executions.addAll(executionsPerHost.get(host));
 
 			stopped += host.stopExecutions(executions);

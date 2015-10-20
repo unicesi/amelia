@@ -27,21 +27,21 @@ import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectIOException;
 
 import org.pascani.deployment.amelia.DeploymentException;
-import org.pascani.deployment.amelia.descriptors.ExecutionDescriptor;
+import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 public class Run extends Command<Integer> implements Callable<Integer> {
 
-	public Run(final Host host, final ExecutionDescriptor descriptor) {
+	public Run(final Host host, final Execution descriptor) {
 		super(host, descriptor);
 	}
 
 	public Integer call() throws Exception {
 
 		int PID = -1;
-		ExecutionDescriptor descriptor = (ExecutionDescriptor) super.descriptor;
+		Execution descriptor = (Execution) super.descriptor;
 		Expect expect = this.host.ssh().expect();
 
 		// Send the run command

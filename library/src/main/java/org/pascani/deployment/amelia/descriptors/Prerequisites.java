@@ -1,16 +1,16 @@
 package org.pascani.deployment.amelia.descriptors;
 
-public class PrerequisitesDescriptor extends CommandDescriptor {
+public class Prerequisites extends CommandDescriptor {
 	
 	private final String javaVersion;
 	
 	private final String frascatiVersion;
 	
-	public PrerequisitesDescriptor() {
+	public Prerequisites() {
 		this("1.6.0_23", "1.4");
 	}
 	
-	public PrerequisitesDescriptor(final String javaVersion, final String frascatiVersion) {
+	public Prerequisites(final String javaVersion, final String frascatiVersion) {
 		super("", "", "Dissatisfied prerequisites", "Prerequisites satisfied");
 		this.javaVersion = javaVersion;
 		this.frascatiVersion = frascatiVersion;

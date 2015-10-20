@@ -20,7 +20,7 @@ package org.pascani.deployment.amelia.descriptors;
 
 import org.pascani.deployment.amelia.util.Strings;
 
-public class ExecutionDescriptor extends CommandDescriptor {
+public class Execution extends CommandDescriptor {
 
 	private final String compositeName;
 
@@ -32,14 +32,14 @@ public class ExecutionDescriptor extends CommandDescriptor {
 
 	private String[] arguments;
 
-	public ExecutionDescriptor(final String compositeName,
+	public Execution(final String compositeName,
 			final String[] libpath) {
 		super(null, null, null, compositeName + " has started");
 		this.compositeName = compositeName;
 		this.libpath = libpath;
 	}
 
-	public ExecutionDescriptor(final String compositeName,
+	public Execution(final String compositeName,
 			final String[] libpath, final String serviceName,
 			final String methodName) {
 
@@ -48,7 +48,7 @@ public class ExecutionDescriptor extends CommandDescriptor {
 		this.methodName = methodName;
 	}
 
-	public ExecutionDescriptor(final String compositeName,
+	public Execution(final String compositeName,
 			final String[] libpath, final String serviceName,
 			final String methodName, final String[] arguments) {
 

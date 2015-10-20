@@ -22,7 +22,7 @@ import static net.sf.expectit.matcher.Matchers.regexp;
 import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import org.pascani.deployment.amelia.DeploymentException;
-import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
+import org.pascani.deployment.amelia.descriptors.Compilation;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
@@ -32,13 +32,13 @@ import net.sf.expectit.Expect;
 
 public class Compile extends Command<Boolean> {
 
-	public Compile(final Host host, final CompilationDescriptor descriptor) {
+	public Compile(final Host host, final Compilation descriptor) {
 		super(host, descriptor);
 	}
 
 	public Boolean call() throws Exception {
 
-		CompilationDescriptor descriptor = (CompilationDescriptor) super.descriptor;
+		Compilation descriptor = (Compilation) super.descriptor;
 		Expect expect = this.host.ssh().expect();
 
 		// The Amelia prompt
