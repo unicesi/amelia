@@ -26,6 +26,7 @@ import org.pascani.deployment.amelia.descriptors.CompilationDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
+import org.pascani.deployment.amelia.util.Strings;
 
 import net.sf.expectit.Expect;
 
@@ -47,15 +48,26 @@ public class Compile extends Command<Boolean> {
 		expect.sendLine(descriptor.toCommandString());
 		String compile = expect.expect(regexp(prompt)).getBefore();
 
-		if (compile.contains("No such file or directory")) {
-			String message = "No such file or directory '" + descriptor.sourceDirectory() + "'";
-			
-			Log.info(super.host.toFixedString() + " " + ascii(10007) + " " + message);
+		String[] _404 = { "No existe el fichero o el directorio",
+				"No such file or directory" };
+		String[] _denied = {
+				"Permission denied",
+				"Permiso denegado"
+		};
+
+		if (Strings.containsAnyOf(compile, _404)) {
+			String message = "No such file or directory '"
+					+ descriptor.sourceDirectory() + "'";
+
+			Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
+					+ message);
 			throw new DeploymentException(message);
-		} else if (compile.contains("Permission denied")) {
-			String message = "Permission denied to access '" + descriptor.sourceDirectory() + "'";
-			
-			Log.info(super.host.toFixedString() + " " + ascii(10007) + " " + message);
+		} else if (Strings.containsAnyOf(compile, _denied)) {
+			String message = "Permission denied to access '"
+					+ descriptor.sourceDirectory() + "'";
+
+			Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
+					+ message);
 			throw new DeploymentException(message);
 		}
 
