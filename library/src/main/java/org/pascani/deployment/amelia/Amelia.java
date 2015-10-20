@@ -273,7 +273,6 @@ public class Amelia {
 	}
 
 	/**
-	 * TODO: When only some of the properties are set, the rest will be null.
 	 * Instead of setting the default values when the file is not found, set
 	 * variables for each variable when it is null.
 	 * 
