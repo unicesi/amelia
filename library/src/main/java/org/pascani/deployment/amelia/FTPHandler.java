@@ -81,7 +81,7 @@ public class FTPHandler extends Thread {
 			return false;
 	}
 
-	public void upload(AssetBundle bundle) throws IOException {
+	public synchronized void upload(AssetBundle bundle) throws IOException {
 
 		for (Map.Entry<String, List<String>> pair : bundle.transfers()
 				.entrySet()) {
