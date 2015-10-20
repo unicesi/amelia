@@ -55,7 +55,6 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		if(frascatiHome.getBefore().trim().isEmpty()) {
 			String message = "Environment variable FRASCATI_HOME not found";
 			Log.info(super.host.toFixedString() + " " + ascii(9888) + " " + message);
-			throw new RuntimeException(message + " in host " + host);
 		}
 
 		// Check Java and FraSCAti are installed
