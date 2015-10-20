@@ -148,7 +148,8 @@ public class AssetBundle extends CommandDescriptor {
 	@Override
 	public String doneMessage() {
 		String message = ascii(10003) + " ";
-		message += successMessage == null ? toString(currentPadding + 4)
+		// 5 = __<identifier>_✓_
+		message += successMessage == null ? toString(currentPadding + 5)
 				: successMessage;
 
 		return message;
@@ -184,30 +185,32 @@ public class AssetBundle extends CommandDescriptor {
 		return this.transfers;
 	}
 
-	public String toString(int leftPadding) {
+	public String toString(int _padding) {
 		StringBuilder sb = new StringBuilder();
-
-		String s = this.transfers.size() == 1 ? "" : "s";
-		String description = "File transfer" + s + ": ";
-		int l = description.length(), i = 0, maxLength = 30;
-
-		for (Map.Entry<String, List<String>> pair : this.transfers.entrySet()) {
-			String key = Strings.truncate(pair.getKey(), maxLength, maxLength);
-
-			int c = i == 0 ? 0 : maxLength;
-			String left = i == 0 ? description : "";
-
-			String local = String.format("%" + (l + c) + "s", key);
-			String remotes = Strings
-					.join(pair.getValue(),
-							String.format("%-" + (l + c + 5 + leftPadding)
-									+ "s", "\n"));
-
-			sb.append(String.format("%s%s -> %s", left, local, remotes) + "\n");
-
-			i++;
+		String padding = String.format("%" + _padding + "s", "File transfer");
+		_padding = _padding + 13; // "File transfer".length
+		boolean firstKey = true;
+		
+		for(String key : transfers.keySet()) {
+			if(!firstKey)
+				padding = String.format("%" + _padding + "s", "");
+			
+			String _key = Strings.truncate(key, 20, 20);
+			sb.append(padding + " " + _key);
+			boolean firstValue = true;
+			
+			for(String value : transfers.get(key)) {
+				String initial = String.format("%-" + _key.length() + "s", "") + padding;
+				if(firstValue)
+					initial = "";
+				
+				sb.append(initial + " -> " + value + "\n");
+				firstValue = false;
+			}
+			
+			firstKey = false;
 		}
-
+		
 		sb.deleteCharAt(sb.length() - 1); // remove last line break
 		return sb.toString();
 	}
