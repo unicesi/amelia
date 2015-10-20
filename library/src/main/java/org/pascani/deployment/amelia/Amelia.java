@@ -71,7 +71,7 @@ public class Amelia {
 				String message = e.getMessage().replaceAll(
 						"^((\\w)+(\\.\\w+)+:\\s)*", "");
 
-				logger.error(message, e);
+				logger.error(e.getMessage(), e);
 				Log.error("Stopping deployment: " + message);
 
 				Amelia.shutdown(true);
