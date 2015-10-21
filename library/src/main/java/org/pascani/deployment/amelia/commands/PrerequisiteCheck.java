@@ -76,7 +76,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		Matcher fmatcher = fpattern.matcher(frascatiVersion.getBefore());
 
 		if (fmatcher.find()
-				&& !fmatcher.group(1).equals(descriptor.frascatiVersion())) {
+				&& !descriptor.frascatiVersion().isEquivalent(fmatcher.group(1))) {
 
 			String message = "FraSCAti version is " + fmatcher.group(1)
 					+ " instead of " + descriptor.frascatiVersion();
@@ -93,7 +93,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		Matcher jmatcher = jpattern.matcher(javaVersion.getBefore());
 
 		if (jmatcher.find()
-				&& !jmatcher.group(1).equals(descriptor.javaVersion())) {
+				&& !descriptor.javaVersion().isEquivalent(jmatcher.group(1))) {
 
 			String message = "Java version is " + jmatcher.group(1)
 					+ " instead of " + descriptor.javaVersion();
