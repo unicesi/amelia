@@ -118,5 +118,10 @@ public class Version {
 
 		return ok;
 	}
+	
+	@Override
+	public String toString() {
+		return this.versionExpression;
+	}
 
 }

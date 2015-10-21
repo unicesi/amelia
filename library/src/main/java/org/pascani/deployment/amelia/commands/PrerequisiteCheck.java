@@ -51,10 +51,11 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		// Check environment variables
 		expect.sendLine("echo $FRASCATI_HOME");
 		Result frascatiHome = expect.expect(Matchers.regexp(prompt));
-		
-		if(frascatiHome.getBefore().trim().isEmpty()) {
+
+		if (frascatiHome.getBefore().trim().isEmpty()) {
 			String message = "Environment variable FRASCATI_HOME not found";
-			Log.info(super.host.toFixedString() + " " + ascii(9888) + " " + message);
+			Log.info(super.host.toFixedString() + " " + ascii(9888) + " "
+					+ message);
 		}
 
 		// Check Java and FraSCAti are installed
@@ -63,7 +64,8 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 		if (!frascati.getBefore().contains("Usage: frascati")) {
 			String message = "FraSCAti not found";
-			Log.info(super.host.toFixedString() + " " + ascii(10007) + " " + message);
+			Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
+					+ message);
 			throw new RuntimeException(message + " in host " + host);
 		}
 
@@ -76,10 +78,11 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		Matcher fmatcher = fpattern.matcher(frascatiVersion.getBefore());
 
 		if (fmatcher.find()
-				&& !descriptor.frascatiVersion().isEquivalent(fmatcher.group(1))) {
+				&& !descriptor.frascatiVersion()
+						.isEquivalent(fmatcher.group(1))) {
 
-			String message = "FraSCAti version is " + fmatcher.group(1)
-					+ " instead of " + descriptor.frascatiVersion();
+			String message = "the FraSCAti version (" + fmatcher.group(1)
+					+ ") is not compliant with " + descriptor.frascatiVersion();
 
 			Log.info(host.toFixedString() + " " + ascii(10007) + " " + message);
 			throw new RuntimeException(message + " in host " + host);
@@ -95,8 +98,8 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		if (jmatcher.find()
 				&& !descriptor.javaVersion().isEquivalent(jmatcher.group(1))) {
 
-			String message = "Java version is " + jmatcher.group(1)
-					+ " instead of " + descriptor.javaVersion();
+			String message = "the java version (" + jmatcher.group(1)
+					+ ") is not compliant with " + descriptor.javaVersion();
 
 			Log.info(host.toFixedString() + " " + ascii(10007) + " " + message);
 			throw new RuntimeException(message + " in host " + host);
