@@ -19,6 +19,9 @@
 package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
+
+import java.util.concurrent.Callable;
+
 import net.sf.expectit.Expect;
 import net.sf.expectit.Result;
 
@@ -87,19 +90,27 @@ public class Cd extends Command<Boolean> {
 	}
 
 	@Override
-	public void rollback() throws Exception {
-		goTo(this.previousDirectory, true);
+	public Callable<Void> rollback() throws Exception {
 
-		Expect expect = host.ssh().expect();
-		String prompt = ShellUtils.ameliaPromptRegexp();
+		final Host host = super.host;
+		final Expect expect = host.ssh().expect();
+		final String prompt = ShellUtils.ameliaPromptRegexp();
+		final String previousDirectory = this.previousDirectory;
 
-		String workingDirectory = pwd(expect, prompt);
+		return new Callable<Void>() {
+			public Void call() throws Exception {
 
-		if (workingDirectory.equals(this.previousDirectory))
-			Log.info(super.host, "Working directory: " + this.previousDirectory);
-		else
-			Log.warning(super.host, "Could not change working directory to "
-					+ this.previousDirectory);
+				goTo(previousDirectory, true);
+				String workingDirectory = pwd(expect, prompt);
+
+				if (workingDirectory.equals(previousDirectory))
+					Log.info(host, "Working directory: " + previousDirectory);
+				else
+					Log.warning(host, "Could not change working directory to "
+							+ previousDirectory);
+				return null;
+			}
+		};
 	}
 
 }

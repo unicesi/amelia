@@ -19,6 +19,9 @@
 package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
+
+import java.util.concurrent.Callable;
+
 import net.sf.expectit.Expect;
 import net.sf.expectit.Result;
 
@@ -75,23 +78,34 @@ public class Compile extends Command<Boolean> {
 	 * same working directory.
 	 */
 	@Override
-	public void rollback() throws Exception {
-		Compilation descriptor = (Compilation) super.descriptor;
-		Expect expect = this.host.ssh().expect();
-		String prompt = ShellUtils.ameliaPromptRegexp();
+	public Callable<Void> rollback() throws Exception {
 
-		String jarFile = descriptor.outputFile() + ".jar";
+		final Host host = super.host;
+		final Expect expect = host.ssh().expect();
+		final Compilation descriptor = (Compilation) super.descriptor;
+		final String prompt = ShellUtils.ameliaPromptRegexp();
 
-		expect.sendLine("rm " + jarFile);
-		Result rm = expect.expect(regexp(prompt));
+		return new Callable<Void>() {
+			public Void call() throws Exception {
 
-		String[] errors = { "Not such file or directory", "Permission denied",
-				"No existe el fichero o el directorio", "Permiso denegado" };
+				String jarFile = descriptor.outputFile() + ".jar";
 
-		if (!Strings.containsAnyOf(rm.getBefore(), errors))
-			Log.info(super.host, "File removed: " + jarFile);
-		else
-			Log.warning(super.host, "Could not remove file " + jarFile);
+				expect.sendLine("rm " + jarFile);
+				Result rm = expect.expect(regexp(prompt));
+
+				String[] errors = { "Not such file or directory",
+						"Permission denied",
+						"No existe el fichero o el directorio",
+						"Permiso denegado" };
+
+				if (!Strings.containsAnyOf(rm.getBefore(), errors))
+					Log.info(host, "File removed: " + jarFile);
+				else
+					Log.warning(host, "Could not remove file " + jarFile);
+
+				return null;
+			}
+		};
 	}
 
 }

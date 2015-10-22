@@ -75,13 +75,21 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 	}
 
 	@Override
-	public void rollback() throws Exception {
-		Execution descriptor = (Execution) super.descriptor;
-		int stopped = super.host.stopExecutions(Arrays.asList(descriptor));
+	public Callable<Void> rollback() throws Exception {
 
-		if (stopped == 0)
-			Log.warning(super.host, "Component " + descriptor.compositeName()
-					+ " could not be stopped");
+		final Host host = super.host;
+		final Execution descriptor = (Execution) super.descriptor;
+
+		return new Callable<Void>() {
+			public Void call() throws Exception {
+				int stopped = host.stopExecutions(Arrays.asList(descriptor));
+				if (stopped == 0)
+					Log.warning(host, "Component " + descriptor.compositeName()
+							+ " could not be stopped");
+
+				return null;
+			}
+		};
 	}
 
 }

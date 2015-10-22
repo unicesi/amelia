@@ -21,6 +21,7 @@ package org.pascani.deployment.amelia.commands;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
@@ -52,21 +53,30 @@ public class Transfer extends Command<Void> {
 	}
 
 	@Override
-	public void rollback() throws Exception {
-		Host host = super.host;
-		AssetBundle descriptor = (AssetBundle) super.descriptor;
-		FTPClient client = host.ftp().client();
+	public Callable<Void> rollback() throws Exception {
 
-		for (Entry<String, List<String>> entry : descriptor.transfers()
-				.entrySet()) {
-			for (String remote : entry.getValue()) {
-				try {
-					client.removeDirectoryWithContents(remote);
-				} catch (IOException e) {
-					Log.warning(host, "Could not remove remote file " + remote);
+		final Host host = super.host;
+		final AssetBundle descriptor = (AssetBundle) super.descriptor;
+		final FTPClient client = host.ftp().client();
+
+		return new Callable<Void>() {
+			public Void call() throws Exception {
+
+				for (Entry<String, List<String>> entry : descriptor.transfers()
+						.entrySet()) {
+					for (String remote : entry.getValue()) {
+						try {
+							client.removeDirectoryWithContents(remote);
+						} catch (IOException e) {
+							Log.warning(host, "Could not remove remote file "
+									+ remote);
+						}
+					}
 				}
+
+				return null;
 			}
-		}
+		};
 	}
 
 }

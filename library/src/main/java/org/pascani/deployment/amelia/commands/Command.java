@@ -59,8 +59,9 @@ public abstract class Command<T> implements Callable<T> {
 		}
 
 		@Override
-		public void rollback() throws Exception {
+		public Callable<Void> rollback() throws Exception {
 			// Nothing to do here
+			return null;
 		}
 	}
 	
@@ -78,7 +79,7 @@ public abstract class Command<T> implements Callable<T> {
 
 	public abstract T call() throws Exception;
 	
-	public abstract void rollback() throws Exception;
+	public abstract Callable<Void> rollback() throws Exception;
 
 	public Host host() {
 		return this.host;
