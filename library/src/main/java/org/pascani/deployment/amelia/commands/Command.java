@@ -57,6 +57,11 @@ public abstract class Command<T> implements Callable<T> {
 
 			return true;
 		}
+
+		@Override
+		public void rollback() throws Exception {
+			// Nothing to do here
+		}
 	}
 	
 	protected final UUID internalId;
@@ -72,6 +77,8 @@ public abstract class Command<T> implements Callable<T> {
 	}
 
 	public abstract T call() throws Exception;
+	
+	public abstract void rollback() throws Exception;
 
 	public Host host() {
 		return this.host;

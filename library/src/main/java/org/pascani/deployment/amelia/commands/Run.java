@@ -72,5 +72,10 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 
 		return PID;
 	}
+	
+	@Override
+	public void rollback() throws Exception {
+		// TODO: implement the rollback functionality
+	}
 
 }

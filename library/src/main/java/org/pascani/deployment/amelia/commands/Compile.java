@@ -70,4 +70,9 @@ public class Compile extends Command<Boolean> {
 		return true;
 	}
 
+	@Override
+	public void rollback() throws Exception {
+		// TODO: implement the rollback functionality
+	}
+
 }

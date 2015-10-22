@@ -137,5 +137,10 @@ public class PrerequisiteCheck extends Command<Boolean> {
 							+ javaVersion.getBefore());
 		}
 	}
+	
+	@Override
+	public void rollback() throws Exception {
+		// Nothing to do here
+	}
 
 }

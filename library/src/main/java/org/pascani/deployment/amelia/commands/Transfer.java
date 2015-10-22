@@ -44,5 +44,10 @@ public class Transfer extends Command<Void> {
 
 		return null;
 	}
+	
+	@Override
+	public void rollback() throws Exception {
+		// TODO: implement the rollback functionality
+	}
 
 }

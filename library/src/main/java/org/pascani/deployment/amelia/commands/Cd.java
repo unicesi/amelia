@@ -20,6 +20,7 @@ package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 import net.sf.expectit.Expect;
+import net.sf.expectit.Result;
 
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.ChangeDirectory;
@@ -33,19 +34,33 @@ import org.pascani.deployment.amelia.util.Strings;
  */
 public class Cd extends Command<Boolean> {
 
+	private String previousDirectory;
+
 	public Cd(Host host, ChangeDirectory descriptor) {
 		super(host, descriptor);
 	}
 
 	@Override
 	public Boolean call() throws Exception {
+		goTo(this.descriptor.toCommandString(), false);
+		return true;
+	}
+
+	private void goTo(String cdCommand, boolean rollback) throws Exception {
 		ChangeDirectory descriptor = (ChangeDirectory) super.descriptor;
 		Host host = super.host;
 
 		Expect expect = host.ssh().expect();
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
-		expect.sendLine(this.descriptor.toCommandString());
+		if (!rollback) {
+			expect.sendLine("pwd");
+			Result pwd = expect.expect(regexp(prompt));
+
+			this.previousDirectory = pwd.getBefore().trim();
+		}
+
+		expect.sendLine(cdCommand);
 		String response = expect.expect(regexp(prompt)).getBefore();
 
 		String[] _404 = { "No existe el fichero o el directorio",
@@ -65,8 +80,11 @@ public class Cd extends Command<Boolean> {
 			Log.error(host, message);
 			throw new DeploymentException(message);
 		}
+	}
 
-		return true;
+	@Override
+	public void rollback() throws Exception {
+		goTo(this.previousDirectory, true);
 	}
 
 }
