@@ -50,6 +50,21 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		Expect expect = host.ssh().expect();
 
 		// Check environment variables
+		verifyFrascatiVariable(expect, prompt);
+
+		// Check Java and FraSCAti are installed
+		verifyFrascati(expect, prompt);
+
+		// Check programs' versions
+		verifyFrascatiVersion(expect, prompt, descriptor);
+		verifyJavaVersion(expect, prompt, descriptor);
+
+		return ok;
+	}
+
+	private void verifyFrascatiVariable(final Expect expect, final String prompt)
+			throws Exception {
+		
 		expect.sendLine("echo $FRASCATI_HOME");
 		Result frascatiHome = expect.expect(Matchers.regexp(prompt));
 
@@ -57,8 +72,11 @@ public class PrerequisiteCheck extends Command<Boolean> {
 			String message = "Environment variable FRASCATI_HOME not found";
 			Log.error(super.host, message);
 		}
+	}
 
-		// Check Java and FraSCAti are installed
+	private void verifyFrascati(final Expect expect, final String prompt)
+			throws Exception {
+		
 		expect.sendLine("frascati --help");
 		Result frascati = expect.expect(Matchers.regexp(prompt));
 
@@ -67,8 +85,12 @@ public class PrerequisiteCheck extends Command<Boolean> {
 			Log.error(super.host, message);
 			throw new RuntimeException(message + " in host " + host);
 		}
+	}
 
-		// Check the FraSCAti version
+	private void verifyFrascatiVersion(final Expect expect,
+			final String prompt, final Prerequisites descriptor)
+			throws Exception {
+
 		expect.sendLine("frascati --version");
 		Result frascatiVersion = expect.expect(Matchers.regexp(prompt));
 
@@ -76,35 +98,44 @@ public class PrerequisiteCheck extends Command<Boolean> {
 				.compile("OW2 FraSCAti version (([0-9]|\\.)*)");
 		Matcher fmatcher = fpattern.matcher(frascatiVersion.getBefore());
 
-		if (fmatcher.find()
-				&& !descriptor.frascatiVersion()
-						.isCompliant(fmatcher.group(1))) {
+		if (fmatcher.find()) {
+			if (!descriptor.frascatiVersion().isCompliant(fmatcher.group(1))) {
+				String message = "the FraSCAti version (" + fmatcher.group(1)
+						+ ") is not compliant with "
+						+ descriptor.frascatiVersion();
 
-			String message = "the FraSCAti version (" + fmatcher.group(1)
-					+ ") is not compliant with " + descriptor.frascatiVersion();
-
-			Log.error(super.host, message);
-			throw new RuntimeException(message + " in host " + host);
+				Log.error(super.host, message);
+				throw new RuntimeException(message + " in host " + host);
+			}
+		} else {
+			Log.warning(super.host,
+					"The FraSCAti version could not be verified. Unknown version "
+							+ frascatiVersion.getBefore());
 		}
+	}
 
-		// Check the Java version
+	private void verifyJavaVersion(final Expect expect, final String prompt,
+			final Prerequisites descriptor) throws Exception {
+
 		expect.sendLine("java -version");
 		Result javaVersion = expect.expect(Matchers.regexp(prompt));
 
 		Pattern jpattern = Pattern.compile("java version \"(.*)\"");
 		Matcher jmatcher = jpattern.matcher(javaVersion.getBefore());
 
-		if (jmatcher.find()
-				&& !descriptor.javaVersion().isCompliant(jmatcher.group(1))) {
+		if (jmatcher.find()) {
+			if (!descriptor.javaVersion().isCompliant(jmatcher.group(1))) {
+				String message = "the java version (" + jmatcher.group(1)
+						+ ") is not compliant with " + descriptor.javaVersion();
 
-			String message = "the java version (" + jmatcher.group(1)
-					+ ") is not compliant with " + descriptor.javaVersion();
-
-			Log.error(super.host, message);
-			throw new RuntimeException(message + " in host " + host);
+				Log.error(super.host, message);
+				throw new RuntimeException(message + " in host " + host);
+			}
+		} else {
+			Log.warning(super.host,
+					"The java version could not be verified. Unknown version "
+							+ javaVersion.getBefore());
 		}
-
-		return ok;
 	}
 
 }
