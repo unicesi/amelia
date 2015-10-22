@@ -241,7 +241,7 @@ public class AssetBundle extends CommandDescriptor {
 		return toString(0);
 	}
 
-	public void overwrite(boolean overwrite) {
+	public void setOverwrite(boolean overwrite) {
 		this.overwrite = overwrite;
 	}
 
