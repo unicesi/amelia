@@ -18,8 +18,14 @@
  */
 package org.pascani.deployment.amelia.commands;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map.Entry;
+
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
+import org.pascani.deployment.amelia.filesystem.FTPClient;
+import org.pascani.deployment.amelia.util.Log;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -34,7 +40,7 @@ public class Transfer extends Command<Void> {
 	public Void call() throws Exception {
 
 		AssetBundle descriptor = (AssetBundle) super.descriptor;
-		
+
 		try {
 			super.host.ftp().upload(descriptor);
 		} catch (Exception e) {
@@ -44,10 +50,23 @@ public class Transfer extends Command<Void> {
 
 		return null;
 	}
-	
+
 	@Override
 	public void rollback() throws Exception {
-		// TODO: implement the rollback functionality
+		Host host = super.host;
+		AssetBundle descriptor = (AssetBundle) super.descriptor;
+		FTPClient client = host.ftp().client();
+
+		for (Entry<String, List<String>> entry : descriptor.transfers()
+				.entrySet()) {
+			for (String remote : entry.getValue()) {
+				try {
+					client.removeDirectoryWithContents(remote);
+				} catch (IOException e) {
+					Log.warning(host, "Could not remove remote file " + remote);
+				}
+			}
+		}
 	}
 
 }

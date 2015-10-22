@@ -54,10 +54,7 @@ public class Cd extends Command<Boolean> {
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
 		if (!rollback) {
-			expect.sendLine("pwd");
-			Result pwd = expect.expect(regexp(prompt));
-
-			this.previousDirectory = pwd.getBefore().trim();
+			this.previousDirectory = pwd(expect, prompt);
 		}
 
 		expect.sendLine(cdCommand);
@@ -82,9 +79,27 @@ public class Cd extends Command<Boolean> {
 		}
 	}
 
+	private String pwd(Expect expect, String prompt) throws Exception {
+		expect.sendLine("pwd");
+		Result pwd = expect.expect(regexp(prompt));
+
+		return pwd.getBefore().trim();
+	}
+
 	@Override
 	public void rollback() throws Exception {
 		goTo(this.previousDirectory, true);
+
+		Expect expect = host.ssh().expect();
+		String prompt = ShellUtils.ameliaPromptRegexp();
+
+		String workingDirectory = pwd(expect, prompt);
+
+		if (workingDirectory.equals(this.previousDirectory))
+			Log.info(super.host, "Working directory: " + this.previousDirectory);
+		else
+			Log.warning(super.host, "Could not change working directory to "
+					+ this.previousDirectory);
 	}
 
 }
