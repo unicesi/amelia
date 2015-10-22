@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the Amelia library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.deployment.amelia.util;
+package org.pascani.deployment.amelia;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,13 +30,12 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import org.pascani.deployment.amelia.Amelia;
-import org.pascani.deployment.amelia.SSHHandler;
 import org.pascani.deployment.amelia.commands.Command;
 import org.pascani.deployment.amelia.commands.CommandFactory;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
+import org.pascani.deployment.amelia.util.Log;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API

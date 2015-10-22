@@ -16,12 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the Amelia library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.deployment.amelia.util;
+package org.pascani.deployment.amelia.descriptors;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.pascani.deployment.amelia.util.Pair;
+import org.pascani.deployment.amelia.util.Strings;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API

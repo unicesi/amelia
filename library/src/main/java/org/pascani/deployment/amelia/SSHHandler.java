@@ -42,7 +42,6 @@ import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.AuthenticationUserInfo;
 import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
-import org.pascani.deployment.amelia.util.SingleThreadTaskQueue;
 import org.pascani.deployment.amelia.util.Strings;
 
 import com.jcraft.jsch.Channel;

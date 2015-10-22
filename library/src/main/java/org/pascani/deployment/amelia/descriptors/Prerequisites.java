@@ -1,6 +1,5 @@
 package org.pascani.deployment.amelia.descriptors;
 
-import org.pascani.deployment.amelia.util.Version;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
