@@ -245,7 +245,7 @@ public class Amelia {
 
 			} catch (IOException e) {
 				Log.error("Deployment shutdown unsuccessful; see logs for more information");
-				Log.info("Shutting system down abruptly");
+				Log.error("Shutting system down abruptly");
 
 				logger.error(e);
 			} finally {

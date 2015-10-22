@@ -19,7 +19,7 @@
 package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
-import static org.pascani.deployment.amelia.util.Strings.ascii;
+import net.sf.expectit.Expect;
 
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.Compilation;
@@ -27,8 +27,6 @@ import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 import org.pascani.deployment.amelia.util.Strings;
-
-import net.sf.expectit.Expect;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -59,15 +57,13 @@ public class Compile extends Command<Boolean> {
 			String message = "No such file or directory '"
 					+ descriptor.sourceDirectory() + "'";
 
-			Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
-					+ message);
+			Log.error(super.host, message);
 			throw new DeploymentException(message);
 		} else if (Strings.containsAnyOf(compile, _denied)) {
 			String message = "Permission denied to access '"
 					+ descriptor.sourceDirectory() + "'";
 
-			Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
-					+ message);
+			Log.error(super.host, message);
 			throw new DeploymentException(message);
 		}
 

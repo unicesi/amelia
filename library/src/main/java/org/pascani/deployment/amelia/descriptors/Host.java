@@ -18,8 +18,6 @@
  */
 package org.pascani.deployment.amelia.descriptors;
 
-import static org.pascani.deployment.amelia.util.Strings.ascii;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -90,7 +88,7 @@ public class Host {
 		this.ssh.join();
 
 		if (this.ssh.isConnected())
-			Log.info("  " + ascii(10003) + " " + this);
+			Log.info(this, "");
 	}
 
 	public void closeSSHConnection() throws IOException {
@@ -102,7 +100,7 @@ public class Host {
 		this.ftp.join();
 
 		if (this.ftp.client().isConnected())
-			Log.info("  " + ascii(10003) + " " + this);
+			Log.info(this, "");
 	}
 
 	public boolean closeFTPConnection() throws IOException {

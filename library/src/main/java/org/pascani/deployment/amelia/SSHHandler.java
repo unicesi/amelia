@@ -21,7 +21,6 @@ package org.pascani.deployment.amelia;
 import static net.sf.expectit.filter.Filters.removeColors;
 import static net.sf.expectit.filter.Filters.removeNonPrintable;
 import static net.sf.expectit.matcher.Matchers.regexp;
-import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +28,10 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectBuilder;
+import net.sf.expectit.Result;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,10 +50,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
-
-import net.sf.expectit.Expect;
-import net.sf.expectit.ExpectBuilder;
-import net.sf.expectit.Result;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -112,13 +111,13 @@ public class SSHHandler extends Thread {
 			String message = "Error establishing SSH connection with "
 					+ this.host;
 
-			Log.info("  " + ascii(10007) + " " + this.host);
+			Log.error(this.host, "");
 			throw new RuntimeException(message, e);
 		} catch (IOException e) {
 			String message = "Error initializing SSH connection with "
 					+ this.host;
 
-			Log.info("  " + ascii(10007) + " " + this.host);
+			Log.error(this.host, "");
 			throw new RuntimeException(message, e);
 		}
 	}
@@ -242,11 +241,10 @@ public class SSHHandler extends Thread {
 			int nExecutions = components.size();
 			String have = nExecutions == 1 ? " has " : " have ";
 			String s = nExecutions == 1 ? "" : "s";
-
-			Log.info(this.host.toFixedString() + " " + ascii(10003) + " "
-					+ "Component" + s + " "
+			String message = "Component" + s + " "
 					+ Strings.join(components, ", ", " and ") + have
-					+ "been stopped");
+					+ "been stopped";
+			Log.info(this.host, message);
 		}
 
 		return components.size();

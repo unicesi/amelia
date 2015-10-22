@@ -18,8 +18,6 @@
  */
 package org.pascani.deployment.amelia.util;
 
-import static org.pascani.deployment.amelia.util.Strings.ascii;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -171,7 +169,6 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 
 	private void stopPreviousExecutions() throws IOException {
 		Log.heading("Stopping previous executions");
-		int stopped = 0;
 
 		Map<Host, List<Execution>> executionsPerHost = new HashMap<Host, List<Execution>>();
 
@@ -192,13 +189,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		for (Host host : executionsPerHost.keySet()) {
 			List<Execution> executions = new ArrayList<Execution>();
 			executions.addAll(executionsPerHost.get(host));
-
-			stopped += host.stopExecutions(executions);
 		}
-
-		if (stopped == 0)
-			Log.info("  " + ascii(10003) + " 0 components were running");
-
 	}
 
 	private int countDependencyThreads(List<T> dependencies,

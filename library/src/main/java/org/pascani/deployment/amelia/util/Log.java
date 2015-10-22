@@ -20,27 +20,36 @@ package org.pascani.deployment.amelia.util;
 
 import static org.pascani.deployment.amelia.util.Strings.ascii;
 
+import org.pascani.deployment.amelia.descriptors.Host;
+
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Log {
 	
 	public static void heading(String message) {
-		message = ascii(187) + " " + cyan(message);
-		System.out.println(message);
+		print(null, ascii(187), cyan(message));
 	}
 	
-	public static void info(String message) {
-		message = message.replaceAll(ascii(10003), green(ascii(10003))); // ✓
-		message = message.replaceAll(ascii(10007), red(ascii(10007))); // ✗
-		message = message.replaceAll(ascii(9888), yellow(ascii(9888))); // ⚠
-
-		System.out.println(message);
+	public static void error(Host host, String message) {
+		print(host, red(ascii(10007)), message);
+	}
+	
+	public static void warning(Host host, String message) {
+		print(host, yellow(ascii(9888)), message);
+	}
+	
+	public static void info(Host host, String message) {
+		print(host, green(ascii(10003)), message);
 	}
 	
 	public static void error(String message) {
-		message = ascii(9632) + " " +  red(message);
-		System.out.println(message);
+		print(null, ascii(9632), red(message));
+	}
+	
+	private static void print(Host host, String icon, String message) {
+		String hostName = host != null ? host.toFixedString() + " " : "";
+		System.out.println(hostName + icon + " " + message);
 	}
 	
 	private static String red(String text) {

@@ -18,8 +18,6 @@
  */
 package org.pascani.deployment.amelia.commands;
 
-import static org.pascani.deployment.amelia.util.Strings.ascii;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,8 +55,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 		if (frascatiHome.getBefore().trim().isEmpty()) {
 			String message = "Environment variable FRASCATI_HOME not found";
-			Log.info(super.host.toFixedString() + " " + ascii(9888) + " "
-					+ message);
+			Log.error(super.host, message);
 		}
 
 		// Check Java and FraSCAti are installed
@@ -67,8 +64,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 		if (!frascati.getBefore().contains("Usage: frascati")) {
 			String message = "FraSCAti not found";
-			Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
-					+ message);
+			Log.error(super.host, message);
 			throw new RuntimeException(message + " in host " + host);
 		}
 
@@ -87,7 +83,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 			String message = "the FraSCAti version (" + fmatcher.group(1)
 					+ ") is not compliant with " + descriptor.frascatiVersion();
 
-			Log.info(host.toFixedString() + " " + ascii(10007) + " " + message);
+			Log.error(super.host, message);
 			throw new RuntimeException(message + " in host " + host);
 		}
 
@@ -104,7 +100,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 			String message = "the java version (" + jmatcher.group(1)
 					+ ") is not compliant with " + descriptor.javaVersion();
 
-			Log.info(host.toFixedString() + " " + ascii(10007) + " " + message);
+			Log.error(super.host, message);
 			throw new RuntimeException(message + " in host " + host);
 		}
 

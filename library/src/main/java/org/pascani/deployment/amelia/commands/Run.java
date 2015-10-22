@@ -19,7 +19,6 @@
 package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
-import static org.pascani.deployment.amelia.util.Strings.ascii;
 
 import java.util.concurrent.Callable;
 
@@ -63,8 +62,7 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 		} catch (ExpectIOException ex) {
 			String message = "Cannot instantiate the FraSCAti factory!";
 			if (ex.getInputBuffer().contains(message)) {
-				Log.info(super.host.toFixedString() + " " + ascii(10007) + " "
-						+ message);
+				Log.error(super.host, message);
 				throw new DeploymentException(message);
 			} else {
 				throw new RuntimeException("Expect operation timeout: "

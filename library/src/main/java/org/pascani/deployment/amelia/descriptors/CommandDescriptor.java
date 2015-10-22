@@ -18,8 +18,6 @@
  */
 package org.pascani.deployment.amelia.descriptors;
 
-import static org.pascani.deployment.amelia.util.Strings.ascii;
-
 import java.util.Observable;
 import java.util.UUID;
 
@@ -31,7 +29,7 @@ import org.pascani.deployment.amelia.util.Log;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class CommandDescriptor extends Observable {
-	
+
 	protected final UUID internalId;
 
 	protected final String command;
@@ -62,25 +60,19 @@ public class CommandDescriptor extends Observable {
 
 	public void done(Host host) {
 		setChanged();
-		Log.info(host.toFixedString() + " " + doneMessage());
+		Log.info(host, doneMessage());
 	}
 
 	public void fail(Host host) {
-		Log.info(host.toFixedString() + " " + failMessage());
+		Log.error(host, failMessage());
 	}
 
 	public String doneMessage() {
-		String message = ascii(10003) + " ";
-		message += successMessage == null ? toString() : successMessage;
-
-		return message;
+		return successMessage == null ? toString() : successMessage;
 	}
 
 	public String failMessage() {
-		String message = ascii(10007) + " ";
-		message += errorMessage == null ? toString() : errorMessage;
-
-		return message;
+		return errorMessage == null ? toString() : errorMessage;
 	}
 
 	public String toCommandString() {
