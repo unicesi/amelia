@@ -204,16 +204,17 @@ public class SSHHandler extends Thread {
 
 		if (command instanceof Run) {
 			Run run = (Run) command;
-			Execution descriptor = (Execution) run
-					.descriptor();
+			Execution descriptor = (Execution) run.descriptor();
 			this.executions.add(descriptor);
 		}
 
 		return result;
 	}
 
-	public int stopExecutions(List<Execution> executions)
-			throws IOException {
+	public int stopExecutions(List<Execution> executions) throws IOException {
+		// TODO: Improve the search string to identify deployed composites when
+		// the classpath is different (libraries are in different order)
+
 		String prompt = ShellUtils.ameliaPromptRegexp();
 		List<String> components = new ArrayList<String>();
 
