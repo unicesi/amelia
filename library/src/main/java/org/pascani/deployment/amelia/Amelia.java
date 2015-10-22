@@ -251,7 +251,7 @@ public class Amelia {
 			} finally {
 				Log.heading("Deployment shutdown successful");
 				
-				// FIXME: Stop all threads instead this
+				// FIXME: Stop all threads instead of this
 				System.exit(0);
 			}
 		}
