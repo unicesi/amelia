@@ -32,6 +32,9 @@ import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Run extends Command<Integer> implements Callable<Integer> {
 
 	public Run(final Host host, final Execution descriptor) {

@@ -30,6 +30,9 @@ import org.pascani.deployment.amelia.util.Strings;
 
 import net.sf.expectit.Expect;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Compile extends Command<Boolean> {
 
 	public Compile(final Host host, final Compilation descriptor) {

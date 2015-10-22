@@ -29,6 +29,9 @@ import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 import org.pascani.deployment.amelia.util.Strings;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Cd extends Command<Boolean> {
 
 	public Cd(Host host, ChangeDirectory descriptor) {

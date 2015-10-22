@@ -35,6 +35,9 @@ import org.pascani.deployment.amelia.FTPHandler;
 import org.pascani.deployment.amelia.SSHHandler;
 import org.pascani.deployment.amelia.util.Log;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Host {
 
 	private final String identifier;

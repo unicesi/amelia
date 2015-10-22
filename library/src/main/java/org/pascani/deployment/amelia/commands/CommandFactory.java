@@ -26,6 +26,9 @@ import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.descriptors.Prerequisites;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class CommandFactory {
 
 	private static CommandFactory instance;

@@ -31,8 +31,6 @@ import org.pascani.deployment.amelia.filesystem.FTPClient;
 import org.pascani.deployment.amelia.util.Log;
 
 /**
- * TODO
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class FTPHandler extends Thread {

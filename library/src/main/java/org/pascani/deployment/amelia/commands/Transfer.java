@@ -21,6 +21,9 @@ package org.pascani.deployment.amelia.commands;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Transfer extends Command<Void> {
 
 	public Transfer(final Host host, final AssetBundle bundle) {

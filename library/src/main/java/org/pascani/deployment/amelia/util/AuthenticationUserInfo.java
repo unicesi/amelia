@@ -33,8 +33,6 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 /**
- * TODO
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class AuthenticationUserInfo implements UserInfo, UIKeyboardInteractive {

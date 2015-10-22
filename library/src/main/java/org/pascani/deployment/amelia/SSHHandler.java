@@ -53,8 +53,6 @@ import net.sf.expectit.ExpectBuilder;
 import net.sf.expectit.Result;
 
 /**
- * TODO
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class SSHHandler extends Thread {

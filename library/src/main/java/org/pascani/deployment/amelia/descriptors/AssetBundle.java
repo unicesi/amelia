@@ -35,6 +35,9 @@ import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.util.Pair;
 import org.pascani.deployment.amelia.util.Strings;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class AssetBundle extends CommandDescriptor {
 
 	private final Map<String, List<String>> transfers;

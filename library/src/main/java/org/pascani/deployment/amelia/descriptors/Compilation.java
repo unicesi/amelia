@@ -20,6 +20,9 @@ package org.pascani.deployment.amelia.descriptors;
 
 import org.pascani.deployment.amelia.util.Strings;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Compilation extends CommandDescriptor {
 
 	private final String sourceDirectory;

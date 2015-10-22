@@ -40,6 +40,9 @@ import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class DependencyGraph<T extends CommandDescriptor> extends
 		HashMap<T, List<T>> {
 

@@ -20,6 +20,9 @@ package org.pascani.deployment.amelia.util;
 
 import java.util.Collection;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Strings {
 
 	public static String join(Collection<String> args, String separator,

@@ -18,6 +18,9 @@
  */
 package org.pascani.deployment.amelia;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class DeploymentException extends Exception {
 
 	/**

@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class SingleThreadTaskQueue extends Thread {
 	
 	private interface Callback<V> {

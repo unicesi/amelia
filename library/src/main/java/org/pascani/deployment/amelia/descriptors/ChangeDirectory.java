@@ -18,6 +18,9 @@
  */
 package org.pascani.deployment.amelia.descriptors;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class ChangeDirectory extends CommandDescriptor {
 
 	private final String directory;

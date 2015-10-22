@@ -20,6 +20,9 @@ package org.pascani.deployment.amelia.util;
 
 import static org.pascani.deployment.amelia.util.Strings.ascii;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Log {
 	
 	public static void heading(String message) {
