@@ -160,6 +160,7 @@ public class Version {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("\"");
 
 		for (int i = 0; i < this.expressions.size(); i++) {
 			Pair<String, String> expression = this.expressions.get(i);
@@ -170,6 +171,7 @@ public class Version {
 				sb.append(" & ");
 		}
 
+		sb.append("\"");
 		return sb.toString();
 	}
 
