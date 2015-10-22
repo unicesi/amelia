@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.expectit.Expect;
@@ -35,7 +36,6 @@ import net.sf.expectit.Result;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.pascani.deployment.amelia.commands.Command;
 import org.pascani.deployment.amelia.commands.Run;
 import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
@@ -197,7 +197,7 @@ public class SSHHandler extends Thread {
 		this.expect.expect(regexp(prompt));
 	}
 
-	public <V> V executeCommand(Command<V> command) throws InterruptedException {
+	public <V> V executeCommand(Callable<V> command) throws InterruptedException {
 		V result = this.taskQueue.execute(command);
 
 		if (command instanceof Run) {
