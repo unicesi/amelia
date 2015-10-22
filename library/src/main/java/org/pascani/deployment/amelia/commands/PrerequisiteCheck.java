@@ -32,6 +32,9 @@ import org.pascani.deployment.amelia.descriptors.Prerequisites;
 import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class PrerequisiteCheck extends Command<Boolean> {
 
 	public PrerequisiteCheck(Host host, Prerequisites descriptor) {
@@ -79,7 +82,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 		if (fmatcher.find()
 				&& !descriptor.frascatiVersion()
-						.isEquivalent(fmatcher.group(1))) {
+						.isCompliant(fmatcher.group(1))) {
 
 			String message = "the FraSCAti version (" + fmatcher.group(1)
 					+ ") is not compliant with " + descriptor.frascatiVersion();
@@ -96,7 +99,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		Matcher jmatcher = jpattern.matcher(javaVersion.getBefore());
 
 		if (jmatcher.find()
-				&& !descriptor.javaVersion().isEquivalent(jmatcher.group(1))) {
+				&& !descriptor.javaVersion().isCompliant(jmatcher.group(1))) {
 
 			String message = "the java version (" + jmatcher.group(1)
 					+ ") is not compliant with " + descriptor.javaVersion();

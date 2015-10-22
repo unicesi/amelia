@@ -18,57 +18,90 @@
  */
 package org.pascani.deployment.amelia.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class Version {
 
 	private final String versionExpression;
 
-	private final String modifier;
-
-	private final String rest;
+	private final List<Pair<String, String>> expressions;
 
 	/**
 	 * <p>
 	 * A valid version expression is composed of two parts: first, an optional
-	 * modifier to specify flexible versions, and second, the actual version.
-	 * Versions must contain numeric characters, '-' and/or '.'. For instance,
-	 * the following versions are valid: *, 1.6.0_23, >1.6, <1.7.
+	 * relational operator to specify flexible versions, and second, the actual
+	 * version. Versions must contain numeric characters, '-' and/or '.'.
+	 * Additionally, versions can be composed with conjunction operators (&) to
+	 * enforce meeting multiple criteria. For instance, the following versions
+	 * are valid: *, 1.6.0_23, > 1.6, < 1.7, >= 1.6 & < 1.7.
 	 * </p>
 	 * 
 	 * <ul>
 	 * <li>version : must match version exactly</li>
 	 * <li>>version : must be greater than version</li>
 	 * <li>>=version : greater or equal than version</li>
-	 * <li><version : less than version</li>
-	 * <li><=version : less or equal than version</li>
-	 * <li>* : Matches any version</li>
+	 * <li>< version : less than version</li>
+	 * <li><= version : less or equal than version</li>
+	 * <li>&lt;version&gt; & ... & &lt;version&gt; : compose multiple criteria</li>
+	 * <li>* : Matches any version (cannot be composed with the '&' operator)</li>
 	 * </ul>
 	 * 
 	 * @param versionExpression
 	 * @throws Exception
 	 */
-	public Version(String versionExpression) throws Exception {
+	public Version(final String versionExpression) throws Exception {
 
-		versionExpression = versionExpression.replace("_", ".");
+		String expression = versionExpression.replace("_", ".")
+				.replace(" ", "");
+		this.versionExpression = expression;
 
 		if (versionExpression.equals("*")) {
-			this.versionExpression = versionExpression;
-			this.modifier = "*";
-			this.rest = null;
+			this.expressions = new ArrayList<Pair<String, String>>();
+			this.expressions.add(new Pair<String, String>("*", null));
 		} else {
-			Pattern pattern = Pattern.compile("^((<|>)=?)?(\\d+(\\.\\d+)*)$");
-			Matcher matcher = pattern.matcher(versionExpression);
-
-			if (!matcher.find())
-				throw new Exception("Invalid version expression \""
-						+ versionExpression);
-
-			this.versionExpression = versionExpression;
-			this.modifier = matcher.group(1);
-			this.rest = matcher.group(3);
+			this.expressions = parse(expression);
 		}
+	}
+
+	public List<Pair<String, String>> parse(final String versionExpression)
+			throws Exception {
+		List<Pair<String, String>> expressions = new ArrayList<Pair<String, String>>();
+
+		// simple version expression
+		String simple = "((<|>)=?)?(\\d+(\\.\\d+)*)";
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("^");
+		sb.append(simple);
+		sb.append("(");
+		sb.append("&" + simple); // conjunction
+		sb.append(")*");
+		sb.append("$");
+
+		// ^((<|>)=?)?(\d+(\.\d+)*)(&((<|>)=?)?(\d+(\.\d+)*))*$
+		Pattern pattern = Pattern.compile(sb.toString());
+		Matcher matcher = pattern.matcher(versionExpression);
+
+		if (!matcher.find())
+			throw new Exception("Invalid version expression \""
+					+ versionExpression);
+
+		String[] groups = matcher.group(0).split("&");
+
+		for (String group : groups) {
+			Pattern sp = Pattern.compile(simple);
+			Matcher sm = sp.matcher(group);
+			sm.find();
+			expressions.add(new Pair<String, String>(sm.group(1), sm.group(3)));
+		}
+
+		return expressions;
 	}
 
 	/**
@@ -82,46 +115,62 @@ public class Version {
 	 * @throws Exception
 	 *             If the version expression is not valid
 	 */
-	public boolean isEquivalent(String version) {
-		boolean accepted = true;
+	public boolean isCompliant(String version) {
+		boolean compliant = true;
 
 		if (!this.versionExpression.equals("*")) {
 			String[] parts = version.replace("_", ".").split("\\.");
-			String[] rest = this.rest.split("\\.");
-
 			parts[0] = parts[0] + ".";
-			rest[0] = rest[0] + ".";
 
-			accepted = compare(Strings.join(parts, ""), Strings.join(rest, ""));
+			for (Pair<String, String> expression : this.expressions) {
+				String[] rest = expression.getValue().split("\\.");
+				rest[0] = rest[0] + ".";
+
+				// It must be compliant with all expressions
+				compliant &= compare(expression.getKey(),
+						Strings.join(parts, ""), Strings.join(rest, ""));
+			}
 		}
 
-		return accepted;
+		return compliant;
 	}
 
-	private boolean compare(String _a, String _b) {
+	private boolean compare(final String operator, final String _a,
+			final String _b) {
 
 		boolean ok = true;
 		double a = Double.parseDouble(_a);
 		double b = Double.parseDouble(_b);
 
-		if (this.modifier == null || this.modifier.equals("")) {
+		if (operator == null || operator.equals("")) {
 			ok = a == b;
-		} else if (this.modifier.equals("<")) {
+		} else if (operator.equals("<")) {
 			ok = a < b;
-		} else if (this.modifier.equals(">")) {
+		} else if (operator.equals(">")) {
 			ok = a > b;
-		} else if (this.modifier.equals("<=")) {
+		} else if (operator.equals("<=")) {
 			ok = a <= b;
-		} else if (this.modifier.equals(">=")) {
+		} else if (operator.equals(">=")) {
 			ok = a >= b;
 		}
 
 		return ok;
 	}
-	
+
 	@Override
 	public String toString() {
-		return this.versionExpression;
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < this.expressions.size(); i++) {
+			Pair<String, String> expression = this.expressions.get(i);
+			sb.append(expression.getKey() + " ");
+			sb.append(expression.getValue());
+
+			if (i < this.expressions.size() - 1)
+				sb.append(" & ");
+		}
+
+		return sb.toString();
 	}
 
 }
