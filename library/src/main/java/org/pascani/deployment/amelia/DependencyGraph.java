@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import org.pascani.deployment.amelia.commands.Command;
@@ -43,43 +45,92 @@ import org.pascani.deployment.amelia.util.Log;
 public class DependencyGraph<T extends CommandDescriptor> extends
 		HashMap<T, List<T>> {
 
-	public class DependencyThread extends Thread implements Observer {
+	public class DependencyThread extends Thread implements Observer,
+			Comparable<DependencyThread> {
 
-		private final T element;
+		private final T descriptor;
 		private final SSHHandler handler;
-		private final Command<?> command;
+		private final Callable<?> callable;
+		private final List<T> dependencies;
+		private final int actualDependencies;
 		private final CountDownLatch doneSignal;
 		private final CountDownLatch mainDoneSignal;
+		private final boolean isRollback;
+		private volatile boolean shutdown;
 
-		public DependencyThread(final T element, final SSHHandler handler,
-				final Command<?> command, final int dependencies,
-				final CountDownLatch doneSignal) {
-			this.element = element;
+		/**
+		 * "dependencies" contains the descriptors on which this thread depends,
+		 * while "actualDependencies" corresponds to the number of tasks
+		 * executing those descriptors.
+		 */
+		public DependencyThread(final T descriptor, final SSHHandler handler,
+				final Callable<?> callable, final List<T> dependencies,
+				final int actualDependencies, final CountDownLatch doneSignal,
+				boolean isRollback) {
+			this.descriptor = descriptor;
 			this.handler = handler;
-			this.command = command;
-			this.doneSignal = new CountDownLatch(dependencies);
+			this.callable = callable;
+			this.dependencies = dependencies;
+			this.actualDependencies = actualDependencies;
+			this.doneSignal = new CountDownLatch(actualDependencies);
 			this.mainDoneSignal = doneSignal;
+			this.isRollback = isRollback;
+			this.shutdown = false;
+
+			// Make this thread observe the corresponding dependencies
+			for (T dependency : this.dependencies) {
+				dependency.addObserver(this);
+			}
+		}
+
+		public DependencyThread(final T descriptor, final SSHHandler handler,
+				final Callable<?> callable, final List<T> dependencies,
+				final int actualDependencies, final CountDownLatch doneSignal) {
+			this(descriptor, handler, callable, dependencies,
+					actualDependencies, doneSignal, false);
 		}
 
 		public void run() {
 			try {
 				this.doneSignal.await();
-				if (!Amelia.aborting) {
-					this.handler.executeCommand(this.command);
-					// Release this dependency
-					this.element.done(this.handler.host());
-					this.element.notifyObservers();
 
-					// Notify to main thread
-					this.mainDoneSignal.countDown();
+				if (!this.shutdown) {
+					this.handler.executeCommand(this.callable);
+					this.descriptor.done(this.handler.host());
+
+					if (!this.isRollback)
+						Log.info(this.handler.host(),
+								this.descriptor.doneMessage());
+
+					// Release this dependency
+					this.descriptor.notifyObservers();
 				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
+			} finally {
+				// Notify to main thread
+				this.mainDoneSignal.countDown();
 			}
 		}
 
 		public void update(Observable o, Object arg) {
 			this.doneSignal.countDown();
+		}
+
+		public int compareTo(DependencyGraph<T>.DependencyThread o) {
+			if (this.dependencies.size() < o.dependencies.size())
+				return -1;
+			else
+				return 1;
+		}
+
+		public void shutdown() {
+			this.shutdown = true;
+			this.descriptor.deleteObserver(this);
+			this.handler.shutdownTaskQueue();
+
+			while (this.doneSignal.getCount() > 0)
+				this.doneSignal.countDown();
 		}
 	}
 
@@ -92,12 +143,18 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 
 	private final Set<Host> hosts;
 
+	private final TreeSet<DependencyThread> threads;
+
 	public DependencyGraph() {
 		this.tasks = new HashMap<T, List<Command<?>>>();
 		this.hosts = new HashSet<Host>();
+		this.threads = new TreeSet<DependencyGraph<T>.DependencyThread>();
 	}
 
-	public void addDescriptor(T a, Host... hosts) {
+	public boolean addDescriptor(T a, Host... hosts) {
+		if (containsKey(a))
+			return false;
+
 		// Store the hosts
 		this.hosts.addAll(Arrays.asList(hosts));
 
@@ -110,6 +167,8 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 			Command<?> task = CommandFactory.getInstance().getCommand(host, a);
 			this.tasks.get(a).add(task);
 		}
+
+		return true;
 	}
 
 	public boolean addDependency(T a, T b) {
@@ -122,13 +181,13 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 					"Circular reference detected: %s <-> %s", a, b));
 
 		get(a).add(b);
-
 		return true;
 	}
 
 	public void resolve(boolean stopPreviousExecutions)
 			throws InterruptedException, IOException {
 
+		Amelia.setCurrentExecutionGraph(this);
 		Log.printBanner();
 
 		// Open SSH and FTP connections before dependencies resolution
@@ -137,12 +196,10 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		Amelia.openSSHConnections(_hosts);
 		Amelia.openFTPConnections(_hosts);
 
-		if (stopPreviousExecutions) {
-			stopPreviousExecutions();
-		}
+		if (stopPreviousExecutions)
+			stopExecutions();
 
-		Log.heading("Starting deployment (" + this.tasks.size() + ")");
-		CountDownLatch doneSignal = new CountDownLatch(keySet().size());
+		CountDownLatch doneSignal = new CountDownLatch(this.tasks.size());
 
 		for (T e : keySet()) {
 			List<T> dependencies = get(e);
@@ -151,24 +208,36 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 
 			for (Command<?> task : tasks) {
 				DependencyThread thread = new DependencyThread(e, task.host()
-						.ssh(), task, deps, doneSignal);
-
-				// Make the thread observe the corresponding dependencies
-				for (T dependency : get(e))
-					dependency.addObserver(thread);
+						.ssh(), task, dependencies, deps, doneSignal);
 
 				// Handle uncaught exceptions
 				thread.setUncaughtExceptionHandler(Amelia.exceptionHandler);
-				thread.start();
+				threads.add(thread);
 			}
 		}
+
+		Log.heading("Starting deployment (" + this.tasks.size() + ")");
+		for (DependencyThread thread : this.threads)
+			thread.start();
 
 		doneSignal.await();
 	}
 
-	private void stopPreviousExecutions() throws IOException {
-		Log.heading("Stopping previous executions");
+	private int countDependencyThreads(List<T> dependencies,
+			List<Command<?>> tasks) {
+		int n = dependencies.size();
 
+		for (T e : dependencies)
+			for (Command<?> c : tasks)
+				if (c.descriptor().equals(e))
+					++n;
+
+		return n;
+	}
+
+	public void stopExecutions() throws IOException {
+
+		Log.heading("Stopping previous executions");
 		Map<Host, List<Execution>> executionsPerHost = new HashMap<Host, List<Execution>>();
 
 		for (T descriptor : this.tasks.keySet()) {
@@ -186,21 +255,22 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		}
 
 		for (Host host : executionsPerHost.keySet()) {
-			List<Execution> executions = new ArrayList<Execution>();
-			executions.addAll(executionsPerHost.get(host));
+			host.stopExecutions(executionsPerHost.get(host));
 		}
 	}
 
-	private int countDependencyThreads(List<T> dependencies,
-			List<Command<?>> tasks) {
-		int n = dependencies.size();
-
-		for (T e : dependencies)
-			for (Command<?> c : tasks)
-				if (c.descriptor().equals(e))
-					++n;
-
-		return n;
+	public Set<Host> hosts() {
+		return this.hosts;
+	}
+	
+	public void stopCurrentThreads() throws InterruptedException {
+		Log.subheading("Waitting for current threads to stop");
+		
+		for (DependencyThread thread : this.threads)
+			thread.shutdown();
+		
+		for (DependencyThread thread : this.threads)
+			thread.join();
 	}
 
 }

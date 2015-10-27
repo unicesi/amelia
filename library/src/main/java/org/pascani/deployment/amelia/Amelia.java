@@ -22,27 +22,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
 
 /**
- * This class is a repository of the SSH and FTP connections.
- * 
- * <p>
- * Additionally, it contains the initial configuration parameters of execution.
- * </p>
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Amelia {
 
-	private static int hostFixedWidth = 0;
+	private static int hostFixedWidth;
 
 	/**
 	 * A map to store initial configuration parameters
@@ -50,39 +44,59 @@ public class Amelia {
 	private static Map<String, String> configuration;
 
 	/**
-	 * A map to store SSH handlers per host (host id)
+	 * The current execution graph
 	 */
-	private static Map<String, Host> hosts = new Hashtable<String, Host>();
+	private static DependencyGraph<? extends CommandDescriptor> currentExecutionGraph;
 
-	public static volatile boolean aborting = false;
+	/**
+	 * The variable indicating whether the current deployment is in trance of
+	 * aborting
+	 */
+	public static volatile boolean aborting;
 
-	public static volatile boolean shuttingDown = false;
+	/**
+	 * The variable indicating whether the current deployment is being shutting
+	 * down
+	 */
+	public static volatile boolean shuttingDown;
 
 	/**
 	 * An uncaught exception handler
 	 */
-	public static final Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
-		public void uncaughtException(Thread t, Throwable e) {
-			if (!aborting && !shuttingDown) {
-				// Prevent showing error messages raised because of the first
-				// reported error
-				aborting = true;
-
-				String message = e.getMessage().replaceAll(
-						"^((\\w)+(\\.\\w+)+:\\s)*", "");
-
-				logger.error(e.getMessage(), e);
-				Log.error("Stopping deployment: " + message);
-
-				Amelia.shutdown(true);
-			}
-		}
-	};
+	public static Thread.UncaughtExceptionHandler exceptionHandler;
 
 	/**
 	 * The logger
 	 */
 	private final static Logger logger = LogManager.getLogger(Amelia.class);
+
+
+	static {
+		reset();
+	}
+	
+	/**
+	 * Initializes all the non-final class members
+	 */
+	public static void reset() {
+		hostFixedWidth = 0;
+		aborting = false;
+		shuttingDown = false;
+		exceptionHandler = new Thread.UncaughtExceptionHandler() {
+			public void uncaughtException(Thread t, Throwable e) {
+				if (!aborting && !shuttingDown) {
+					aborting = true;
+					String message = e.getMessage().replaceAll(
+							"^((\\w)+(\\.\\w+)+:\\s)*", "");
+
+					logger.error(e.getMessage(), e);
+					Log.error("Stopping deployment: " + message);
+
+					Amelia.shutdown(true);
+				}
+			}
+		};
+	}
 
 	/**
 	 * Opens FTP connections with the specified hosts
@@ -92,15 +106,17 @@ public class Amelia {
 	 * @throws InterruptedException
 	 *             If any thread interrupts any of the handler threads
 	 */
-	public static void openFTPConnections(Host... _hosts)
+	public static void openFTPConnections(Host... hosts)
 			throws InterruptedException {
-		Log.heading("Establishing FTP connections (" + _hosts.length + ")");
 
-		for (Host host : _hosts) {
+		if (hosts.length > 0)
+			Log.heading("Establishing FTP connections (" + hosts.length + ")");
+
+		for (Host host : hosts) {
+			if (host.ftp().client().isConnected())
+				continue;
+
 			host.openFTPConnection();
-
-			if (!hosts.containsKey(host.identifier()))
-				hosts.put(host.identifier(), host);
 
 			logger.info("FTP connection for " + host
 					+ " was successfully established");
@@ -115,19 +131,20 @@ public class Amelia {
 	 * @throws InterruptedException
 	 *             If any thread interrupts any of the handler threads
 	 */
-	public static void openSSHConnections(Host... _hosts)
+	public static void openSSHConnections(Host... hosts)
 			throws InterruptedException {
-		Log.heading("Establishing SSH connections (" + _hosts.length + ")");
 
-		for (Host host : _hosts) {
+		if (hosts.length > 0)
+			Log.heading("Establishing SSH connections (" + hosts.length + ")");
+
+		for (Host host : hosts) {
+			if (host.ssh().isConnected())
+				continue;
+
 			host.openSSHConnection();
 
-			if (!hosts.containsKey(host.identifier())) {
-				hosts.put(host.identifier(), host);
-
-				if (hostFixedWidth < host.toString().length())
-					hostFixedWidth = host.toString().length();
-			}
+			if (hostFixedWidth < host.toString().length())
+				hostFixedWidth = host.toString().length();
 
 			if (host.ssh().isConnected())
 				logger.info("SSH connection for " + host
@@ -135,8 +152,8 @@ public class Amelia {
 		}
 
 		// set a common (fixed) with for all hosts
-		for (Map.Entry<String, Host> entry : hosts.entrySet()) {
-			entry.getValue().setFixedWidth(hostFixedWidth);
+		for (Host host : currentExecutionGraph.hosts()) {
+			host.setFixedWidth(hostFixedWidth);
 		}
 	}
 
@@ -150,20 +167,11 @@ public class Amelia {
 	 *             server or receiving a reply from the server.
 	 */
 	public static void closeFTPConnections(Host... hosts) throws IOException {
-		String[] ids = new String[hosts.length];
+		if (hosts.length > 0)
+			Log.subheading("Closing FTP connections");
 
-		for (int i = 0; i < ids.length; i++)
-			ids[i] = hosts[i].identifier();
-
-		closeFTPConnections(ids);
-	}
-
-	private static void closeFTPConnections(String... hostsIds)
-			throws IOException {
-		for (String id : hostsIds) {
-			Host host = hosts.get(id);
+		for (Host host : hosts) {
 			host.closeFTPConnection();
-
 			logger.info("FTP connection for " + host
 					+ " was successfully closed");
 		}
@@ -179,20 +187,11 @@ public class Amelia {
 	 *             If I/O error occurs.
 	 */
 	public static void closeSSHConnections(Host... hosts) throws IOException {
-		String[] ids = new String[hosts.length];
+		if (hosts.length > 0)
+			Log.subheading("Closing SSH connections");
 
-		for (int i = 0; i < ids.length; i++)
-			ids[i] = hosts[i].identifier();
-
-		closeSSHConnections(ids);
-	}
-
-	private static void closeSSHConnections(String... hostsIds)
-			throws IOException {
-		for (String id : hostsIds) {
-			Host host = hosts.get(id);
+		for (Host host : hosts) {
 			host.closeSSHConnection();
-
 			logger.info("SSH connection for " + host
 					+ " was successfully closed");
 		}
@@ -207,61 +206,39 @@ public class Amelia {
 	 *             If I/O error occurs.
 	 */
 	public static void stopExecutions(Host... hosts) throws IOException {
-		String[] ids = new String[hosts.length];
-
-		for (int i = 0; i < ids.length; i++)
-			ids[i] = hosts[i].identifier();
-
-		stopExecutions(ids);
-	}
-
-	private static void stopExecutions(String... hostsIds) throws IOException {
-		for (String id : hostsIds) {
-			Host host = hosts.get(id);
+		for (Host host : hosts)
 			host.stopExecutions();
-		}
 	}
 
 	/**
 	 * Terminates the execution
-	 * 
-	 * TODO: wait until all threads have terminated their execution before doing
-	 * anything
 	 */
-	public static void shutdown(boolean stopExecutedComponents) {
+	public static void shutdown(boolean stopCurrentExecutions) {
+		// Prevent shutting down more than once
 		if (!shuttingDown) {
-			// Prevent shutting down more than once
 			shuttingDown = true;
-
 			Log.heading("Starting deployment shutdown");
+
 			try {
-				String[] _hosts = hosts.keySet().toArray(new String[0]);
+				Host[] _hosts = currentExecutionGraph.hosts().toArray(
+						new Host[0]);
 
-				if (stopExecutedComponents)
-					stopExecutions(_hosts);
-
+				if(stopCurrentExecutions)
+					currentExecutionGraph.stopExecutions();
+				
+				currentExecutionGraph.stopCurrentThreads();
 				closeFTPConnections(_hosts);
 				closeSSHConnections(_hosts);
-
-			} catch (IOException e) {
+			} catch (Exception e) {
 				Log.error("Deployment shutdown unsuccessful; see logs for more information");
 				Log.error("Shutting system down abruptly");
-
 				logger.error(e);
 			} finally {
 				Log.heading("Deployment shutdown successful");
-				
 				// FIXME: Stop all threads instead of this
-				System.exit(0);
+				// System.exit(0);
 			}
 		}
-	}
-
-	/**
-	 * @return registered hosts
-	 */
-	public static Map<String, Host> hosts() {
-		return hosts;
 	}
 
 	/**
@@ -324,6 +301,11 @@ public class Amelia {
 			String name = (String) key;
 			configuration.put(name, config.getProperty(name));
 		}
+	}
+
+	public static void setCurrentExecutionGraph(
+			DependencyGraph<? extends CommandDescriptor> graph) {
+		currentExecutionGraph = graph;
 	}
 
 }

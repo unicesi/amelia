@@ -28,6 +28,7 @@ import net.sf.expectit.Expect;
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
+import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.ShellUtils;
 
 /**
@@ -51,17 +52,11 @@ public abstract class Command<T> implements Callable<T> {
 			String response = expect.expect(regexp(prompt)).getBefore();
 
 			if (!this.descriptor.isOk(response)) {
-				this.descriptor.fail(this.host);
+				Log.error(this.host, this.descriptor.failMessage());
 				throw new DeploymentException(this.descriptor.errorMessage());
 			}
 
 			return true;
-		}
-
-		@Override
-		public Callable<Void> rollback() throws Exception {
-			// Nothing to do here
-			return null;
 		}
 	}
 	
@@ -78,8 +73,6 @@ public abstract class Command<T> implements Callable<T> {
 	}
 
 	public abstract T call() throws Exception;
-	
-	public abstract Callable<Void> rollback() throws Exception;
 
 	public Host host() {
 		return this.host;

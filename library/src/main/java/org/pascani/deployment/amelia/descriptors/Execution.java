@@ -35,25 +35,24 @@ public class Execution extends CommandDescriptor {
 
 	private String[] arguments;
 
-	public Execution(final String compositeName,
-			final String[] libpath) {
-		super(null, null, null, compositeName + " has started");
+	public Execution(final String compositeName, final String[] libpath) {
+		super("frascati run " + compositeName + " ...", null, null,
+				compositeName + " has started");
 		this.compositeName = compositeName;
 		this.libpath = libpath;
 	}
 
-	public Execution(final String compositeName,
-			final String[] libpath, final String serviceName,
-			final String methodName) {
+	public Execution(final String compositeName, final String[] libpath,
+			final String serviceName, final String methodName) {
 
 		this(compositeName, libpath);
 		this.serviceName = serviceName;
 		this.methodName = methodName;
 	}
 
-	public Execution(final String compositeName,
-			final String[] libpath, final String serviceName,
-			final String methodName, final String[] arguments) {
+	public Execution(final String compositeName, final String[] libpath,
+			final String serviceName, final String methodName,
+			final String[] arguments) {
 
 		this(compositeName, libpath, serviceName, methodName);
 		this.arguments = arguments;

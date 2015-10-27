@@ -19,11 +19,7 @@
 package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
-
-import java.util.concurrent.Callable;
-
 import net.sf.expectit.Expect;
-import net.sf.expectit.Result;
 
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.ChangeDirectory;
@@ -37,28 +33,22 @@ import org.pascani.deployment.amelia.util.Strings;
  */
 public class Cd extends Command<Boolean> {
 
-	private String previousDirectory;
-
 	public Cd(Host host, ChangeDirectory descriptor) {
 		super(host, descriptor);
 	}
 
 	@Override
 	public Boolean call() throws Exception {
-		goTo(this.descriptor.toCommandString(), false);
+		goTo(this.descriptor.toCommandString());
 		return true;
 	}
 
-	private void goTo(String cdCommand, boolean rollback) throws Exception {
+	private void goTo(String cdCommand) throws Exception {
 		ChangeDirectory descriptor = (ChangeDirectory) super.descriptor;
 		Host host = super.host;
 
 		Expect expect = host.ssh().expect();
 		String prompt = ShellUtils.ameliaPromptRegexp();
-
-		if (!rollback) {
-			this.previousDirectory = pwd(expect, prompt);
-		}
 
 		expect.sendLine(cdCommand);
 		String response = expect.expect(regexp(prompt)).getBefore();
@@ -81,36 +71,5 @@ public class Cd extends Command<Boolean> {
 			throw new DeploymentException(message);
 		}
 	}
-
-	private String pwd(Expect expect, String prompt) throws Exception {
-		expect.sendLine("pwd");
-		Result pwd = expect.expect(regexp(prompt));
-
-		return pwd.getBefore().trim();
-	}
-
-	@Override
-	public Callable<Void> rollback() throws Exception {
-
-		final Host host = super.host;
-		final Expect expect = host.ssh().expect();
-		final String prompt = ShellUtils.ameliaPromptRegexp();
-		final String previousDirectory = this.previousDirectory;
-
-		return new Callable<Void>() {
-			public Void call() throws Exception {
-
-				goTo(previousDirectory, true);
-				String workingDirectory = pwd(expect, prompt);
-
-				if (workingDirectory.equals(previousDirectory))
-					Log.info(host, "Working directory: " + previousDirectory);
-				else
-					Log.warning(host, "Could not change working directory to "
-							+ previousDirectory);
-				return null;
-			}
-		};
-	}
-
+	
 }

@@ -197,7 +197,8 @@ public class SSHHandler extends Thread {
 		this.expect.expect(regexp(prompt));
 	}
 
-	public <V> V executeCommand(Callable<V> command) throws InterruptedException {
+	public <V> V executeCommand(Callable<V> command)
+			throws InterruptedException {
 		V result = this.taskQueue.execute(command);
 
 		if (command instanceof Run) {
@@ -249,6 +250,13 @@ public class SSHHandler extends Thread {
 		return components.size();
 	}
 
+	/**
+	 * Stops current executions on the task queue
+	 */
+	public void shutdownTaskQueue() {
+		this.taskQueue.shutdown();
+	}
+
 	public void stopExecutions() throws IOException {
 		stopExecutions(this.executions);
 	}
@@ -273,6 +281,8 @@ public class SSHHandler extends Thread {
 	}
 
 	public boolean isConnected() {
+		if(this.session == null || this.channel == null)
+			return false;
 		return this.session.isConnected() && this.channel.isConnected();
 	}
 

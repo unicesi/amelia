@@ -31,6 +31,10 @@ public class Log {
 		print(null, ascii(187), cyan(message));
 	}
 	
+	public static void subheading(String message) {
+		print(null, " ", message);
+	}
+	
 	public static void error(Host host, String message) {
 		print(host, red(ascii(10007)), message);
 	}

@@ -22,7 +22,6 @@ import java.util.Observable;
 import java.util.UUID;
 
 import org.pascani.deployment.amelia.commands.CommandFactory;
-import org.pascani.deployment.amelia.util.Log;
 
 /**
  * @see CommandFactory
@@ -60,11 +59,6 @@ public class CommandDescriptor extends Observable {
 
 	public void done(Host host) {
 		setChanged();
-		Log.info(host, doneMessage());
-	}
-
-	public void fail(Host host) {
-		Log.error(host, failMessage());
 	}
 
 	public String doneMessage() {

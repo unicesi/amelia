@@ -149,12 +149,6 @@ public class AssetBundle extends CommandDescriptor {
 	}
 
 	@Override
-	public void fail(Host host) {
-		currentPadding = host.toString().length();
-		super.fail(host);
-	}
-
-	@Override
 	public String doneMessage() {
 		String message = ascii(10003) + " ";
 		// 5 = __<identifier>_✓_

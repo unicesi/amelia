@@ -20,7 +20,6 @@ package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import net.sf.expectit.Expect;
@@ -72,24 +71,6 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 		}
 
 		return PID;
-	}
-
-	@Override
-	public Callable<Void> rollback() throws Exception {
-
-		final Host host = super.host;
-		final Execution descriptor = (Execution) super.descriptor;
-
-		return new Callable<Void>() {
-			public Void call() throws Exception {
-				int stopped = host.stopExecutions(Arrays.asList(descriptor));
-				if (stopped == 0)
-					Log.warning(host, "Component " + descriptor.compositeName()
-							+ " could not be stopped");
-
-				return null;
-			}
-		};
 	}
 
 }

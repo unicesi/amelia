@@ -78,14 +78,18 @@ public class FTPHandler extends Thread {
 	}
 
 	public synchronized void upload(AssetBundle bundle) throws IOException {
-
 		for (Map.Entry<String, List<String>> pair : bundle.transfers()
 				.entrySet()) {
 			for (String remote : pair.getValue()) {
 				this.client.upload(pair.getKey(), remote, bundle.overwrite());
 			}
 		}
-
+	}
+	
+	public boolean isConnected() {
+		if(this.client == null)
+			return false;
+		return this.client.isConnected();
 	}
 	
 	public Host host() {

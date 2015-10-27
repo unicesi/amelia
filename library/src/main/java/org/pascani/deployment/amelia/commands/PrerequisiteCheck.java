@@ -18,7 +18,6 @@
  */
 package org.pascani.deployment.amelia.commands;
 
-import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -137,12 +136,6 @@ public class PrerequisiteCheck extends Command<Boolean> {
 					"The java version could not be verified. Unknown version "
 							+ javaVersion.getBefore());
 		}
-	}
-	
-	@Override
-	public Callable<Void> rollback() throws Exception {
-		// Nothing to do here
-		return null;
 	}
 
 }

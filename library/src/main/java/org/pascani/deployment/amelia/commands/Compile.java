@@ -19,11 +19,7 @@
 package org.pascani.deployment.amelia.commands;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
-
-import java.util.concurrent.Callable;
-
 import net.sf.expectit.Expect;
-import net.sf.expectit.Result;
 
 import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.Compilation;
@@ -70,42 +66,6 @@ public class Compile extends Command<Boolean> {
 		}
 
 		return true;
-	}
-
-	/**
-	 * As there is not such "decompile" command, the rollback functionality
-	 * consist of removing the compiled file. Also, the shell should be in the
-	 * same working directory.
-	 */
-	@Override
-	public Callable<Void> rollback() throws Exception {
-
-		final Host host = super.host;
-		final Expect expect = host.ssh().expect();
-		final Compilation descriptor = (Compilation) super.descriptor;
-		final String prompt = ShellUtils.ameliaPromptRegexp();
-
-		return new Callable<Void>() {
-			public Void call() throws Exception {
-
-				String jarFile = descriptor.outputFile() + ".jar";
-
-				expect.sendLine("rm " + jarFile);
-				Result rm = expect.expect(regexp(prompt));
-
-				String[] errors = { "Not such file or directory",
-						"Permission denied",
-						"No existe el fichero o el directorio",
-						"Permiso denegado" };
-
-				if (!Strings.containsAnyOf(rm.getBefore(), errors))
-					Log.info(host, "File removed: " + jarFile);
-				else
-					Log.warning(host, "Could not remove file " + jarFile);
-
-				return null;
-			}
-		};
 	}
 
 }

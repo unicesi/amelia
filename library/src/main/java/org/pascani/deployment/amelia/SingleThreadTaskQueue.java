@@ -20,27 +20,30 @@ package org.pascani.deployment.amelia;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class SingleThreadTaskQueue extends Thread {
-	
+
 	private interface Callback<V> {
-		public void complete(V result);
+		public void onComplete(V result);
+
+		public void onCancel();
 	}
-	
+
 	private class CallbackTask<V> implements Runnable {
-		
+
 		private final Callable<V> task;
 		private final Callback<V> callback;
-		
+
 		public CallbackTask(Callable<V> task, Callback<V> callback) {
 			this.task = task;
 			this.callback = callback;
@@ -49,45 +52,68 @@ public class SingleThreadTaskQueue extends Thread {
 		public void run() {
 			try {
 				V result = this.task.call();
-				this.callback.complete(result);
+				this.callback.onComplete(result);
 			} catch (Exception e) {
+				this.callback.onCancel();
 				throw new RuntimeException(e);
 			}
 		}
 	}
-	
+
 	private final ExecutorService executor;
-	private final BlockingQueue<Runnable> dispatchQueue;
-	
+	private final LinkedBlockingDeque<CallbackTask<?>> dispatchQueue;
+	private volatile boolean shutdown;
+	private Future<?> currentTask;
+
 	public SingleThreadTaskQueue() {
 		this.executor = Executors.newSingleThreadExecutor();
-		this.dispatchQueue = new LinkedBlockingDeque<Runnable>();
+		this.dispatchQueue = new LinkedBlockingDeque<CallbackTask<?>>();
 	}
-	
+
 	public void run() {
-		while(true) {
+		while (!this.shutdown) {
+			CallbackTask<?> task = null;
 			try {
-				this.executor.submit(dispatchQueue.take()).get();
+				task = this.dispatchQueue.pollFirst(10, TimeUnit.MILLISECONDS);
+				if (task != null) {
+					currentTask = this.executor.submit(task);
+					currentTask.get();
+				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
 	}
-	
+
+	public synchronized void shutdown() {
+		if (!this.shutdown) {
+			this.shutdown = true;
+			this.executor.shutdown();
+
+			// release locks of canceled tasks
+			for (CallbackTask<?> task : dispatchQueue) {
+				task.callback.onCancel();
+			}
+		}
+	}
+
 	public <V> V execute(final Callable<V> task) throws InterruptedException {
-		
 		final CountDownLatch signal = new CountDownLatch(1);
 		final List<V> _return = new ArrayList<V>();
+		_return.add(0, null);
 
 		this.dispatchQueue.add(new CallbackTask<V>(task, new Callback<V>() {
-			public void complete(V result) {
-				_return.add(result);
+			public void onComplete(V result) {
+				_return.add(0, result);
+				signal.countDown();
+			}
+
+			public void onCancel() {
 				signal.countDown();
 			}
 		}));
 
 		signal.await();
-	
 		return _return.get(0);
 	}
 
