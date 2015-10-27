@@ -36,7 +36,7 @@ import org.pascani.deployment.amelia.util.Log;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class Host {
+public class Host implements Comparable<Host> {
 
 	private final String identifier;
 
@@ -111,8 +111,7 @@ public class Host {
 		this.ssh.stopExecutions();
 	}
 
-	public int stopExecutions(List<Execution> executions)
-			throws IOException {
+	public int stopExecutions(List<Execution> executions) throws IOException {
 		return this.ssh.stopExecutions(executions);
 	}
 
@@ -237,6 +236,10 @@ public class Host {
 			return false;
 		}
 		return true;
+	}
+
+	public int compareTo(Host o) {
+		return this.identifier.compareTo(o.identifier);
 	}
 
 }

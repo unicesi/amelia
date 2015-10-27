@@ -34,6 +34,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.pascani.deployment.amelia.commands.Command;
 import org.pascani.deployment.amelia.commands.CommandFactory;
+import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
@@ -52,7 +53,6 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		private final SSHHandler handler;
 		private final Callable<?> callable;
 		private final List<T> dependencies;
-		private final int actualDependencies;
 		private final CountDownLatch doneSignal;
 		private final CountDownLatch mainDoneSignal;
 		private final boolean isRollback;
@@ -71,7 +71,6 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 			this.handler = handler;
 			this.callable = callable;
 			this.dependencies = dependencies;
-			this.actualDependencies = actualDependencies;
 			this.doneSignal = new CountDownLatch(actualDependencies);
 			this.mainDoneSignal = doneSignal;
 			this.isRollback = isRollback;
@@ -141,13 +140,16 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 
 	private final Map<T, List<Command<?>>> tasks;
 
-	private final Set<Host> hosts;
+	private final Set<Host> sshHosts;
+
+	private final Set<Host> ftpHosts;
 
 	private final TreeSet<DependencyThread> threads;
 
 	public DependencyGraph() {
 		this.tasks = new HashMap<T, List<Command<?>>>();
-		this.hosts = new HashSet<Host>();
+		this.sshHosts = new HashSet<Host>();
+		this.ftpHosts = new HashSet<Host>();
 		this.threads = new TreeSet<DependencyGraph<T>.DependencyThread>();
 	}
 
@@ -155,8 +157,11 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		if (containsKey(a))
 			return false;
 
-		// Store the hosts
-		this.hosts.addAll(Arrays.asList(hosts));
+		// The only known use of the FTP connection is the AssetBundle
+		if (a instanceof AssetBundle)
+			this.ftpHosts.addAll(Arrays.asList(hosts));
+		else
+			this.sshHosts.addAll(Arrays.asList(hosts));
 
 		// Add the element with an empty list of dependencies
 		put(a, new ArrayList<T>());
@@ -192,9 +197,8 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 
 		// Open SSH and FTP connections before dependencies resolution
 		// TODO: validate if FTP/SSH is needed before opening connections
-		Host[] _hosts = this.hosts.toArray(new Host[0]);
-		Amelia.openSSHConnections(_hosts);
-		Amelia.openFTPConnections(_hosts);
+		Amelia.openSSHConnections(this.sshHosts.toArray(new Host[0]));
+		Amelia.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
 
 		if (stopPreviousExecutions)
 			stopExecutions();
@@ -260,15 +264,20 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 	}
 
 	public Set<Host> hosts() {
-		return this.hosts;
+		Set<Host> hosts = new TreeSet<Host>();
+
+		hosts.addAll(this.ftpHosts);
+		hosts.addAll(this.sshHosts);
+
+		return hosts;
 	}
-	
+
 	public void stopCurrentThreads() throws InterruptedException {
 		Log.subheading("Waitting for current threads to stop");
-		
+
 		for (DependencyThread thread : this.threads)
 			thread.shutdown();
-		
+
 		for (DependencyThread thread : this.threads)
 			thread.join();
 	}
