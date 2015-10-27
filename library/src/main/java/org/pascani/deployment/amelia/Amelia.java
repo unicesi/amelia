@@ -27,7 +27,6 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
 
@@ -46,7 +45,7 @@ public class Amelia {
 	/**
 	 * The current execution graph
 	 */
-	private static DependencyGraph<? extends CommandDescriptor> currentExecutionGraph;
+	private static DependencyGraph currentExecutionGraph;
 
 	/**
 	 * The variable indicating whether the current deployment is in trance of
@@ -70,16 +69,16 @@ public class Amelia {
 	 */
 	private final static Logger logger = LogManager.getLogger(Amelia.class);
 
-
 	static {
 		reset();
 	}
-	
+
 	/**
 	 * Initializes all the non-final class members
 	 */
 	public static void reset() {
 		hostFixedWidth = 0;
+		currentExecutionGraph = null;
 		aborting = false;
 		shuttingDown = false;
 		exceptionHandler = new Thread.UncaughtExceptionHandler() {
@@ -223,9 +222,9 @@ public class Amelia {
 				Host[] _hosts = currentExecutionGraph.hosts().toArray(
 						new Host[0]);
 
-				if(stopCurrentExecutions)
+				if (stopCurrentExecutions)
 					currentExecutionGraph.stopExecutions();
-				
+
 				currentExecutionGraph.stopCurrentThreads();
 				closeFTPConnections(_hosts);
 				closeSSHConnections(_hosts);
@@ -303,8 +302,7 @@ public class Amelia {
 		}
 	}
 
-	public static void setCurrentExecutionGraph(
-			DependencyGraph<? extends CommandDescriptor> graph) {
+	public static void setCurrentExecutionGraph(DependencyGraph graph) {
 		currentExecutionGraph = graph;
 	}
 

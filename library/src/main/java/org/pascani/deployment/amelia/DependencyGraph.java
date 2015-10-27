@@ -43,16 +43,16 @@ import org.pascani.deployment.amelia.util.Log;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class DependencyGraph<T extends CommandDescriptor> extends
-		HashMap<T, List<T>> {
+public class DependencyGraph extends
+		HashMap<CommandDescriptor, List<CommandDescriptor>> {
 
 	public class DependencyThread extends Thread implements Observer,
 			Comparable<DependencyThread> {
 
-		private final T descriptor;
+		private final CommandDescriptor descriptor;
 		private final SSHHandler handler;
 		private final Callable<?> callable;
-		private final List<T> dependencies;
+		private final List<CommandDescriptor> dependencies;
 		private final CountDownLatch doneSignal;
 		private final CountDownLatch mainDoneSignal;
 		private final boolean isRollback;
@@ -63,8 +63,9 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		 * while "actualDependencies" corresponds to the number of tasks
 		 * executing those descriptors.
 		 */
-		public DependencyThread(final T descriptor, final SSHHandler handler,
-				final Callable<?> callable, final List<T> dependencies,
+		public DependencyThread(final CommandDescriptor descriptor,
+				final SSHHandler handler, final Callable<?> callable,
+				final List<CommandDescriptor> dependencies,
 				final int actualDependencies, final CountDownLatch doneSignal,
 				boolean isRollback) {
 			this.descriptor = descriptor;
@@ -77,13 +78,14 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 			this.shutdown = false;
 
 			// Make this thread observe the corresponding dependencies
-			for (T dependency : this.dependencies) {
+			for (CommandDescriptor dependency : this.dependencies) {
 				dependency.addObserver(this);
 			}
 		}
 
-		public DependencyThread(final T descriptor, final SSHHandler handler,
-				final Callable<?> callable, final List<T> dependencies,
+		public DependencyThread(final CommandDescriptor descriptor,
+				final SSHHandler handler, final Callable<?> callable,
+				final List<CommandDescriptor> dependencies,
 				final int actualDependencies, final CountDownLatch doneSignal) {
 			this(descriptor, handler, callable, dependencies,
 					actualDependencies, doneSignal, false);
@@ -116,7 +118,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 			this.doneSignal.countDown();
 		}
 
-		public int compareTo(DependencyGraph<T>.DependencyThread o) {
+		public int compareTo(DependencyThread o) {
 			if (this.dependencies.size() < o.dependencies.size())
 				return -1;
 			else
@@ -138,7 +140,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 	 */
 	private static final long serialVersionUID = -6806533450294013309L;
 
-	private final Map<T, List<Command<?>>> tasks;
+	private final Map<CommandDescriptor, List<Command<?>>> tasks;
 
 	private final Set<Host> sshHosts;
 
@@ -147,13 +149,13 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 	private final TreeSet<DependencyThread> threads;
 
 	public DependencyGraph() {
-		this.tasks = new HashMap<T, List<Command<?>>>();
+		this.tasks = new HashMap<CommandDescriptor, List<Command<?>>>();
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();
-		this.threads = new TreeSet<DependencyGraph<T>.DependencyThread>();
+		this.threads = new TreeSet<DependencyThread>();
 	}
 
-	public boolean addDescriptor(T a, Host... hosts) {
+	public boolean addDescriptor(CommandDescriptor a, Host... hosts) {
 		if (containsKey(a))
 			return false;
 
@@ -164,7 +166,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 			this.sshHosts.addAll(Arrays.asList(hosts));
 
 		// Add the element with an empty list of dependencies
-		put(a, new ArrayList<T>());
+		put(a, new ArrayList<CommandDescriptor>());
 		this.tasks.put(a, new ArrayList<Command<?>>());
 
 		// Add a executable task per host
@@ -176,7 +178,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		return true;
 	}
 
-	public boolean addDependency(T a, T b) {
+	public boolean addDependency(CommandDescriptor a, CommandDescriptor b) {
 		if (!containsKey(a) || !containsKey(b))
 			return false;
 
@@ -205,8 +207,8 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 
 		CountDownLatch doneSignal = new CountDownLatch(this.tasks.size());
 
-		for (T e : keySet()) {
-			List<T> dependencies = get(e);
+		for (CommandDescriptor e : keySet()) {
+			List<CommandDescriptor> dependencies = get(e);
 			List<Command<?>> tasks = this.tasks.get(e);
 			int deps = countDependencyThreads(dependencies, tasks);
 
@@ -227,11 +229,11 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		doneSignal.await();
 	}
 
-	private int countDependencyThreads(List<T> dependencies,
+	private int countDependencyThreads(List<CommandDescriptor> dependencies,
 			List<Command<?>> tasks) {
 		int n = dependencies.size();
 
-		for (T e : dependencies)
+		for (CommandDescriptor e : dependencies)
 			for (Command<?> c : tasks)
 				if (c.descriptor().equals(e))
 					++n;
@@ -244,7 +246,7 @@ public class DependencyGraph<T extends CommandDescriptor> extends
 		Log.heading("Stopping previous executions");
 		Map<Host, List<Execution>> executionsPerHost = new HashMap<Host, List<Execution>>();
 
-		for (T descriptor : this.tasks.keySet()) {
+		for (CommandDescriptor descriptor : this.tasks.keySet()) {
 			if (descriptor instanceof Execution) {
 				List<Command<?>> commands = this.tasks.get(descriptor);
 				for (Command<?> command : commands) {
