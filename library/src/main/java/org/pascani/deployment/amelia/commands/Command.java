@@ -29,7 +29,6 @@ import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
-import org.pascani.deployment.amelia.util.ShellUtils;
 
 /**
  * @see CommandFactory
@@ -46,10 +45,10 @@ public abstract class Command<T> implements Callable<T> {
 		public Boolean call() throws Exception {
 
 			Expect expect = this.host.ssh().expect();
-			String prompt = ShellUtils.ameliaPromptRegexp();
+			String expression = this.descriptor.stopRegexp();
 
 			expect.sendLine(this.descriptor.toCommandString());
-			String response = expect.expect(regexp(prompt)).getBefore();
+			String response = expect.expect(regexp(expression)).getBefore();
 
 			if (!this.descriptor.isOk(response)) {
 				Log.error(this.host, this.descriptor.failMessage());

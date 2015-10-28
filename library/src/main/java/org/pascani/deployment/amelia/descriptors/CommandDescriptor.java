@@ -22,6 +22,7 @@ import java.util.Observable;
 import java.util.UUID;
 
 import org.pascani.deployment.amelia.commands.CommandFactory;
+import org.pascani.deployment.amelia.util.ShellUtils;
 
 /**
  * @see CommandFactory
@@ -37,15 +38,34 @@ public class CommandDescriptor extends Observable {
 
 	protected final String errorMessage;
 
+	protected final String stopRegexp;
+
 	protected final String successMessage;
 
+	/**
+	 * 
+	 * @param command
+	 * @param errorText
+	 * @param errorMessage
+	 * @param stopRegexp
+	 *            A regular expression to determine when to stop waiting
+	 * @param successMessage
+	 */
 	public CommandDescriptor(final String command, final String errorText,
-			final String errorMessage, final String successMessage) {
+			final String errorMessage, final String stopRegexp,
+			final String successMessage) {
 		this.internalId = UUID.randomUUID();
 		this.command = command;
 		this.errorText = errorText;
 		this.errorMessage = errorMessage;
+		this.stopRegexp = stopRegexp;
 		this.successMessage = successMessage;
+	}
+
+	public CommandDescriptor(final String command, final String errorText,
+			final String errorMessage, final String successMessage) {
+		this(command, errorText, errorMessage, ShellUtils.ameliaPromptRegexp(),
+				successMessage);
 	}
 
 	public CommandDescriptor(final String command, final String errorText,
@@ -115,5 +135,13 @@ public class CommandDescriptor extends Observable {
 
 	public String errorMessage() {
 		return this.errorMessage;
+	}
+
+	public String stopRegexp() {
+		return this.stopRegexp;
+	}
+
+	public String successMessage() {
+		return this.successMessage;
 	}
 }
