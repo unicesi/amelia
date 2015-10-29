@@ -26,7 +26,7 @@ import org.pascani.deployment.amelia.util.Strings;
 public class Execution extends CommandDescriptor {
 
 	public static class Builder {
-		
+
 		private String compositeName;
 		private String[] libpath;
 		private String serviceName;
@@ -34,7 +34,7 @@ public class Execution extends CommandDescriptor {
 		private String[] arguments;
 		private long timeout;
 		private String stopRegexp;
-		
+
 		public Builder() {
 			this.timeout = 0;
 			this.stopRegexp = "Press Ctrl\\+C to quit\\.\\.\\.|Call done!";
@@ -65,7 +65,7 @@ public class Execution extends CommandDescriptor {
 			return this;
 		}
 
-		public Builder withTimeout(long timeout) {
+		public Builder withTimeout(final long timeout) {
 			this.timeout = timeout;
 			return this;
 		}
@@ -94,7 +94,7 @@ public class Execution extends CommandDescriptor {
 
 	private Execution(Builder builder) {
 		super("frascati run " + builder.compositeName + " ...", null, null,
-				builder.stopRegexp, builder.compositeName + " has started");
+				builder.stopRegexp, builder.compositeName + " has been executed");
 		this.compositeName = builder.compositeName;
 		this.libpath = builder.libpath;
 		this.serviceName = builder.serviceName;
