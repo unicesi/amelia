@@ -21,6 +21,7 @@ package org.pascani.deployment.amelia.commands;
 import static net.sf.expectit.matcher.Matchers.regexp;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectIOException;
@@ -40,6 +41,7 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 		super(host, descriptor);
 	}
 
+	@SuppressWarnings("resource")
 	public Integer call() throws Exception {
 
 		int PID = -1;
@@ -57,6 +59,12 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 
 		try {
 			// Expect for a successful execution
+			if (descriptor.timeout() == -1)
+				expect = expect.withInfiniteTimeout();
+			else if(descriptor.timeout() > 0)
+				expect = expect.withTimeout(descriptor.timeout(),
+						TimeUnit.MILLISECONDS);
+
 			expect.expect(regexp(descriptor.stopRegexp()));
 
 		} catch (ExpectIOException ex) {

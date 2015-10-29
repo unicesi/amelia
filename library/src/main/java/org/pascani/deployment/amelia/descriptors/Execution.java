@@ -25,58 +25,77 @@ import org.pascani.deployment.amelia.util.Strings;
  */
 public class Execution extends CommandDescriptor {
 
-	private final static String DEFAULT_STOP_REGEX = "Press Ctrl\\+C to quit\\.\\.\\.|Call done!";
+	public static class Builder {
+		
+		private String compositeName;
+		private String[] libpath;
+		private String serviceName;
+		private String methodName;
+		private String[] arguments;
+		private long timeout;
+		private String stopRegexp;
+		
+		public Builder() {
+			this.timeout = 0;
+			this.stopRegexp = "Press Ctrl\\+C to quit\\.\\.\\.|Call done!";
+		}
+
+		public Builder withComposite(final String compositeName) {
+			this.compositeName = compositeName;
+			return this;
+		}
+
+		public Builder withLibpath(final String... libs) {
+			this.libpath = libs;
+			return this;
+		}
+
+		public Builder withService(final String serviceName) {
+			this.serviceName = serviceName;
+			return this;
+		}
+
+		public Builder withMethod(final String methodName) {
+			this.methodName = methodName;
+			return this;
+		}
+
+		public Builder withArguments(final String... arguments) {
+			this.arguments = arguments;
+			return this;
+		}
+
+		public Builder withTimeout(long timeout) {
+			this.timeout = timeout;
+			return this;
+		}
+
+		public Builder withInfiniteTimeout() {
+			this.timeout = -1;
+			return this;
+		}
+
+		public Execution build() {
+			return new Execution(this);
+		}
+	}
 
 	private final String compositeName;
-
 	private final String[] libpath;
+	private final String serviceName;
+	private final String methodName;
+	private final String[] arguments;
+	private final long timeout;
 
-	private String serviceName;
-
-	private String methodName;
-
-	private String[] arguments;
-
-	public Execution(final String compositeName, final String[] libpath,
-			final String stopRegexp) {
-		super("frascati run " + compositeName + " ...", null, null, stopRegexp,
-				compositeName + " has started");
-		this.compositeName = compositeName;
-		this.libpath = libpath;
-	}
-
-	public Execution(final String compositeName, final String[] libpath) {
-		this(compositeName, libpath, DEFAULT_STOP_REGEX);
-	}
-
-	public Execution(final String compositeName, final String[] libpath,
-			final String serviceName, final String methodName,
-			final String stopRegexp) {
-
-		this(compositeName, libpath, stopRegexp);
-		this.serviceName = serviceName;
-		this.methodName = methodName;
-	}
-
-	public Execution(final String compositeName, final String[] libpath,
-			final String serviceName, final String methodName) {
-		this(compositeName, libpath, serviceName, methodName,
-				DEFAULT_STOP_REGEX);
-	}
-
-	public Execution(final String compositeName, final String[] libpath,
-			final String serviceName, final String methodName,
-			final String[] arguments, final String stopRegexp) {
-
-		this(compositeName, libpath, serviceName, methodName, stopRegexp);
-		this.arguments = arguments;
-	}
-
-	public Execution(final String compositeName, final String[] libpath,
-			final String serviceName, final String methodName,
-			final String[] arguments) {
-		this(compositeName, libpath, serviceName, methodName, arguments,
-				DEFAULT_STOP_REGEX);
+	private Execution(Builder builder) {
+		super("frascati run " + builder.compositeName + " ...", null, null,
+				builder.stopRegexp, builder.compositeName + " has started");
+		this.compositeName = builder.compositeName;
+		this.libpath = builder.libpath;
+		this.serviceName = builder.serviceName;
+		this.methodName = builder.methodName;
+		this.arguments = builder.arguments;
+		this.timeout = builder.timeout;
 	}
 
 	public String toCommandSearchString() {
@@ -137,6 +156,10 @@ public class Execution extends CommandDescriptor {
 
 	public String[] arguments() {
 		return this.arguments;
+	}
+
+	public long timeout() {
+		return this.timeout;
 	}
 
 }
