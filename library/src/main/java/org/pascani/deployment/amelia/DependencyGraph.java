@@ -104,6 +104,9 @@ public class DependencyGraph extends
 								this.descriptor.doneMessage());
 
 					// Release this dependency
+					// FIXME: Temporary workaround to avoid service-not-bound
+					// errors (RMI)
+					Thread.sleep(2000);
 					this.descriptor.notifyObservers();
 				}
 			} catch (Exception e) {
