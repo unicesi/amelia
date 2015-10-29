@@ -55,7 +55,6 @@ public class DependencyGraph extends
 		private final List<CommandDescriptor> dependencies;
 		private final CountDownLatch doneSignal;
 		private final CountDownLatch mainDoneSignal;
-		private final boolean isRollback;
 		private volatile boolean shutdown;
 
 		/**
@@ -66,29 +65,19 @@ public class DependencyGraph extends
 		public DependencyThread(final CommandDescriptor descriptor,
 				final SSHHandler handler, final Callable<?> callable,
 				final List<CommandDescriptor> dependencies,
-				final int actualDependencies, final CountDownLatch doneSignal,
-				boolean isRollback) {
+				final int actualDependencies, final CountDownLatch doneSignal) {
 			this.descriptor = descriptor;
 			this.handler = handler;
 			this.callable = callable;
 			this.dependencies = dependencies;
 			this.doneSignal = new CountDownLatch(actualDependencies);
 			this.mainDoneSignal = doneSignal;
-			this.isRollback = isRollback;
 			this.shutdown = false;
 
 			// Make this thread observe the corresponding dependencies
 			for (CommandDescriptor dependency : this.dependencies) {
 				dependency.addObserver(this);
 			}
-		}
-
-		public DependencyThread(final CommandDescriptor descriptor,
-				final SSHHandler handler, final Callable<?> callable,
-				final List<CommandDescriptor> dependencies,
-				final int actualDependencies, final CountDownLatch doneSignal) {
-			this(descriptor, handler, callable, dependencies,
-					actualDependencies, doneSignal, false);
 		}
 
 		public void run() {
@@ -99,9 +88,7 @@ public class DependencyGraph extends
 					this.handler.executeCommand(this.callable);
 					this.descriptor.done(this.handler.host());
 
-					if (!this.isRollback)
-						Log.info(this.handler.host(),
-								this.descriptor.doneMessage());
+					Log.info(this.handler.host(), this.descriptor.doneMessage());
 
 					// Release this dependency
 					// FIXME: Temporary workaround to avoid service-not-bound
