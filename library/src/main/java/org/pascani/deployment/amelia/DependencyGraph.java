@@ -222,7 +222,7 @@ public class DependencyGraph extends
 			}
 		}
 
-		Log.heading("Starting deployment (" + this.tasks.size() + ")");
+		Log.heading("Starting deployment (" + this.threads.size() + ")");
 		for (DependencyThread thread : this.threads)
 			thread.start();
 
