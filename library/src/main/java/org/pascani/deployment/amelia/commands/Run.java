@@ -57,7 +57,7 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 
 		try {
 			// Expect for a successful execution
-			expect.expect(regexp("Press Ctrl\\+C to quit\\.\\.\\.|Call done!"));
+			expect.expect(regexp(descriptor.stopRegexp()));
 
 		} catch (ExpectIOException ex) {
 			String message = "Cannot instantiate the FraSCAti factory!";

@@ -25,6 +25,8 @@ import org.pascani.deployment.amelia.util.Strings;
  */
 public class Execution extends CommandDescriptor {
 
+	private final static String DEFAULT_STOP_REGEX = "Press Ctrl\\+C to quit\\.\\.\\.|Call done!";
+
 	private final String compositeName;
 
 	private final String[] libpath;
@@ -35,27 +37,46 @@ public class Execution extends CommandDescriptor {
 
 	private String[] arguments;
 
-	public Execution(final String compositeName, final String[] libpath) {
-		super("frascati run " + compositeName + " ...", null, null,
+	public Execution(final String compositeName, final String[] libpath,
+			final String stopRegexp) {
+		super("frascati run " + compositeName + " ...", null, null, stopRegexp,
 				compositeName + " has started");
 		this.compositeName = compositeName;
 		this.libpath = libpath;
 	}
 
-	public Execution(final String compositeName, final String[] libpath,
-			final String serviceName, final String methodName) {
+	public Execution(final String compositeName, final String[] libpath) {
+		this(compositeName, libpath, DEFAULT_STOP_REGEX);
+	}
 
-		this(compositeName, libpath);
+	public Execution(final String compositeName, final String[] libpath,
+			final String serviceName, final String methodName,
+			final String stopRegexp) {
+
+		this(compositeName, libpath, stopRegexp);
 		this.serviceName = serviceName;
 		this.methodName = methodName;
 	}
 
 	public Execution(final String compositeName, final String[] libpath,
+			final String serviceName, final String methodName) {
+		this(compositeName, libpath, serviceName, methodName,
+				DEFAULT_STOP_REGEX);
+	}
+
+	public Execution(final String compositeName, final String[] libpath,
+			final String serviceName, final String methodName,
+			final String[] arguments, final String stopRegexp) {
+
+		this(compositeName, libpath, serviceName, methodName, stopRegexp);
+		this.arguments = arguments;
+	}
+
+	public Execution(final String compositeName, final String[] libpath,
 			final String serviceName, final String methodName,
 			final String[] arguments) {
-
-		this(compositeName, libpath, serviceName, methodName);
-		this.arguments = arguments;
+		this(compositeName, libpath, serviceName, methodName, arguments,
+				DEFAULT_STOP_REGEX);
 	}
 
 	public String toCommandSearchString() {
