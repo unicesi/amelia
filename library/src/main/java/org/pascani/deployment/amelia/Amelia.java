@@ -85,11 +85,11 @@ public class Amelia {
 			public void uncaughtException(Thread t, Throwable e) {
 				if (!aborting && !shuttingDown) {
 					aborting = true;
-					// String message = e.getMessage().replaceAll(
-					// "^((\\w)+(\\.\\w+)+:\\s)*", "");
+					String message = e.getMessage().replaceAll(
+							"^((\\w)+(\\.\\w+)+:\\s)*", "");
 
 					logger.error(e.getMessage(), e);
-					Log.error("Stopping deployment: " + e.getMessage());
+					Log.error("Stopping deployment: " + message);
 
 					Amelia.shutdown(true);
 				}
@@ -150,7 +150,7 @@ public class Amelia {
 						+ " was successfully established");
 		}
 
-		// set a common (fixed) with for all hosts
+		// set a common (fixed) width for all hosts
 		for (Host host : currentExecutionGraph.hosts()) {
 			host.setFixedWidth(hostFixedWidth);
 		}

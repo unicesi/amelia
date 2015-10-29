@@ -188,7 +188,6 @@ public class DependencyGraph extends
 		Log.printBanner();
 
 		// Open SSH and FTP connections before dependencies resolution
-		// TODO: validate if FTP/SSH is needed before opening connections
 		Amelia.openSSHConnections(this.sshHosts.toArray(new Host[0]));
 		Amelia.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
 

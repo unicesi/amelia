@@ -107,17 +107,11 @@ public class SSHHandler extends Thread {
 			this.taskQueue.start();
 
 		} catch (JSchException e) {
-			String message = "Error establishing SSH connection with "
-					+ this.host;
-
-			Log.error(this.host, "");
-			throw new RuntimeException(message, e);
+			Log.error(this.host, "Error establishing connection");
+			System.exit(0);
 		} catch (IOException e) {
-			String message = "Error initializing SSH connection with "
-					+ this.host;
-
-			Log.error(this.host, "");
-			throw new RuntimeException(message, e);
+			Log.error(this.host, "Error initializing connection");
+			System.exit(0);
 		}
 	}
 

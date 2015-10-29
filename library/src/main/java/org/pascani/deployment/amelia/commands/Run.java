@@ -69,8 +69,8 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 		} catch (ExpectIOException ex) {
 			String message1 = "Cannot instantiate the FraSCAti factory in host "
 					+ super.host;
-			String message2 = "Operation timeout waiting for "
-					+ descriptor.stopRegexp() + " in host " + super.host;
+			String message2 = "Operation timeout waiting for \""
+					+ descriptor.stopRegexp() + "\" in host " + super.host;
 
 			if (ex.getInputBuffer().contains(message1)) {
 				Log.error(super.host, message1);
