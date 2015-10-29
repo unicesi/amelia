@@ -75,6 +75,11 @@ public class Execution extends CommandDescriptor {
 			return this;
 		}
 
+		public Builder withStopRegexp(final String regularExpression) {
+			this.stopRegexp = regularExpression;
+			return this;
+		}
+
 		public Execution build() {
 			return new Execution(this);
 		}
