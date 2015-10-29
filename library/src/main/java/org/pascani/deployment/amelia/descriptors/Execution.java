@@ -70,7 +70,7 @@ public class Execution extends CommandDescriptor {
 			return this;
 		}
 
-		public Builder withInfiniteTimeout() {
+		public Builder withoutTimeout() {
 			this.timeout = -1;
 			return this;
 		}
