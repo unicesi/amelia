@@ -85,11 +85,11 @@ public class Amelia {
 			public void uncaughtException(Thread t, Throwable e) {
 				if (!aborting && !shuttingDown) {
 					aborting = true;
-					String message = e.getMessage().replaceAll(
-							"^((\\w)+(\\.\\w+)+:\\s)*", "");
+					// String message = e.getMessage().replaceAll(
+					// "^((\\w)+(\\.\\w+)+:\\s)*", "");
 
 					logger.error(e.getMessage(), e);
-					Log.error("Stopping deployment: " + message);
+					Log.error("Stopping deployment: " + e.getMessage());
 
 					Amelia.shutdown(true);
 				}
