@@ -25,7 +25,6 @@ import java.util.concurrent.Callable;
 
 import net.sf.expectit.Expect;
 
-import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
@@ -52,7 +51,7 @@ public abstract class Command<T> implements Callable<T> {
 
 			if (!this.descriptor.isOk(response)) {
 				Log.error(this.host, this.descriptor.failMessage());
-				throw new DeploymentException(this.descriptor.errorMessage());
+				throw new Exception(this.descriptor.errorMessage());
 			}
 
 			return true;

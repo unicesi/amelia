@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectIOException;
 
-import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
@@ -61,20 +60,23 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 			// Expect for a successful execution
 			if (descriptor.timeout() == -1)
 				expect = expect.withInfiniteTimeout();
-			else if(descriptor.timeout() > 0)
+			else if (descriptor.timeout() > 0)
 				expect = expect.withTimeout(descriptor.timeout(),
 						TimeUnit.MILLISECONDS);
 
 			expect.expect(regexp(descriptor.stopRegexp()));
 
 		} catch (ExpectIOException ex) {
-			String message = "Cannot instantiate the FraSCAti factory!";
-			if (ex.getInputBuffer().contains(message)) {
-				Log.error(super.host, message);
-				throw new DeploymentException(message);
+			String message1 = "Cannot instantiate the FraSCAti factory in host "
+					+ super.host;
+			String message2 = "Operation timeout waiting for "
+					+ descriptor.stopRegexp() + " in host " + super.host;
+
+			if (ex.getInputBuffer().contains(message1)) {
+				Log.error(super.host, message1);
+				throw ex;
 			} else {
-				throw new RuntimeException("Expect operation timeout: "
-						+ ex.getInputBuffer());
+				throw new RuntimeException(message2);
 			}
 		}
 

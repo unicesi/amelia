@@ -21,7 +21,6 @@ package org.pascani.deployment.amelia.commands;
 import static net.sf.expectit.matcher.Matchers.regexp;
 import net.sf.expectit.Expect;
 
-import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.Compilation;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
@@ -40,7 +39,7 @@ public class Compile extends Command<Boolean> {
 	public Boolean call() throws Exception {
 
 		Compilation descriptor = (Compilation) super.descriptor;
-		Expect expect = this.host.ssh().expect();
+		Expect expect = super.host.ssh().expect();
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
 		// Perform the compilation
@@ -53,16 +52,16 @@ public class Compile extends Command<Boolean> {
 
 		if (Strings.containsAnyOf(compile, _404)) {
 			String message = "No such file or directory '"
-					+ descriptor.sourceDirectory() + "'";
+					+ descriptor.sourceDirectory() + "' in host " + super.host;
 
 			Log.error(super.host, message);
-			throw new DeploymentException(message);
+			throw new Exception(message);
 		} else if (Strings.containsAnyOf(compile, _denied)) {
 			String message = "Permission denied to access '"
-					+ descriptor.sourceDirectory() + "'";
+					+ descriptor.sourceDirectory() + "' in host " + super.host;
 
 			Log.error(super.host, message);
-			throw new DeploymentException(message);
+			throw new Exception(message);
 		}
 
 		return true;

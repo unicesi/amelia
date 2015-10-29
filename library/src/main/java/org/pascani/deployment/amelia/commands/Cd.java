@@ -21,7 +21,6 @@ package org.pascani.deployment.amelia.commands;
 import static net.sf.expectit.matcher.Matchers.regexp;
 import net.sf.expectit.Expect;
 
-import org.pascani.deployment.amelia.DeploymentException;
 import org.pascani.deployment.amelia.descriptors.ChangeDirectory;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.util.Log;
@@ -62,14 +61,14 @@ public class Cd extends Command<Boolean> {
 					+ descriptor.directory() + "'";
 
 			Log.error(host, message);
-			throw new DeploymentException(message);
+			throw new Exception(message);
 		} else if (Strings.containsAnyOf(response, _denied)) {
 			String message = "Permission denied to access '"
 					+ descriptor.directory() + "'";
 
 			Log.error(host, message);
-			throw new DeploymentException(message);
+			throw new Exception(message);
 		}
 	}
-	
+
 }
