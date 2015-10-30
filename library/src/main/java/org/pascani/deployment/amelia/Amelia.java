@@ -225,13 +225,13 @@ public class Amelia {
 				currentExecutionGraph.stopCurrentThreads();
 				closeFTPConnections(_hosts);
 				closeSSHConnections(_hosts);
+				Log.heading("Deployment shutdown successful");
 			} catch (Exception e) {
 				Log.error("Deployment shutdown unsuccessful; see logs for more information");
 				Log.error("Shutting system down abruptly");
 				logger.error(e);
 			} finally {
 				reset();
-				Log.heading("Deployment shutdown successful");
 			}
 		}
 	}
