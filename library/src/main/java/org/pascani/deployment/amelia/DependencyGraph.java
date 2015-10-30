@@ -88,8 +88,6 @@ public class DependencyGraph extends
 					this.handler.executeCommand(this.callable);
 					this.descriptor.done(this.handler.host());
 
-					Log.info(this.handler.host(), this.descriptor.doneMessage());
-
 					// Release this dependency
 					// FIXME: Temporary workaround to avoid service-not-bound
 					// errors (RMI)

@@ -44,8 +44,9 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 	public Integer call() throws Exception {
 
 		int PID = -1;
+		Host host = super.host;
 		Execution descriptor = (Execution) super.descriptor;
-		Expect expect = super.host.ssh().expect();
+		Expect expect = host.ssh().expect();
 
 		// Send the run command
 		expect.sendLine(descriptor.toCommandString() + " &");
@@ -65,15 +66,15 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 						TimeUnit.MILLISECONDS);
 
 			expect.expect(regexp(descriptor.stopRegexp()));
+			Log.info(host, descriptor.doneMessage());
 
 		} catch (ExpectIOException ex) {
-			String message1 = "Cannot instantiate the FraSCAti factory in host "
-					+ super.host;
+			String message1 = "Cannot instantiate the FraSCAti factory";
 			String message2 = "Operation timeout waiting for \""
-					+ descriptor.stopRegexp() + "\" in host " + super.host;
+					+ descriptor.stopRegexp() + "\" in host " + host;
 
 			if (ex.getInputBuffer().contains(message1)) {
-				Log.error(super.host, message1);
+				Log.error(host, message1 + " in host " + host);
 				throw ex;
 			} else {
 				throw new RuntimeException(message2);

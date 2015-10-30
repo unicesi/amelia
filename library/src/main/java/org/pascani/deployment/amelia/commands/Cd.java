@@ -68,6 +68,8 @@ public class Cd extends Command<Boolean> {
 
 			Log.error(host, message);
 			throw new Exception(message);
+		} else {
+			Log.info(host, descriptor.doneMessage());
 		}
 	}
 

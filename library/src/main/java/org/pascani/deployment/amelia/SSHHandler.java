@@ -205,7 +205,7 @@ public class SSHHandler extends Thread {
 	}
 
 	public int stopExecutions(List<Execution> executions) throws IOException {
-		// TODO: Improve the search string to identify deployed composites when
+		// FIXME: Improve the search string to identify deployed composites when
 		// the classpath is different (libraries are in different order)
 
 		String prompt = ShellUtils.ameliaPromptRegexp();

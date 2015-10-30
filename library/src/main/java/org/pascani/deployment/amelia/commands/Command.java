@@ -43,21 +43,26 @@ public abstract class Command<T> implements Callable<T> {
 
 		public Boolean call() throws Exception {
 
-			Expect expect = this.host.ssh().expect();
-			String expression = this.descriptor.stopRegexp();
+			Host host = super.host;
+			CommandDescriptor descriptor = super.descriptor;
 
-			expect.sendLine(this.descriptor.toCommandString());
+			Expect expect = host.ssh().expect();
+			String expression = descriptor.stopRegexp();
+
+			expect.sendLine(descriptor.toCommandString());
 			String response = expect.expect(regexp(expression)).getBefore();
 
-			if (!this.descriptor.isOk(response)) {
-				Log.error(this.host, this.descriptor.failMessage());
-				throw new Exception(this.descriptor.errorMessage());
+			if (!descriptor.isOk(response)) {
+				Log.error(host, descriptor.failMessage());
+				throw new Exception(descriptor.errorMessage());
+			} else {
+				Log.info(host, descriptor.doneMessage());
 			}
 
 			return true;
 		}
 	}
-	
+
 	protected final UUID internalId;
 
 	protected final Host host;

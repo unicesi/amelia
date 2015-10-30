@@ -59,12 +59,14 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		verifyFrascatiVersion(expect, prompt, descriptor);
 		verifyJavaVersion(expect, prompt, descriptor);
 
+		Log.info(host, descriptor.doneMessage());
+
 		return ok;
 	}
 
 	private void verifyFrascatiVariable(final Expect expect, final String prompt)
 			throws Exception {
-		
+
 		expect.sendLine("echo $FRASCATI_HOME");
 		Result frascatiHome = expect.expect(Matchers.regexp(prompt));
 
@@ -76,7 +78,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 
 	private void verifyFrascati(final Expect expect, final String prompt)
 			throws Exception {
-		
+
 		expect.sendLine("frascati --help");
 		Result frascati = expect.expect(Matchers.regexp(prompt));
 

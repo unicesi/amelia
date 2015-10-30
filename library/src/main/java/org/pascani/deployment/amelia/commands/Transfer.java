@@ -34,12 +34,14 @@ public class Transfer extends Command<Void> {
 	@Override
 	public Void call() throws Exception {
 
+		Host host = super.host;
 		AssetBundle descriptor = (AssetBundle) super.descriptor;
 
 		try {
-			super.host.ftp().upload(descriptor);
+			host.ftp().upload(descriptor);
+			Log.info(host, descriptor.doneMessage());
 		} catch (Exception e) {
-			Log.error(super.host, descriptor.failMessage());
+			Log.error(host, descriptor.failMessage());
 			throw e;
 		}
 

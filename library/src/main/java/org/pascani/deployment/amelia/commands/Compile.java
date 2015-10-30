@@ -38,8 +38,9 @@ public class Compile extends Command<Boolean> {
 
 	public Boolean call() throws Exception {
 
+		Host host = super.host;
 		Compilation descriptor = (Compilation) super.descriptor;
-		Expect expect = super.host.ssh().expect();
+		Expect expect = host.ssh().expect();
 		String prompt = ShellUtils.ameliaPromptRegexp();
 
 		// Perform the compilation
@@ -52,16 +53,18 @@ public class Compile extends Command<Boolean> {
 
 		if (Strings.containsAnyOf(compile, _404)) {
 			String message = "No such file or directory '"
-					+ descriptor.sourceDirectory() + "' in host " + super.host;
+					+ descriptor.sourceDirectory() + "' in host " + host;
 
-			Log.error(super.host, message);
+			Log.error(host, message);
 			throw new Exception(message);
 		} else if (Strings.containsAnyOf(compile, _denied)) {
 			String message = "Permission denied to access '"
-					+ descriptor.sourceDirectory() + "' in host " + super.host;
+					+ descriptor.sourceDirectory() + "' in host " + host;
 
-			Log.error(super.host, message);
+			Log.error(host, message);
 			throw new Exception(message);
+		} else {
+			Log.info(host, descriptor.doneMessage());
 		}
 
 		return true;
