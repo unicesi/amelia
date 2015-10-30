@@ -137,9 +137,6 @@ public class Amelia {
 			Log.heading("Establishing SSH connections (" + hosts.length + ")");
 
 		for (Host host : hosts) {
-			if (host.ssh().isConnected())
-				continue;
-
 			host.openSSHConnection();
 
 			if (hostFixedWidth < host.toString().length())
@@ -233,8 +230,8 @@ public class Amelia {
 				Log.error("Shutting system down abruptly");
 				logger.error(e);
 			} finally {
-				Log.heading("Deployment shutdown successful");
 				reset();
+				Log.heading("Deployment shutdown successful");
 			}
 		}
 	}

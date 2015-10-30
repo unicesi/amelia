@@ -84,11 +84,15 @@ public class Host implements Comparable<Host> {
 	}
 
 	public void openSSHConnection() throws InterruptedException {
-		this.ssh.start();
-		this.ssh.join();
-
-		if (this.ssh.isConnected())
-			Log.info(this, "");
+		if(!this.ssh.isConnected()) {
+			this.ssh.start();
+			this.ssh.join();
+			
+			if (this.ssh.isConnected())
+				Log.info(this, "Connection established");
+		} else {
+			Log.info(this, "Already opened");
+		}
 	}
 
 	public void closeSSHConnection() throws IOException {
@@ -96,11 +100,15 @@ public class Host implements Comparable<Host> {
 	}
 
 	public void openFTPConnection() throws InterruptedException {
-		this.ftp.start();
-		this.ftp.join();
+		if(!this.ftp.isConnected()) {
+			this.ftp.start();
+			this.ftp.join();
 
-		if (this.ftp.client().isConnected())
-			Log.info(this, "");
+			if (this.ftp.client().isConnected())
+				Log.info(this, "Connection established");
+		} else {
+			Log.info(this, "Already opened");
+		}
 	}
 
 	public boolean closeFTPConnection() throws IOException {
