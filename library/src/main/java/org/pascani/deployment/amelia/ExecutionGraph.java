@@ -43,7 +43,7 @@ import org.pascani.deployment.amelia.util.Log;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class DependencyGraph
+public class ExecutionGraph
 		extends HashMap<CommandDescriptor, List<CommandDescriptor>> {
 
 	public class DependencyThread extends Thread
@@ -138,7 +138,7 @@ public class DependencyGraph
 
 	private final ExecutionManager executionHelper;
 
-	public DependencyGraph() {
+	public ExecutionGraph() {
 		this.tasks = new HashMap<CommandDescriptor, List<Command<?>>>();
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();

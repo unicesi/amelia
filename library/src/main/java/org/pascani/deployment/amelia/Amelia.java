@@ -45,7 +45,7 @@ public class Amelia {
 	/**
 	 * The current execution graph
 	 */
-	private static DependencyGraph currentExecutionGraph;
+	private static ExecutionGraph currentExecutionGraph;
 
 	/**
 	 * The variable indicating whether the current deployment is in trance of
@@ -298,7 +298,7 @@ public class Amelia {
 		}
 	}
 
-	public static void setCurrentExecutionGraph(DependencyGraph graph) {
+	public static void setCurrentExecutionGraph(ExecutionGraph graph) {
 		currentExecutionGraph = graph;
 	}
 

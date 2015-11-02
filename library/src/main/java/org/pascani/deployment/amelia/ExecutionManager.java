@@ -38,7 +38,7 @@ public class ExecutionManager {
 	/**
 	 * The current execution graph
 	 */
-	private DependencyGraph executionGraph;
+	private ExecutionGraph executionGraph;
 
 	/**
 	 * The variable indicating whether the current deployment is in trance of
@@ -62,7 +62,7 @@ public class ExecutionManager {
 	 */
 	private static Logger logger = LogManager.getLogger(ExecutionManager.class);
 
-	public ExecutionManager(DependencyGraph executionGraph) {
+	public ExecutionManager(ExecutionGraph executionGraph) {
 		this.executionGraph = executionGraph;
 		reset();
 		setProperties();
