@@ -81,10 +81,10 @@ public class SSHHandler extends Thread {
 	public SSHHandler(final Host host) {
 		this.host = host;
 
-		String _connectionTimeout = Amelia
-				.getConfigurationEntry("connection_timeout");
-		String _executionTimeout = Amelia
-				.getConfigurationEntry("execution_timeout");
+		String _connectionTimeout = System
+				.getProperty("amelia.connection_timeout");
+		String _executionTimeout = System
+				.getProperty("amelia.execution_timeout");
 
 		this.connectionTimeout = Integer.parseInt(_connectionTimeout);
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
@@ -92,8 +92,7 @@ public class SSHHandler extends Thread {
 		this.taskQueue = new SingleThreadTaskQueue();
 
 		// Handle uncaught exceptions
-		this.setUncaughtExceptionHandler(Amelia.exceptionHandler);
-		this.taskQueue.setUncaughtExceptionHandler(Amelia.exceptionHandler);
+		this.taskQueue.setUncaughtExceptionHandler(ExecutionManager.exceptionHandler());
 	}
 
 	@Override
@@ -118,8 +117,8 @@ public class SSHHandler extends Thread {
 	private void connect() throws JSchException, IOException {
 		JSch jsch = new JSch();
 
-		String identity = Amelia.getConfigurationEntry("identity");
-		String knownHosts = Amelia.getConfigurationEntry("known_hosts");
+		String identity = System.getProperty("amelia.identity");
+		String knownHosts = System.getProperty("amelia.known_hosts");
 
 		if (new File(identity).exists())
 			jsch.addIdentity(identity);
@@ -180,8 +179,8 @@ public class SSHHandler extends Thread {
 		String shell = result.getBefore().split("\n")[0].trim();
 
 		if (!shell.matches("bash|zsh")) {
-			RuntimeException e = new RuntimeException("Shell not supported: "
-					+ shell);
+			RuntimeException e = new RuntimeException(
+					"Shell not supported: " + shell);
 			logger.error("Shell not supported: " + shell, e);
 			throw e;
 		}
@@ -225,9 +224,9 @@ public class SSHHandler extends Thread {
 				this.expect.expect(regexp(prompt));
 
 				components.add(descriptor.compositeName());
-				logger.info("Execution of composite "
-						+ descriptor.compositeName()
-						+ " was successfully stopped in " + this.host);
+				logger.info(
+						"Execution of composite " + descriptor.compositeName()
+								+ " was successfully stopped in " + this.host);
 			}
 		}
 
@@ -275,7 +274,7 @@ public class SSHHandler extends Thread {
 	}
 
 	public boolean isConnected() {
-		if(this.session == null || this.channel == null)
+		if (this.session == null || this.channel == null)
 			return false;
 		return this.session.isConnected() && this.channel.isConnected();
 	}

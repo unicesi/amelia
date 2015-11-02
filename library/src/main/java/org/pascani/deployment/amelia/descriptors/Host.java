@@ -50,9 +50,9 @@ public class Host implements Comparable<Host> {
 
 	private final String password;
 
-	private final SSHHandler ssh;
+	private SSHHandler ssh;
 
-	private final FTPHandler ftp;
+	private FTPHandler ftp;
 
 	private int fixedWith;
 
@@ -70,10 +70,6 @@ public class Host implements Comparable<Host> {
 		this.sshPort = sshPort;
 		this.username = username;
 		this.password = password;
-
-		this.ssh = new SSHHandler(this);
-		this.ftp = new FTPHandler(this);
-
 		this.fixedWith = toString().length();
 	}
 
@@ -84,6 +80,9 @@ public class Host implements Comparable<Host> {
 	}
 
 	public void openSSHConnection() throws InterruptedException {
+		if(this.ssh == null)
+			this.ssh = new SSHHandler(this);
+			
 		if(!this.ssh.isConnected()) {
 			this.ssh.start();
 			this.ssh.join();
@@ -96,10 +95,14 @@ public class Host implements Comparable<Host> {
 	}
 
 	public void closeSSHConnection() throws IOException {
-		this.ssh.close();
+		if(this.ssh != null)
+			this.ssh.close();
 	}
 
 	public void openFTPConnection() throws InterruptedException {
+		if(this.ftp == null)
+			this.ftp = new FTPHandler(this);
+		
 		if(!this.ftp.isConnected()) {
 			this.ftp.start();
 			this.ftp.join();
@@ -111,8 +114,9 @@ public class Host implements Comparable<Host> {
 		}
 	}
 
-	public boolean closeFTPConnection() throws IOException {
-		return this.ftp.close();
+	public void closeFTPConnection() throws IOException {
+		if(this.ftp != null)
+			this.ftp.close();
 	}
 
 	public void stopExecutions() throws IOException {

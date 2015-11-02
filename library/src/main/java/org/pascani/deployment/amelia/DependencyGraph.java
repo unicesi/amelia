@@ -43,11 +43,11 @@ import org.pascani.deployment.amelia.util.Log;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class DependencyGraph extends
-		HashMap<CommandDescriptor, List<CommandDescriptor>> {
+public class DependencyGraph
+		extends HashMap<CommandDescriptor, List<CommandDescriptor>> {
 
-	public class DependencyThread extends Thread implements Observer,
-			Comparable<DependencyThread> {
+	public class DependencyThread extends Thread
+			implements Observer, Comparable<DependencyThread> {
 
 		private final CommandDescriptor descriptor;
 		private final SSHHandler handler;
@@ -136,11 +136,14 @@ public class DependencyGraph extends
 
 	private final TreeSet<DependencyThread> threads;
 
+	private final ExecutionManager executionHelper;
+
 	public DependencyGraph() {
 		this.tasks = new HashMap<CommandDescriptor, List<Command<?>>>();
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();
 		this.threads = new TreeSet<DependencyThread>();
+		this.executionHelper = new ExecutionManager(this);
 	}
 
 	public boolean addDescriptor(CommandDescriptor a, Host... hosts) {
@@ -172,24 +175,24 @@ public class DependencyGraph extends
 
 		// FIXME: search for transitive dependencies
 		if (get(b).contains(a))
-			throw new RuntimeException(String.format(
-					"Circular reference detected: %s <-> %s", a, b));
+			throw new RuntimeException(String
+					.format("Circular reference detected: %s <-> %s", a, b));
 
 		get(a).add(b);
 		return true;
 	}
 
-	public void resolve(boolean stopPreviousExecutions)
-			throws InterruptedException, IOException {
+	public void resolve(final boolean stopPreviousExecutions,
+			final boolean stopExecutionsWhenFinish)
+					throws InterruptedException, IOException {
 
-		Amelia.setCurrentExecutionGraph(this);
 		Log.printBanner();
 
 		// Open SSH and FTP connections before dependencies resolution
-		Amelia.openSSHConnections(this.sshHosts.toArray(new Host[0]));
-		Amelia.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
+		executionHelper.openSSHConnections(this.sshHosts.toArray(new Host[0]));
+		executionHelper.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
 
-		if (stopPreviousExecutions)
+		if (stopPreviousExecutions && this.sshHosts.size() > 0)
 			stopExecutions();
 
 		CountDownLatch doneSignal = new CountDownLatch(this.tasks.size());
@@ -200,11 +203,12 @@ public class DependencyGraph extends
 			int deps = countDependencyThreads(dependencies, tasks);
 
 			for (Command<?> task : tasks) {
-				DependencyThread thread = new DependencyThread(e, task.host()
-						.ssh(), task, dependencies, deps, doneSignal);
+				DependencyThread thread = new DependencyThread(e,
+						task.host().ssh(), task, dependencies, deps,
+						doneSignal);
 
 				// Handle uncaught exceptions
-				thread.setUncaughtExceptionHandler(Amelia.exceptionHandler);
+				thread.setUncaughtExceptionHandler(ExecutionManager.exceptionHandler());
 				threads.add(thread);
 			}
 		}
@@ -214,6 +218,7 @@ public class DependencyGraph extends
 			thread.start();
 
 		doneSignal.await();
+		this.executionHelper.shutdown(true);
 	}
 
 	private int countDependencyThreads(List<CommandDescriptor> dependencies,
@@ -241,8 +246,8 @@ public class DependencyGraph extends
 						executionsPerHost.put(command.host(),
 								new ArrayList<Execution>());
 
-					executionsPerHost.get(command.host()).add(
-							(Execution) descriptor);
+					executionsPerHost.get(command.host())
+							.add((Execution) descriptor);
 				}
 			}
 		}

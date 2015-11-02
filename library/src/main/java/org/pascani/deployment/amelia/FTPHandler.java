@@ -40,9 +40,6 @@ public class FTPHandler extends Thread {
 	public FTPHandler(final Host host) {
 		this.host = host;
 		this.client = new FTPClient();
-		
-		// Handle uncaught exceptions
-		this.setUncaughtExceptionHandler(Amelia.exceptionHandler);
 	}
 
 	public void run() {
