@@ -43,7 +43,7 @@ import org.pascani.deployment.amelia.util.Log;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ExecutionGraph
+public class DescriptorGraph
 		extends HashMap<CommandDescriptor, List<CommandDescriptor>> {
 
 	public class DependencyThread extends Thread
@@ -136,14 +136,14 @@ public class ExecutionGraph
 
 	private final TreeSet<DependencyThread> threads;
 
-	private final ExecutionManager executionHelper;
+	private final ExecutionManager executionManager;
 
-	public ExecutionGraph() {
+	public DescriptorGraph() {
 		this.tasks = new HashMap<CommandDescriptor, List<Command<?>>>();
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();
 		this.threads = new TreeSet<DependencyThread>();
-		this.executionHelper = new ExecutionManager(this);
+		this.executionManager = new ExecutionManager(this);
 	}
 
 	public boolean addDescriptor(CommandDescriptor a, Host... hosts) {
@@ -182,15 +182,22 @@ public class ExecutionGraph
 		return true;
 	}
 
+	/**
+	 * Resolve dependencies and do nothing after deployment has been finished
+	 */
+	public void resolve(final boolean stopPreviousExecutions)
+			throws InterruptedException, IOException {
+		resolve(stopPreviousExecutions, false, false);
+	}
+
 	public void resolve(final boolean stopPreviousExecutions,
+			final boolean shutdownAfterDeployment,
 			final boolean stopExecutionsWhenFinish)
 					throws InterruptedException, IOException {
 
-		Log.printBanner();
-
 		// Open SSH and FTP connections before dependencies resolution
-		executionHelper.openSSHConnections(this.sshHosts.toArray(new Host[0]));
-		executionHelper.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
+		executionManager.openSSHConnections(this.sshHosts.toArray(new Host[0]));
+		executionManager.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
 
 		if (stopPreviousExecutions && this.sshHosts.size() > 0)
 			stopExecutions();
@@ -208,7 +215,8 @@ public class ExecutionGraph
 						doneSignal);
 
 				// Handle uncaught exceptions
-				thread.setUncaughtExceptionHandler(ExecutionManager.exceptionHandler());
+				thread.setUncaughtExceptionHandler(
+						ExecutionManager.exceptionHandler());
 				threads.add(thread);
 			}
 		}
@@ -218,7 +226,7 @@ public class ExecutionGraph
 			thread.start();
 
 		doneSignal.await();
-		this.executionHelper.shutdown(true);
+		this.executionManager.shutdown(true);
 	}
 
 	private int countDependencyThreads(List<CommandDescriptor> dependencies,
@@ -257,15 +265,6 @@ public class ExecutionGraph
 		}
 	}
 
-	public Set<Host> hosts() {
-		Set<Host> hosts = new TreeSet<Host>();
-
-		hosts.addAll(this.ftpHosts);
-		hosts.addAll(this.sshHosts);
-
-		return hosts;
-	}
-
 	public void stopCurrentThreads() throws InterruptedException {
 		Log.subheading("Waitting for current threads to stop");
 
@@ -276,4 +275,20 @@ public class ExecutionGraph
 			thread.join();
 	}
 
+	public Set<Host> hosts() {
+		Set<Host> hosts = new TreeSet<Host>();
+
+		hosts.addAll(this.ftpHosts);
+		hosts.addAll(this.sshHosts);
+
+		return hosts;
+	}
+	
+	public Set<Host> sshHosts() {
+		return this.sshHosts;
+	}
+	
+	public Set<Host> ftpHosts() {
+		return this.ftpHosts;
+	}
 }

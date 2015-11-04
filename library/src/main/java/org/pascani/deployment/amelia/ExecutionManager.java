@@ -38,7 +38,7 @@ public class ExecutionManager {
 	/**
 	 * The current execution graph
 	 */
-	private ExecutionGraph executionGraph;
+	private DescriptorGraph executionGraph;
 
 	/**
 	 * The variable indicating whether the current deployment is in trance of
@@ -62,7 +62,7 @@ public class ExecutionManager {
 	 */
 	private static Logger logger = LogManager.getLogger(ExecutionManager.class);
 
-	public ExecutionManager(ExecutionGraph executionGraph) {
+	public ExecutionManager(DescriptorGraph executionGraph) {
 		this.executionGraph = executionGraph;
 		reset();
 		setProperties();
@@ -85,6 +85,7 @@ public class ExecutionManager {
 					logger.error(e.getMessage(), e);
 					Log.error("Stopping deployment: " + message);
 
+					SubsystemGraph.getInstance().shutdown();
 					shutdown(true);
 				}
 			}
@@ -208,14 +209,17 @@ public class ExecutionManager {
 			Log.heading("Starting deployment shutdown");
 
 			try {
-				Host[] _hosts = executionGraph.hosts().toArray(new Host[0]);
+				Host[] sshHosts = executionGraph.sshHosts()
+						.toArray(new Host[0]);
+				Host[] ftpHosts = executionGraph.ftpHosts()
+						.toArray(new Host[0]);
 
 				if (stopCurrentExecutions)
 					executionGraph.stopExecutions();
 
 				executionGraph.stopCurrentThreads();
-				closeFTPConnections(_hosts);
-				closeSSHConnections(_hosts);
+				closeFTPConnections(ftpHosts);
+				closeSSHConnections(sshHosts);
 				Log.heading("Deployment shutdown successful");
 			} catch (Exception e) {
 				Log.error(
@@ -235,6 +239,10 @@ public class ExecutionManager {
 	 * Reads configuration properties
 	 */
 	private void setProperties() {
+		if (System.getProperty("amelia.config") != null)
+			return;
+
+		System.setProperty("amelia.config", "true");
 		Properties config = new Properties();
 		InputStream input = null;
 

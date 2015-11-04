@@ -24,7 +24,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +62,6 @@ public class SingleThreadTaskQueue extends Thread {
 	private final ExecutorService executor;
 	private final LinkedBlockingDeque<CallbackTask<?>> dispatchQueue;
 	private volatile boolean shutdown;
-	private Future<?> currentTask;
 
 	public SingleThreadTaskQueue() {
 		this.executor = Executors.newSingleThreadExecutor();
@@ -75,10 +73,8 @@ public class SingleThreadTaskQueue extends Thread {
 			CallbackTask<?> task = null;
 			try {
 				task = this.dispatchQueue.pollFirst(10, TimeUnit.MILLISECONDS);
-				if (task != null) {
-					currentTask = this.executor.submit(task);
-					currentTask.get();
-				}
+				if (task != null)
+					this.executor.submit(task).get();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

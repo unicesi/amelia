@@ -98,6 +98,10 @@ public final class Pair<K, V> implements Serializable {
 	@Override public String toString() {
 		return k + "->" + v;
 	}
+	
+	public static <K, V> Pair<K, V> newPair(K key, V value) {
+		return new Pair<K, V>(key, value);
+	}
 
 }
 
