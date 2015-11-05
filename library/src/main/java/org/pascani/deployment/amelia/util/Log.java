@@ -20,98 +20,108 @@ package org.pascani.deployment.amelia.util;
 
 import static org.pascani.deployment.amelia.util.Strings.ascii;
 
+import java.text.SimpleDateFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.pascani.deployment.amelia.descriptors.Host;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Log {
-	
-	public static void heading(String message) {
-		print(null, ascii(187), cyan(message));
+
+	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat(
+			"HH:mm:ss");
+
+	public static void info(String message) {
+		print(message);
 	}
-	
-	public static void subheading(String message) {
-		print(null, " ", message);
-	}
-	
+
 	public static void error(Host host, String message) {
-		print(host, red(ascii(10007)), message);
-	}
-	
-	public static void warning(Host host, String message) {
-		print(host, yellow(ascii(9888)), message);
-	}
-	
-	public static void info(Host host, String message) {
-		print(host, green(ascii(10003)), message);
-	}
-	
-	public static void error(String message) {
-		print(null, ascii(9632), red(message));
-	}
-	
-	private static void print(Host host, String icon, String message) {
 		String hostName = host != null ? host.toFixedString() + " " : "";
-		System.out.println(hostName + icon + " " + message);
+		print(hostName + ANSI.RED.format(ascii(10007)) + " " + message);
 	}
-	
-	private static String red(String text) {
-		return "\u001b[1;31m" + text + reset();
+
+	public static void warning(Host host, String message) {
+		String hostName = host != null ? host.toFixedString() + " " : "";
+		print(hostName + ANSI.YELLOW.format(ascii(9888)) + " " + message);
 	}
-	
-	private static String green(String text) {
-		return "\u001b[1;32m" + text + reset();
+
+	public static void ok(Host host, String message) {
+		String hostName = host != null ? host.toFixedString() + " " : "";
+		print(hostName + ANSI.GREEN.format(ascii(10003)) + " " + message);
 	}
-	
-	private static String yellow(String text) {
-		return "\u001b[1;33m" + text + reset();
+
+	public static void error(String message) {
+		print(ascii(9632) + " " + ANSI.RED.format(message));
 	}
-	
-	private static String blue(String text) {
-		return "\u001b[1;34m" + text + reset();
+
+	private static synchronized void print(String message) {
+		message = colorPairs(message, "['\"]", "['\"]", ANSI.CYAN);
+		message = colorPairs(message, "\\[", "\\]", ANSI.MAGENTA);
+		message = colorPairs(message, "\\(", "\\)", ANSI.BLUE);
+
+		long currentTime = System.currentTimeMillis();
+		String formattedTime = timeFormatter.format(currentTime);
+		formattedTime = "[" + ANSI.GRAY.format(formattedTime) + "]";
+
+		System.out.println(formattedTime + " " + message);
 	}
-	
-	private static String cyan(String text) {
-		return "\u001b[1;36m" + text + reset();
+
+	// Adapted from: http://stackoverflow.com/a/24080170/738968
+	private static String colorPairs(String text, String leftSymbol,
+			String rightSymbol, ANSI color) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("(" + leftSymbol + ")");
+		sb.append("((?:(?!\1).)*)");
+		sb.append("(" + rightSymbol + ")");
+		
+		Pattern quotes = Pattern.compile(sb.toString());
+		Matcher matcher = quotes.matcher(text);
+
+		if (matcher.find()) {
+			String left = matcher.group(1);
+			String right = matcher.group(3);
+			String coloredText = color.format(matcher.group(2));
+			text = matcher.replaceAll(left + coloredText + right);
+		}
+		
+		return text;
 	}
-	
-	private static String reset() {
-		return "\u001b[0m";
-	}
-	
-	private static String blink(String text) {
-		return "\u001B[5m" + text + reset();
-	}
-	
+
 	public static void printBanner() {
 		// From
 		// http://www.chris.com/ascii/index.php?art=transportation/airplanes
 		String e = Strings.ascii(233), c = Strings.ascii(169);
+		ANSI b = ANSI.BLUE, r = ANSI.RED, y = ANSI.CYAN, bb = ANSI.BLINK;
+
 		String banner = "\n" + "               __"
-				+ blue("/\\")
+				+ b.format("/\\")
 				+ "__              .----------------------------------------. \n"
 				+ "              `=="
-				+ blue("/\\")
+				+ b.format("/\\")
 				+ "==`             |                                        | \n"
-				+ "    " + red("____________") + blue("/") + red("__") + blue("\\")
-				+ red("____________")
+				+ "    " + r.format("____________") + r.format("/")
+				+ r.format("__") + b.format("\\") + r.format("____________")
 				+ "   |              A M E L I A               | \n" + "   "
-				+ red("/____________________________\\")
+				+ r.format("/____________________________\\")
 				+ "  |                                        | \n" + "     "
-				+ red("__") + "||" + red("__") + "||" + red("__") + blue("/") + ".--."
-				+ blue("\\") + red("__") + "||" + red("__") + "||" + red("__")
-				+ "    | A deployment library by Miguel Jim" + e + "nez | \n"
-				+ "    " + red("/__") + "|" + red("___") + "|" + red("___") + "( "
-				+ blink(cyan("><")) + " )" + red("___") + "|" + red("___") + "|"
-				+ red("__\\") + "   |        " + c
+				+ r.format("__") + "||" + r.format("__") + "||"
+				+ r.format("__") + b.format("/") + ".--." + b.format("\\")
+				+ r.format("__") + "||" + r.format("__") + "||"
+				+ r.format("__") + "    | A deployment library by Miguel Jim"
+				+ e + "nez | \n" + "    " + r.format("/__") + "|"
+				+ r.format("___") + "|" + r.format("___") + "( "
+				+ bb.format(y.format("><")) + " )" + r.format("___") + "|"
+				+ r.format("___") + "|" + r.format("__\\") + "   |        " + c
 				+ " Universidad Icesi 2015        | \n" + "              _"
-				+ blue("/") + "`--`" + blue("\\")
+				+ b.format("/") + "`--`" + b.format("\\")
 				+ "_             |                                        | \n"
-				+ "             (" + blue("/") + "------" + blue("\\")
+				+ "             (" + b.format("/") + "------" + b.format("\\")
 				+ ")            '----------------------------------------' \n";
 
 		System.out.printf("%s\n", banner);
 	}
-	
+
 }

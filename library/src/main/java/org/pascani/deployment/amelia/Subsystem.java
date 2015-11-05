@@ -42,15 +42,15 @@ public class Subsystem {
 	}
 
 	public void start() {
-		Log.subheading("\n  Deploying subsystem " + alias + "\n");
+		Log.info("Starting deploying of subsystem '" + alias + "'");
 	}
 
 	public void error() {
-		Log.error(null, "Error deploying subsystem " + alias);
+		Log.error(null, "Error deploying subsystem '" + alias + "'");
 	}
 
 	public void done() {
-		Log.info(null, "Subsystem " + alias + " deployed successfully");
+		Log.info("Finished deploying subsystem '" + alias + "'\n");
 	}
 
 	@Override

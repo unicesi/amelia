@@ -68,13 +68,22 @@ public class Strings {
 	public static String ascii(int codePoint) {
 		return String.valueOf(Character.toChars(codePoint));
 	}
-	
+
 	public static String truncate(String arg, int minimum, int maximun) {
-		if(arg.length() > maximun)
+		if (arg.length() > maximun)
 			arg = "..." + arg.substring(arg.length() - maximun + 3);
-			
+
 		arg = String.format("%" + minimum + "." + maximun + "s", arg);
 		return arg;
+	}
+
+	public static String center(String text, int length) {
+		String out = String.format("%" + length + "s%s%" + length + "s", "",
+				text, "");
+		float mid = (out.length() / 2);
+		float start = mid - (length / 2);
+		float end = start + length;
+		return out.substring((int) start, (int) end);
 	}
 
 }

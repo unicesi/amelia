@@ -59,7 +59,7 @@ public class PrerequisiteCheck extends Command<Boolean> {
 		verifyFrascatiVersion(expect, prompt, descriptor);
 		verifyJavaVersion(expect, prompt, descriptor);
 
-		Log.info(host, descriptor.doneMessage());
+		Log.ok(host, descriptor.doneMessage());
 
 		return ok;
 	}

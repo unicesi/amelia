@@ -56,7 +56,7 @@ public abstract class Command<T> implements Callable<T> {
 				Log.error(host, descriptor.failMessage());
 				throw new Exception(descriptor.errorMessage());
 			} else {
-				Log.info(host, descriptor.doneMessage());
+				Log.ok(host, descriptor.doneMessage());
 			}
 
 			return true;

@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.FTPHandler;
 import org.pascani.deployment.amelia.SSHHandler;
 import org.pascani.deployment.amelia.util.Log;
+import org.pascani.deployment.amelia.util.Strings;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -80,42 +81,42 @@ public class Host implements Comparable<Host> {
 	}
 
 	public void openSSHConnection() throws InterruptedException {
-		if(this.ssh == null)
+		if (this.ssh == null)
 			this.ssh = new SSHHandler(this);
-			
-		if(!this.ssh.isConnected()) {
+
+		if (!this.ssh.isConnected()) {
 			this.ssh.start();
 			this.ssh.join();
-			
+
 			if (this.ssh.isConnected())
-				Log.info(this, "Connection established");
+				Log.ok(this, "Connection established");
 		} else {
-			Log.info(this, "Already opened");
+			Log.ok(this, "Already opened");
 		}
 	}
 
 	public void closeSSHConnection() throws IOException {
-		if(this.ssh != null)
+		if (this.ssh != null)
 			this.ssh.close();
 	}
 
 	public void openFTPConnection() throws InterruptedException {
-		if(this.ftp == null)
+		if (this.ftp == null)
 			this.ftp = new FTPHandler(this);
-		
-		if(!this.ftp.isConnected()) {
+
+		if (!this.ftp.isConnected()) {
 			this.ftp.start();
 			this.ftp.join();
 
 			if (this.ftp.client().isConnected())
-				Log.info(this, "Connection established");
+				Log.ok(this, "Connection established");
 		} else {
-			Log.info(this, "Already opened");
+			Log.ok(this, "Already opened");
 		}
 	}
 
 	public void closeFTPConnection() throws IOException {
-		if(this.ftp != null)
+		if (this.ftp != null)
 			this.ftp.close();
 	}
 
@@ -211,7 +212,7 @@ public class Host implements Comparable<Host> {
 	}
 
 	public String toFixedString() {
-		return String.format("  %-" + this.fixedWith + "s", toString());
+		return "[" + Strings.center(toString(), this.fixedWith) + "]";
 	}
 
 	@Override

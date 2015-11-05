@@ -64,7 +64,7 @@ public class Compile extends Command<Boolean> {
 			Log.error(host, message);
 			throw new Exception(message);
 		} else {
-			Log.info(host, descriptor.doneMessage());
+			Log.ok(host, descriptor.doneMessage());
 		}
 
 		return true;

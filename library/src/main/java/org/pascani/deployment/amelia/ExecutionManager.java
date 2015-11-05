@@ -103,7 +103,7 @@ public class ExecutionManager {
 	public void openFTPConnections(Host... hosts) throws InterruptedException {
 
 		if (hosts.length > 0)
-			Log.heading("Establishing FTP connections (" + hosts.length + ")");
+			Log.info("Establishing FTP connections (" + hosts.length + ")");
 
 		for (Host host : hosts) {
 			if (host.ftp().client().isConnected())
@@ -127,7 +127,7 @@ public class ExecutionManager {
 	public void openSSHConnections(Host... hosts) throws InterruptedException {
 
 		if (hosts.length > 0)
-			Log.heading("Establishing SSH connections (" + hosts.length + ")");
+			Log.info("Establishing SSH connections (" + hosts.length + ")");
 
 		for (Host host : hosts) {
 			host.openSSHConnection();
@@ -157,7 +157,7 @@ public class ExecutionManager {
 	 */
 	public void closeFTPConnections(Host... hosts) throws IOException {
 		if (hosts.length > 0)
-			Log.subheading("Closing FTP connections");
+			Log.info("Closing FTP connections");
 
 		for (Host host : hosts) {
 			host.closeFTPConnection();
@@ -177,7 +177,7 @@ public class ExecutionManager {
 	 */
 	public void closeSSHConnections(Host... hosts) throws IOException {
 		if (hosts.length > 0)
-			Log.subheading("Closing SSH connections");
+			Log.info("Closing SSH connections");
 
 		for (Host host : hosts) {
 			host.closeSSHConnection();
@@ -206,7 +206,7 @@ public class ExecutionManager {
 		// Prevent shutting down more than once
 		if (!shuttingDown) {
 			shuttingDown = true;
-			Log.heading("Starting deployment shutdown");
+			Log.info("Starting deployment shutdown");
 
 			try {
 				Host[] sshHosts = executionGraph.sshHosts()
@@ -220,7 +220,7 @@ public class ExecutionManager {
 				executionGraph.stopCurrentThreads();
 				closeFTPConnections(ftpHosts);
 				closeSSHConnections(sshHosts);
-				Log.heading("Deployment shutdown successful");
+				Log.info("Deployment shutdown successful");
 			} catch (Exception e) {
 				Log.error(
 						"Deployment shutdown unsuccessful; see logs for more information");

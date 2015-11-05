@@ -66,7 +66,7 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 						TimeUnit.MILLISECONDS);
 
 			expect.expect(regexp(descriptor.stopRegexp()));
-			Log.info(host, descriptor.doneMessage());
+			Log.ok(host, descriptor.doneMessage());
 
 		} catch (ExpectIOException ex) {
 			String message1 = "Cannot instantiate the FraSCAti factory";

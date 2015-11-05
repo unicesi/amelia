@@ -16,36 +16,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the Amelia library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.deployment.amelia.commands;
+package org.pascani.deployment.amelia.util;
 
-import org.pascani.deployment.amelia.descriptors.AssetBundle;
-import org.pascani.deployment.amelia.descriptors.Host;
-import org.pascani.deployment.amelia.util.Log;
+public enum ANSI {
 
-/**
- * @author Miguel Jiménez - Initial contribution and API
- */
-public class Transfer extends Command<Void> {
+	BLINK(5),
+	RED(31),
+	GREEN(32),
+	YELLOW(33),
+	BLUE(34),
+	MAGENTA(35),
+	CYAN(36),
+	GRAY(90),
+	RESET(0);
 
-	public Transfer(final Host host, final AssetBundle bundle) {
-		super(host, bundle);
+	private final int code;
+
+	ANSI(int code) {
+		this.code = code;
 	}
 
-	@Override
-	public Void call() throws Exception {
+	public int code() {
+		return this.code;
+	}
 
-		Host host = super.host;
-		AssetBundle descriptor = (AssetBundle) super.descriptor;
+	public String format(String text) {
+		return toString() + text + ANSI.RESET.toString();
+	}
 
-		try {
-			host.ftp().upload(descriptor);
-			Log.ok(host, descriptor.doneMessage());
-		} catch (Exception e) {
-			Log.error(host, descriptor.failMessage());
-			throw e;
-		}
-
-		return null;
+	public String toString() {
+		return "\u001b[1;" + this.code + "m";
 	}
 
 }
