@@ -172,6 +172,8 @@ public class DescriptorGraph
 	public boolean addDependency(CommandDescriptor a, CommandDescriptor b) {
 		if (!containsKey(a) || !containsKey(b))
 			return false;
+		else if(a == b)
+			return false;
 
 		// FIXME: search for transitive dependencies
 		if (get(b).contains(a))
