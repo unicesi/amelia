@@ -38,6 +38,7 @@ import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.CommandDescriptor;
 import org.pascani.deployment.amelia.descriptors.Execution;
 import org.pascani.deployment.amelia.descriptors.Host;
+import org.pascani.deployment.amelia.util.Configuration;
 import org.pascani.deployment.amelia.util.Log;
 
 /**
@@ -139,6 +140,7 @@ public class DescriptorGraph
 	private final ExecutionManager executionManager;
 
 	public DescriptorGraph() {
+		new Configuration().setProperties();
 		this.tasks = new HashMap<CommandDescriptor, List<Command<?>>>();
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();

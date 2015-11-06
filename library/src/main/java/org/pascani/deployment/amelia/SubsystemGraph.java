@@ -28,6 +28,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
+import org.pascani.deployment.amelia.util.Configuration;
 import org.pascani.deployment.amelia.util.Log;
 
 /**
@@ -138,6 +139,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 	private static SubsystemGraph instance;
 
 	private SubsystemGraph() {
+		new Configuration().setProperties();
 		this.subsystems = new ArrayList<Subsystem>();
 		this.threads = new TreeSet<DependencyThread>();
 		this.taskQueue = new SingleThreadTaskQueue();

@@ -18,10 +18,7 @@
  */
 package org.pascani.deployment.amelia;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,7 +62,6 @@ public class ExecutionManager {
 	public ExecutionManager(DescriptorGraph executionGraph) {
 		this.executionGraph = executionGraph;
 		reset();
-		setProperties();
 	}
 
 	/**
@@ -224,60 +220,6 @@ public class ExecutionManager {
 			} finally {
 				reset();
 			}
-		}
-	}
-
-	/**
-	 * Instead of setting the default values when the file is not found, set
-	 * variables for each variable when it is null.
-	 * 
-	 * Reads configuration properties
-	 */
-	private void setProperties() {
-		if (System.getProperty("amelia.config") != null)
-			return;
-
-		System.setProperty("amelia.config", "true");
-		Properties config = new Properties();
-		InputStream input = null;
-
-		try {
-			input = ExecutionManager.class.getClassLoader()
-					.getResourceAsStream("amelia.properties");
-			if (input != null)
-				config.load(input);
-
-		} catch (FileNotFoundException e) {
-			logger.warn("No configuration file was found. Execution is started with default values");
-		} catch (IOException e) {
-			logger.error("Error loading configuration file. Execution is started with default values");
-		} finally {
-			String home = System.getProperty("user.home");
-
-			// Set defaults
-			if (!config.containsKey("identity"))
-				config.put("identity", home + "/.ssh/id_rsa");
-			if (!config.containsKey("known_hosts"))
-				config.put("known_hosts", home + "/.ssh/known_hosts");
-			if (!config.containsKey("connection_timeout"))
-				config.put("connection_timeout", "10000"); // 0 for no
-															// timeout
-			if (!config.containsKey("execution_timeout"))
-				config.put("execution_timeout", "15000");
-
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					logger.error("Error closing stream of configuration file",
-							e);
-				}
-			}
-		}
-
-		for (Object key : config.keySet()) {
-			String name = (String) key;
-			System.setProperty("amelia." + name, config.getProperty(name));
 		}
 	}
 

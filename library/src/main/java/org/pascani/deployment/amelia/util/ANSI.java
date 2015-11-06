@@ -41,7 +41,12 @@ public enum ANSI {
 	}
 
 	public String format(String text) {
-		return toString() + text + ANSI.RESET.toString();
+		String formattedText = text;
+		boolean useANSI = Boolean.valueOf(System.getProperty("amelia.color_output"));
+		if (useANSI)
+			formattedText = toString() + text + ANSI.RESET.toString();
+
+		return formattedText;
 	}
 
 	public String toString() {

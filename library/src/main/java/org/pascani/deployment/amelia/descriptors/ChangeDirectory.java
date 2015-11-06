@@ -18,6 +18,8 @@
  */
 package org.pascani.deployment.amelia.descriptors;
 
+import org.pascani.deployment.amelia.util.ANSI;
+
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
@@ -27,11 +29,12 @@ public class ChangeDirectory extends CommandDescriptor {
 
 	public ChangeDirectory(final String directory) {
 		super("cd " + directory, "", "Could not change working directory to "
-				+ directory, "Working directory: " + directory);
+				+ ANSI.YELLOW.format(directory), "Working directory: "
+				+ ANSI.YELLOW.format(directory));
 
 		this.directory = directory;
 	}
-	
+
 	public String directory() {
 		return this.directory;
 	}
