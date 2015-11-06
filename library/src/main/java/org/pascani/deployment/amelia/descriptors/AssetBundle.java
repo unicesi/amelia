@@ -18,8 +18,6 @@
  */
 package org.pascani.deployment.amelia.descriptors;
 
-import static org.pascani.deployment.amelia.util.Strings.ascii;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,8 +30,9 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pascani.deployment.amelia.util.ANSI;
+import org.pascani.deployment.amelia.util.Log;
 import org.pascani.deployment.amelia.util.Pair;
-import org.pascani.deployment.amelia.util.Strings;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -41,8 +40,6 @@ import org.pascani.deployment.amelia.util.Strings;
 public class AssetBundle extends CommandDescriptor {
 
 	private final Map<String, List<String>> transfers;
-
-	private int currentPadding;
 
 	private boolean overwrite;
 
@@ -54,9 +51,8 @@ public class AssetBundle extends CommandDescriptor {
 
 	public AssetBundle(Map<String, List<String>> transfers,
 			final boolean overwrite) {
-		super("put [...]", null, null);
+		super(null, null, null);
 		this.transfers = transfers;
-		this.currentPadding = 0;
 		this.overwrite = overwrite;
 	}
 
@@ -143,32 +139,6 @@ public class AssetBundle extends CommandDescriptor {
 	}
 
 	@Override
-	public void done(Host host) {
-		currentPadding = host.toString().length();
-		super.done(host);
-	}
-
-	@Override
-	public String doneMessage() {
-		String message = ascii(10003) + " ";
-		// 5 = __<identifier>_✓_
-		message += successMessage == null ? toString(currentPadding + 5)
-				: successMessage;
-
-		return message;
-	}
-
-	@Override
-	public String failMessage() {
-		String message = ascii(10007) + " ";
-		// 5 = __<identifier>_✗_
-		message += errorMessage == null ? toString(currentPadding + 5)
-				: errorMessage;
-
-		return message;
-	}
-
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
@@ -198,41 +168,33 @@ public class AssetBundle extends CommandDescriptor {
 		return this.transfers;
 	}
 
-	public String toString(int _padding) {
-		StringBuilder sb = new StringBuilder();
-		String padding = String.format("%" + (_padding > 0 ? _padding : "")
-				+ "s", "File transfer");
-		_padding = _padding + 13; // "File transfer".length
-		boolean firstKey = true;
-
-		for (String key : transfers.keySet()) {
-			if (!firstKey)
-				padding = String.format("%" + _padding + "s", "");
-
-			String _key = Strings.truncate(key, 20, 20);
-			sb.append(padding + " " + _key);
-			boolean firstValue = true;
-
-			for (String value : transfers.get(key)) {
-				String initial = String.format("%-" + _key.length() + "s", "")
-						+ padding;
-				if (firstValue)
-					initial = "";
-
-				sb.append(initial + " -> " + value + "\n");
-				firstValue = false;
-			}
-
-			firstKey = false;
-		}
-
-		sb.deleteCharAt(sb.length() - 1); // remove last line break
-		return sb.toString();
-	}
-
 	@Override
 	public String toString() {
-		return toString(0);
+		if (this.transfers.isEmpty())
+			return "No files to transfer";
+
+		StringBuilder sb = new StringBuilder();
+		String s = (this.transfers.size() > 1 ? "s" : "");
+		sb.append("Successful transfer" + s + "\n");
+		int t = 0;
+		
+		for (String local : transfers.keySet()) {
+			if (t++ == 0)
+				sb.append(Log.SEPARATOR_WITHOUT_TIME);
+
+			int i = 0;
+			String formattedLocal = ANSI.YELLOW.format(local);
+			sb.append(String.format("\n   local: %s\n", formattedLocal));
+
+			for (String remote : transfers.get(local)) {
+				String label = i++ == 0 ? "remote:" : "       ";
+				String formattedRemote = ANSI.YELLOW.format(remote);
+				sb.append(String.format("  %s %s\n", label, formattedRemote));
+			}
+			sb.append(Log.SEPARATOR_WITHOUT_TIME);
+		}
+
+		return sb.toString();
 	}
 
 	public void setOverwrite(boolean overwrite) {

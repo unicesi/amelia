@@ -31,6 +31,12 @@ import org.pascani.deployment.amelia.descriptors.Host;
  */
 public class Log {
 
+	public static final String SEPARATOR_WITHOUT_TIME = ANSI.GRAY
+			.format("--------------------------------------------------------------------------------");
+	
+	public static final String SEPARATOR = ANSI.GRAY
+			.format("---------------------------------------------------------------------");
+
 	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat(
 			"HH:mm:ss");
 
@@ -76,7 +82,7 @@ public class Log {
 		sb.append("(" + leftSymbol + ")");
 		sb.append("((?:(?!\1).)*)");
 		sb.append("(" + rightSymbol + ")");
-		
+
 		Pattern quotes = Pattern.compile(sb.toString());
 		Matcher matcher = quotes.matcher(text);
 
@@ -86,7 +92,7 @@ public class Log {
 			String coloredText = color.format(matcher.group(2));
 			text = matcher.replaceAll(left + coloredText + right);
 		}
-		
+
 		return text;
 	}
 
