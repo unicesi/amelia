@@ -79,8 +79,8 @@ public class ExecutionManager {
 			public void uncaughtException(Thread t, Throwable e) {
 				if (!aborting && !shuttingDown) {
 					aborting = true;
-					String message = e.getMessage()
-							.replaceAll("^((\\w)+(\\.\\w+)+:\\s)*", "");
+					String message = e.getMessage().replaceAll(
+							"^((\\w)+(\\.\\w+)+:\\s)*", "");
 
 					logger.error(e.getMessage(), e);
 					Log.error("Stopping deployment: " + message);
@@ -106,9 +106,6 @@ public class ExecutionManager {
 			Log.info("Establishing FTP connections (" + hosts.length + ")");
 
 		for (Host host : hosts) {
-			if (host.ftp().client().isConnected())
-				continue;
-
 			host.openFTPConnection();
 
 			logger.info("FTP connection for " + host
@@ -135,9 +132,8 @@ public class ExecutionManager {
 			if (hostFixedWidth < host.toString().length())
 				hostFixedWidth = host.toString().length();
 
-			if (host.ssh().isConnected())
-				logger.info("SSH connection for " + host
-						+ " was successfully established");
+			logger.info("SSH connection for " + host
+					+ " was successfully established");
 		}
 
 		// set a common (fixed) width for all hosts
@@ -161,8 +157,8 @@ public class ExecutionManager {
 
 		for (Host host : hosts) {
 			host.closeFTPConnection();
-			logger.info(
-					"FTP connection for " + host + " was successfully closed");
+			logger.info("FTP connection for " + host
+					+ " was successfully closed");
 		}
 	}
 
@@ -181,8 +177,8 @@ public class ExecutionManager {
 
 		for (Host host : hosts) {
 			host.closeSSHConnection();
-			logger.info(
-					"SSH connection for " + host + " was successfully closed");
+			logger.info("SSH connection for " + host
+					+ " was successfully closed");
 		}
 	}
 
@@ -222,8 +218,7 @@ public class ExecutionManager {
 				closeSSHConnections(sshHosts);
 				Log.info("Deployment shutdown successful");
 			} catch (Exception e) {
-				Log.error(
-						"Deployment shutdown unsuccessful; see logs for more information");
+				Log.error("Deployment shutdown unsuccessful; see logs for more information");
 				Log.error("Shutting system down abruptly");
 				logger.error(e);
 			} finally {
@@ -253,11 +248,9 @@ public class ExecutionManager {
 				config.load(input);
 
 		} catch (FileNotFoundException e) {
-			logger.warn(
-					"No configuration file was found. Execution is started with default values");
+			logger.warn("No configuration file was found. Execution is started with default values");
 		} catch (IOException e) {
-			logger.error(
-					"Error loading configuration file. Execution is started with default values");
+			logger.error("Error loading configuration file. Execution is started with default values");
 		} finally {
 			String home = System.getProperty("user.home");
 
