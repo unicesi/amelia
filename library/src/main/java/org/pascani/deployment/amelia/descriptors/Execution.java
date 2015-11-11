@@ -33,11 +33,11 @@ public class Execution extends CommandDescriptor {
 		private String methodName;
 		private String[] arguments;
 		private long timeout;
-		private String stopRegexp;
+		private String releaseRegexp;
 
 		public Builder() {
 			this.timeout = 0;
-			this.stopRegexp = "Press Ctrl\\+C to quit\\.\\.\\.|Call done!";
+			this.releaseRegexp = "Press Ctrl\\+C to quit\\.\\.\\.|Call done!";
 		}
 
 		public Builder withComposite(final String compositeName) {
@@ -75,8 +75,8 @@ public class Execution extends CommandDescriptor {
 			return this;
 		}
 
-		public Builder withStopRegexp(final String regularExpression) {
-			this.stopRegexp = regularExpression;
+		public Builder withReleaseRegexp(final String regularExpression) {
+			this.releaseRegexp = regularExpression;
 			return this;
 		}
 
@@ -94,7 +94,7 @@ public class Execution extends CommandDescriptor {
 
 	private Execution(Builder builder) {
 		super("frascati run " + builder.compositeName + " ...", null, null,
-				builder.stopRegexp, builder.compositeName + " has been executed");
+				builder.releaseRegexp, builder.compositeName + " has been executed");
 		this.compositeName = builder.compositeName;
 		this.libpath = builder.libpath;
 		this.serviceName = builder.serviceName;

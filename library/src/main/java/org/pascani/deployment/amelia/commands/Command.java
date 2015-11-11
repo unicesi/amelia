@@ -47,7 +47,7 @@ public abstract class Command<T> implements Callable<T> {
 			CommandDescriptor descriptor = super.descriptor;
 
 			Expect expect = host.ssh().expect();
-			String expression = descriptor.stopRegexp();
+			String expression = descriptor.releaseRegexp();
 
 			expect.sendLine(descriptor.toCommandString());
 			String response = expect.expect(regexp(expression)).getBefore();

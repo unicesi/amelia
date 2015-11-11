@@ -38,7 +38,7 @@ public class CommandDescriptor extends Observable {
 
 	protected final String errorMessage;
 
-	protected final String stopRegexp;
+	protected final String releaseRegexp;
 
 	protected final String successMessage;
 
@@ -58,7 +58,7 @@ public class CommandDescriptor extends Observable {
 		this.command = command;
 		this.errorText = errorText;
 		this.errorMessage = errorMessage;
-		this.stopRegexp = stopRegexp;
+		this.releaseRegexp = stopRegexp;
 		this.successMessage = successMessage;
 	}
 
@@ -137,8 +137,8 @@ public class CommandDescriptor extends Observable {
 		return this.errorMessage;
 	}
 
-	public String stopRegexp() {
-		return this.stopRegexp;
+	public String releaseRegexp() {
+		return this.releaseRegexp;
 	}
 
 	public String successMessage() {

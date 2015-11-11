@@ -65,13 +65,13 @@ public class Run extends Command<Integer> implements Callable<Integer> {
 				expect = expect.withTimeout(descriptor.timeout(),
 						TimeUnit.MILLISECONDS);
 
-			expect.expect(regexp(descriptor.stopRegexp()));
+			expect.expect(regexp(descriptor.releaseRegexp()));
 			Log.ok(host, descriptor.doneMessage());
 
 		} catch (ExpectIOException ex) {
 			String message1 = "Cannot instantiate the FraSCAti factory";
 			String message2 = "Operation timeout waiting for \""
-					+ descriptor.stopRegexp() + "\" in host " + host;
+					+ descriptor.releaseRegexp() + "\" in host " + host;
 
 			if (ex.getInputBuffer().contains(message1)) {
 				Log.error(host, message1 + " in host " + host);
