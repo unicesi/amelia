@@ -230,7 +230,9 @@ public class DescriptorGraph
 			thread.start();
 
 		doneSignal.await();
-		this.executionManager.shutdown(true);
+		
+		if(shutdownAfterDeployment)
+			this.executionManager.shutdown(stopExecutionsWhenFinish);
 	}
 
 	private int countDependencyThreads(List<CommandDescriptor> dependencies,
