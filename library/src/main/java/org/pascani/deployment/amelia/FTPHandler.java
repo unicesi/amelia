@@ -23,6 +23,8 @@ import java.net.SocketException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.pascani.deployment.amelia.descriptors.AssetBundle;
 import org.pascani.deployment.amelia.descriptors.Host;
 import org.pascani.deployment.amelia.filesystem.FTPClient;
@@ -36,6 +38,11 @@ public class FTPHandler extends Thread {
 	private final Host host;
 
 	private final FTPClient client;
+	
+	/**
+	 * The logger
+	 */
+	private final static Logger logger = LogManager.getLogger(FTPHandler.class);
 
 	public FTPHandler(final Host host) {
 		this.host = host;
@@ -46,9 +53,11 @@ public class FTPHandler extends Thread {
 		try {
 			connect();
 		} catch (SocketException e) {
+			logger.error("Error establishing connection", e);
 			Log.error(this.host, "Error establishing connection");
 			System.exit(0);
 		} catch (IOException e) {
+			logger.error("Error establishing connection", e);
 			Log.error(this.host, "Error establishing connection");
 			System.exit(0);
 		}

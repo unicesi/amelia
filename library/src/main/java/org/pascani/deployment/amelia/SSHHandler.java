@@ -106,9 +106,11 @@ public class SSHHandler extends Thread {
 			this.taskQueue.start();
 
 		} catch (JSchException e) {
+			logger.error("Error establishing SSH connection", e);
 			Log.error(this.host, "Error establishing connection");
 			System.exit(0);
 		} catch (IOException e) {
+			logger.error("Error initializing SSH connection", e);
 			Log.error(this.host, "Error initializing connection");
 			System.exit(0);
 		}
