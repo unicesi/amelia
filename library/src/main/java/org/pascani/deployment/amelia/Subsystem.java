@@ -28,6 +28,7 @@ import org.pascani.deployment.amelia.util.Log;
 public class Subsystem {
 
 	public abstract static class Deployment extends OpenObservable {
+		// TODO: provide access for other classes to shutdown their dependencies
 		public abstract void deploy(Map<String, Subsystem> dependencies)
 				throws Exception;
 	}
