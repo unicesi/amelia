@@ -206,7 +206,8 @@ public class DescriptorGraph
 		if (stopPreviousExecutions && this.sshHosts.size() > 0)
 			stopExecutions();
 
-		CountDownLatch doneSignal = new CountDownLatch(this.tasks.size());
+		int totalTasks = countTotalTasks();
+		CountDownLatch doneSignal = new CountDownLatch(totalTasks);
 
 		for (CommandDescriptor e : keySet()) {
 			List<CommandDescriptor> dependencies = get(e);
@@ -225,7 +226,7 @@ public class DescriptorGraph
 			}
 		}
 
-		Log.info("Starting execution of commands (" + this.threads.size() + ")");
+		Log.info("Starting execution of commands (" + totalTasks + ")");
 		for (DependencyThread thread : this.threads)
 			thread.start();
 
@@ -233,6 +234,14 @@ public class DescriptorGraph
 		
 		if(shutdownAfterDeployment)
 			this.executionManager.shutdown(stopExecutionsWhenFinish);
+	}
+	
+	private int countTotalTasks() {
+		int total = 0;
+		for(List<Command<?>> tasks : this.tasks.values()) {
+			total += tasks.size();
+		}
+		return total;
 	}
 
 	private int countDependencyThreads(List<CommandDescriptor> dependencies,
