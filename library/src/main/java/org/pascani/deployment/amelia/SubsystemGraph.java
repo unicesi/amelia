@@ -185,7 +185,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		}
 
 		Log.printBanner();
-		Log.info("Resolving subsystems (" + this.threads.size() + ")");
+		Log.info("Resolving subsystems (" + this.subsystems.size() + ")");
 
 		for (DependencyThread thread : this.threads)
 			thread.start();
