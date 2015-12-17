@@ -200,6 +200,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			this.taskQueue.shutdown();
 			for (DependencyThread thread : this.threads)
 				thread.shutdown();
+			instance = null;
 		}
 	}
 
