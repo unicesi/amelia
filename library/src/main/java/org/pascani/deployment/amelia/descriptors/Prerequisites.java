@@ -11,8 +11,9 @@ public class Prerequisites extends CommandDescriptor {
 
 	public Prerequisites(final Version javaVersion,
 			final Version frascatiVersion) {
-		super("Java & FraSCAti prerequisites", "",
-				"Dissatisfied prerequisites", "Prerequisites satisfied");
+		super(new CommandDescriptor.Builder()
+				.withErrorMessage("Dissatisfied prerequisites")
+				.withSuccessMessage("Prerequisites satisfied"));
 		this.javaVersion = javaVersion;
 		this.frascatiVersion = frascatiVersion;
 	}

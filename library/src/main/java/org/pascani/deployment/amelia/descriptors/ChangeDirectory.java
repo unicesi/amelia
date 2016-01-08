@@ -28,10 +28,13 @@ public class ChangeDirectory extends CommandDescriptor {
 	private final String directory;
 
 	public ChangeDirectory(final String directory) {
-		super("cd " + directory, "", "Could not change working directory to "
-				+ ANSI.YELLOW.format(directory), "Working directory: "
-				+ ANSI.YELLOW.format(directory));
-
+		super(new CommandDescriptor.Builder()
+				.withCommand("cd")
+				.withArguments(directory)
+				.withErrorMessage("Could not change working directory to " + 
+						ANSI.YELLOW.format(directory))
+				.withSuccessMessage("Working directory: " + 
+						ANSI.YELLOW.format(directory)));
 		this.directory = directory;
 	}
 

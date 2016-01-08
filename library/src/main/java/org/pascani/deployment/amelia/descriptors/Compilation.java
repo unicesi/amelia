@@ -33,8 +33,10 @@ public class Compilation extends CommandDescriptor {
 
 	public Compilation(final String sourceDirectory, final String outputFile,
 			final String... classpath) {
-		super("frascati compile " + sourceDirectory + " -libpath " + outputFile
-				+ " ...", null, null, outputFile + ".jar has been generated");
+		super(new CommandDescriptor.Builder()
+				.withCommand("frascati")
+				.withArguments("compile", sourceDirectory, "-libpath", outputFile, "...")
+				.withSuccessMessage(outputFile + ".jar has been generated"));
 		this.sourceDirectory = sourceDirectory;
 		this.outputFile = outputFile;
 		this.classpath = classpath;

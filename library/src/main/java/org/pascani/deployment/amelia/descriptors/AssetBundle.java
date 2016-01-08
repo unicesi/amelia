@@ -51,7 +51,7 @@ public class AssetBundle extends CommandDescriptor {
 
 	public AssetBundle(Map<String, List<String>> transfers,
 			final boolean overwrite) {
-		super(null, null, null);
+		super(new CommandDescriptor.Builder());
 		this.transfers = transfers;
 		this.overwrite = overwrite;
 	}

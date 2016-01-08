@@ -22,6 +22,7 @@ import static net.sf.expectit.matcher.Matchers.regexp;
 
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.expectit.Expect;
 
@@ -48,7 +49,13 @@ public abstract class Command<T> implements Callable<T> {
 
 			Expect expect = host.ssh().expect();
 			String expression = descriptor.releaseRegexp();
-
+			
+			if (descriptor.timeout() == -1)
+				expect = expect.withInfiniteTimeout();
+			else if (descriptor.timeout() > 0)
+				expect = expect.withTimeout(descriptor.timeout(),
+						TimeUnit.MILLISECONDS);
+			
 			expect.sendLine(descriptor.toCommandString());
 			String response = expect.expect(regexp(expression)).getBefore();
 

@@ -23,54 +23,95 @@ import java.util.UUID;
 
 import org.pascani.deployment.amelia.commands.CommandFactory;
 import org.pascani.deployment.amelia.util.ShellUtils;
+import org.pascani.deployment.amelia.util.Strings;
 
 /**
  * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class CommandDescriptor extends Observable {
+	
+	public static class Builder {
+
+		private String command;
+		private String[] arguments;
+		private String releaseRegexp;
+		private long timeout;
+		private String errorText;
+		private String errorMessage;
+		private String successMessage;
+
+		public Builder() {
+			this.command = "";
+			this.arguments = new String[]{};
+			this.releaseRegexp = ShellUtils.ameliaPromptRegexp();
+			this.timeout = 0;
+			this.errorMessage = "";
+			this.successMessage = "";
+		}
+		
+		public Builder withCommand(final String command) {
+			this.command = command;
+			return this;
+		}
+
+		public Builder withArguments(final String... arguments) {
+			this.arguments = arguments;
+			return this;
+		}
+		
+		public Builder withReleaseRegexp(final String regularExpression) {
+			this.releaseRegexp = regularExpression;
+			return this;
+		}
+
+		public Builder withTimeout(final long timeout) {
+			this.timeout = timeout;
+			return this;
+		}
+
+		public Builder withoutTimeout() {
+			this.timeout = -1;
+			return this;
+		}
+		
+		public Builder withErrorText(String errorText) {
+			this.errorText = errorText;
+			return this;
+		}
+		
+		public Builder withErrorMessage(String errorMessage) {
+			this.errorMessage = errorMessage;
+			return this;
+		}
+		
+		public Builder withSuccessMessage(String successMessage) {
+			this.successMessage = successMessage;
+			return this;
+		}
+
+		public CommandDescriptor build() {
+			return new CommandDescriptor(this);
+		}
+	}
 
 	protected final UUID internalId;
-
 	protected final String command;
-
 	protected final String errorText;
-
 	protected final String errorMessage;
-
 	protected final String releaseRegexp;
-
 	protected final String successMessage;
+	protected final long timeout;
 
-	/**
-	 * 
-	 * @param command
-	 * @param errorText
-	 * @param errorMessage
-	 * @param stopRegexp
-	 *            A regular expression to determine when to stop waiting
-	 * @param successMessage
-	 */
-	public CommandDescriptor(final String command, final String errorText,
-			final String errorMessage, final String stopRegexp,
-			final String successMessage) {
+	public CommandDescriptor(final Builder builder) {
 		this.internalId = UUID.randomUUID();
-		this.command = command;
-		this.errorText = errorText;
-		this.errorMessage = errorMessage;
-		this.releaseRegexp = stopRegexp;
-		this.successMessage = successMessage;
-	}
-
-	public CommandDescriptor(final String command, final String errorText,
-			final String errorMessage, final String successMessage) {
-		this(command, errorText, errorMessage, ShellUtils.ameliaPromptRegexp(),
-				successMessage);
-	}
-
-	public CommandDescriptor(final String command, final String errorText,
-			final String errorMessage) {
-		this(command, errorText, errorMessage, null);
+		this.command = builder.command + " "
+				+ Strings.join(builder.arguments, " ");
+		this.releaseRegexp = builder.releaseRegexp;
+		this.timeout = builder.timeout;
+		this.errorText = builder.errorText;
+		this.errorMessage = builder.errorMessage;
+		this.successMessage = builder.successMessage;
 	}
 
 	public boolean isOk(String response) {
@@ -127,6 +168,10 @@ public class CommandDescriptor extends Observable {
 			return false;
 		}
 		return true;
+	}
+	
+	public long timeout() {
+		return this.timeout;
 	}
 
 	public String errorText() {

@@ -93,8 +93,11 @@ public class Execution extends CommandDescriptor {
 	private final long timeout;
 
 	private Execution(Builder builder) {
-		super("frascati run " + builder.compositeName + " ...", null, null,
-				builder.releaseRegexp, builder.compositeName + " has been executed");
+		super(new CommandDescriptor.Builder()
+				.withCommand("frascati")
+				.withArguments("run", builder.compositeName, "...")
+				.withReleaseRegexp(builder.releaseRegexp)
+				.withSuccessMessage(builder.compositeName + " has been executed"));
 		this.compositeName = builder.compositeName;
 		this.libpath = builder.libpath;
 		this.serviceName = builder.serviceName;
