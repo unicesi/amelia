@@ -95,7 +95,7 @@
 				</executions>
 				<configuration>
 					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
+						<descriptorRef>dependencies</descriptorRef>
 					</descriptorRefs>
 				</configuration>
 			</plugin>
