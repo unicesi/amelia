@@ -95,8 +95,10 @@
 				</executions>
 				<configuration>
 					<descriptorRefs>
-						<descriptorRef>dependencies</descriptorRef>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<finalName>${project.artifactId}-${project.version}-dependencies</finalName>
+        			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 			</plugin>
 		</plugins>
