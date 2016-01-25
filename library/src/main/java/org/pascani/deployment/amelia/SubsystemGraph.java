@@ -177,7 +177,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 	public void resolve() throws InterruptedException {
 		CountDownLatch doneSignal = new CountDownLatch(this.subsystems.size());
 
-		for (Subsystem subsystem : keySet()) {
+		for (Subsystem subsystem : this.subsystems) {
 			List<Subsystem> dependencies = get(subsystem);
 			DependencyThread thread = new DependencyThread(subsystem,
 					dependencies, doneSignal, this.taskQueue);
