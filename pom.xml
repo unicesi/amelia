@@ -51,15 +51,16 @@
 				<role>developer</role>
 			</roles>
 		</developer>
-		<developer>
-			<id>gtamura</id>
-			<name>Gabriel Tamura</name>
-			<email>gtamura@icesi.edu.co</email>
-			<url>https://www.icesi.edu.co/profesores/cv/gabriel-tamura</url>
-			<organization>Universidad Icesi</organization>
-			<roles>
-				<role>architect</role>
-			</roles>
-		</developer>
 	</developers>
+	<profiles>
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<properties>
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+			</properties>
+		</profile>
+	</profiles>
 </project>
