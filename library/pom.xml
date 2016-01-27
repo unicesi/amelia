@@ -78,8 +78,8 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-			            	<additionalparam>-Xdoclint:none</additionalparam>
-			            </configuration>
+            				<additionalparam>${javadoc.opts}</additionalparam>
+          				</configuration>
 					</execution>
 				</executions>
 			</plugin>
