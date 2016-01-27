@@ -26,7 +26,7 @@
 	<name>amelia</name>
 	<description>Parent project for the Amelia modules</description>
 	<modules>
-		<module>library</module>
+		<module>org.amelia.dsl.lib</module>
 	</modules>
 	<licenses>
 		<license>
