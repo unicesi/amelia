@@ -151,4 +151,11 @@
 		</pluginManagement>
 	</build>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.amelia</groupId>
+			<artifactId>org.amelia.dsl.lib</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 </project>
