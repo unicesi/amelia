@@ -20,18 +20,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.pascani.deployment</groupId>
-		<artifactId>amelia</artifactId>
+		<groupId>org.amelia</groupId>
+		<artifactId>org.amelia.tycho.parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../../maven/org.amelia.tycho.parent/pom.xml</relativePath>
 	</parent>
 	
 	<artifactId>org.amelia.dsl.lib</artifactId>
 	<name>Amelia Runtime Library</name>
-	
-	<properties>
-		<maven.compiler.source>1.6</maven.compiler.source>
-  		<maven.compiler.target>1.6</maven.compiler.target>
-	</properties>
 	
 	<dependencies>
 		<dependency>

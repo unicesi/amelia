@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.amelia.dsl
+Bundle-Vendor: Miguel Jiménez
+Bundle-Version: 0.0.1.qualifier
+Bundle-SymbolicName: org.amelia.dsl; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.util,
+ org.antlr.runtime,
+ org.eclipse.xtend.lib,
+ org.eclipse.emf.common,
+ org.eclipse.xtext.xbase.lib
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.amelia.dsl.generator,
+ org.amelia.dsl.parser.antlr.internal,
+ org.amelia.dsl.serializer,
+ org.amelia.dsl.parser.antlr,
+ org.amelia.dsl.services,
+ org.amelia.dsl.validation,
+ org.amelia.dsl.amelia.impl,
+ org.amelia.dsl,
+ org.amelia.dsl.scoping,
+ org.amelia.dsl.amelia,
+ org.amelia.dsl.amelia.util
+Import-Package: org.apache.log4j
