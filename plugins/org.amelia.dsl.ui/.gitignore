@@ -1,6 +1,7 @@
 # Local Files
 *.class
 .DS_Store
+plugin.xml_gen
 
 # Package Files
 *.jar
