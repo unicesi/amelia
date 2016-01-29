@@ -16,7 +16,10 @@ Require-Bundle: org.amelia.dsl,
  org.eclipse.ui,
  org.eclipse.xtend.lib;resolution:=optional,
  org.eclipse.xtext.builder,
- org.eclipse.xtext.xbase.lib
+ org.eclipse.xtext.xbase.lib,
+ org.eclipse.jdt.debug.ui,
+ org.eclipse.xtext.common.types.ui,
+ org.eclipse.xtext.xbase.ui
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.amelia.dsl.ui.quickfix,

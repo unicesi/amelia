@@ -16,12 +16,35 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Amelia DSL. If not, see <http://www.gnu.org/licenses/>.
  */
-grammar org.amelia.dsl.Amelia with org.eclipse.xtext.common.Terminals
+grammar org.amelia.dsl.Amelia with org.eclipse.xtext.xbase.Xbase
+
+import "http://www.eclipse.org/xtext/xbase/Xbase"
 
 generate amelia "http://www.amelia.org/dsl/Amelia"
 
-Model:
-	greetings+=Greeting*;
+Model
+	:	('package' name = QualifiedName ->';'?)?
+//    	imports = XImportSection?
+		expressions += ModelExpressions*
+	;
+
+ModelExpressions returns XExpression
+	:	SubsystemDeclaration
+	|	XVariableDeclaration ->';'?
+	|	XIfExpression
+	|	XForLoopExpression
+	|	XBasicForLoopExpression
+	|	XWhileExpression
+	|	XDoWhileExpression
+	|	XFeatureCall
+	;
+
+SubsystemDeclaration returns Subsystem
+	:	'subsystem' name = ID
+		('<-' dependencies += [Subsystem | QualifiedName] (',' dependencies += [Subsystem | QualifiedName])*)?
+		body = XBlockExpression
+	;
 	
-Greeting:
-	'Hello' name=ID '!';
+SequentialBlock
+	:	'sequential' 'in' nodes = XExpression body = XBlockExpression
+	;
