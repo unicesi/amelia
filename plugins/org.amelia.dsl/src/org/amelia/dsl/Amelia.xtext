@@ -24,27 +24,45 @@ generate amelia "http://www.amelia.org/dsl/Amelia"
 
 Model
 	:	('package' name = QualifiedName ->';'?)?
-//    	imports = XImportSection?
-		expressions += ModelExpressions*
+    	imports = XImportSection?
+		typeDeclaration = TypeDeclaration?
 	;
 
-ModelExpressions returns XExpression
+TypeDeclaration
 	:	SubsystemDeclaration
-	|	XVariableDeclaration ->';'?
-	|	XIfExpression
-	|	XForLoopExpression
-	|	XBasicForLoopExpression
-	|	XWhileExpression
-	|	XDoWhileExpression
-	|	XFeatureCall
 	;
 
 SubsystemDeclaration returns Subsystem
 	:	'subsystem' name = ID
 		('<-' dependencies += [Subsystem | QualifiedName] (',' dependencies += [Subsystem | QualifiedName])*)?
+		body = SubsystemBlockExpression
+	;
+
+SubsystemBlockExpression returns XBlockExpression
+	:	{SubsystemBlockExpression} '{' (expressions += InternalSubsystemDeclaration)* '}'
+	;
+
+InternalSubsystemDeclaration returns XExpression
+	:	VariableDeclaration
+	|	TaskDeclaration
+	;
+
+VariableDeclaration returns XExpression
+	:	{VariableDeclaration}
+		(writeable ?= 'var'|'val') (=>(type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)? ->';'?
+	;
+
+TaskDeclaration returns Task
+	:	'task' name = ID
+		('(' declaredFormalParameters += JvmFormalParameter (',' declaredFormalParameters += JvmFormalParameter)* ')')?
+		('<-' dependencies += [Task | ID] (',' dependencies += [Task | ID])*)?
 		body = XBlockExpression
 	;
 	
 SequentialBlock
 	:	'sequential' 'in' nodes = XExpression body = XBlockExpression
+	;
+	
+InExpression
+	:	left = XExpression 'in' right = XExpression
 	;
