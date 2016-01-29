@@ -20,40 +20,56 @@ package org.amelia.dsl.jvmmodel
 
 import com.google.inject.Inject
 import org.amelia.dsl.amelia.Subsystem
+import org.amelia.dsl.amelia.Task
+import org.amelia.dsl.amelia.VariableDeclaration
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.amelia.dsl.amelia.Model
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
- *
+ * 
  * <p>The JVM model should contain all elements that would appear in the Java code 
  * which is generated from the source model. Other models link against the JVM model rather than the source model.</p>     
  */
 class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 
-    /**
-     * convenience API to build and initialize JVM types and their members.
-     */
+	/**
+	 * convenience API to build and initialize JVM types and their members.
+	 */
 	@Inject extension JvmTypesBuilder
-	
+
 	@Inject extension IQualifiedNameProvider
 
-	def dispatch void infer(Model model, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		val clazz = acceptor.accept(model.toClass(model.fullyQualifiedName) [
+	def dispatch void infer(Subsystem subsystem, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		acceptor.accept(subsystem.toClass(subsystem.fullyQualifiedName) [
 			if (!isPreIndexingPhase) {
-				for (e : model.expressions) {
+				val fields = newArrayList
+				val methods = newArrayList
+				documentation = subsystem.documentation
+				for (e : subsystem.body.expressions) {
 					switch (e) {
-						Subsystem: {
-							members += e.toMethod(e.name.toFirstLower, typeRef(void)) [
-			   					documentation = e.documentation
-			   					body = e.body
-			   				]
+						VariableDeclaration: {
+							fields += e.toField(e.name, if (e.type != null) e.type else inferredType) [
+								documentation = e.documentation
+								final = !e.writeable
+								initializer = e.right
+							]
+						}
+						Task: {
+							methods += e.toMethod(e.name.toFirstLower, typeRef(void)) [
+								documentation = e.documentation
+								body = e.body
+								if (e.declaredFormalParameters != null)
+									for (param : e.declaredFormalParameters)
+										parameters += param.toParameter(param.name, param.parameterType)
+							]
 						}
 					}
 				}
+				members += fields
+				members += methods
 			}
 		])
 	}
