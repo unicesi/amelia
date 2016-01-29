@@ -18,9 +18,34 @@
  */
 package org.amelia.dsl
 
+import com.google.inject.Binder
+import com.google.inject.name.Names
+import org.amelia.dsl.scoping.AmeliaScopeProvider
+import org.eclipse.xtext.linking.LinkingScopeProviderBinding
+import org.eclipse.xtext.scoping.IScopeProvider
+import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
+	
+	override void configureIScopeProviderDelegate(Binder binder) {
+		binder
+			.bind(IScopeProvider)
+			.annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE))
+			.to(AmeliaScopeProvider)
+	}
+	
+	override void configureLinkingIScopeProvider(Binder binder) {
+		binder
+			.bind(IScopeProvider)
+			.annotatedWith(LinkingScopeProviderBinding)
+			.to(AmeliaScopeProvider);
+	}
+	
+	override Class<? extends IScopeProvider> bindIScopeProvider() {
+		return AmeliaScopeProvider
+	}
+	
 }
