@@ -19,10 +19,24 @@
 package org.amelia.dsl.ui
 
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import org.amelia.dsl.ui.highlighting.AmeliaHighlightingConfiguration
+import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+import org.amelia.dsl.ui.highlighting.AmeliaSemanticHighlightingCalculator
+import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
  */
 @FinalFieldsConstructor
 class AmeliaUiModule extends AbstractAmeliaUiModule {
+	
+	override Class<? extends ISemanticHighlightingCalculator> bindIdeSemanticHighlightingCalculator() {
+		return AmeliaSemanticHighlightingCalculator;
+	}
+
+	override Class<? extends IHighlightingConfiguration> bindIHighlightingConfiguration() {
+		return AmeliaHighlightingConfiguration;
+	}
+	
+	
 }
