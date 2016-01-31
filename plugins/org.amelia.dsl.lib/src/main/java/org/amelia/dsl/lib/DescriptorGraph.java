@@ -128,6 +128,8 @@ public class DescriptorGraph
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = -6806533450294013309L;
+	
+	private final String subsystem;
 
 	private final Map<CommandDescriptor, List<Command<?>>> tasks;
 
@@ -139,13 +141,18 @@ public class DescriptorGraph
 
 	private final ExecutionManager executionManager;
 
-	public DescriptorGraph() {
+	public DescriptorGraph(String subsystem) {
 		new Configuration().setProperties();
+		this.subsystem = subsystem;
 		this.tasks = new HashMap<CommandDescriptor, List<Command<?>>>();
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();
 		this.threads = new TreeSet<DependencyThread>();
 		this.executionManager = new ExecutionManager(this);
+	}
+	
+	public DescriptorGraph() {
+		this("default");
 	}
 
 	public boolean addDescriptor(CommandDescriptor a, Host... hosts) {
@@ -257,10 +264,9 @@ public class DescriptorGraph
 	}
 
 	public void stopExecutions() throws IOException {
-
 		Log.info("Stopping previous executions");
 		Map<Host, List<Execution>> executionsPerHost = new HashMap<Host, List<Execution>>();
-
+		
 		for (CommandDescriptor descriptor : this.tasks.keySet()) {
 			if (descriptor instanceof Execution) {
 				List<Command<?>> commands = this.tasks.get(descriptor);
@@ -288,6 +294,10 @@ public class DescriptorGraph
 
 		for (DependencyThread thread : this.threads)
 			thread.join();
+	}
+	
+	public String subsystem() {
+		return this.subsystem;
 	}
 
 	public Set<Host> hosts() {

@@ -80,9 +80,9 @@ public class Host implements Comparable<Host> {
 				.toString());
 	}
 
-	public void openSSHConnection() throws InterruptedException {
+	public void openSSHConnection(String subsystem) throws InterruptedException {
 		if (this.ssh == null)
-			this.ssh = new SSHHandler(this);
+			this.ssh = new SSHHandler(this, subsystem);
 
 		if (!this.ssh.isConnected()) {
 			this.ssh.start();

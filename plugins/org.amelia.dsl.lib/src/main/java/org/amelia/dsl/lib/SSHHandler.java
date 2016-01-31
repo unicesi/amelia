@@ -56,6 +56,8 @@ import com.jcraft.jsch.UserInfo;
 public class SSHHandler extends Thread {
 
 	private final Host host;
+	
+	private final String subsystem;
 
 	private Session session;
 
@@ -78,9 +80,10 @@ public class SSHHandler extends Thread {
 	 */
 	private final static Logger logger = LogManager.getLogger(SSHHandler.class);
 
-	public SSHHandler(final Host host) {
+	public SSHHandler(final Host host, final String subsystem) {
 		this.host = host;
-
+		this.subsystem = subsystem;
+		
 		String _connectionTimeout = System
 				.getProperty("amelia.connection_timeout");
 		String _executionTimeout = System
@@ -118,7 +121,6 @@ public class SSHHandler extends Thread {
 
 	private void connect() throws JSchException, IOException {
 		JSch jsch = new JSch();
-
 		String identity = System.getProperty("amelia.identity");
 		String knownHosts = System.getProperty("amelia.known_hosts");
 
@@ -141,10 +143,8 @@ public class SSHHandler extends Thread {
 			this.session.setPassword(this.host.password());
 
 		UserInfo ui = new AuthenticationUserInfo();
-
 		this.session.setUserInfo(ui);
 		this.session.connect(this.connectionTimeout);
-
 		this.channel = session.openChannel("shell");
 		this.channel.connect(this.connectionTimeout);
 	}
@@ -284,7 +284,8 @@ public class SSHHandler extends Thread {
 	private File createOutputFile() throws IOException {
 		String fileName = this.host + "-" + System.nanoTime() + ".txt";
 
-		File parent = new File("sessions");
+		File parent = new File(
+				"sessions" + File.separator + this.subsystem);
 		File file = new File(parent, fileName);
 
 		if (!parent.exists())

@@ -123,7 +123,7 @@ public class ExecutionManager {
 			Log.info("Establishing SSH connections (" + hosts.length + ")");
 
 		for (Host host : hosts) {
-			host.openSSHConnection();
+			host.openSSHConnection(this.executionGraph.subsystem());
 
 			if (hostFixedWidth < host.toString().length())
 				hostFixedWidth = host.toString().length();

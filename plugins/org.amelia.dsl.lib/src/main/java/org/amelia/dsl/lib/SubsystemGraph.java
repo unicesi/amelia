@@ -66,13 +66,11 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			try {
 				this.doneSignal.await();
 				if (!this.shutdown) {
-					this.subsystem.start();
-					final Subsystem.Deployment deployment = this.subsystem
-							.deployment();
-
 					taskQueue.execute(new Callable<Void>() {
 						public Void call() throws Exception {
-							deployment.deploy(depsAsMap());
+							subsystem.start();
+							subsystem.deployment().deploy(subsystem.alias(),
+									depsAsMap());
 							return null;
 						}
 					});
