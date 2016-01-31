@@ -34,27 +34,23 @@ TypeDeclaration
 
 SubsystemDeclaration returns Subsystem
 	:	'subsystem' name = ID
-		('<-' dependencies += [Subsystem | QualifiedName] (',' dependencies += [Subsystem | QualifiedName])*)?
-		body = SubsystemBlockExpression
+		('<' dependencies += [Subsystem | QualifiedName] (',' dependencies += [Subsystem | QualifiedName])*)?
+		body = XBlockExpression
 	;
 
-SubsystemBlockExpression returns XBlockExpression
-	:	{SubsystemBlockExpression} '{' (expressions += InternalSubsystemDeclaration)* '}'
+SequentialBlock returns XBlockExpression
+	:	'sequential' {SequentialBlock}	'{'
+			(expressions += XExpression)*
+		'}'
 	;
 
-InternalSubsystemDeclaration returns XExpression
-	:	VariableDeclaration
-	;
-
-VariableDeclaration returns XExpression
-	:	{VariableDeclaration}
-		(writeable ?= 'var'|'val') (=>(type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)? ->';'?
-	;
-	
-SequentialBlock
-	:	'sequential' 'in' nodes = XExpression body = XBlockExpression
-	;
-	
-InExpression
-	:	left = XExpression 'in' right = XExpression
+XLiteral returns XExpression
+	:	XCollectionLiteral
+	|	XClosure
+	|	XBooleanLiteral
+	|	XNumberLiteral
+	|	XNullLiteral
+	|	XStringLiteral
+	|	XTypeLiteral
+	|	SequentialBlock
 	;
