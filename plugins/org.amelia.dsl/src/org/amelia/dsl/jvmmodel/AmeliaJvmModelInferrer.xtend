@@ -19,8 +19,8 @@
 package org.amelia.dsl.jvmmodel
 
 import com.google.inject.Inject
+import java.util.Map
 import org.amelia.dsl.amelia.Subsystem
-import org.amelia.dsl.amelia.VariableDeclaration
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
@@ -44,22 +44,14 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	def dispatch void infer(Subsystem subsystem, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		acceptor.accept(subsystem.toClass(subsystem.fullyQualifiedName) [
 			if (!isPreIndexingPhase) {
-				val fields = newArrayList
-				val methods = newArrayList
 				documentation = subsystem.documentation
-				for (e : subsystem.body.expressions) {
-					switch (e) {
-						VariableDeclaration: {
-							fields += e.toField(e.name, if (e.type != null) e.type else inferredType) [
-								documentation = e.documentation
-								final = !e.writeable
-								initializer = e.right
-							]
-						}
-					}
-				}
-				members += fields
-				members += methods
+				superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
+				members += subsystem.toMethod("deploy", typeRef(void)) [
+					exceptions += typeRef(Exception)
+					parameters += subsystem.toParameter("subsystem", typeRef(String))
+					parameters += subsystem.toParameter("dependencies", typeRef(Map, typeRef(String), typeRef(org.amelia.dsl.lib.Subsystem)))
+					body = subsystem.body
+				]
 			}
 		])
 	}
