@@ -18,14 +18,8 @@
  */
 package org.amelia.dsl.scoping
 
-import org.amelia.dsl.amelia.AmeliaPackage
-import org.amelia.dsl.amelia.Task
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
-import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.xtext.scoping.Scopes
-import org.eclipse.xtext.scoping.impl.FilteringScope
-import org.amelia.dsl.amelia.Subsystem
 
 /**
  * This class contains custom scoping description.
@@ -37,19 +31,6 @@ class AmeliaScopeProvider extends AmeliaImportedNamespaceAwareLocalScopeProvider
 	
 	override getScope(EObject context, EReference reference) {
 		switch (context) {
-			Task case reference == AmeliaPackage.Literals.TASK__DEPENDENCIES: {
-				val root = EcoreUtil2.getRootContainer(context)
-				val tasks = Scopes.scopeFor(EcoreUtil2.getAllContentsOfType(root, Task));
-				return new FilteringScope(tasks) [ input |
-					input.getEObjectOrProxy() != context
-				]
-			}
-			Subsystem case reference == AmeliaPackage.Literals.SUBSYSTEM__DEPENDENCIES: {
-				val subsystems = getGlobalScope(context.eResource, reference)
-				return new FilteringScope(subsystems) [ input |
-					input.getEObjectOrProxy() != context
-				]
-			}
 			default: return super.getScope(context, reference)
 		}
 	}
