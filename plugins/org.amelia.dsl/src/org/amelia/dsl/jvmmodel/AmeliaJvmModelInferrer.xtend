@@ -20,7 +20,6 @@ package org.amelia.dsl.jvmmodel
 
 import com.google.inject.Inject
 import org.amelia.dsl.amelia.Subsystem
-import org.amelia.dsl.amelia.Task
 import org.amelia.dsl.amelia.VariableDeclaration
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
@@ -55,15 +54,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								documentation = e.documentation
 								final = !e.writeable
 								initializer = e.right
-							]
-						}
-						Task: {
-							methods += e.toMethod(e.name.toFirstLower, typeRef(void)) [
-								documentation = e.documentation
-								body = e.body
-								if (e.declaredFormalParameters != null)
-									for (param : e.declaredFormalParameters)
-										parameters += param.toParameter(param.name, param.parameterType)
 							]
 						}
 					}

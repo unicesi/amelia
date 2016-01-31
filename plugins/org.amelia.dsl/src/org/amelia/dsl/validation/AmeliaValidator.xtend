@@ -25,7 +25,6 @@ import java.util.Set
 import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.Subsystem
-import org.amelia.dsl.amelia.Task
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.validation.Check
@@ -86,21 +85,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def checkTaskNameIsUnique(Task task) {
-		val parent = task.eContainer.eContainer as Subsystem
-		var duplicates = parent.body.expressions.filter [ e |
-			switch (e) {
-				Task: e.name.equals(task.name) && !e.equals(task)
-				default: false
-			}
-		]
-		if (!duplicates.isEmpty) {
-			error("Duplicate local task " + task.name, AmeliaPackage.Literals.TASK__NAME,
-				DUPLICATE_LOCAL_VARIABLE)
-		}
-	}
-	
-	@Check
 	def checkVariableNameIsUnique(VariableDeclaration varDecl) {
 		val parent = varDecl.eContainer.eContainer as Subsystem
 		val duplicateVars = parent.body.expressions.filter [ v |
@@ -128,19 +112,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			error("The declared package '" + model.name + "' does not match the expected package '" + expectedPackage +
 				"'", AmeliaPackage.Literals.MODEL__NAME, INVALID_PACKAGE_NAME)
 		}
-	}
-	
-	@Check
-	def void checkNoRecursiveDependencies(Task task) {
-		task.findDependentElements [ cycle |
-			if (cycle.size == 1) {
-				error('''The task '«task.name»' cannot depend on itself.''', 
-					  cycle.head, AmeliaPackage.Literals.TASK__NAME, CYCLIC_DEPENDENCY)
-			} else {
-				error('''There is a cyclic dependency that involves tasks «cycle.filter(Task).map[name].join(", ")»''', 
-					  cycle.head, AmeliaPackage.Literals.TASK__NAME, CYCLIC_DEPENDENCY)
-			}
-		]
 	}
 	
 	@Check
@@ -172,10 +143,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		while (changed) {
 			changed = false
 			for (t : elements.toList) {
-				val dependencies = if (t instanceof Task)
-						t.dependencies
-					else if (t instanceof Subsystem)
-						t.dependencies
+				val dependencies = if (t instanceof Subsystem) t.dependencies
 				if (result.containsAll(dependencies)) {
 					changed = true
 					result.add(t)
@@ -191,10 +159,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	def private void internalFindDependentTasksRec(EObject e, Set<EObject> set) {
 		if (!set.add(e))
 			return;
-		val dependencies = if (e instanceof Task)
-				e.dependencies
-			else if (e instanceof Subsystem)
-				e.dependencies
+		val dependencies = if (e instanceof Subsystem) e.dependencies
 		for (t : dependencies) 
 			internalFindDependentTasksRec(t, set)
 	}

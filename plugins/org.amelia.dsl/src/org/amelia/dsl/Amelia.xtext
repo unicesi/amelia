@@ -44,19 +44,11 @@ SubsystemBlockExpression returns XBlockExpression
 
 InternalSubsystemDeclaration returns XExpression
 	:	VariableDeclaration
-	|	TaskDeclaration
 	;
 
 VariableDeclaration returns XExpression
 	:	{VariableDeclaration}
 		(writeable ?= 'var'|'val') (=>(type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)? ->';'?
-	;
-
-TaskDeclaration returns Task
-	:	'task' name = ID
-		('(' declaredFormalParameters += JvmFormalParameter (',' declaredFormalParameters += JvmFormalParameter)* ')')?
-		('<-' dependencies += [Task | ID] (',' dependencies += [Task | ID])*)?
-		body = XBlockExpression
 	;
 	
 SequentialBlock
