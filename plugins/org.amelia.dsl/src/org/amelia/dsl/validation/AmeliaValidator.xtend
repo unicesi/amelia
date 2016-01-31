@@ -18,13 +18,18 @@
  */
 package org.amelia.dsl.validation
 
+import java.util.ArrayList
+import java.util.Arrays
 import java.util.Collection
-import org.amelia.dsl.amelia.Task
 import java.util.Set
-import org.eclipse.xtext.validation.Check
 import org.amelia.dsl.amelia.AmeliaPackage
+import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.Subsystem
+import org.amelia.dsl.amelia.Task
+import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.validation.Check
+import org.amelia.dsl.amelia.VariableDeclaration
 
 /**
  * This class contains custom validation rules. 
@@ -34,6 +39,96 @@ import org.eclipse.emf.ecore.EObject
 class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	public static val CYCLIC_DEPENDENCY = "amelia.issue.cyclicDependency"
+	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
+	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
+	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
+	public static val DUPLICATE_LOCAL_VARIABLE = "amelia.issue.duplicateLocalVariable"
+	
+	def fromURItoFQN(URI resourceURI) {
+		// e.g., platform:/resource/<project>/<source-folder>/org/example/.../TypeDecl.pascani
+		var segments = new ArrayList
+
+		// Remove the first 3 segments, and return the package and file segments
+		segments.addAll(resourceURI.segmentsList.subList(3, resourceURI.segments.size - 1))
+
+		// Remove file extension and add the last segment
+		segments.add(resourceURI.lastSegment.substring(0, resourceURI.lastSegment.lastIndexOf(".")))
+
+		return segments.fold("", [r, t|if(r.isEmpty) t else r + "." + t])
+	}
+
+	@Check
+	def checkSubsystemStartsWithCapital(Subsystem subsystem) {
+		if (!Character.isUpperCase(subsystem.name.charAt(0))) {
+			warning("Name should start with a capital", AmeliaPackage.Literals.SUBSYSTEM__NAME,
+				NON_CAPITAL_NAME)
+		}
+	}
+
+	@Check
+	def checkPackageIsLowerCase(Model model) {
+		if (!model.name.equals(model.name.toLowerCase)) {
+			error("Package name must be in lower case", AmeliaPackage.Literals.MODEL__NAME)
+		}
+	}
+
+	@Check
+	def checkSubsystemNameMatchesPhysicalName(Subsystem subsystem) {
+		// e.g., platform:/resource/<project>/<source-folder>/org/example/.../Subsystem.amelia
+		val URI = subsystem.eResource.URI
+		val fileName = URI.lastSegment.substring(0, URI.lastSegment.indexOf(URI.fileExtension) - 1)
+		val isPublic = subsystem.eContainer != null && subsystem.eContainer instanceof Model
+
+		if (isPublic && !fileName.equals(subsystem.name)) {
+			error("Subsystem '" + subsystem.name + "' does not match the corresponding file name '" + fileName +
+				"'", AmeliaPackage.Literals.SUBSYSTEM__NAME, INVALID_FILE_NAME)
+		}
+	}
+	
+	@Check
+	def checkTaskNameIsUnique(Task task) {
+		val parent = task.eContainer.eContainer as Subsystem
+		var duplicates = parent.body.expressions.filter [ e |
+			switch (e) {
+				Task: e.name.equals(task.name) && !e.equals(task)
+				default: false
+			}
+		]
+		if (!duplicates.isEmpty) {
+			error("Duplicate local task " + task.name, AmeliaPackage.Literals.TASK__NAME,
+				DUPLICATE_LOCAL_VARIABLE)
+		}
+	}
+	
+	@Check
+	def checkVariableNameIsUnique(VariableDeclaration varDecl) {
+		val parent = varDecl.eContainer.eContainer as Subsystem
+		val duplicateVars = parent.body.expressions.filter [ v |
+			switch (v) {
+				VariableDeclaration case v.name.equals(varDecl.name): {
+					return !v.equals(varDecl)
+				}
+				default:
+					return false
+			}
+		]
+		if (!duplicateVars.isEmpty) {
+			error("Duplicate local variable " + varDecl.name, AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME,
+				DUPLICATE_LOCAL_VARIABLE)
+		}
+	}
+	
+	@Check
+	def checkPackageMatchesPhysicalDirectory(Model model) {
+		val packageSegments = model.name.split("\\.")
+		val fqn = fromURItoFQN(model.typeDeclaration.eResource.URI)
+		var expectedPackage = fqn.substring(0, fqn.lastIndexOf("."))
+
+		if (!Arrays.equals(expectedPackage.split("\\."), packageSegments)) {
+			error("The declared package '" + model.name + "' does not match the expected package '" + expectedPackage +
+				"'", AmeliaPackage.Literals.MODEL__NAME, INVALID_PACKAGE_NAME)
+		}
+	}
 	
 	@Check
 	def void checkNoRecursiveDependencies(Task task) {
