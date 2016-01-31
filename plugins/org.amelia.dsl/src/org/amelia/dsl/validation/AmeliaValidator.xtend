@@ -28,7 +28,9 @@ import org.amelia.dsl.amelia.Subsystem
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.validation.Check
-import org.amelia.dsl.amelia.VariableDeclaration
+import org.eclipse.xtext.xbase.XBlockExpression
+import org.eclipse.xtext.xbase.XVariableDeclaration
+import org.eclipse.xtext.xbase.XbasePackage
 
 /**
  * This class contains custom validation rules. 
@@ -85,11 +87,11 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def checkVariableNameIsUnique(VariableDeclaration varDecl) {
+	def checkVariableNameIsUnique(XVariableDeclaration varDecl) {
 		val parent = varDecl.eContainer.eContainer as Subsystem
-		val duplicateVars = parent.body.expressions.filter [ v |
+		val duplicateVars = (parent.body as XBlockExpression).expressions.filter [ v |
 			switch (v) {
-				VariableDeclaration case v.name.equals(varDecl.name): {
+				XVariableDeclaration case v.name.equals(varDecl.name): {
 					return !v.equals(varDecl)
 				}
 				default:
@@ -97,7 +99,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			}
 		]
 		if (!duplicateVars.isEmpty) {
-			error("Duplicate local variable " + varDecl.name, AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME,
+			error("Duplicate local variable " + varDecl.name, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
 				DUPLICATE_LOCAL_VARIABLE)
 		}
 	}
