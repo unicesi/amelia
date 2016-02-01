@@ -67,8 +67,8 @@ public class CommandExtensions {
 	 *            The command descriptors
 	 * @param host
 	 *            The host where the descriptors run
-	 * @return {@code descriptor.runsOn(host)} for each descriptor
-	 *         (the conjunction)
+	 * @return the conjunction of {@code descriptor.runsOn(hosts)} for all
+	 *         descriptors
 	 */
 	@Pure
 	public static boolean operator_doubleGreaterThan(
@@ -87,8 +87,8 @@ public class CommandExtensions {
 	 *            The command descriptors
 	 * @param hosts
 	 *            The hosts where the descriptors run
-	 * @return {@code descriptor.runsOn(hosts)} for each descriptor
-	 *         (the conjunction)
+	 * @return the conjunction of {@code descriptor.runsOn(hosts)} for all
+	 *         descriptors
 	 */
 	@Pure
 	public static boolean operator_doubleGreaterThan(
@@ -96,6 +96,78 @@ public class CommandExtensions {
 		boolean all = true;
 		for (CommandDescriptor descriptor : descriptors) {
 			all &= descriptor.runsOn(hosts);
+		}
+		return all;
+	}
+
+	/**
+	 * The binary {@code =>} operator.
+	 * 
+	 * @param descriptor
+	 *            The dependent command descriptor
+	 * @param dependency
+	 *            The dependency
+	 * @return {@code descriptor.dependsOn(dependency)}
+	 */
+	@Pure
+	@Inline(value = "$1.dependsOn($2)")
+	public static boolean operator_doubleArrow(CommandDescriptor descriptor,
+			CommandDescriptor dependency) {
+		return descriptor.dependsOn(dependency);
+	}
+
+	/**
+	 * The binary {@code =>} operator.
+	 * 
+	 * @param descriptor
+	 *            The dependent command descriptor
+	 * @param dependencies
+	 *            The dependencies
+	 * @return {@code descriptor.dependsOn(dependency)}
+	 */
+	@Pure
+	@Inline(value = "$1.dependsOn($2)")
+	public static boolean operator_doubleArrow(CommandDescriptor descriptor,
+			CommandDescriptor[] dependencies) {
+		return descriptor.dependsOn(dependencies);
+	}
+
+	/**
+	 * The binary {@code =>} operator.
+	 * 
+	 * @param descriptors
+	 *            The dependent command descriptors
+	 * @param dependency
+	 *            The dependency
+	 * @return the conjunction of {@code descriptor.dependsOn(dependency)} for
+	 *         all descriptors
+	 */
+	@Pure
+	public static boolean operator_doubleArrow(CommandDescriptor[] descriptors,
+			CommandDescriptor dependency) {
+		boolean all = true;
+		for (CommandDescriptor descriptor : descriptors) {
+			all &= descriptor.dependsOn(dependency);
+		}
+		return all;
+	}
+
+	/**
+	 * The binary {@code =>} operator.
+	 * 
+	 * @param descriptors
+	 *            The dependent command descriptors
+	 * @param dependencies
+	 *            The dependencies
+	 * @return the conjunction of {@code descriptor.dependsOn(dependencies)} for
+	 *         all descriptors
+	 */
+	@Pure
+	public static boolean operator_doubleArrow(CommandDescriptor[] descriptors,
+			CommandDescriptor[] dependencies) {
+		boolean all = true;
+		for (CommandDescriptor descriptor : descriptors) {
+			all &= descriptor.dependsOn(dependencies);
 		}
 		return all;
 	}
