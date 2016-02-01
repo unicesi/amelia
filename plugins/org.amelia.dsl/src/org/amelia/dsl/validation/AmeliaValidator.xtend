@@ -88,19 +88,22 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def checkVariableNameIsUnique(XVariableDeclaration varDecl) {
-		val parent = varDecl.eContainer.eContainer as Subsystem
-		val duplicateVars = (parent.body as XBlockExpression).expressions.filter [ v |
-			switch (v) {
-				XVariableDeclaration case v.name.equals(varDecl.name): {
-					return !v.equals(varDecl)
+		val parent = varDecl.eContainer.eContainer
+		switch (parent) {
+			Subsystem: {
+				val duplicateVars = (parent.body as XBlockExpression).expressions.filter [ v |
+					switch (v) {
+						XVariableDeclaration case v.name.equals(varDecl.name):
+							return !v.equals(varDecl)
+						default:
+							return false
+					}
+				]
+				if (!duplicateVars.isEmpty) {
+					error("Duplicate local variable " + varDecl.name, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
+						DUPLICATE_LOCAL_VARIABLE)
 				}
-				default:
-					return false
 			}
-		]
-		if (!duplicateVars.isEmpty) {
-			error("Duplicate local variable " + varDecl.name, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
-				DUPLICATE_LOCAL_VARIABLE)
 		}
 	}
 	
