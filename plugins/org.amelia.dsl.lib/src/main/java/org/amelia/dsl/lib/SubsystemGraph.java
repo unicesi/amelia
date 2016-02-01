@@ -150,7 +150,30 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 
 		return instance;
 	}
+	
+	/*
+	 * FIXME: search for transitive dependencies
+	 */
+	public boolean addSubsystems(Subsystem... subsystems) {
+		boolean all = true;
+		for (Subsystem subsystem : subsystems) {
+			if (this.subsystems.contains(subsystem)) {
+				all = false;
+				continue;
+			}
+			this.subsystems.add(subsystem);
+			put(subsystem, subsystem.dependencies());
+		}
+		return all;
+	}
 
+	/**
+	 * @deprecated use {@link #addSubsystems(Subsystem...)} instead
+	 * @param subsystem
+	 *            The subsystem to add
+	 * @return Whether or not the subsystem was added
+	 */
+	@Deprecated
 	public boolean addSubsystem(Subsystem subsystem) {
 		if (containsKey(subsystem))
 			return false;
@@ -160,6 +183,15 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		return this.subsystems.add(subsystem);
 	}
 
+	/**
+	 * @deprecated use {@link Subsystem #dependsOn(Subsystem...)} instead
+	 * @param a
+	 *            The dependent subsystem
+	 * @param b
+	 *            The dependency
+	 * @return Whether or not the dependency was added
+	 */
+	@Deprecated
 	public boolean addDependency(Subsystem a, Subsystem b) {
 		if (!containsKey(a) || !containsKey(b))
 			return false;

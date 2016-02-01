@@ -18,6 +18,8 @@
  */
 package org.amelia.dsl.lib;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.amelia.dsl.lib.util.Log;
@@ -36,10 +38,13 @@ public class Subsystem {
 	private final String alias;
 
 	private final Deployment deployment;
+	
+	private final List<Subsystem> dependencies;
 
 	public Subsystem(final String alias, final Deployment deployment) {
 		this.alias = alias;
 		this.deployment = deployment;
+		this.dependencies = new ArrayList<Subsystem>();
 	}
 
 	public void start() {
@@ -52,6 +57,49 @@ public class Subsystem {
 
 	public void done() {
 		Log.info("Finished deploying subsystem '" + alias + "'\n");
+	}
+	
+	public boolean dependsOn(Subsystem... subsystems) {
+		boolean all = true;
+		for (Subsystem subsystem : subsystems) {
+			if (subsystem.equals(this))
+				throw new IllegalArgumentException("A subsystem cannot depend on itself");
+			if (this.dependencies.contains(subsystem)) {
+				all = false;
+				continue;
+			}
+			this.dependencies.add(subsystem);
+		}
+		return all;
+	}
+	
+	public List<Subsystem> dependencies() {
+		return this.dependencies;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((alias == null) ? 0 : alias.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Subsystem other = (Subsystem) obj;
+		if (alias == null) {
+			if (other.alias != null)
+				return false;
+		} else if (!alias.equals(other.alias))
+			return false;
+		return true;
 	}
 
 	@Override
