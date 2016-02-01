@@ -24,6 +24,8 @@ import org.amelia.dsl.scoping.AmeliaScopeProvider
 import org.eclipse.xtext.linking.LinkingScopeProviderBinding
 import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
+import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
+import org.amelia.dsl.scoping.AmeliaImplicitlyImportedFeatures
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -46,6 +48,13 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 	
 	override Class<? extends IScopeProvider> bindIScopeProvider() {
 		return AmeliaScopeProvider
+	}
+	
+	override void configure(Binder binder) {
+		super.configure(binder)
+		binder
+			.bind(ImplicitlyImportedFeatures)
+			.to(AmeliaImplicitlyImportedFeatures)
 	}
 	
 }
