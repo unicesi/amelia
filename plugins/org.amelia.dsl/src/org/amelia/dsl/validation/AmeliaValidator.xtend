@@ -31,6 +31,8 @@ import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
+import org.amelia.dsl.amelia.SequentialBlock
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 
 /**
  * This class contains custom validation rules. 
@@ -40,10 +42,11 @@ import org.eclipse.xtext.xbase.XbasePackage
 class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	public static val CYCLIC_DEPENDENCY = "amelia.issue.cyclicDependency"
-	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
-	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
-	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
 	public static val DUPLICATE_LOCAL_VARIABLE = "amelia.issue.duplicateLocalVariable"
+	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
+	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
+	public static val INVALID_PARAMETER_TYPE = "amelia.issue.invalidParameterType"
+	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
 	
 	def fromURItoFQN(URI resourceURI) {
 		// e.g., platform:/resource/<project>/<source-folder>/org/example/.../TypeDecl.pascani
@@ -130,6 +133,15 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 					  cycle.head, AmeliaPackage.Literals.SUBSYSTEM__NAME, CYCLIC_DEPENDENCY)
 			}
 		]
+	}
+	
+	@Check
+	def void checkSequentialBlockExpressions(SequentialBlock sequentialBlock) {
+		val block = sequentialBlock as XBlockExpression
+		val commands = block.expressions.filter[e|e.actualType.getSuperType(CommandDescriptor) != null]
+		if (commands.length != block.expressions.length)
+			error("Sequential blocks can only contain command expressions",
+				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS, INVALID_PARAMETER_TYPE)
 	}
 	
 	/**
