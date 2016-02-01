@@ -18,6 +18,9 @@
  */
 package org.amelia.dsl.lib.util;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public enum ANSI {
 
 	BLINK(5),
