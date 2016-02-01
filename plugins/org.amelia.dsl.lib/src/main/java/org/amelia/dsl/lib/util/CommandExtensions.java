@@ -88,8 +88,8 @@ public class CommandExtensions {
 	 * @return the conjunction of {@code descriptor.runsOn(hosts)} for all
 	 *         descriptors
 	 */
-	public static boolean operator_mappedTo(List<CommandDescriptor> descriptors,
-			Host host) {
+	public static boolean operator_mappedTo(
+			List<? extends CommandDescriptor> descriptors, Host host) {
 		return operator_mappedTo(descriptors.toArray(new CommandDescriptor[0]), host);
 	}
 
@@ -122,9 +122,9 @@ public class CommandExtensions {
 	 * @return the conjunction of {@code descriptor.runsOn(hosts)} for all
 	 *         descriptors
 	 */
-	public static boolean operator_mappedTo(List<CommandDescriptor> descriptors, List<Host> hosts) {
-		return operator_mappedTo(descriptors.toArray(new CommandDescriptor[0]),
-				hosts.toArray(new Host[0]));
+	public static boolean operator_mappedTo(
+			List<? extends CommandDescriptor> descriptors, List<Host> hosts) {
+		return operator_mappedTo(descriptors.toArray(new CommandDescriptor[0]), hosts.toArray(new Host[0]));
 	}
 
 	/**
