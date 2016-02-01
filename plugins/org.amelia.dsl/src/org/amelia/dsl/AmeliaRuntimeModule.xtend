@@ -26,6 +26,10 @@ import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.amelia.dsl.scoping.AmeliaImplicitlyImportedFeatures
+import org.amelia.dsl.compiler.AmeliaCompiler
+import org.eclipse.xtext.xbase.compiler.XbaseCompiler
+import org.amelia.dsl.typesystem.AmeliaTypeComputer
+import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -55,6 +59,14 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 		binder
 			.bind(ImplicitlyImportedFeatures)
 			.to(AmeliaImplicitlyImportedFeatures)
+	}
+	
+	def Class<? extends ITypeComputer> bindITypeComputer() {
+		return AmeliaTypeComputer
+	}
+
+	def Class<? extends XbaseCompiler> bindXbaseCompiler() {
+		return AmeliaCompiler
 	}
 	
 }
