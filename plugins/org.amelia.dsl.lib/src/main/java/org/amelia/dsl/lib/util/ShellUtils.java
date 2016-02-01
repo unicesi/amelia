@@ -50,9 +50,9 @@ public class ShellUtils {
 	 */
 	public static String ameliaPromptFormat(String shell) {
 
-		// e.g., [Amelia library 2015-09-28 18:54:34 user@grid0:~/Desktop]$
-		String bash = "[Amelia library \\D{%F %T} \\u@\\h:\\w]$ ";
-		String zsh = "[Amelia library %D{%Y-%m-%d %H:%M:%S} %n% @%m% :%~]$ ";
+		// e.g., [Amelia 2015-09-28 18:54:34 user@grid0:~/Desktop]$
+		String bash = "[Amelia \\D{%F %T} \\u@\\h:\\w]$ ";
+		String zsh = "[Amelia %D{%Y-%m-%d %H:%M:%S} %n% @%m% :%~]$ ";
 
 		String command = "PS1=\"";
 
@@ -76,7 +76,7 @@ public class ShellUtils {
 
 		StringBuilder regexp = new StringBuilder();
 
-		regexp.append("\\[Amelia library ");
+		regexp.append("\\[Amelia ");
 		regexp.append(date + " ");
 		regexp.append(time + " ");
 		regexp.append(user);
