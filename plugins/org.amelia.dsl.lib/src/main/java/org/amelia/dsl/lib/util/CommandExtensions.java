@@ -27,30 +27,72 @@ import org.eclipse.xtext.xbase.lib.Pure;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class CommandExtensions {
-	
+
+	/**
+	 * The binary {@code >>} operator.
+	 * 
+	 * @param descriptor
+	 *            The command descriptor
+	 * @param host
+	 *            The host where the descriptor runs
+	 * @return {@code descriptor.runsOn(host)}
+	 */
 	@Pure
-	@Inline(value="$1.runsOn($2)")
-	public static boolean operator_doubleGreaterThan(CommandDescriptor descriptor, Host host) {
+	@Inline(value = "$1.runsOn($2)")
+	public static boolean operator_doubleGreaterThan(
+			CommandDescriptor descriptor, Host host) {
 		return descriptor.runsOn(host);
 	}
-	
+
+	/**
+	 * The binary {@code >>} operator.
+	 * 
+	 * @param descriptor
+	 *            The command descriptor
+	 * @param hosts
+	 *            The hosts where the descriptor runs
+	 * @return {@code descriptor.runsOn(hosts)}
+	 */
 	@Pure
-	@Inline(value="$1.runsOn($2)")
-	public static boolean operator_doubleGreaterThan(CommandDescriptor descriptor, Host[] hosts) {
+	@Inline(value = "$1.runsOn($2)")
+	public static boolean operator_doubleGreaterThan(
+			CommandDescriptor descriptor, Host[] hosts) {
 		return descriptor.runsOn(hosts);
 	}
-	
+
+	/**
+	 * The binary {@code >>} operator.
+	 * 
+	 * @param descriptors
+	 *            The command descriptors
+	 * @param host
+	 *            The host where the descriptors run
+	 * @return {@code descriptor.runsOn(host)} for each descriptor
+	 *         (the conjunction)
+	 */
 	@Pure
-	public static boolean operator_doubleGreaterThan(CommandDescriptor[] descriptors, Host host) {
+	public static boolean operator_doubleGreaterThan(
+			CommandDescriptor[] descriptors, Host host) {
 		boolean all = true;
 		for (CommandDescriptor descriptor : descriptors) {
 			all &= descriptor.runsOn(host);
 		}
 		return all;
 	}
-	
+
+	/**
+	 * The binary {@code >>} operator.
+	 * 
+	 * @param descriptors
+	 *            The command descriptors
+	 * @param hosts
+	 *            The hosts where the descriptors run
+	 * @return {@code descriptor.runsOn(hosts)} for each descriptor
+	 *         (the conjunction)
+	 */
 	@Pure
-	public static boolean operator_doubleGreaterThan(CommandDescriptor[] descriptors, Host[] hosts) {
+	public static boolean operator_doubleGreaterThan(
+			CommandDescriptor[] descriptors, Host[] hosts) {
 		boolean all = true;
 		for (CommandDescriptor descriptor : descriptors) {
 			all &= descriptor.runsOn(hosts);
