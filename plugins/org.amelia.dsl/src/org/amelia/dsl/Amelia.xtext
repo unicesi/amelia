@@ -34,7 +34,7 @@ TypeDeclaration
 
 SubsystemDeclaration returns Subsystem
 	:	'subsystem' name = ID
-		('<' dependencies += [Subsystem | QualifiedName] (',' dependencies += [Subsystem | QualifiedName])*)?
+		('<=' dependencies += [Subsystem | QualifiedName] (',' dependencies += [Subsystem | QualifiedName])*)?
 		body = XBlockExpression
 	;
 
