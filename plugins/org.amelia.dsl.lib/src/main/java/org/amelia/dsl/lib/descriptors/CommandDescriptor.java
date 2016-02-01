@@ -18,6 +18,8 @@
  */
 package org.amelia.dsl.lib.descriptors;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
 
@@ -102,6 +104,8 @@ public class CommandDescriptor extends Observable {
 	protected final String releaseRegexp;
 	protected final String successMessage;
 	protected final long timeout;
+	protected final List<CommandDescriptor> dependencies;
+	protected final List<Host> hosts;
 
 	public CommandDescriptor(final Builder builder) {
 		this.internalId = UUID.randomUUID();
@@ -112,6 +116,8 @@ public class CommandDescriptor extends Observable {
 		this.errorText = builder.errorText;
 		this.errorMessage = builder.errorMessage;
 		this.successMessage = builder.successMessage;
+		this.dependencies = new ArrayList<CommandDescriptor>();
+		this.hosts = new ArrayList<Host>();
 	}
 
 	public boolean isOk(String response) {
@@ -132,6 +138,38 @@ public class CommandDescriptor extends Observable {
 
 	public String toCommandString() {
 		return this.command;
+	}
+	
+	public boolean dependsOn(CommandDescriptor... dependencies) {
+		boolean all = true;
+		for (CommandDescriptor descriptor : dependencies) {
+			if (this.dependencies.contains(dependencies)) {
+				all = false;
+				continue;
+			}
+			this.dependencies.add(descriptor);
+		}
+		return all;
+	}
+	
+	public boolean runsOn(Host... hosts) {
+		boolean all = true;
+		for (Host host : hosts) {
+			if (this.hosts.contains(host)) {
+				all = false;
+				continue;
+			}
+			this.hosts.add(host);
+		}
+		return all;
+	}
+	
+	public List<Host> hosts() {
+		return this.hosts;
+	}
+	
+	public List<CommandDescriptor> dependencies() {
+		return this.dependencies;
 	}
 
 	@Override

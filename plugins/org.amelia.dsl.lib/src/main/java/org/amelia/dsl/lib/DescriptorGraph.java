@@ -154,7 +154,45 @@ public class DescriptorGraph
 	public DescriptorGraph() {
 		this("default");
 	}
+	
+	/**
+	 * @param descriptors The array of descriptors to add
+	 * @return {@code true} is all descriptors were added, {@code false} otherwise
+	 */
+	public boolean addDescriptors(CommandDescriptor... descriptors) {
+		boolean added = true;
+		for (CommandDescriptor descriptor : descriptors) {
+			if (containsKey(descriptor)) {
+				added = false;
+				continue;
+			}
+			// The only known use of the FTP connection is the AssetBundle
+			if (descriptor instanceof AssetBundle)
+				this.ftpHosts.addAll(descriptor.hosts());
+			else
+				this.sshHosts.addAll(descriptor.hosts());
+			
+			put(descriptor, descriptor.dependencies());
+			this.tasks.put(descriptor, new ArrayList<Command<?>>());
 
+			// Add an executable task per host
+			for (Host host : descriptor.hosts()) {
+				Command<?> task = CommandFactory.getInstance().getCommand(host, descriptor);
+				this.tasks.get(descriptor).add(task);
+			}
+		}
+		return added;
+	}
+
+	/**
+	 * @deprecated use {@link CommandDescriptor#runsOn(Host)} instead
+	 * @param a
+	 *            The command descriptor
+	 * @param hosts
+	 *            The hosts where the command runs
+	 * @return Whether or not the command was added
+	 */
+	@Deprecated
 	public boolean addDescriptor(CommandDescriptor a, Host... hosts) {
 		if (containsKey(a))
 			return false;
@@ -169,7 +207,7 @@ public class DescriptorGraph
 		put(a, new ArrayList<CommandDescriptor>());
 		this.tasks.put(a, new ArrayList<Command<?>>());
 
-		// Add a executable task per host
+		// Add an executable task per host
 		for (Host host : hosts) {
 			Command<?> task = CommandFactory.getInstance().getCommand(host, a);
 			this.tasks.get(a).add(task);
@@ -178,6 +216,16 @@ public class DescriptorGraph
 		return true;
 	}
 
+	/**
+	 * @deprecated Use {@link CommandDescriptor#dependsOn(CommandDescriptor)}
+	 *             instead
+	 * @param a
+	 *            The dependent command
+	 * @param b
+	 *            The dependency
+	 * @return Whether or not the dependency was added
+	 */
+	@Deprecated
 	public boolean addDependency(CommandDescriptor a, CommandDescriptor b) {
 		if (!containsKey(a) || !containsKey(b))
 			return false;
