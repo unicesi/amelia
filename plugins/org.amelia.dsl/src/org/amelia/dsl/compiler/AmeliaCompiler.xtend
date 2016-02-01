@@ -8,6 +8,8 @@ import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.eclipse.xtext.xbase.XConstructorCall
 import org.eclipse.xtext.xbase.compiler.Later
+import java.util.ArrayList
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 
 class AmeliaCompiler extends XbaseCompiler {
 
@@ -27,29 +29,23 @@ class AmeliaCompiler extends XbaseCompiler {
 
 	def void _toJavaStatement(SequentialBlock expr, ITreeAppendable appendable, boolean isReferenced) {
 		val b = appendable.trace(expr, false)
-		if (expr.getExpressions().isEmpty())
-			return;
-		if (expr.getExpressions().size() == 1) {
-			internalToJavaStatement(expr.getExpressions().get(0), b, isReferenced);
-			return;
+		var sequentialBlockName = "_"
+		if (isReferenced) {
+			declareInitializedSyntheticVariable(expr, b, [ t |
+				t.append("new ").append(ArrayList).append("<").append(CommandDescriptor).append(">();")
+			]);
+			sequentialBlockName = getVarName(expr, b)
 		}
-		if (isReferenced)
-			declareSyntheticVariable(expr, b);
 		val expressions = expr.getExpressions();
 		var String previous = null
 		for (var i = 0; i < expressions.size(); i++) {
-			val ex = expressions.get(i);
-			var name = "_"
-			if (i < expressions.size() - 1 || !isReferenced) {
-				declareInitializedSyntheticVariable(ex, b);
-				name = getVarName(ex, b)
-			} else {
-				internalToJavaStatement(ex, b, isReferenced);
-				name = getVarName(expr, b)
-				b.newLine().append(name).append(" = ");
-				internalToConvertedExpression(ex, b, getLightweightType(expr));
-				b.append(";");
-			}
+			val current = expressions.get(i);
+			declareInitializedSyntheticVariable(current, b, [ t |
+				internalToJavaStatement(current, t, false);
+			]);
+			val name = getVarName(current, b)
+			if (isReferenced)
+				b.newLine.append(sequentialBlockName).append(".add(").append(name).append(");")
 			if (previous != null) {
 				b.newLine.append(name).append(".dependsOn(").append(previous).append(")").append(";")
 				previous = name
@@ -90,14 +86,14 @@ class AmeliaCompiler extends XbaseCompiler {
 	/**
 	 * Declares a synthetic variable initialized with a given expression
 	 */
-	def protected void declareInitializedSyntheticVariable(XExpression expr, ITreeAppendable b) {
+	def protected void declareInitializedSyntheticVariable(XExpression expr, ITreeAppendable b, Later later) {
 		val type = getTypeForVariableDeclaration(expr);
 		val proposedName = makeJavaIdentifier(getFavoriteVariableName(expr));
 		val varName = b.declareSyntheticVariable(expr, proposedName);
 		b.newLine();
 		b.append(type);
 		b.append(" ").append(varName).append(" = ");
-		internalToJavaStatement(expr, b, false);
+		later.exec(b);
 	}
 
 }
