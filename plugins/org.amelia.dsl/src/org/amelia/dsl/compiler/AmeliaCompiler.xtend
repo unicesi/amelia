@@ -15,7 +15,7 @@ class AmeliaCompiler extends XbaseCompiler {
 
 	override internalToConvertedExpression(XExpression obj, ITreeAppendable appendable) {
 		switch (obj) {
-			SequentialBlock: _toJavaExpression(obj as XBlockExpression, appendable)
+			SequentialBlock: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
 	}
@@ -26,8 +26,13 @@ class AmeliaCompiler extends XbaseCompiler {
 			default: super.doInternalToJavaStatement(obj, appendable, isReferenced)
 		}
 	}
+	
+	def protected void _toJavaExpression(SequentialBlock expr, ITreeAppendable appendable) {
+		val b = appendable.trace(expr, false);
+		b.append(getVarName(expr, b));
+	}
 
-	def void _toJavaStatement(SequentialBlock expr, ITreeAppendable appendable, boolean isReferenced) {
+	def protected void _toJavaStatement(SequentialBlock expr, ITreeAppendable appendable, boolean isReferenced) {
 		val b = appendable.trace(expr, false)
 		var sequentialBlockName = "_"
 		if (isReferenced) {
