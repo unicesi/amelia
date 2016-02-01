@@ -104,8 +104,8 @@ public class CommandDescriptor extends Observable {
 	protected final String releaseRegexp;
 	protected final String successMessage;
 	protected final long timeout;
-	protected final List<CommandDescriptor> dependencies;
-	protected final List<Host> hosts;
+	private final List<CommandDescriptor> dependencies;
+	private final List<Host> hosts;
 
 	public CommandDescriptor(final Builder builder) {
 		this.internalId = UUID.randomUUID();
