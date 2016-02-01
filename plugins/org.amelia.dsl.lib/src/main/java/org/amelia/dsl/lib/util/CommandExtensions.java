@@ -18,6 +18,8 @@
  */
 package org.amelia.dsl.lib.util;
 
+import java.util.List;
+
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.eclipse.xtext.xbase.lib.Inline;
@@ -75,6 +77,21 @@ public class CommandExtensions {
 		}
 		return all;
 	}
+	
+	/**
+	 * The binary {@code ->} operator.
+	 * 
+	 * @param descriptors
+	 *            The command descriptors
+	 * @param host
+	 *            The host where the descriptors run
+	 * @return the conjunction of {@code descriptor.runsOn(hosts)} for all
+	 *         descriptors
+	 */
+	public static boolean operator_mappedTo(List<CommandDescriptor> descriptors,
+			Host host) {
+		return operator_mappedTo(descriptors.toArray(new CommandDescriptor[0]), host);
+	}
 
 	/**
 	 * The binary {@code ->} operator.
@@ -93,6 +110,21 @@ public class CommandExtensions {
 			all &= descriptor.runsOn(hosts);
 		}
 		return all;
+	}
+	
+	/**
+	 * The binary {@code ->} operator.
+	 * 
+	 * @param descriptors
+	 *            The command descriptors
+	 * @param hosts
+	 *            The hosts where the descriptors run
+	 * @return the conjunction of {@code descriptor.runsOn(hosts)} for all
+	 *         descriptors
+	 */
+	public static boolean operator_mappedTo(List<CommandDescriptor> descriptors, List<Host> hosts) {
+		return operator_mappedTo(descriptors.toArray(new CommandDescriptor[0]),
+				hosts.toArray(new Host[0]));
 	}
 
 	/**
