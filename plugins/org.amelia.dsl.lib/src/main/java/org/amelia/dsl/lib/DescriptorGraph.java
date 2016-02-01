@@ -156,6 +156,8 @@ public class DescriptorGraph
 	}
 	
 	/**
+	 * FIXME: search for transitive dependencies
+	 *
 	 * @param descriptors The array of descriptors to add
 	 * @return {@code true} is all descriptors were added, {@code false} otherwise
 	 */
