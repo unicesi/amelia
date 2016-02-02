@@ -23,6 +23,9 @@ import org.eclipse.xtext.generator.OutputConfiguration
 import org.eclipse.xtext.generator.IFileSystemAccess
 import java.util.Set
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class AmeliaOutputConfigurationProvider implements IOutputConfigurationProvider {
 
 	public static val AMELIA_OUTPUT = "amelia"

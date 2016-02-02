@@ -21,6 +21,8 @@ package org.amelia.dsl
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaStandaloneSetup extends AmeliaStandaloneSetupGenerated {
 

@@ -38,6 +38,8 @@ import org.amelia.dsl.lib.descriptors.CommandDescriptor
  * This class contains custom validation rules. 
  *
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaValidator extends AbstractAmeliaValidator {
 	

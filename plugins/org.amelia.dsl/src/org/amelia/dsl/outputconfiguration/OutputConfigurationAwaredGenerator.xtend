@@ -22,6 +22,9 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.xbase.compiler.JvmModelGenerator
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class OutputConfigurationAwaredGenerator extends JvmModelGenerator {
 
 	override void doGenerate(Resource input, IFileSystemAccess fsa) {

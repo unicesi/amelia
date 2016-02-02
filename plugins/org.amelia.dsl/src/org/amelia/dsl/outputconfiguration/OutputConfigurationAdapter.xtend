@@ -22,6 +22,9 @@ import org.eclipse.emf.common.notify.Adapter
 import org.eclipse.emf.common.notify.Notification
 import org.eclipse.emf.common.notify.Notifier
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class OutputConfigurationAdapter implements Adapter {
 
 	private String outputConfigurationName

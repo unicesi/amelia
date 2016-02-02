@@ -26,6 +26,8 @@ import org.eclipse.emf.ecore.EReference
  * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping
  * on how and when to use it.
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaScopeProvider extends AmeliaImportedNamespaceAwareLocalScopeProvider {
 	

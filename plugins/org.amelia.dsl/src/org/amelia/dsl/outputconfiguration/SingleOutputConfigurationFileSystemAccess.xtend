@@ -23,6 +23,9 @@ import org.eclipse.xtext.generator.IFileSystemAccessExtension
 import org.eclipse.xtext.generator.IFileSystemAccessExtension2
 import org.eclipse.emf.common.util.URI
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class SingleOutputConfigurationFileSystemAccess implements IFileSystemAccess, IFileSystemAccessExtension, IFileSystemAccessExtension2 {
 
 	protected IFileSystemAccess fsa
