@@ -24,6 +24,8 @@ import org.eclipse.xtext.ui.label.DefaultDescriptionLabelProvider
  * Provides labels for IEObjectDescriptions and IResourceDescriptions.
  * 
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#label-provider
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaDescriptionLabelProvider extends DefaultDescriptionLabelProvider {
 

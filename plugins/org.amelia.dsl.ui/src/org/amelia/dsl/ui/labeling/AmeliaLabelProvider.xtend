@@ -26,6 +26,8 @@ import org.eclipse.xtext.xbase.ui.labeling.XbaseLabelProvider
  * Provides labels for EObjects.
  * 
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#label-provider
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaLabelProvider extends XbaseLabelProvider {
 

@@ -30,6 +30,8 @@ import org.eclipse.jetty.webapp.WebXmlConfiguration
 /**
  * This program starts an HTTP server for testing the web integration of your DSL.
  * Just execute it and point a web browser to http://localhost:8080/
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class ServerLauncher {
 	def static void main(String[] args) {

@@ -26,6 +26,8 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculat
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 @FinalFieldsConstructor
 class AmeliaUiModule extends AbstractAmeliaUiModule {

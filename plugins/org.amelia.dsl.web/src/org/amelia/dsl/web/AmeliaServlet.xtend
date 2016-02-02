@@ -27,6 +27,8 @@ import org.eclipse.xtext.web.servlet.XtextServlet
 
 /**
  * Deploy this class into a servlet container to enable DSL-specific services.
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 @WebServlet(name = 'XtextServices', urlPatterns = '/xtext-service/*')
 class AmeliaServlet extends XtextServlet {

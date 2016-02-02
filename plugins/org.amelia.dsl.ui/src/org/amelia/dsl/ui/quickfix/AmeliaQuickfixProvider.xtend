@@ -28,6 +28,8 @@ import org.eclipse.xtext.xbase.ui.quickfix.XbaseQuickfixProvider
  * Custom quickfixes.
  *
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#quick-fixes
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaQuickfixProvider extends XbaseQuickfixProvider {
 

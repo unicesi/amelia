@@ -29,6 +29,8 @@ import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 
 /**
  * Initialization support for running Xtext languages in web applications.
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 @FinalFieldsConstructor
 class AmeliaWebSetup extends AmeliaStandaloneSetup {
