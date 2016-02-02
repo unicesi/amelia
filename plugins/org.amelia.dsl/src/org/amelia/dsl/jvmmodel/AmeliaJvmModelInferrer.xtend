@@ -25,6 +25,8 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
+import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -42,7 +44,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension IQualifiedNameProvider
 
 	def dispatch void infer(Subsystem subsystem, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		acceptor.accept(subsystem.toClass(subsystem.fullyQualifiedName) [
+		val clazz = subsystem.toClass(subsystem.fullyQualifiedName)
+		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
+		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				documentation = subsystem.documentation
 				superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
@@ -53,7 +57,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					body = subsystem.body
 				]
 			}
-		])
+		]
 	}
 
 }

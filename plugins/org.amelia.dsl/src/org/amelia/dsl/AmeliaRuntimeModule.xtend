@@ -30,6 +30,11 @@ import org.amelia.dsl.compiler.AmeliaCompiler
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.amelia.dsl.typesystem.AmeliaTypeComputer
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
+import org.eclipse.xtext.generator.IGenerator
+import org.amelia.dsl.outputconfiguration.OutputConfigurationAwaredGenerator
+import com.google.inject.Singleton
+import org.eclipse.xtext.generator.IOutputConfigurationProvider
+import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -57,8 +62,16 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 	override void configure(Binder binder) {
 		super.configure(binder)
 		binder
+			.bind(IOutputConfigurationProvider)
+			.to(AmeliaOutputConfigurationProvider)
+			.in(Singleton)
+		binder
 			.bind(ImplicitlyImportedFeatures)
 			.to(AmeliaImplicitlyImportedFeatures)
+	}
+	
+	override Class<? extends IGenerator> bindIGenerator() {
+		return OutputConfigurationAwaredGenerator
 	}
 	
 	def Class<? extends ITypeComputer> bindITypeComputer() {
