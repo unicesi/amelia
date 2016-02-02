@@ -1,15 +1,14 @@
 package org.amelia.dsl.compiler
 
+import java.util.ArrayList
 import org.amelia.dsl.amelia.SequentialBlock
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.xbase.XBlockExpression
+import org.eclipse.xtext.xbase.XConstructorCall
 import org.eclipse.xtext.xbase.XExpression
+import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
-import org.eclipse.xtext.xbase.XConstructorCall
-import org.eclipse.xtext.xbase.compiler.Later
-import java.util.ArrayList
-import org.amelia.dsl.lib.descriptors.CommandDescriptor
 
 class AmeliaCompiler extends XbaseCompiler {
 
@@ -46,7 +45,7 @@ class AmeliaCompiler extends XbaseCompiler {
 		for (var i = 0; i < expressions.size(); i++) {
 			val current = expressions.get(i);
 			declareInitializedSyntheticVariable(current, b, [ t |
-				internalToJavaStatement(current, t, false);
+				internalToJavaStatement(current, t, false)
 			]);
 			val name = getVarName(current, b)
 			if (isReferenced)
