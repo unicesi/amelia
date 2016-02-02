@@ -34,6 +34,7 @@ public class Execution extends CommandDescriptor {
 		private String[] arguments;
 		private long timeout;
 		private String releaseRegexp;
+		private String successMessage;
 
 		public Builder() {
 			this.timeout = 0;
@@ -79,8 +80,15 @@ public class Execution extends CommandDescriptor {
 			this.releaseRegexp = regularExpression;
 			return this;
 		}
+		
+		public Builder withSuccessMessage(final String successMessage) {
+			this.successMessage = successMessage;
+			return this;
+		}
 
 		public Execution build() {
+			if (this.successMessage == null)
+				this.successMessage = this.compositeName + " has been executed";
 			return new Execution(this);
 		}
 	}
@@ -97,7 +105,7 @@ public class Execution extends CommandDescriptor {
 				.withCommand("frascati")
 				.withArguments("run", builder.compositeName, "...")
 				.withReleaseRegexp(builder.releaseRegexp)
-				.withSuccessMessage(builder.compositeName + " has been executed"));
+				.withSuccessMessage(builder.successMessage));
 		this.compositeName = builder.compositeName;
 		this.libpath = builder.libpath;
 		this.serviceName = builder.serviceName;
