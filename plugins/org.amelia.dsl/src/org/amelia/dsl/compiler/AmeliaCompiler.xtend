@@ -27,6 +27,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
+import org.amelia.dsl.amelia.ChangeDirectory
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -36,15 +37,37 @@ class AmeliaCompiler extends XbaseCompiler {
 	override internalToConvertedExpression(XExpression obj, ITreeAppendable appendable) {
 		switch (obj) {
 			SequentialBlock: _toJavaExpression(obj, appendable)
+			ChangeDirectory: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
 	}
 
-	override doInternalToJavaStatement(XExpression obj, ITreeAppendable appendable, boolean isReferenced) {
-		switch (obj) {
-			SequentialBlock: _toJavaStatement(obj, appendable, isReferenced)
-			default: super.doInternalToJavaStatement(obj, appendable, isReferenced)
+	override doInternalToJavaStatement(XExpression expr, ITreeAppendable appendable, boolean isReferenced) {
+		switch (expr) {
+			SequentialBlock: _toJavaStatement(expr, appendable, isReferenced)
+			ChangeDirectory: _toJavaStatement(expr, appendable, isReferenced)
+			default: super.doInternalToJavaStatement(expr, appendable, isReferenced)
 		}
+	}
+	
+	def protected void _toJavaStatement(ChangeDirectory expr, ITreeAppendable b, boolean isReferenced) {
+		if (!isReferenced) {
+			internalToConvertedExpression(expr, b);
+			b.append(";");
+		} else if (isVariableDeclarationRequired(expr, b)) {
+			val later = new Later() {
+				override void exec(ITreeAppendable appendable) {
+					internalToConvertedExpression(expr, appendable);
+				}
+			};
+			declareFreshLocalVariable(expr, b, later);
+		}
+	}
+	
+	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable appendable) {
+		appendable.append("new ").append(org.amelia.dsl.lib.descriptors.ChangeDirectory).append("(")
+		appendable.append('''"«expr.directory»"''')
+		appendable.append(")")
 	}
 	
 	def protected void _toJavaExpression(SequentialBlock expr, ITreeAppendable appendable) {
@@ -61,7 +84,7 @@ class AmeliaCompiler extends XbaseCompiler {
 			]);
 			sequentialBlockName = getVarName(expr, b)
 		}
-		val expressions = expr.getExpressions();
+		val expressions = expr.commands
 		var String previous = null
 		for (var i = 0; i < expressions.size(); i++) {
 			val current = expressions.get(i);

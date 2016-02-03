@@ -26,6 +26,7 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeExpectation
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
 import org.eclipse.xtext.xbase.typesystem.conformance.ConformanceFlags
+import org.amelia.dsl.amelia.ChangeDirectory
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -35,12 +36,18 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 	override computeTypes(XExpression expression, ITypeComputationState state) {
 		switch (expression) {
 			SequentialBlock: _computeTypes(expression, state)
+			ChangeDirectory: _computeTypes(expression, state)
 			default: super.computeTypes(expression, state)
 		}
 	}
 	
+	def protected _computeTypes(ChangeDirectory expression, ITypeComputationState state) {
+		val result = getRawTypeForName(org.amelia.dsl.lib.descriptors.ChangeDirectory, state);
+		state.acceptActualType(result);
+	}
+	
 	def protected void _computeTypes(SequentialBlock object, ITypeComputationState state) {
-		val children = object.getExpressions()
+		val children = object.commands
 		if (children.isEmpty()) {
 			for (ITypeExpectation expectation : state.getExpectations()) {
 				val expectedType = expectation.getExpectedType()

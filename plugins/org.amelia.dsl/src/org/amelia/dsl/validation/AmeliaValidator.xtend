@@ -24,15 +24,15 @@ import java.util.Collection
 import java.util.Set
 import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.Model
+import org.amelia.dsl.amelia.SequentialBlock
 import org.amelia.dsl.amelia.Subsystem
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
-import org.amelia.dsl.amelia.SequentialBlock
-import org.amelia.dsl.lib.descriptors.CommandDescriptor
 
 /**
  * This class contains custom validation rules. 
@@ -138,13 +138,21 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkSequentialBlockExpressions(SequentialBlock sequentialBlock) {
-		val block = sequentialBlock as XBlockExpression
-		val commands = block.expressions.filter[e|e.actualType.getSuperType(CommandDescriptor) != null]
-		if (commands.length != block.expressions.length)
+	def void checkSequentialBlockExpressions(SequentialBlock block) {
+		val commands = block.commands.filter[e|e.actualType.getSuperType(CommandDescriptor) != null]
+		if (commands.length != block.commands.length)
 			error("Sequential blocks can only contain command expressions",
 				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS, INVALID_PARAMETER_TYPE)
 	}
+	
+//	@Check
+//	def void checkDirectory(ChangeDirectory expr) {
+//		val type = expr.directory.actualType
+//		if (type.getSuperType(String) == null) {
+//			error('''The directory must be of type String, «type.simpleName» was found instead''',
+//				AmeliaPackage.Literals.CHANGE_DIRECTORY__DIRECTORY, INVALID_PARAMETER_TYPE)
+//		}
+//	}
 	
 	/**
 	 * Adapted from 

@@ -38,10 +38,14 @@ SubsystemDeclaration returns Subsystem
 		body = XBlockExpression
 	;
 
-SequentialBlock returns XBlockExpression
+SequentialBlock
 	:	'sequential' {SequentialBlock}	'{'
-			(expressions += XExpression)*
+			(commands += ChangeDirectory)*
 		'}'
+	;
+
+ChangeDirectory
+	:	'cd' directory = STRING
 	;
 
 XLiteral returns XExpression
@@ -53,4 +57,5 @@ XLiteral returns XExpression
 	|	XStringLiteral
 	|	XTypeLiteral
 	|	SequentialBlock
+	|	ChangeDirectory
 	;
