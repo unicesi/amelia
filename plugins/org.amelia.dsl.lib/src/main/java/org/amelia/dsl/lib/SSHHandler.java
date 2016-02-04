@@ -289,7 +289,7 @@ public class SSHHandler extends Thread {
 		File file = new File(parent, fileName);
 
 		if (!parent.exists())
-			parent.mkdir();
+			parent.mkdirs();
 
 		file.createNewFile();
 
