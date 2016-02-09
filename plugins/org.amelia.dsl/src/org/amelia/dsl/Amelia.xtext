@@ -24,7 +24,6 @@ generate amelia "http://www.amelia.org/dsl/Amelia"
 
 Model
 	:	('package' name = QualifiedName ->';'?)?
-    	imports = XImportSection?
 		typeDeclaration = TypeDeclaration?
 	;
 
@@ -33,15 +32,16 @@ TypeDeclaration
 	;
 
 SubsystemDeclaration returns Subsystem
-	:	'subsystem' name = ID
-		('<''=' dependencies += [Subsystem | QualifiedName] (',' dependencies += [Subsystem | QualifiedName])*)?
-		body = XBlockExpression
+	:	includes = IncludeSection?
+		'subsystem' name = ID body = XBlockExpression
 	;
 
-SequentialBlock
-	:	'sequential' {SequentialBlock}	'{'
-			(commands += ChangeDirectory)*
-		'}'
+IncludeSection
+	:	includeDeclarations += IncludeDeclaration+
+	;
+
+IncludeDeclaration
+	:	'include' includedType = [TypeDeclaration|QualifiedName] ->';'?
 	;
 
 ChangeDirectory
@@ -56,6 +56,5 @@ XLiteral returns XExpression
 	|	XNullLiteral
 	|	XStringLiteral
 	|	XTypeLiteral
-	|	SequentialBlock
 	|	ChangeDirectory
 	;

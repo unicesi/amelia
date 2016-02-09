@@ -24,9 +24,7 @@ import java.util.Collection
 import java.util.Set
 import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.Model
-import org.amelia.dsl.amelia.SequentialBlock
 import org.amelia.dsl.amelia.Subsystem
-import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.validation.Check
@@ -137,14 +135,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		]
 	}
 	
-	@Check
-	def void checkSequentialBlockExpressions(SequentialBlock block) {
-		val commands = block.commands.filter[e|e.actualType.getSuperType(CommandDescriptor) != null]
-		if (commands.length != block.commands.length)
-			error("Sequential blocks can only contain command expressions",
-				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS, INVALID_PARAMETER_TYPE)
-	}
-	
 //	@Check
 //	def void checkDirectory(ChangeDirectory expr) {
 //		val type = expr.directory.actualType
@@ -170,7 +160,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		while (changed) {
 			changed = false
 			for (t : elements.toList) {
-				val dependencies = if (t instanceof Subsystem) t.dependencies
+				val dependencies = if (t instanceof Subsystem) t.includes.includeDeclarations
 				if (result.containsAll(dependencies)) {
 					changed = true
 					result.add(t)
@@ -186,7 +176,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	def private void internalFindDependentTasksRec(EObject e, Set<EObject> set) {
 		if (!set.add(e))
 			return;
-		val dependencies = if (e instanceof Subsystem) e.dependencies
+		val dependencies = if (e instanceof Subsystem) e.includes.includeDeclarations
 		for (t : dependencies) 
 			internalFindDependentTasksRec(t, set)
 	}
