@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Random;
 
 import org.amelia.dsl.lib.FTPHandler;
 import org.amelia.dsl.lib.SSHHandler;
@@ -36,6 +36,8 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
+ * 
+ * TODO: document this class
  */
 public class Host implements Comparable<Host> {
 
@@ -61,6 +63,15 @@ public class Host implements Comparable<Host> {
 	 * The logger
 	 */
 	private final static Logger logger = LogManager.getLogger(Host.class);
+	
+	/*
+	 * From: https://en.wikipedia.org/wiki/List_of_Disney_animated_universe_characters
+	 */
+	private final static String[] randomNames = {"mandy", "billy", "nemo",
+		"doris","abby", "alice", "apollo", "ariel", "aurora", "bambi", "ben",
+		"blaze", "bobbie", "buster"};
+	
+	private final static List<String> pickedNames = new ArrayList<String>();
 
 	public Host(final String hostname, final int ftpPort, final int sshPort,
 			final String username, final String password,
@@ -76,8 +87,7 @@ public class Host implements Comparable<Host> {
 
 	public Host(final String hostname, final int ftpPort, final int sshPort,
 			final String username, final String password) {
-		this(hostname, ftpPort, sshPort, username, password, UUID.randomUUID()
-				.toString());
+		this(hostname, ftpPort, sshPort, username, password, randomName());
 	}
 
 	public void openSSHConnection(String subsystem) throws InterruptedException {
@@ -130,37 +140,29 @@ public class Host implements Comparable<Host> {
 
 	public static Host[] fromFile(String pathname) throws IOException {
 		List<Host> hosts = new ArrayList<Host>();
-
 		InputStream in = new FileInputStream(pathname);
 		InputStreamReader streamReader = null;
 		BufferedReader bufferedReader = null;
-
 		try {
 			streamReader = new InputStreamReader(in);
 			bufferedReader = new BufferedReader(streamReader);
-
 			String line;
 			int l = 1;
 			while ((line = bufferedReader.readLine()) != null) {
-
 				String[] d = line.split("\t");
-
 				if (d.length == 5) {
 					int ftpPort = Integer.parseInt(d[1]);
 					int sshPort = Integer.parseInt(d[2]);
 					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4]));
-
 				} else if (d.length == 6) {
 					int ftpPort = Integer.parseInt(d[1]);
 					int sshPort = Integer.parseInt(d[2]);
 					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4], d[5]));
-
 				} else {
 					String message = "Bad format in hosts file: [" + l + "] "
 							+ line;
 					RuntimeException e = new RuntimeException(message);
 					logger.error(message, e);
-
 					throw e;
 				}
 
@@ -171,8 +173,19 @@ public class Host implements Comparable<Host> {
 			streamReader.close();
 			bufferedReader.close();
 		}
-
 		return hosts.toArray(new Host[0]);
+	}
+	
+	private static String randomName() {
+		Random g = new Random();
+		String name = randomNames[g.nextInt(randomNames.length)];
+		String proposal = name;
+		int i = 1;
+		while (pickedNames.contains(proposal)) {
+			proposal = name + "-" + i++;
+		}
+		pickedNames.add(proposal);
+		return proposal;
 	}
 
 	public String identifier() {
