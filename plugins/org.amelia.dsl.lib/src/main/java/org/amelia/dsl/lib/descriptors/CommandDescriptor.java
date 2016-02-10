@@ -24,7 +24,6 @@ import java.util.Observable;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-import org.amelia.dsl.lib.commands.CommandFactory;
 import org.amelia.dsl.lib.util.ShellUtils;
 import org.amelia.dsl.lib.util.Strings;
 
