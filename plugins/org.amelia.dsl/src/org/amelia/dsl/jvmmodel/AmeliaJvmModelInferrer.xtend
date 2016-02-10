@@ -47,6 +47,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 
 	def dispatch void infer(Subsystem subsystem, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val clazz = subsystem.toClass(subsystem.fullyQualifiedName)
+		if (clazz == null)
+			return;
 		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
