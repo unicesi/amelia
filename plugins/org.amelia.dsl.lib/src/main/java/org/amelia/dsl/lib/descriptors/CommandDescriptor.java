@@ -18,14 +18,19 @@
  */
 package org.amelia.dsl.lib.descriptors;
 
+import static net.sf.expectit.matcher.Matchers.regexp;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
 
 import org.amelia.dsl.lib.util.CallableTask;
+import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.ShellUtils;
 import org.amelia.dsl.lib.util.Strings;
+
+import net.sf.expectit.Expect;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -98,6 +103,24 @@ public class CommandDescriptor extends Observable {
 		}
 
 		public CommandDescriptor build() {
+			if (this.callable == null) {
+				this.callable = new CallableTask<Void>() {
+					@Override public Void call(Host host, String prompt)
+							throws Exception {
+						Expect expect = host.ssh().expect();
+						expect.sendLine(command);
+						String response = expect.expect(regexp(prompt)).getBefore();
+						if (Strings.containsAnyOf(response, errorTexts)) {
+							String message = Strings.firstIn(errorTexts, response);
+							Log.error(host, message);
+							throw new Exception(message);
+						} else {
+							Log.ok(host, successMessage);
+						}
+						return null;
+					}
+				};
+			}
 			return new CommandDescriptor(this);
 		}
 	}
