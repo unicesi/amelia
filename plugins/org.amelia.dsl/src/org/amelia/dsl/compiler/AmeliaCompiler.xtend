@@ -23,6 +23,8 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
+import org.amelia.dsl.amelia.CommandLiteral
+import org.amelia.dsl.amelia.Compilation
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -32,18 +34,19 @@ class AmeliaCompiler extends XbaseCompiler {
 	override internalToConvertedExpression(XExpression obj, ITreeAppendable appendable) {
 		switch (obj) {
 			ChangeDirectory: _toJavaExpression(obj, appendable)
+			Compilation: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
 	}
 
 	override doInternalToJavaStatement(XExpression expr, ITreeAppendable appendable, boolean isReferenced) {
 		switch (expr) {
-			ChangeDirectory: _toJavaStatement(expr, appendable, isReferenced)
+			CommandLiteral: _toJavaStatement(expr, appendable, isReferenced)
 			default: super.doInternalToJavaStatement(expr, appendable, isReferenced)
 		}
 	}
 	
-	def protected void _toJavaStatement(ChangeDirectory expr, ITreeAppendable b, boolean isReferenced) {
+	def protected void _toJavaStatement(CommandLiteral expr, ITreeAppendable b, boolean isReferenced) {
 		if (!isReferenced) {
 			internalToConvertedExpression(expr, b);
 			b.append(";");
@@ -60,6 +63,16 @@ class AmeliaCompiler extends XbaseCompiler {
 	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable b) {
 		b.append("new ").append(org.amelia.dsl.lib.descriptors.ChangeDirectory).append("(")
 		internalToConvertedExpression(expr.directory, b)
+		b.append(")")
+	}
+	
+	def protected void _toJavaExpression(Compilation expr, ITreeAppendable b) {
+		b.append("new ").append(org.amelia.dsl.lib.descriptors.Compilation).append("(")
+		internalToConvertedExpression(expr.source, b)
+		b.append(", ")
+		internalToConvertedExpression(expr.output, b)
+		b.append(", ")
+		internalToConvertedExpression(expr.classpath, b)
 		b.append(")")
 	}
 

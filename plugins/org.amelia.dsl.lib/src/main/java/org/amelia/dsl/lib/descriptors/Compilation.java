@@ -18,6 +18,8 @@
  */
 package org.amelia.dsl.lib.descriptors;
 
+import java.util.List;
+
 import org.amelia.dsl.lib.util.Strings;
 
 /**
@@ -32,6 +34,11 @@ public class Compilation extends CommandDescriptor {
 	private final String[] classpath;
 
 	public Compilation(final String sourceDirectory, final String outputFile,
+			final List<String> classpath) {
+		this(sourceDirectory, outputFile, classpath.toArray(new String[0]));
+	}
+	
+	public Compilation(final String sourceDirectory, final String outputFile,
 			final String... classpath) {
 		super(new CommandDescriptor.Builder()
 				.withCommand("frascati")
@@ -45,13 +52,11 @@ public class Compilation extends CommandDescriptor {
 	@Override
 	public String toCommandString() {
 		StringBuilder sb = new StringBuilder();
-
 		sb.append("frascati ");
 		sb.append("compile ");
 		sb.append(this.sourceDirectory + " ");
 		sb.append(this.outputFile + " ");
 		sb.append(Strings.join(this.classpath, ":"));
-
 		return sb.toString();
 	}
 

@@ -44,8 +44,17 @@ IncludeDeclaration
 	:	'include' includedType = [TypeDeclaration|QualifiedName] ->';'?
 	;
 
-ChangeDirectory returns XExpression
-	:	{ChangeDirectory} 'cd' directory = XExpression
+ChangeDirectory
+	:	'cd' directory = XExpression
+	;
+
+Compilation
+	:	'compile' source = XExpression output = XExpression classpath = XExpression
+	;
+
+CommandLiteral
+	:	ChangeDirectory
+	|	Compilation
 	;
 
 XLiteral returns XExpression
@@ -56,5 +65,5 @@ XLiteral returns XExpression
 	|	XNullLiteral
 	|	XStringLiteral
 	|	XTypeLiteral
-	|	ChangeDirectory
+	|	CommandLiteral
 	;

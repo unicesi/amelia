@@ -22,6 +22,7 @@ import org.amelia.dsl.amelia.ChangeDirectory
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
+import org.amelia.dsl.amelia.Compilation
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -31,15 +32,16 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 	override computeTypes(XExpression expression, ITypeComputationState state) {
 		switch (expression) {
 			ChangeDirectory: _computeTypes(expression, state)
+			Compilation: _computeTypes(expression, state)
 			default: super.computeTypes(expression, state)
 		}
 	}
 	
 	def protected _computeTypes(ChangeDirectory command, ITypeComputationState state) {
-		// Compute type for the directory
+		// Compute type for the inner expressions
 		state.withinScope(command);
-		val directoryState = state.withoutExpectation(); // no expectation
-		directoryState.computeTypes(command.directory);
+		val noExpectationState = state.withoutExpectation();
+		noExpectationState.computeTypes(command.directory);
 		addLocalToCurrentScope(command.directory, state);
 		
 		// set the actual type for the entire expression
@@ -47,4 +49,19 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		state.acceptActualType(result);
 	}
 	
+	def protected _computeTypes(Compilation command, ITypeComputationState state) {
+		// Compute type for the inner expressions
+		state.withinScope(command);
+		val noExpectationState = state.withoutExpectation();
+		noExpectationState.computeTypes(command.source);
+		noExpectationState.computeTypes(command.output);
+		noExpectationState.computeTypes(command.classpath);
+		addLocalToCurrentScope(command.source, state);
+		addLocalToCurrentScope(command.output, state);
+		addLocalToCurrentScope(command.classpath, state);
+		
+		// set the actual type for the entire expression
+		val result = getRawTypeForName(org.amelia.dsl.lib.descriptors.Compilation, state);
+		state.acceptActualType(result);
+	}
 }

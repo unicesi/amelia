@@ -32,6 +32,8 @@ import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
 import org.amelia.dsl.amelia.ChangeDirectory
+import org.amelia.dsl.amelia.Compilation
+import java.util.List
 
 /**
  * This class contains custom validation rules. 
@@ -138,10 +140,37 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkDirectory(ChangeDirectory expr) {
-		val type = expr.directory.actualType
-		if (type.getSuperType(String) == null) {
-			error('''The directory must be of type String, «type.simpleName» was found instead''',
+		if (expr.directory.actualType.getSuperType(String) == null) {
+			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.CHANGE_DIRECTORY__DIRECTORY, INVALID_PARAMETER_TYPE)
+		}
+	}
+
+	@Check
+	def void checkDirectory(Compilation expr) {
+		if (expr.source.actualType.getSuperType(String) == null) {
+			error('''The source parameter must be of type String, «expr.source.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.COMPILATION__SOURCE, INVALID_PARAMETER_TYPE)
+		}
+		if (expr.output.actualType.getSuperType(String) == null) {
+			error('''The output parameter must be of type String, «expr.output.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.COMPILATION__OUTPUT, INVALID_PARAMETER_TYPE)
+		}
+		val classpathType = expr.classpath.actualType
+		if (classpathType.getSuperType(typeof(String[])) == null && classpathType.getSuperType(List) == null) {
+			error('''The classpath must be of type String[], «classpathType.simpleName» was found instead''',
+				AmeliaPackage.Literals.COMPILATION__CLASSPATH, INVALID_PARAMETER_TYPE)
+		} else if (classpathType.getSuperType(List) != null) {
+			var showError = false
+			if (classpathType.getSuperType(List).typeArguments.length == 1) {
+				if (!classpathType.getSuperType(List).typeArguments.get(0).identifier.equals(String.canonicalName))
+					showError = true
+			} else
+				showError = true
+
+			if (showError)
+				error('''The classpath must be of type List<String>, «classpathType.simpleName» was found instead''',
+					AmeliaPackage.Literals.COMPILATION__CLASSPATH, INVALID_PARAMETER_TYPE)
 		}
 	}
 	
