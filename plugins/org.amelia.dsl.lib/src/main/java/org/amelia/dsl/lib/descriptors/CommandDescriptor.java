@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.amelia.dsl.lib.util.CallableTask;
 import org.amelia.dsl.lib.util.Log;
@@ -31,6 +32,7 @@ import org.amelia.dsl.lib.util.ShellUtils;
 import org.amelia.dsl.lib.util.Strings;
 
 import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectIOException;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -104,24 +106,49 @@ public class CommandDescriptor extends Observable {
 
 		public CommandDescriptor build() {
 			if (this.callable == null) {
-				this.callable = new CallableTask<Void>() {
-					@Override public Void call(Host host, String prompt)
-							throws Exception {
-						Expect expect = host.ssh().expect();
-						expect.sendLine(command);
-						String response = expect.expect(regexp(prompt)).getBefore();
+				this.callable = defaultCallableTask();
+			}
+			return new CommandDescriptor(this);
+		}
+		
+		protected CallableTask<Integer> defaultCallableTask() {
+			return new CallableTask<Integer>() {
+				@SuppressWarnings("resource")
+				@Override public Integer call(Host host, String prompt)
+						throws Exception {
+					Expect expect = host.ssh().expect();
+					
+					// Execute the command
+					expect.sendLine(command + " &");
+					String PID = expect.expect(regexp("\\[\\d+\\] (\\d+)")).group(1);
+					
+					// Detach the process
+					expect.sendLine(ShellUtils.detachProcess());
+					
+					if (timeout == -1)
+						expect = expect.withInfiniteTimeout();
+					else if (timeout > 0)
+						expect = expect.withTimeout(timeout, TimeUnit.MILLISECONDS);
+					
+					try {
+						// Expect for a successful execution
+						expect.expect(regexp(releaseRegexp));
+						Log.ok(host, successMessage);
+					} catch(ExpectIOException e) {
+						String response = e.getInputBuffer();
 						if (Strings.containsAnyOf(response, errorTexts)) {
 							String message = Strings.firstIn(errorTexts, response);
 							Log.error(host, message);
 							throw new Exception(message);
 						} else {
-							Log.ok(host, successMessage);
+							String message = "Operation timeout waiting for \""
+									+ releaseRegexp + "\" in host " + host;
+							throw new RuntimeException(message);
 						}
-						return null;
 					}
-				};
-			}
-			return new CommandDescriptor(this);
+					return Integer.parseInt(PID);
+				}
+			};
 		}
 	}
 
