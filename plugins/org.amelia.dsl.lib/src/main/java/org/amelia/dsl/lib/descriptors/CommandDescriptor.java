@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 
+import org.amelia.dsl.lib.util.CallableTask;
 import org.amelia.dsl.lib.util.ShellUtils;
 import org.amelia.dsl.lib.util.Strings;
 
@@ -41,7 +41,7 @@ public class CommandDescriptor extends Observable {
 		private String[] errorTexts;
 		private String errorMessage;
 		private String successMessage;
-		private Callable<?> callable;
+		private CallableTask<?> callable;
 
 		public Builder() {
 			this.command = "";
@@ -92,7 +92,7 @@ public class CommandDescriptor extends Observable {
 			return this;
 		}
 		
-		public Builder withCallable(Callable<?> callable) {
+		public Builder withCallable(CallableTask<?> callable) {
 			this.callable = callable;
 			return this;
 		}
@@ -109,7 +109,7 @@ public class CommandDescriptor extends Observable {
 	protected final String releaseRegexp;
 	protected final String successMessage;
 	protected final long timeout;
-	protected final Callable<?> callable;
+	protected final CallableTask<?> callable;
 	private final List<CommandDescriptor> dependencies;
 	private final List<Host> hosts;
 
@@ -238,7 +238,7 @@ public class CommandDescriptor extends Observable {
 		return this.successMessage;
 	}
 	
-	public Callable<?> callable() {
+	public CallableTask<?> callable() {
 		return this.callable;
 	}
 }
