@@ -31,6 +31,7 @@ import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
+import org.amelia.dsl.amelia.ChangeDirectory
 
 /**
  * This class contains custom validation rules. 
@@ -135,14 +136,14 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		]
 	}
 	
-//	@Check
-//	def void checkDirectory(ChangeDirectory expr) {
-//		val type = expr.directory.actualType
-//		if (type.getSuperType(String) == null) {
-//			error('''The directory must be of type String, «type.simpleName» was found instead''',
-//				AmeliaPackage.Literals.CHANGE_DIRECTORY__DIRECTORY, INVALID_PARAMETER_TYPE)
-//		}
-//	}
+	@Check
+	def void checkDirectory(ChangeDirectory expr) {
+		val type = expr.directory.actualType
+		if (type.getSuperType(String) == null) {
+			error('''The directory must be of type String, «type.simpleName» was found instead''',
+				AmeliaPackage.Literals.CHANGE_DIRECTORY__DIRECTORY, INVALID_PARAMETER_TYPE)
+		}
+	}
 	
 	/**
 	 * Adapted from 

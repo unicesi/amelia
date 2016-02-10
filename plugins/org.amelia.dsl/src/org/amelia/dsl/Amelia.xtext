@@ -44,8 +44,8 @@ IncludeDeclaration
 	:	'include' includedType = [TypeDeclaration|QualifiedName] ->';'?
 	;
 
-ChangeDirectory
-	:	'cd' directory = STRING
+ChangeDirectory returns XExpression
+	:	{ChangeDirectory} 'cd' directory = XExpression
 	;
 
 XLiteral returns XExpression

@@ -57,10 +57,10 @@ class AmeliaCompiler extends XbaseCompiler {
 		}
 	}
 	
-	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable appendable) {
-		appendable.append("new ").append(org.amelia.dsl.lib.descriptors.ChangeDirectory).append("(")
-		appendable.append('''"«expr.directory»"''')
-		appendable.append(")")
+	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable b) {
+		b.append("new ").append(org.amelia.dsl.lib.descriptors.ChangeDirectory).append("(")
+		internalToConvertedExpression(expr.directory, b)
+		b.append(")")
 	}
 
 }

@@ -35,7 +35,14 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		}
 	}
 	
-	def protected _computeTypes(ChangeDirectory expression, ITypeComputationState state) {
+	def protected _computeTypes(ChangeDirectory command, ITypeComputationState state) {
+		// Compute type for the directory
+		state.withinScope(command);
+		val directoryState = state.withoutExpectation(); // no expectation
+		directoryState.computeTypes(command.directory);
+		addLocalToCurrentScope(command.directory, state);
+		
+		// set the actual type for the entire expression
 		val result = getRawTypeForName(org.amelia.dsl.lib.descriptors.ChangeDirectory, state);
 		state.acceptActualType(result);
 	}
