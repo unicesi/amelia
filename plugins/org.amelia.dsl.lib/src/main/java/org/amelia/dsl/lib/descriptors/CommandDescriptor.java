@@ -39,7 +39,7 @@ public class CommandDescriptor extends Observable {
 		private String[] arguments;
 		private String releaseRegexp;
 		private long timeout;
-		private String errorText;
+		private String[] errorTexts;
 		private String errorMessage;
 		private String successMessage;
 
@@ -77,8 +77,8 @@ public class CommandDescriptor extends Observable {
 			return this;
 		}
 		
-		public Builder withErrorText(String errorText) {
-			this.errorText = errorText;
+		public Builder withErrorText(String... errorTexts) {
+			this.errorTexts = errorTexts;
 			return this;
 		}
 		
@@ -99,7 +99,7 @@ public class CommandDescriptor extends Observable {
 
 	protected final UUID internalId;
 	protected final String command;
-	protected final String errorText;
+	protected final String[] errorTexts;
 	protected final String errorMessage;
 	protected final String releaseRegexp;
 	protected final String successMessage;
@@ -113,7 +113,7 @@ public class CommandDescriptor extends Observable {
 				+ Strings.join(builder.arguments, " ");
 		this.releaseRegexp = builder.releaseRegexp;
 		this.timeout = builder.timeout;
-		this.errorText = builder.errorText;
+		this.errorTexts = builder.errorTexts;
 		this.errorMessage = builder.errorMessage;
 		this.successMessage = builder.successMessage;
 		this.dependencies = new ArrayList<CommandDescriptor>();
@@ -121,7 +121,8 @@ public class CommandDescriptor extends Observable {
 	}
 
 	public boolean isOk(String response) {
-		return this.errorText == null || !response.contains(this.errorText);
+		return this.errorTexts == null
+				|| Strings.containsAnyOf(response, this.errorTexts);
 	}
 
 	public void done(Host host) {
@@ -214,8 +215,8 @@ public class CommandDescriptor extends Observable {
 		return this.timeout;
 	}
 
-	public String errorText() {
-		return this.errorText;
+	public String[] errorTexts() {
+		return this.errorTexts;
 	}
 
 	public String errorMessage() {
