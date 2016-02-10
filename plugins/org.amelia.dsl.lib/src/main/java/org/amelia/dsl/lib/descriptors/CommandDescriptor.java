@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import org.amelia.dsl.lib.commands.CommandFactory;
 import org.amelia.dsl.lib.util.ShellUtils;
 import org.amelia.dsl.lib.util.Strings;
 
 /**
- * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class CommandDescriptor extends Observable {
@@ -42,6 +42,7 @@ public class CommandDescriptor extends Observable {
 		private String[] errorTexts;
 		private String errorMessage;
 		private String successMessage;
+		private Callable<?> callable;
 
 		public Builder() {
 			this.command = "";
@@ -91,6 +92,11 @@ public class CommandDescriptor extends Observable {
 			this.successMessage = successMessage;
 			return this;
 		}
+		
+		public Builder withCallable(Callable<?> callable) {
+			this.callable = callable;
+			return this;
+		}
 
 		public CommandDescriptor build() {
 			return new CommandDescriptor(this);
@@ -104,6 +110,7 @@ public class CommandDescriptor extends Observable {
 	protected final String releaseRegexp;
 	protected final String successMessage;
 	protected final long timeout;
+	protected final Callable<?> callable;
 	private final List<CommandDescriptor> dependencies;
 	private final List<Host> hosts;
 
@@ -116,6 +123,7 @@ public class CommandDescriptor extends Observable {
 		this.errorTexts = builder.errorTexts;
 		this.errorMessage = builder.errorMessage;
 		this.successMessage = builder.successMessage;
+		this.callable = builder.callable;
 		this.dependencies = new ArrayList<CommandDescriptor>();
 		this.hosts = new ArrayList<Host>();
 	}
@@ -229,5 +237,9 @@ public class CommandDescriptor extends Observable {
 
 	public String successMessage() {
 		return this.successMessage;
+	}
+	
+	public Callable<?> callable() {
+		return this.callable;
 	}
 }
