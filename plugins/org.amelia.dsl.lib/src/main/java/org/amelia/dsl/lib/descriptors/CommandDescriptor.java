@@ -49,6 +49,7 @@ public class CommandDescriptor extends Observable {
 		private String errorMessage;
 		private String successMessage;
 		private CallableTask<?> callable;
+		private boolean execution;
 
 		public Builder() {
 			this.command = "";
@@ -57,6 +58,7 @@ public class CommandDescriptor extends Observable {
 			this.timeout = 0;
 			this.errorMessage = "";
 			this.successMessage = "";
+			this.execution = false;
 		}
 		
 		public Builder withCommand(final String command) {
@@ -103,6 +105,11 @@ public class CommandDescriptor extends Observable {
 			this.callable = callable;
 			return this;
 		}
+		
+		public Builder isExecution() {
+			this.execution = true;
+			return this;
+		}	
 
 		public CommandDescriptor build() {
 			if (this.callable == null) {
