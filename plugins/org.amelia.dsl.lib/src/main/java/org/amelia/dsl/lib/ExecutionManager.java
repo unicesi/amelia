@@ -214,7 +214,7 @@ public class ExecutionManager {
 				closeSSHConnections(sshHosts);
 				Log.info("Deployment shutdown successful");
 			} catch (Exception e) {
-				Log.error("Deployment shutdown unsuccessful; see logs for more information");
+				Log.error("Deployment shutdown unsuccessful. See logs for more information");
 				Log.error("Shutting system down abruptly");
 				logger.error(e);
 			} finally {
