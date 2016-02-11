@@ -25,6 +25,7 @@ import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.amelia.dsl.amelia.CommandLiteral
 import org.amelia.dsl.amelia.Compilation
+import org.amelia.dsl.lib.util.Commands
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -61,13 +62,13 @@ class AmeliaCompiler extends XbaseCompiler {
 	}
 	
 	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable b) {
-		b.append("new ").append(org.amelia.dsl.lib.descriptors.ChangeDirectory).append("(")
+		b.append(Commands).append(".cd").append("(")
 		internalToConvertedExpression(expr.directory, b)
 		b.append(")")
 	}
 	
 	def protected void _toJavaExpression(Compilation expr, ITreeAppendable b) {
-		b.append("new ").append(org.amelia.dsl.lib.descriptors.Compilation).append("(")
+		b.append(Commands).append(".compile").append("(")
 		internalToConvertedExpression(expr.source, b)
 		b.append(", ")
 		internalToConvertedExpression(expr.output, b)

@@ -23,6 +23,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
 import org.amelia.dsl.amelia.Compilation
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -45,7 +46,7 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		addLocalToCurrentScope(command.directory, state);
 		
 		// set the actual type for the entire expression
-		val result = getRawTypeForName(org.amelia.dsl.lib.descriptors.ChangeDirectory, state);
+		val result = getRawTypeForName(CommandDescriptor, state);
 		state.acceptActualType(result);
 	}
 	
@@ -61,7 +62,7 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		addLocalToCurrentScope(command.classpath, state);
 		
 		// set the actual type for the entire expression
-		val result = getRawTypeForName(org.amelia.dsl.lib.descriptors.Compilation, state);
+		val result = getRawTypeForName(CommandDescriptor, state);
 		state.acceptActualType(result);
 	}
 }
