@@ -258,7 +258,7 @@ public class Commands {
 						throw new RuntimeException(
 								message + " in host " + host);
 					} else {
-						Log.info("The " + programName + " version is Ok");
+						Log.ok(host, "The " + programName + " version is Ok");
 					}
 				} else {
 					Log.warning(host,
