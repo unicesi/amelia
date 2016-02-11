@@ -128,6 +128,7 @@ public class Commands {
 					.withReleaseRegexp(this.releaseRegexp)
 					.withSuccessMessage(this.successMessage)
 					.withTimeout(this.timeout)
+					.isExecution()
 					.build();
 			return run;
 		}
@@ -247,7 +248,7 @@ public class Commands {
 				Matcher matcher = pattern.matcher(actualVersion.getBefore());
 				if (matcher.find()) {
 					if (!version.isCompliant(matcher.group(1))) {
-						String message = "the " + programName + " version ("
+						String message = "The " + programName + " version ("
 								+ matcher.group(1) + ") is not compliant with "
 								+ version;
 						Log.error(host, message);
@@ -265,6 +266,10 @@ public class Commands {
 		};
 		CommandDescriptor check = new CommandDescriptor.Builder()
 				.withCallable(callable)
+				.withCommand(versionCommand)
+				.withErrorMessage("The " + programName
+						+ " version is not compliant with " + version)
+				.withSuccessMessage("The " + programName + " version is Ok")
 				.build();
 		return check;
 	}
