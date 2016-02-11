@@ -103,6 +103,9 @@ public class Commands {
 		}
 
 		/**
+		 * TODO: create a task based on the default task and a process detach
+		 * after executing the run command
+		 * 
 		 * @return a {@link CommandDescriptor} with the necessary configuration
 		 *         to run the given composite
 		 */
