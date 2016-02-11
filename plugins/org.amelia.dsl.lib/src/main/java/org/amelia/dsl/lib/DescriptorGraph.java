@@ -31,12 +31,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 
-import org.amelia.dsl.lib.commands.Command;
 import org.amelia.dsl.lib.descriptors.AssetBundle;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
+import org.amelia.dsl.lib.util.ScheduledTask;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -49,7 +49,7 @@ public class DescriptorGraph
 
 		private final CommandDescriptor descriptor;
 		private final SSHHandler handler;
-		private final Command<?> command;
+		private final ScheduledTask<?> command;
 		private final List<CommandDescriptor> dependencies;
 		private final CountDownLatch doneSignal;
 		private final CountDownLatch mainDoneSignal;
@@ -61,7 +61,7 @@ public class DescriptorGraph
 		 * executing those descriptors.
 		 */
 		public DependencyThread(final CommandDescriptor descriptor,
-				final SSHHandler handler, final Command<?> command,
+				final SSHHandler handler, final ScheduledTask<?> command,
 				final List<CommandDescriptor> dependencies,
 				final int actualDependencies, final CountDownLatch doneSignal) {
 			this.descriptor = descriptor;
@@ -127,7 +127,7 @@ public class DescriptorGraph
 	
 	private final String subsystem;
 
-	private final Map<CommandDescriptor, List<Command<?>>> tasks;
+	private final Map<CommandDescriptor, List<ScheduledTask<?>>> tasks;
 
 	private final Set<Host> sshHosts;
 
@@ -140,7 +140,7 @@ public class DescriptorGraph
 	public DescriptorGraph(String subsystem) {
 		new Configuration().setProperties();
 		this.subsystem = subsystem;
-		this.tasks = new HashMap<CommandDescriptor, List<Command<?>>>();
+		this.tasks = new HashMap<CommandDescriptor, List<ScheduledTask<?>>>();
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();
 		this.threads = new TreeSet<DependencyThread>();
@@ -171,11 +171,11 @@ public class DescriptorGraph
 				this.sshHosts.addAll(descriptor.hosts());
 			
 			put(descriptor, descriptor.dependencies());
-			this.tasks.put(descriptor, new ArrayList<Command<?>>());
+			this.tasks.put(descriptor, new ArrayList<ScheduledTask<?>>());
 
 			// Add an executable task per host
 			for (Host host : descriptor.hosts()) {
-				Command<?> task = new Command<Object>(host, descriptor);
+				ScheduledTask<?> task = new ScheduledTask<Object>(host, descriptor);
 				this.tasks.get(descriptor).add(task);
 			}
 		}
@@ -203,11 +203,11 @@ public class DescriptorGraph
 
 		// Add the element with an empty list of dependencies
 		put(a, new ArrayList<CommandDescriptor>());
-		this.tasks.put(a, new ArrayList<Command<?>>());
+		this.tasks.put(a, new ArrayList<ScheduledTask<?>>());
 
 		// Add an executable task per host
 		for (Host host : hosts) {
-			Command<?> task = new Command<Object>(host, a);
+			ScheduledTask<?> task = new ScheduledTask<Object>(host, a);
 			this.tasks.get(a).add(task);
 		}
 
@@ -264,10 +264,10 @@ public class DescriptorGraph
 
 		for (CommandDescriptor e : keySet()) {
 			List<CommandDescriptor> dependencies = get(e);
-			List<Command<?>> tasks = this.tasks.get(e);
+			List<ScheduledTask<?>> tasks = this.tasks.get(e);
 			int deps = countDependencyThreads(dependencies, tasks);
 
-			for (Command<?> task : tasks) {
+			for (ScheduledTask<?> task : tasks) {
 				DependencyThread thread = new DependencyThread(e,
 						task.host().ssh(), task, dependencies, deps, doneSignal);
 
@@ -290,18 +290,18 @@ public class DescriptorGraph
 	
 	private int countTotalTasks() {
 		int total = 0;
-		for(List<Command<?>> tasks : this.tasks.values()) {
+		for(List<ScheduledTask<?>> tasks : this.tasks.values()) {
 			total += tasks.size();
 		}
 		return total;
 	}
 
 	private int countDependencyThreads(List<CommandDescriptor> dependencies,
-			List<Command<?>> tasks) {
+			List<ScheduledTask<?>> tasks) {
 		int n = dependencies.size();
 
 		for (CommandDescriptor e : dependencies)
-			for (Command<?> c : tasks)
+			for (ScheduledTask<?> c : tasks)
 				if (c.descriptor().equals(e))
 					++n;
 
@@ -314,8 +314,8 @@ public class DescriptorGraph
 		
 		for (CommandDescriptor descriptor : this.tasks.keySet()) {
 			if (descriptor.isExecution()) {
-				List<Command<?>> commands = this.tasks.get(descriptor);
-				for (Command<?> command : commands) {
+				List<ScheduledTask<?>> commands = this.tasks.get(descriptor);
+				for (ScheduledTask<?> command : commands) {
 					if (!executionsPerHost.containsKey(command.host()))
 						executionsPerHost.put(command.host(), new ArrayList<CommandDescriptor>());
 					executionsPerHost.get(command.host()).add(descriptor);

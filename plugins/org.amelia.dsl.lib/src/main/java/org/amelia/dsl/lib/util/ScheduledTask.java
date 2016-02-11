@@ -16,27 +16,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the Amelia library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.amelia.dsl.lib.commands;
+package org.amelia.dsl.lib.util;
 
 import java.util.UUID;
 
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
-import org.amelia.dsl.lib.util.CallableTask;
 
 /**
- * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class Command<T> implements CallableTask<T> {
+public class ScheduledTask<T> implements CallableTask<T> {
 
+	/**
+	 * A unique identifier among all scheduled tasks
+	 */
 	protected final UUID internalId;
 	
+	/**
+	 * The host in which the task will be executed
+	 */
 	protected final Host host;
 
+	/**
+	 * The descriptor of the scheduled task (command)
+	 */
 	protected final CommandDescriptor descriptor;
 
-	public Command(final Host host, final CommandDescriptor descriptor) {
+	public ScheduledTask(final Host host, final CommandDescriptor descriptor) {
 		this.internalId = UUID.randomUUID();
 		this.host = host;
 		this.descriptor = descriptor;
@@ -75,7 +82,7 @@ public class Command<T> implements CallableTask<T> {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		Command<?> other = (Command<?>) obj;
+		ScheduledTask<?> other = (ScheduledTask<?>) obj;
 		if (this.internalId == null) {
 			if (other.internalId != null) {
 				return false;

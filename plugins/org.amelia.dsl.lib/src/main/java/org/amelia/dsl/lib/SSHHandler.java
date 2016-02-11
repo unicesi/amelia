@@ -30,11 +30,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.amelia.dsl.lib.commands.Command;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.util.AuthenticationUserInfo;
 import org.amelia.dsl.lib.util.Log;
+import org.amelia.dsl.lib.util.ScheduledTask;
 import org.amelia.dsl.lib.util.ShellUtils;
 import org.amelia.dsl.lib.util.Strings;
 import org.apache.logging.log4j.LogManager;
@@ -192,7 +192,7 @@ public class SSHHandler extends Thread {
 		this.expect.expect(regexp(prompt));
 	}
 
-	public void executeCommand(final CommandDescriptor descriptor, final Command<?> command)
+	public void executeCommand(final CommandDescriptor descriptor, final ScheduledTask<?> command)
 			throws InterruptedException {
 		this.taskQueue.execute(new Callable<Object>() {
 			@Override public Object call() throws Exception {
