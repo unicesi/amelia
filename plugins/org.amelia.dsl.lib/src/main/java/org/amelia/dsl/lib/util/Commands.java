@@ -18,8 +18,11 @@
  */
 package org.amelia.dsl.lib.util;
 
+import static net.sf.expectit.matcher.Matchers.regexp;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +31,7 @@ import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.descriptors.Version;
 
 import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectIOException;
 import net.sf.expectit.Result;
 import net.sf.expectit.matcher.Matchers;
 
@@ -126,6 +130,7 @@ public class Commands {
 				arguments.add("-p " + Strings.join(this.arguments, " "));
 
 			CommandDescriptor run = new CommandDescriptor.Builder()
+					.withCallable(callableTask(arguments))
 					.withCommand("frascati")
 					.withArguments(arguments.toArray(new String[0]))
 					.withReleaseRegexp(this.releaseRegexp)
@@ -134,6 +139,55 @@ public class Commands {
 					.isExecution()
 					.build();
 			return run;
+		}
+		
+		private CallableTask<Integer> callableTask(final List<String> arguments) {
+			final String[] errors = { "Error when parsing the composite file '"
+					+ compositeName + "'", "Cannot instantiate the FraSCAti factory" };
+			return new CallableTask<Integer>() {
+
+				@Override public Integer call(Host host, String prompt)
+						throws Exception {
+					int PID = -1;
+					Expect expect = host.ssh().expect();
+					if (timeout == -1)
+						expect = expect.withInfiniteTimeout();
+					else if (timeout > 0)
+						expect = expect.withTimeout(timeout, TimeUnit.MILLISECONDS);
+
+					// Execute the command and obtain the process ID
+					expect.sendLine("frascati " + Strings.join(arguments, " ") + " &");
+					String _pid = expect.expect(regexp("\\[\\d+\\] (\\d+)")).group(1);
+
+					// Detach the process
+					expect.sendLine(ShellUtils.detachProcess());
+					PID = Integer.parseInt(_pid);
+
+					try {
+						// Expect for a successful execution
+						String response = expect.expect(regexp(releaseRegexp)).getBefore();
+						if (Strings.containsAnyOf(response, errors)) {
+							String message = Strings.firstIn(errors, response);
+							Log.error(host, message);
+							throw new RuntimeException(message);
+						} else {
+							Log.ok(host, successMessage);
+						}
+					} catch (ExpectIOException e) {
+						String message2 = "Operation timeout waiting for \""
+								+ releaseRegexp + "\" in host " + host;
+
+						if (Strings.containsAnyOf(e.getInputBuffer(), errors)) {
+							Log.error(host, Strings.firstIn(errors, e.getInputBuffer())
+											+ " in host " + host);
+							throw e;
+						} else {
+							throw new RuntimeException(message2);
+						}
+					}
+					return PID;
+				}
+			};
 		}
 	}
 
