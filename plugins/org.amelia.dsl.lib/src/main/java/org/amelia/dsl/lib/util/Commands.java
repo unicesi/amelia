@@ -254,6 +254,8 @@ public class Commands {
 						Log.error(host, message);
 						throw new RuntimeException(
 								message + " in host " + host);
+					} else {
+						Log.info("The " + programName + " version is Ok");
 					}
 				} else {
 					Log.warning(host,
@@ -266,10 +268,6 @@ public class Commands {
 		};
 		CommandDescriptor check = new CommandDescriptor.Builder()
 				.withCallable(callable)
-				.withCommand(versionCommand)
-				.withErrorMessage("The " + programName
-						+ " version is not compliant with " + version)
-				.withSuccessMessage("The " + programName + " version is Ok")
 				.build();
 		return check;
 	}
