@@ -53,9 +53,10 @@ public class CommandDescriptor extends Observable {
 
 		public Builder() {
 			this.command = "";
-			this.arguments = new String[]{};
+			this.arguments = new String[0];
 			this.releaseRegexp = ShellUtils.ameliaPromptRegexp();
 			this.timeout = 0;
+			this.errorTexts = new String[0];
 			this.errorMessage = "";
 			this.successMessage = "";
 			this.execution = false;
@@ -130,16 +131,23 @@ public class CommandDescriptor extends Observable {
 					try {
 						// Execute the command and expect for a successful execution
 						expect.sendLine(command + " " + Strings.join(arguments, " "));
-						expect.expect(regexp(releaseRegexp));
-						Log.ok(host, successMessage == null ? command : successMessage);
+						String response = expect.expect(regexp(releaseRegexp)).getBefore();
+						if (Strings.containsAnyOf(response, errorTexts)) {
+							Log.error(host, errorMessage);
+							throw new RuntimeException(errorMessage);
+						} else {							
+							Log.ok(host, successMessage == null ? command : successMessage);
+						}
 					} catch(ExpectIOException e) {
 						String response = e.getInputBuffer();
 						if (Strings.containsAnyOf(response, errorTexts)) {
 							Log.error(host, errorMessage);
 							throw new Exception(errorMessage);
 						} else {
-							String message = "Operation timeout waiting for \""
-									+ releaseRegexp + "\" in host " + host;
+							String regexp = releaseRegexp.equals(prompt)
+									? "the amelia prompt" : "\"" + releaseRegexp + "\"";
+							String message = "Operation timeout waiting for "
+									+ regexp + " in host " + host;
 							throw new RuntimeException(message);
 						}
 					}

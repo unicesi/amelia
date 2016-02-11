@@ -239,9 +239,14 @@ public class Commands {
 	 */
 	public static CommandDescriptor compile(final String sourceDirectory,
 			final String outputFile, final String... classpath) {
+		String[] errors = { "No existe el fichero o el directorio",
+				"Permiso denegado", "No such file or directory",
+				"Permission denied" };
 		CommandDescriptor compile = new CommandDescriptor.Builder()
 				.withCommand("frascati")
 				.withArguments("compile", sourceDirectory, outputFile, Strings.join(classpath, ":"))
+				.withErrorText(errors)
+				.withErrorMessage(outputFile + ".jar could not been generated")
 				.withSuccessMessage(outputFile + ".jar has been generated")
 				.build();
 		return compile;
