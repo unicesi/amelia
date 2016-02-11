@@ -72,7 +72,7 @@ public class ShellUtils {
 		String time = "(\\d+){2}:(\\d+){2}:(\\d+){2}";
 		String user = "([a-z_][a-z0-9_]{0,30})";
 		String host = "([a-zA-Z0-9-\\.]{0,24})";
-		String directory = "(\\/)?([^\\/ ]+(\\/)?)+";
+		String directory = "((\\/)?([^\\/ ]+(\\/)?)+|\\/)";
 
 		StringBuilder regexp = new StringBuilder();
 
