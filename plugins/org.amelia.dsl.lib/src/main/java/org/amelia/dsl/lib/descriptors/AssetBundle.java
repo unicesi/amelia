@@ -74,6 +74,14 @@ public class AssetBundle extends CommandDescriptor {
 	public AssetBundle() {
 		this(new HashMap<String, List<String>>(), true);
 	}
+	
+	@Override public String doneMessage() {
+		return toString();
+	}
+	
+	@Override public String failMessage() {
+		return "Unsuccessful transfer" + (this.transfers.size() == 1 ? "" : "s");
+	}
 
 	public AssetBundle resolveVariables(Pair<String, String>... variables) {
 		Map<String, String> _variables = new HashMap<String, String>();
