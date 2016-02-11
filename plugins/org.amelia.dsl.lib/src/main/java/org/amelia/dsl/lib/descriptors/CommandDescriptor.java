@@ -112,48 +112,38 @@ public class CommandDescriptor extends Observable {
 		}	
 
 		public CommandDescriptor build() {
-			if (this.callable == null) {
+			if (this.callable == null)
 				this.callable = defaultCallableTask();
-			}
 			return new CommandDescriptor(this);
 		}
 		
-		protected CallableTask<Integer> defaultCallableTask() {
-			return new CallableTask<Integer>() {
-				@SuppressWarnings("resource")
-				@Override public Integer call(Host host, String prompt)
+		protected CallableTask<Void> defaultCallableTask() {
+			return new CallableTask<Void>() {
+				@Override public Void call(Host host, String prompt)
 						throws Exception {
-					Expect expect = host.ssh().expect();
-					
-					// Execute the command
-					expect.sendLine(command + " &");
-					String PID = expect.expect(regexp("\\[\\d+\\] (\\d+)")).group(1);
-					
-					// Detach the process
-					expect.sendLine(ShellUtils.detachProcess());
-					
+					Expect expect = host.ssh().expect();	
 					if (timeout == -1)
 						expect = expect.withInfiniteTimeout();
 					else if (timeout > 0)
 						expect = expect.withTimeout(timeout, TimeUnit.MILLISECONDS);
 					
 					try {
-						// Expect for a successful execution
+						// Execute the command and expect for a successful execution
+						expect.sendLine(command + " " + Strings.join(arguments, " "));
 						expect.expect(regexp(releaseRegexp));
-						Log.ok(host, successMessage);
+						Log.ok(host, successMessage == null ? command : successMessage);
 					} catch(ExpectIOException e) {
 						String response = e.getInputBuffer();
 						if (Strings.containsAnyOf(response, errorTexts)) {
-							String message = Strings.firstIn(errorTexts, response);
-							Log.error(host, message);
-							throw new Exception(message);
+							Log.error(host, errorMessage);
+							throw new Exception(errorMessage);
 						} else {
 							String message = "Operation timeout waiting for \""
 									+ releaseRegexp + "\" in host " + host;
 							throw new RuntimeException(message);
 						}
 					}
-					return Integer.parseInt(PID);
+					return null;
 				}
 			};
 		}
@@ -167,6 +157,7 @@ public class CommandDescriptor extends Observable {
 	protected final String successMessage;
 	protected final long timeout;
 	protected final CallableTask<?> callable;
+	protected final boolean execution;
 	private final List<CommandDescriptor> dependencies;
 	private final List<Host> hosts;
 
@@ -180,6 +171,7 @@ public class CommandDescriptor extends Observable {
 		this.errorMessage = builder.errorMessage;
 		this.successMessage = builder.successMessage;
 		this.callable = builder.callable;
+		this.execution = builder.execution;
 		this.dependencies = new ArrayList<CommandDescriptor>();
 		this.hosts = new ArrayList<Host>();
 	}
@@ -297,5 +289,9 @@ public class CommandDescriptor extends Observable {
 	
 	public CallableTask<?> callable() {
 		return this.callable;
+	}
+	
+	public boolean isExecution() {
+		return this.execution;
 	}
 }
