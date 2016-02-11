@@ -29,17 +29,14 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
-import org.amelia.dsl.lib.commands.Command;
-import org.amelia.dsl.lib.commands.CommandFactory;
 import org.amelia.dsl.lib.descriptors.AssetBundle;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
-import org.amelia.dsl.lib.descriptors.Execution;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
+import org.amelia.dsl.lib.util.ScheduledTask;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -52,7 +49,7 @@ public class DescriptorGraph
 
 		private final CommandDescriptor descriptor;
 		private final SSHHandler handler;
-		private final Callable<?> callable;
+		private final ScheduledTask<?> command;
 		private final List<CommandDescriptor> dependencies;
 		private final CountDownLatch doneSignal;
 		private final CountDownLatch mainDoneSignal;
@@ -64,12 +61,12 @@ public class DescriptorGraph
 		 * executing those descriptors.
 		 */
 		public DependencyThread(final CommandDescriptor descriptor,
-				final SSHHandler handler, final Callable<?> callable,
+				final SSHHandler handler, final ScheduledTask<?> command,
 				final List<CommandDescriptor> dependencies,
 				final int actualDependencies, final CountDownLatch doneSignal) {
 			this.descriptor = descriptor;
 			this.handler = handler;
-			this.callable = callable;
+			this.command = command;
 			this.dependencies = dependencies;
 			this.doneSignal = new CountDownLatch(actualDependencies);
 			this.mainDoneSignal = doneSignal;
@@ -84,9 +81,8 @@ public class DescriptorGraph
 		public void run() {
 			try {
 				this.doneSignal.await();
-
 				if (!this.shutdown) {
-					this.handler.executeCommand(this.callable);
+					this.handler.executeCommand(this.descriptor, this.command);
 					this.descriptor.done(this.handler.host());
 
 					// Release this dependency
@@ -131,7 +127,7 @@ public class DescriptorGraph
 	
 	private final String subsystem;
 
-	private final Map<CommandDescriptor, List<Command<?>>> tasks;
+	private final Map<CommandDescriptor, List<ScheduledTask<?>>> tasks;
 
 	private final Set<Host> sshHosts;
 
@@ -144,7 +140,7 @@ public class DescriptorGraph
 	public DescriptorGraph(String subsystem) {
 		new Configuration().setProperties();
 		this.subsystem = subsystem;
-		this.tasks = new HashMap<CommandDescriptor, List<Command<?>>>();
+		this.tasks = new HashMap<CommandDescriptor, List<ScheduledTask<?>>>();
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();
 		this.threads = new TreeSet<DependencyThread>();
@@ -175,11 +171,11 @@ public class DescriptorGraph
 				this.sshHosts.addAll(descriptor.hosts());
 			
 			put(descriptor, descriptor.dependencies());
-			this.tasks.put(descriptor, new ArrayList<Command<?>>());
+			this.tasks.put(descriptor, new ArrayList<ScheduledTask<?>>());
 
 			// Add an executable task per host
 			for (Host host : descriptor.hosts()) {
-				Command<?> task = CommandFactory.getInstance().getCommand(host, descriptor);
+				ScheduledTask<?> task = new ScheduledTask<Object>(host, descriptor);
 				this.tasks.get(descriptor).add(task);
 			}
 		}
@@ -207,11 +203,11 @@ public class DescriptorGraph
 
 		// Add the element with an empty list of dependencies
 		put(a, new ArrayList<CommandDescriptor>());
-		this.tasks.put(a, new ArrayList<Command<?>>());
+		this.tasks.put(a, new ArrayList<ScheduledTask<?>>());
 
 		// Add an executable task per host
 		for (Host host : hosts) {
-			Command<?> task = CommandFactory.getInstance().getCommand(host, a);
+			ScheduledTask<?> task = new ScheduledTask<Object>(host, a);
 			this.tasks.get(a).add(task);
 		}
 
@@ -268,13 +264,12 @@ public class DescriptorGraph
 
 		for (CommandDescriptor e : keySet()) {
 			List<CommandDescriptor> dependencies = get(e);
-			List<Command<?>> tasks = this.tasks.get(e);
+			List<ScheduledTask<?>> tasks = this.tasks.get(e);
 			int deps = countDependencyThreads(dependencies, tasks);
 
-			for (Command<?> task : tasks) {
+			for (ScheduledTask<?> task : tasks) {
 				DependencyThread thread = new DependencyThread(e,
-						task.host().ssh(), task, dependencies, deps,
-						doneSignal);
+						task.host().ssh(), task, dependencies, deps, doneSignal);
 
 				// Handle uncaught exceptions
 				thread.setUncaughtExceptionHandler(
@@ -295,18 +290,18 @@ public class DescriptorGraph
 	
 	private int countTotalTasks() {
 		int total = 0;
-		for(List<Command<?>> tasks : this.tasks.values()) {
+		for(List<ScheduledTask<?>> tasks : this.tasks.values()) {
 			total += tasks.size();
 		}
 		return total;
 	}
 
 	private int countDependencyThreads(List<CommandDescriptor> dependencies,
-			List<Command<?>> tasks) {
+			List<ScheduledTask<?>> tasks) {
 		int n = dependencies.size();
 
 		for (CommandDescriptor e : dependencies)
-			for (Command<?> c : tasks)
+			for (ScheduledTask<?> c : tasks)
 				if (c.descriptor().equals(e))
 					++n;
 
@@ -315,18 +310,15 @@ public class DescriptorGraph
 
 	public void stopExecutions() throws IOException {
 		Log.info("Stopping previous executions");
-		Map<Host, List<Execution>> executionsPerHost = new HashMap<Host, List<Execution>>();
+		Map<Host, List<CommandDescriptor>> executionsPerHost = new HashMap<Host, List<CommandDescriptor>>();
 		
 		for (CommandDescriptor descriptor : this.tasks.keySet()) {
-			if (descriptor instanceof Execution) {
-				List<Command<?>> commands = this.tasks.get(descriptor);
-				for (Command<?> command : commands) {
+			if (descriptor.isExecution()) {
+				List<ScheduledTask<?>> commands = this.tasks.get(descriptor);
+				for (ScheduledTask<?> command : commands) {
 					if (!executionsPerHost.containsKey(command.host()))
-						executionsPerHost.put(command.host(),
-								new ArrayList<Execution>());
-
-					executionsPerHost.get(command.host())
-							.add((Execution) descriptor);
+						executionsPerHost.put(command.host(), new ArrayList<CommandDescriptor>());
+					executionsPerHost.get(command.host()).add(descriptor);
 				}
 			}
 		}

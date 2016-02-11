@@ -16,36 +16,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the Amelia library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.amelia.dsl.lib.commands;
+package org.amelia.dsl.lib.util;
 
-import org.amelia.dsl.lib.descriptors.AssetBundle;
 import org.amelia.dsl.lib.descriptors.Host;
-import org.amelia.dsl.lib.util.Log;
 
 /**
+ * 
  * @author Miguel Jiménez - Initial contribution and API
+ *
+ * @param <V>
+ *            The return type
  */
-public class Transfer extends Command<Void> {
-
-	public Transfer(final Host host, final AssetBundle bundle) {
-		super(host, bundle);
-	}
-
-	@Override
-	public Void call() throws Exception {
-
-		Host host = super.host;
-		AssetBundle descriptor = (AssetBundle) super.descriptor;
-
-		try {
-			host.ftp().upload(descriptor);
-			Log.ok(host, descriptor.doneMessage());
-		} catch (Exception e) {
-			Log.error(host, descriptor.failMessage());
-			throw e;
-		}
-
-		return null;
-	}
-
+public interface CallableTask<V> {
+	
+	public V call(Host host, String prompt) throws Exception;
+	
 }

@@ -16,74 +16,44 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the Amelia library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.amelia.dsl.lib.commands;
-
-import static net.sf.expectit.matcher.Matchers.regexp;
+package org.amelia.dsl.lib.util;
 
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import net.sf.expectit.Expect;
 
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
-import org.amelia.dsl.lib.util.Log;
 
 /**
- * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class Command<T> implements Callable<T> {
+public class ScheduledTask<T> implements CallableTask<T> {
 
-	public static class Simple extends Command<Boolean> {
-
-		public Simple(Host host, CommandDescriptor descriptor) {
-			super(host, descriptor);
-		}
-
-		public Boolean call() throws Exception {
-
-			Host host = super.host;
-			CommandDescriptor descriptor = super.descriptor;
-
-			Expect expect = host.ssh().expect();
-			String expression = descriptor.releaseRegexp();
-			
-			if (descriptor.timeout() == -1)
-				expect = expect.withInfiniteTimeout();
-			else if (descriptor.timeout() > 0)
-				expect = expect.withTimeout(descriptor.timeout(),
-						TimeUnit.MILLISECONDS);
-			
-			expect.sendLine(descriptor.toCommandString());
-			String response = expect.expect(regexp(expression)).getBefore();
-
-			if (!descriptor.isOk(response)) {
-				Log.error(host, descriptor.failMessage());
-				throw new Exception(descriptor.errorMessage());
-			} else {
-				Log.ok(host, descriptor.doneMessage());
-			}
-
-			return true;
-		}
-	}
-
+	/**
+	 * A unique identifier among all scheduled tasks
+	 */
 	protected final UUID internalId;
-
+	
+	/**
+	 * The host in which the task will be executed
+	 */
 	protected final Host host;
 
+	/**
+	 * The descriptor of the scheduled task (command)
+	 */
 	protected final CommandDescriptor descriptor;
 
-	public Command(final Host host, final CommandDescriptor descriptor) {
+	public ScheduledTask(final Host host, final CommandDescriptor descriptor) {
 		this.internalId = UUID.randomUUID();
 		this.host = host;
 		this.descriptor = descriptor;
 	}
-
-	public abstract T call() throws Exception;
-
+	
+	@SuppressWarnings("unchecked")
+	@Override public T call(Host host, String prompt) throws Exception {
+		return (T) descriptor.callable().call(host, prompt);
+	}
+	
 	public Host host() {
 		return this.host;
 	}
@@ -112,7 +82,7 @@ public abstract class Command<T> implements Callable<T> {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		Command<?> other = (Command<?>) obj;
+		ScheduledTask<?> other = (ScheduledTask<?>) obj;
 		if (this.internalId == null) {
 			if (other.internalId != null) {
 				return false;

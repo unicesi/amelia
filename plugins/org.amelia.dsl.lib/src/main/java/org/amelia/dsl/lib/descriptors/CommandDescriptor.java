@@ -18,17 +18,23 @@
  */
 package org.amelia.dsl.lib.descriptors;
 
+import static net.sf.expectit.matcher.Matchers.regexp;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-import org.amelia.dsl.lib.commands.CommandFactory;
+import org.amelia.dsl.lib.util.CallableTask;
+import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.ShellUtils;
 import org.amelia.dsl.lib.util.Strings;
 
+import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectIOException;
+
 /**
- * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class CommandDescriptor extends Observable {
@@ -39,9 +45,11 @@ public class CommandDescriptor extends Observable {
 		private String[] arguments;
 		private String releaseRegexp;
 		private long timeout;
-		private String errorText;
+		private String[] errorTexts;
 		private String errorMessage;
 		private String successMessage;
+		private CallableTask<?> callable;
+		private boolean execution;
 
 		public Builder() {
 			this.command = "";
@@ -50,6 +58,7 @@ public class CommandDescriptor extends Observable {
 			this.timeout = 0;
 			this.errorMessage = "";
 			this.successMessage = "";
+			this.execution = false;
 		}
 		
 		public Builder withCommand(final String command) {
@@ -77,8 +86,8 @@ public class CommandDescriptor extends Observable {
 			return this;
 		}
 		
-		public Builder withErrorText(String errorText) {
-			this.errorText = errorText;
+		public Builder withErrorText(String... errorTexts) {
+			this.errorTexts = errorTexts;
 			return this;
 		}
 		
@@ -91,19 +100,64 @@ public class CommandDescriptor extends Observable {
 			this.successMessage = successMessage;
 			return this;
 		}
+		
+		public Builder withCallable(CallableTask<?> callable) {
+			this.callable = callable;
+			return this;
+		}
+		
+		public Builder isExecution() {
+			this.execution = true;
+			return this;
+		}	
 
 		public CommandDescriptor build() {
+			if (this.callable == null)
+				this.callable = defaultCallableTask();
 			return new CommandDescriptor(this);
+		}
+		
+		protected CallableTask<Void> defaultCallableTask() {
+			return new CallableTask<Void>() {
+				@Override public Void call(Host host, String prompt)
+						throws Exception {
+					Expect expect = host.ssh().expect();	
+					if (timeout == -1)
+						expect = expect.withInfiniteTimeout();
+					else if (timeout > 0)
+						expect = expect.withTimeout(timeout, TimeUnit.MILLISECONDS);
+					
+					try {
+						// Execute the command and expect for a successful execution
+						expect.sendLine(command + " " + Strings.join(arguments, " "));
+						expect.expect(regexp(releaseRegexp));
+						Log.ok(host, successMessage == null ? command : successMessage);
+					} catch(ExpectIOException e) {
+						String response = e.getInputBuffer();
+						if (Strings.containsAnyOf(response, errorTexts)) {
+							Log.error(host, errorMessage);
+							throw new Exception(errorMessage);
+						} else {
+							String message = "Operation timeout waiting for \""
+									+ releaseRegexp + "\" in host " + host;
+							throw new RuntimeException(message);
+						}
+					}
+					return null;
+				}
+			};
 		}
 	}
 
 	protected final UUID internalId;
 	protected final String command;
-	protected final String errorText;
+	protected final String[] errorTexts;
 	protected final String errorMessage;
 	protected final String releaseRegexp;
 	protected final String successMessage;
 	protected final long timeout;
+	protected CallableTask<?> callable;
+	protected final boolean execution;
 	private final List<CommandDescriptor> dependencies;
 	private final List<Host> hosts;
 
@@ -113,15 +167,18 @@ public class CommandDescriptor extends Observable {
 				+ Strings.join(builder.arguments, " ");
 		this.releaseRegexp = builder.releaseRegexp;
 		this.timeout = builder.timeout;
-		this.errorText = builder.errorText;
+		this.errorTexts = builder.errorTexts;
 		this.errorMessage = builder.errorMessage;
 		this.successMessage = builder.successMessage;
+		this.callable = builder.callable;
+		this.execution = builder.execution;
 		this.dependencies = new ArrayList<CommandDescriptor>();
 		this.hosts = new ArrayList<Host>();
 	}
 
 	public boolean isOk(String response) {
-		return this.errorText == null || !response.contains(this.errorText);
+		return this.errorTexts == null
+				|| Strings.containsAnyOf(response, this.errorTexts);
 	}
 
 	public void done(Host host) {
@@ -214,8 +271,8 @@ public class CommandDescriptor extends Observable {
 		return this.timeout;
 	}
 
-	public String errorText() {
-		return this.errorText;
+	public String[] errorTexts() {
+		return this.errorTexts;
 	}
 
 	public String errorMessage() {
@@ -228,5 +285,13 @@ public class CommandDescriptor extends Observable {
 
 	public String successMessage() {
 		return this.successMessage;
+	}
+	
+	public CallableTask<?> callable() {
+		return this.callable;
+	}
+	
+	public boolean isExecution() {
+		return this.execution;
 	}
 }

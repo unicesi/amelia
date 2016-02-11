@@ -38,16 +38,13 @@ public class Strings {
 	public static String join(String[] args, String separator,
 			String lastSeparator) {
 		String output = "";
-
 		for (int i = 0; i < args.length; i++) {
 			if (i == args.length - 2)
 				separator = lastSeparator;
 			if (i == args.length - 1)
 				separator = "";
-
 			output += args[i] + separator;
 		}
-
 		return output;
 	}
 
@@ -57,12 +54,18 @@ public class Strings {
 
 	public static boolean containsAnyOf(String source, String[] strings) {
 		boolean contains = false;
-
 		for (int i = 0; i < strings.length && !contains; i++) {
 			contains = source.contains(strings[i]);
 		}
-
 		return contains;
+	}
+	
+	public static String firstIn(String[] strings, String text) {
+		for (int i = 0; i < strings.length; i++) {
+			if (text.contains(strings[i]))
+				return strings[i];
+		}
+		return null;
 	}
 
 	public static String ascii(int codePoint) {
