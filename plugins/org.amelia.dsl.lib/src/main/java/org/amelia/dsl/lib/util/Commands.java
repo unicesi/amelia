@@ -238,6 +238,23 @@ public class Commands {
 	 *         compile the sources
 	 */
 	public static CommandDescriptor compile(final String sourceDirectory,
+			final String outputFile, final List<String> classpath) {
+		return compile(sourceDirectory, outputFile, classpath.toArray(new String[0]));
+	}
+	
+	/**
+	 * Configures a {@link CommandDescriptor} to compile a source directory
+	 * 
+	 * @param sourceDirectory
+	 *            The directory containing all the java sources
+	 * @param outputFile
+	 *            The name of the output jar file
+	 * @param classpath
+	 *            The source extra classpath
+	 * @return a {@link CommandDescriptor} with the necessary configuration to
+	 *         compile the sources
+	 */
+	public static CommandDescriptor compile(final String sourceDirectory,
 			final String outputFile, final String... classpath) {
 		String[] errors = { "No existe el fichero o el directorio",
 				"Permiso denegado", "No such file or directory",
