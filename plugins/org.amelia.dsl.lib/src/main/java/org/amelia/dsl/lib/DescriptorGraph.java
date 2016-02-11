@@ -175,7 +175,7 @@ public class DescriptorGraph
 
 			// Add an executable task per host
 			for (Host host : descriptor.hosts()) {
-				Command<?> task = new Command.Simple(host, descriptor);
+				Command<?> task = new Command<Object>(host, descriptor);
 				this.tasks.get(descriptor).add(task);
 			}
 		}
@@ -207,7 +207,7 @@ public class DescriptorGraph
 
 		// Add an executable task per host
 		for (Host host : hosts) {
-			Command<?> task = new Command.Simple(host, a);
+			Command<?> task = new Command<Object>(host, a);
 			this.tasks.get(a).add(task);
 		}
 

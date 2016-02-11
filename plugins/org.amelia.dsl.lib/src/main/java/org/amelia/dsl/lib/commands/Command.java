@@ -28,20 +28,7 @@ import org.amelia.dsl.lib.util.CallableTask;
  * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class Command<T> implements CallableTask<T> {
-
-	public static class Simple extends Command<Void> {
-
-		public Simple(final Host host, CommandDescriptor descriptor) {
-			super(host, descriptor);
-		}
-
-		@Override public Void call(Host host, String prompt) throws Exception {
-			super.descriptor.callable().call(host, prompt);
-			return null;
-		}
-
-	}
+public class Command<T> implements CallableTask<T> {
 
 	protected final UUID internalId;
 	
@@ -53,6 +40,11 @@ public abstract class Command<T> implements CallableTask<T> {
 		this.internalId = UUID.randomUUID();
 		this.host = host;
 		this.descriptor = descriptor;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override public T call(Host host, String prompt) throws Exception {
+		return (T) descriptor.callable().call(host, prompt);
 	}
 	
 	public Host host() {
