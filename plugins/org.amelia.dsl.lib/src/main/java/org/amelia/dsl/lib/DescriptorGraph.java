@@ -32,7 +32,6 @@ import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 
 import org.amelia.dsl.lib.commands.Command;
-import org.amelia.dsl.lib.commands.CommandFactory;
 import org.amelia.dsl.lib.descriptors.AssetBundle;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
@@ -176,7 +175,7 @@ public class DescriptorGraph
 
 			// Add an executable task per host
 			for (Host host : descriptor.hosts()) {
-				Command<?> task = CommandFactory.getInstance().getCommand(host, descriptor);
+				Command<?> task = new Command.Simple(host, descriptor);
 				this.tasks.get(descriptor).add(task);
 			}
 		}
@@ -208,7 +207,7 @@ public class DescriptorGraph
 
 		// Add an executable task per host
 		for (Host host : hosts) {
-			Command<?> task = CommandFactory.getInstance().getCommand(host, a);
+			Command<?> task = new Command.Simple(host, a);
 			this.tasks.get(a).add(task);
 		}
 

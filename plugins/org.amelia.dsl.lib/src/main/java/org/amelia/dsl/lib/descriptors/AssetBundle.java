@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.amelia.dsl.lib.util.ANSI;
+import org.amelia.dsl.lib.util.CallableTask;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -54,6 +55,20 @@ public class AssetBundle extends CommandDescriptor {
 		super(new CommandDescriptor.Builder());
 		this.transfers = transfers;
 		this.overwrite = overwrite;
+		final AssetBundle that = this;
+		this.callable = new CallableTask<Void>() {
+			@Override
+			public Void call(Host host, String prompt) throws Exception {
+				try {
+					host.ftp().upload(that);
+					Log.ok(host, that.doneMessage());
+				} catch (Exception e) {
+					Log.error(host, that.failMessage());
+					throw e;
+				}
+				return null;
+			}
+		};
 	}
 
 	public AssetBundle() {

@@ -156,7 +156,7 @@ public class CommandDescriptor extends Observable {
 	protected final String releaseRegexp;
 	protected final String successMessage;
 	protected final long timeout;
-	protected final CallableTask<?> callable;
+	protected CallableTask<?> callable;
 	protected final boolean execution;
 	private final List<CommandDescriptor> dependencies;
 	private final List<Host> hosts;
