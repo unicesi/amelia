@@ -19,12 +19,8 @@
 package org.amelia.dsl.lib.commands;
 
 import org.amelia.dsl.lib.descriptors.AssetBundle;
-import org.amelia.dsl.lib.descriptors.ChangeDirectory;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
-import org.amelia.dsl.lib.descriptors.Compilation;
-import org.amelia.dsl.lib.descriptors.Execution;
 import org.amelia.dsl.lib.descriptors.Host;
-import org.amelia.dsl.lib.descriptors.Prerequisites;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -44,22 +40,10 @@ public class CommandFactory {
 	}
 
 	public Command<?> getCommand(Host host, CommandDescriptor descriptor) {
-		Command<?> command = null;
-
-		if (descriptor instanceof Compilation)
-			command = new Compile(host, (Compilation) descriptor);
-		else if (descriptor instanceof Execution)
-			command = new Run(host, (Execution) descriptor);
-		else if (descriptor instanceof AssetBundle)
-			command = new Transfer(host, (AssetBundle) descriptor);
-		else if (descriptor instanceof Prerequisites)
-			command = new PrerequisiteCheck(host, (Prerequisites) descriptor);
-		else if (descriptor instanceof ChangeDirectory)
-			command = new Cd(host, (ChangeDirectory) descriptor);
+		if (descriptor instanceof AssetBundle)
+			return new Transfer(host, (AssetBundle) descriptor);
 		else
-			command = new Command.Simple(host, descriptor);
-
-		return command;
+			return new Command.Simple(host, descriptor);
 	}
 
 }

@@ -30,12 +30,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import net.sf.expectit.Expect;
-import net.sf.expectit.ExpectBuilder;
-import net.sf.expectit.Result;
-
-import org.amelia.dsl.lib.commands.Run;
-import org.amelia.dsl.lib.descriptors.Execution;
+import org.amelia.dsl.lib.commands.Command;
+import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.util.AuthenticationUserInfo;
 import org.amelia.dsl.lib.util.Log;
@@ -49,6 +45,10 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
+
+import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectBuilder;
+import net.sf.expectit.Result;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -71,7 +71,7 @@ public class SSHHandler extends Thread {
 
 	private File output;
 
-	private final List<Execution> executions;
+	private final List<CommandDescriptor> executions;
 
 	private final SingleThreadTaskQueue taskQueue;
 
@@ -91,7 +91,7 @@ public class SSHHandler extends Thread {
 
 		this.connectionTimeout = Integer.parseInt(_connectionTimeout);
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
-		this.executions = new ArrayList<Execution>();
+		this.executions = new ArrayList<CommandDescriptor>();
 		this.taskQueue = new SingleThreadTaskQueue();
 
 		// Handle uncaught exceptions
@@ -192,20 +192,20 @@ public class SSHHandler extends Thread {
 		this.expect.expect(regexp(prompt));
 	}
 
-	public <V> V executeCommand(Callable<V> command)
+	public void executeCommand(final CommandDescriptor descriptor, final Command<?> command)
 			throws InterruptedException {
-		V result = this.taskQueue.execute(command);
+		this.taskQueue.execute(new Callable<Object>() {
+			@Override public Object call() throws Exception {
+				return command.call(host, ShellUtils.ameliaPromptRegexp());
+			}
+		});
 
-		if (command instanceof Run) {
-			Run run = (Run) command;
-			Execution descriptor = (Execution) run.descriptor();
+		if (descriptor.isExecution()) {
 			this.executions.add(descriptor);
 		}
-
-		return result;
 	}
 
-	public int stopExecutions(List<Execution> executions) throws IOException {
+	public int stopExecutions(List<CommandDescriptor> executions) throws IOException {
 		// FIXME: Improve the search string to identify deployed composites when
 		// the classpath is different (libraries are in different order)
 
@@ -215,20 +215,20 @@ public class SSHHandler extends Thread {
 		// Stop executions in reverse order (to avoid abruptly stopping
 		// components)
 		for (int i = executions.size() - 1; i >= 0; i--) {
-			Execution descriptor = executions.remove(i);
+			CommandDescriptor descriptor = executions.remove(i);
 
-			String criterion = descriptor.toCommandSearchString();
+			String criterion = descriptor.toCommandString();
+			String[] data = criterion.split(" "); // data[2]: compositeName
 			this.expect.sendLine(ShellUtils.runningCompositeName(criterion));
 			Result r = this.expect.expect(regexp(prompt));
 
-			if (r.getBefore().contains(descriptor.compositeName())) {
+			if (r.getBefore().contains(data[2])) {
 				this.expect.sendLine(ShellUtils.killCommand(criterion));
 				this.expect.expect(regexp(prompt));
 
-				components.add(descriptor.compositeName());
-				logger.info(
-						"Execution of composite " + descriptor.compositeName()
-								+ " was successfully stopped in " + this.host);
+				components.add(data[2]);
+				logger.info("Execution of composite " + data[2]
+						+ " was successfully stopped in " + this.host);
 			}
 		}
 
@@ -256,7 +256,7 @@ public class SSHHandler extends Thread {
 		stopExecutions(this.executions);
 	}
 
-	public List<Execution> executions() {
+	public List<CommandDescriptor> executions() {
 		return this.executions;
 	}
 
@@ -283,16 +283,13 @@ public class SSHHandler extends Thread {
 
 	private File createOutputFile() throws IOException {
 		String fileName = this.host + "-" + System.nanoTime() + ".txt";
-
-		File parent = new File(
-				"sessions" + File.separator + this.subsystem);
+		File parent = new File("sessions" + File.separator + this.subsystem);
 		File file = new File(parent, fileName);
 
 		if (!parent.exists())
 			parent.mkdirs();
 
 		file.createNewFile();
-
 		return file;
 	}
 

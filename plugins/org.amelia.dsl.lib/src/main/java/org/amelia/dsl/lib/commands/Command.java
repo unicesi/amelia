@@ -18,60 +18,33 @@
  */
 package org.amelia.dsl.lib.commands;
 
-import static net.sf.expectit.matcher.Matchers.regexp;
-
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import net.sf.expectit.Expect;
 
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
-import org.amelia.dsl.lib.util.Log;
+import org.amelia.dsl.lib.util.CallableTask;
 
 /**
  * @see CommandFactory
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class Command<T> implements Callable<T> {
+public abstract class Command<T> implements CallableTask<T> {
 
-	public static class Simple extends Command<Boolean> {
+	public static class Simple extends Command<Void> {
 
-		public Simple(Host host, CommandDescriptor descriptor) {
+		public Simple(final Host host, CommandDescriptor descriptor) {
 			super(host, descriptor);
 		}
 
-		public Boolean call() throws Exception {
-
-			Host host = super.host;
-			CommandDescriptor descriptor = super.descriptor;
-
-			Expect expect = host.ssh().expect();
-			String expression = descriptor.releaseRegexp();
-			
-			if (descriptor.timeout() == -1)
-				expect = expect.withInfiniteTimeout();
-			else if (descriptor.timeout() > 0)
-				expect = expect.withTimeout(descriptor.timeout(),
-						TimeUnit.MILLISECONDS);
-			
-			expect.sendLine(descriptor.toCommandString());
-			String response = expect.expect(regexp(expression)).getBefore();
-
-			if (!descriptor.isOk(response)) {
-				Log.error(host, descriptor.failMessage());
-				throw new Exception(descriptor.errorMessage());
-			} else {
-				Log.ok(host, descriptor.doneMessage());
-			}
-
-			return true;
+		@Override public Void call(Host host, String prompt) throws Exception {
+			super.descriptor.callable().call(host, prompt);
+			return null;
 		}
+
 	}
 
 	protected final UUID internalId;
-
+	
 	protected final Host host;
 
 	protected final CommandDescriptor descriptor;
@@ -81,9 +54,7 @@ public abstract class Command<T> implements Callable<T> {
 		this.host = host;
 		this.descriptor = descriptor;
 	}
-
-	public abstract T call() throws Exception;
-
+	
 	public Host host() {
 		return this.host;
 	}

@@ -134,7 +134,7 @@ public class Host implements Comparable<Host> {
 		this.ssh.stopExecutions();
 	}
 
-	public int stopExecutions(List<Execution> executions) throws IOException {
+	public int stopExecutions(List<CommandDescriptor> executions) throws IOException {
 		return this.ssh.stopExecutions(executions);
 	}
 

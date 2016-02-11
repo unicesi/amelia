@@ -31,12 +31,8 @@ public class Transfer extends Command<Void> {
 		super(host, bundle);
 	}
 
-	@Override
-	public Void call() throws Exception {
-
-		Host host = super.host;
+	@Override public Void call(Host host, String prompt) throws Exception {
 		AssetBundle descriptor = (AssetBundle) super.descriptor;
-
 		try {
 			host.ftp().upload(descriptor);
 			Log.ok(host, descriptor.doneMessage());
@@ -44,7 +40,6 @@ public class Transfer extends Command<Void> {
 			Log.error(host, descriptor.failMessage());
 			throw e;
 		}
-
 		return null;
 	}
 

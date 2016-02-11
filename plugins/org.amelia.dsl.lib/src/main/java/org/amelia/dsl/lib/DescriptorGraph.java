@@ -29,14 +29,12 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import org.amelia.dsl.lib.commands.Command;
 import org.amelia.dsl.lib.commands.CommandFactory;
 import org.amelia.dsl.lib.descriptors.AssetBundle;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
-import org.amelia.dsl.lib.descriptors.Execution;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
@@ -52,7 +50,7 @@ public class DescriptorGraph
 
 		private final CommandDescriptor descriptor;
 		private final SSHHandler handler;
-		private final Callable<?> callable;
+		private final Command<?> command;
 		private final List<CommandDescriptor> dependencies;
 		private final CountDownLatch doneSignal;
 		private final CountDownLatch mainDoneSignal;
@@ -64,12 +62,12 @@ public class DescriptorGraph
 		 * executing those descriptors.
 		 */
 		public DependencyThread(final CommandDescriptor descriptor,
-				final SSHHandler handler, final Callable<?> callable,
+				final SSHHandler handler, final Command<?> command,
 				final List<CommandDescriptor> dependencies,
 				final int actualDependencies, final CountDownLatch doneSignal) {
 			this.descriptor = descriptor;
 			this.handler = handler;
-			this.callable = callable;
+			this.command = command;
 			this.dependencies = dependencies;
 			this.doneSignal = new CountDownLatch(actualDependencies);
 			this.mainDoneSignal = doneSignal;
@@ -84,9 +82,8 @@ public class DescriptorGraph
 		public void run() {
 			try {
 				this.doneSignal.await();
-
 				if (!this.shutdown) {
-					this.handler.executeCommand(this.callable);
+					this.handler.executeCommand(this.descriptor, this.command);
 					this.descriptor.done(this.handler.host());
 
 					// Release this dependency
@@ -273,8 +270,7 @@ public class DescriptorGraph
 
 			for (Command<?> task : tasks) {
 				DependencyThread thread = new DependencyThread(e,
-						task.host().ssh(), task, dependencies, deps,
-						doneSignal);
+						task.host().ssh(), task, dependencies, deps, doneSignal);
 
 				// Handle uncaught exceptions
 				thread.setUncaughtExceptionHandler(
@@ -315,18 +311,15 @@ public class DescriptorGraph
 
 	public void stopExecutions() throws IOException {
 		Log.info("Stopping previous executions");
-		Map<Host, List<Execution>> executionsPerHost = new HashMap<Host, List<Execution>>();
+		Map<Host, List<CommandDescriptor>> executionsPerHost = new HashMap<Host, List<CommandDescriptor>>();
 		
 		for (CommandDescriptor descriptor : this.tasks.keySet()) {
-			if (descriptor instanceof Execution) {
+			if (descriptor.isExecution()) {
 				List<Command<?>> commands = this.tasks.get(descriptor);
 				for (Command<?> command : commands) {
 					if (!executionsPerHost.containsKey(command.host()))
-						executionsPerHost.put(command.host(),
-								new ArrayList<Execution>());
-
-					executionsPerHost.get(command.host())
-							.add((Execution) descriptor);
+						executionsPerHost.put(command.host(), new ArrayList<CommandDescriptor>());
+					executionsPerHost.get(command.host()).add(descriptor);
 				}
 			}
 		}
