@@ -19,6 +19,7 @@
 package org.amelia.dsl.lib;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Observer;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
@@ -214,12 +216,26 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 
 		Log.printBanner();
 		Log.info("Resolving subsystems (" + this.subsystems.size() + ")");
-
+		long start = System.nanoTime();
 		for (DependencyThread thread : this.threads)
 			thread.start();
 
 		doneSignal.await();
 		shutdown();
+		long end = System.nanoTime();
+		
+		if (!ExecutionManager.isAnySubsystemAborting()) {
+			Log.print(Log.SEPARATOR_LONG);
+			Log.print("DEPLOYMENT SUCCESS");
+			Log.print(Log.SEPARATOR_LONG);
+			Log.print("Total time: "
+					+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s");
+			Log.print("Finished at: " + new Date());
+			Log.print(Log.SEPARATOR_LONG);
+		} else {
+			Log.print(Log.SEPARATOR_LONG + "\nDEPLOYMENT ERROR\n"
+					+ Log.SEPARATOR_LONG);
+		}
 	}
 
 	public void shutdown() {
