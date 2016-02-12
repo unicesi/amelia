@@ -71,15 +71,13 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 							subsystem.start();
 							subsystem.deployment().deploy(subsystem.alias(),
 									depsAsMap());
+							if (!shutdown)
+								subsystem.done();
+							else
+								subsystem.error();
 							return null;
 						}
 					});
-
-					if (!this.shutdown)
-						this.subsystem.done();
-					else
-						this.subsystem.error();
-
 					this.subsystem.deployment().setChanged();
 					this.subsystem.deployment().notifyObservers();
 				}
