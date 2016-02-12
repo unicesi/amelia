@@ -18,8 +18,6 @@
  */
 package org.amelia.dsl.lib.util;
 
-import static org.amelia.dsl.lib.util.Strings.ascii;
-
 import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,42 +33,48 @@ public class Log {
 			.format("--------------------------------------------------------------------------------");
 	
 	public static final String SEPARATOR = ANSI.GRAY
-			.format("---------------------------------------------------------------------");
+			.format("----------------------------------------------------------");
 
 	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat(
-			"HH:mm:ss");
+			"yyyy-MM-dd HH:mm:ss.SSS");
+	
+	private static final String INFO = ANSI.CYAN.format("   INFO");
+	private static final String OK = ANSI.GREEN.format("SUCCESS");
+	private static final String WARN = ANSI.YELLOW.format("   WARN");
+	private static final String ERROR = ANSI.RED.format("  ERROR");
 
 	public static void info(String message) {
-		print(message);
+		print(INFO + " " + message);
 	}
 
 	public static void error(Host host, String message) {
-		String hostName = host != null ? host.toFixedString() + " " : "";
-		print(hostName + ANSI.RED.format(ascii(10007)) + " " + message);
+		String hostName = host != null ? host.toFixedString() : "";
+		print(ERROR + " [" + ANSI.MAGENTA.format(hostName) + "] " + message);
 	}
 
 	public static void warning(Host host, String message) {
-		String hostName = host != null ? host.toFixedString() + " " : "";
-		print(hostName + ANSI.YELLOW.format(ascii(9888)) + " " + message);
+		String hostName = host != null ? host.toFixedString() : "";
+		print(WARN + " [" + ANSI.MAGENTA.format(hostName) + "] " + message);
 	}
 
 	public static void ok(Host host, String message) {
-		String hostName = host != null ? host.toFixedString() + " " : "";
-		print(hostName + ANSI.GREEN.format(ascii(10003)) + " " + message);
+		String hostName = host != null ? host.toFixedString() : "";
+		print(OK + " [" + ANSI.MAGENTA.format(hostName) + "] " + message);
 	}
 
 	public static void error(String message) {
-		print(ascii(9632) + " " + ANSI.RED.format(message));
+		print(ERROR + " " + message);
 	}
 
 	private static synchronized void print(String message) {
+		// FIXME: bad coloring when there is already colored text before pairs
 		message = colorPairs(message, "['\"]", "['\"]", ANSI.CYAN);
-		message = colorPairs(message, "\\[", "\\]", ANSI.MAGENTA);
+//		message = colorPairs(message, "\\[", "\\]", ANSI.MAGENTA);
 		message = colorPairs(message, "\\(", "\\)", ANSI.BLUE);
 
 		long currentTime = System.currentTimeMillis();
 		String formattedTime = timeFormatter.format(currentTime);
-		formattedTime = "[" + ANSI.GRAY.format(formattedTime) + "]";
+		formattedTime = ANSI.GRAY.format(formattedTime);
 
 		System.out.println(formattedTime + " " + message);
 	}

@@ -56,7 +56,8 @@ public class Subsystem {
 	}
 
 	public void done() {
-		Log.info("Finished deploying subsystem '" + alias + "'\n");
+		Log.info("Finished deploying subsystem '" + alias + "'\n"
+				+ Log.SEPARATOR_WITHOUT_TIME);
 	}
 	
 	public boolean dependsOn(Subsystem... subsystems) {

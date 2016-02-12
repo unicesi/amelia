@@ -225,7 +225,7 @@ public class Host implements Comparable<Host> {
 	}
 
 	public String toFixedString() {
-		return "[" + Strings.center(toString(), this.fixedWith) + "]";
+		return Strings.center(toString(), this.fixedWith);
 	}
 
 	@Override
