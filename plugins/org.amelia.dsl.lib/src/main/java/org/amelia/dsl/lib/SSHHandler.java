@@ -216,9 +216,9 @@ public class SSHHandler extends Thread {
 		// components)
 		for (int i = executions.size() - 1; i >= 0; i--) {
 			CommandDescriptor descriptor = executions.remove(i);
-
-			String criterion = descriptor.toCommandString();
-			String[] data = criterion.split(" "); // data[2]: compositeName
+			String command = descriptor.toCommandString();
+			String[] data = command.split(" "); // data[2]: compositeName
+			String criterion = Strings.join(Strings.skip(data, 2), " ");
 			this.expect.sendLine(ShellUtils.runningCompositeName(criterion));
 			Result r = this.expect.expect(regexp(prompt));
 
