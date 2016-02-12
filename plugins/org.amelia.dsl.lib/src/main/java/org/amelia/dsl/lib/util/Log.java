@@ -103,7 +103,12 @@ public class Log {
 			String left = matcher.group(1);
 			String right = matcher.group(3);
 			String coloredText = color.format(matcher.group(2));
-			text = matcher.replaceAll(left + coloredText + right);
+			if ((left.equals("'") && right.equals("'"))
+					|| (left.equals("\"") && right.equals("\""))) {
+				text = matcher.replaceAll(coloredText);
+			} else {
+				text = matcher.replaceAll(left + coloredText + right);
+			}
 		}
 
 		return text;
