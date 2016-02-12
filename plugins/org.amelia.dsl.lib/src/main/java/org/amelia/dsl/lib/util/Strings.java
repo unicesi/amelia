@@ -18,12 +18,33 @@
  */
 package org.amelia.dsl.lib.util;
 
+import java.security.InvalidParameterException;
 import java.util.Collection;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Strings {
+	
+	public static String[] skip(String[] strings, int elementsToSkip) {
+		if (elementsToSkip > strings.length)
+			throw new InvalidParameterException(
+					"The number of elements to skip cannot be greater than "
+							+ "the actual number of elements in the array");
+		String[] result = new String[strings.length - elementsToSkip];
+		System.arraycopy(strings, elementsToSkip, result, 0, result.length);
+		return result;
+	}
+	
+	public static String[] take(String[] strings, int elementsToTake) {
+		if (elementsToTake > strings.length)
+			throw new InvalidParameterException(
+					"The number of elements to take cannot be greater than "
+							+ "the actual number of elements in the array");
+		String[] result = new String[elementsToTake];
+		System.arraycopy(strings, 0, result, 0, elementsToTake);
+		return result;
+	}
 
 	public static String join(Collection<String> args, String separator,
 			String lastSeparator) {
