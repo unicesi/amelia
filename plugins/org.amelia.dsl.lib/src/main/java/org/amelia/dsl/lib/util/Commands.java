@@ -171,7 +171,7 @@ public class Commands {
 							Log.error(host, message);
 							throw new RuntimeException(message);
 						} else {
-							Log.ok(host, successMessage);
+							Log.success(host, successMessage);
 						}
 					} catch (ExpectIOException e) {
 						String message2 = "Operation timeout waiting for \""
@@ -334,7 +334,7 @@ public class Commands {
 						throw new RuntimeException(
 								message + " in host " + host);
 					} else {
-						Log.ok(host, "The " + programName + " version is Ok");
+						Log.success(host, "The " + programName + " version is Ok");
 					}
 				} else {
 					Log.warning(host,

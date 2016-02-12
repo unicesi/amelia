@@ -29,54 +29,63 @@ import org.amelia.dsl.lib.descriptors.Host;
  */
 public class Log {
 
-	public static final String SEPARATOR_WITHOUT_TIME = ANSI.GRAY
+	public static final String SEPARATOR_LONG = ANSI.GRAY
 			.format("--------------------------------------------------------------------------------");
 	
 	public static final String SEPARATOR = ANSI.GRAY
-			.format("----------------------------------------------------------");
+			.format("------------------------------------------------");
 
 	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss.SSS");
 	
 	private static final String INFO = ANSI.CYAN.format("   INFO");
-	private static final String OK = ANSI.GREEN.format("SUCCESS");
+	private static final String SUCCESS = ANSI.GREEN.format("SUCCESS");
 	private static final String WARN = ANSI.YELLOW.format("   WARN");
 	private static final String ERROR = ANSI.RED.format("  ERROR");
-
-	public static void info(String message) {
-		print(INFO + " " + message);
+	
+	public static void print(String message) {
+		print(message, false);
 	}
-
-	public static void error(Host host, String message) {
-		String hostName = host != null ? host.toFixedString() : "";
-		print(ERROR + " [" + ANSI.MAGENTA.format(hostName) + "] " + message);
-	}
-
-	public static void warning(Host host, String message) {
-		String hostName = host != null ? host.toFixedString() : "";
-		print(WARN + " [" + ANSI.MAGENTA.format(hostName) + "] " + message);
-	}
-
-	public static void ok(Host host, String message) {
-		String hostName = host != null ? host.toFixedString() : "";
-		print(OK + " [" + ANSI.MAGENTA.format(hostName) + "] " + message);
-	}
-
-	public static void error(String message) {
-		print(ERROR + " " + message);
-	}
-
-	private static synchronized void print(String message) {
+	
+	private static synchronized void print(String message, boolean showTime) {
 		// FIXME: bad coloring when there is already colored text before pairs
 		message = colorPairs(message, "['\"]", "['\"]", ANSI.CYAN);
 //		message = colorPairs(message, "\\[", "\\]", ANSI.MAGENTA);
 		message = colorPairs(message, "\\(", "\\)", ANSI.BLUE);
+		if (showTime) {
+			long currentTime = System.currentTimeMillis();
+			String formattedTime = timeFormatter.format(currentTime);
+			formattedTime = ANSI.GRAY.format(formattedTime);
+			System.out.println(formattedTime + " " + message);
+		} else {
+			System.out.println(message);
+		}
+	}
 
-		long currentTime = System.currentTimeMillis();
-		String formattedTime = timeFormatter.format(currentTime);
-		formattedTime = ANSI.GRAY.format(formattedTime);
+	public static void info(String message) {
+		print(INFO + " " + message, true);
+	}
 
-		System.out.println(formattedTime + " " + message);
+	public static void error(Host host, String message) {
+		print(ERROR + formatHost(host) + message, true);
+	}
+
+	public static void warning(Host host, String message) {
+		print(WARN + formatHost(host) + message, true);
+	}
+
+	public static void success(Host host, String message) {
+		
+		print(SUCCESS + formatHost(host) + message, true);
+	}
+
+	public static void error(String message) {
+		print(ERROR + " " + message, true);
+	}
+	
+	private static String formatHost(Host host) {
+		return host != null
+				? " [" + ANSI.MAGENTA.format(host.toFixedString()) + "] " : " ";
 	}
 
 	// Adapted from: http://stackoverflow.com/a/24080170/738968

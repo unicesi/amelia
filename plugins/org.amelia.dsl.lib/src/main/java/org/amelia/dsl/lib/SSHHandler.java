@@ -239,7 +239,7 @@ public class SSHHandler extends Thread {
 			String message = "Component" + s + " "
 					+ Strings.join(components, ", ", " and ") + have
 					+ "been stopped";
-			Log.ok(this.host, message);
+			Log.success(this.host, message);
 		}
 
 		return components.size();

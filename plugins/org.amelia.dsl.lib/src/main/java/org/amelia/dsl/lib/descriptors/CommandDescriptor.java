@@ -136,7 +136,7 @@ public class CommandDescriptor extends Observable {
 							Log.error(host, errorMessage);
 							throw new RuntimeException(errorMessage);
 						} else {							
-							Log.ok(host, successMessage == null ? command : successMessage);
+							Log.success(host, successMessage == null ? command : successMessage);
 						}
 					} catch(ExpectIOException e) {
 						String response = e.getInputBuffer();

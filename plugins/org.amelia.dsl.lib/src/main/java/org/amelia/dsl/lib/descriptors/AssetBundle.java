@@ -61,7 +61,7 @@ public class AssetBundle extends CommandDescriptor {
 			public Void call(Host host, String prompt) throws Exception {
 				try {
 					host.ftp().upload(that);
-					Log.ok(host, that.doneMessage());
+					Log.success(host, that.doneMessage());
 				} catch (Exception e) {
 					Log.error(host, that.failMessage());
 					throw e;
@@ -203,7 +203,7 @@ public class AssetBundle extends CommandDescriptor {
 		
 		for (String local : transfers.keySet()) {
 			if (t++ == 0)
-				sb.append(Log.SEPARATOR_WITHOUT_TIME);
+				sb.append(Log.SEPARATOR_LONG);
 
 			int i = 0;
 			String formattedLocal = ANSI.YELLOW.format(local);
@@ -214,7 +214,7 @@ public class AssetBundle extends CommandDescriptor {
 				String formattedRemote = ANSI.YELLOW.format(remote);
 				sb.append(String.format("  %s %s\n", label, formattedRemote));
 			}
-			sb.append(Log.SEPARATOR_WITHOUT_TIME);
+			sb.append(Log.SEPARATOR_LONG);
 		}
 
 		return sb.toString();

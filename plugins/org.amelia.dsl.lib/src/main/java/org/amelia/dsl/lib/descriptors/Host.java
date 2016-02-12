@@ -99,9 +99,9 @@ public class Host implements Comparable<Host> {
 			this.ssh.join();
 
 			if (this.ssh.isConnected())
-				Log.ok(this, "Connection established");
+				Log.success(this, "Connection established");
 		} else {
-			Log.ok(this, "Already opened");
+			Log.success(this, "Already opened");
 		}
 	}
 
@@ -119,9 +119,9 @@ public class Host implements Comparable<Host> {
 			this.ftp.join();
 
 			if (this.ftp.client().isConnected())
-				Log.ok(this, "Connection established");
+				Log.success(this, "Connection established");
 		} else {
-			Log.ok(this, "Already opened");
+			Log.success(this, "Already opened");
 		}
 	}
 
