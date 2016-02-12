@@ -32,11 +32,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
+import org.amelia.dsl.lib.util.Arrays;
 import org.amelia.dsl.lib.util.AuthenticationUserInfo;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.ScheduledTask;
 import org.amelia.dsl.lib.util.ShellUtils;
-import org.amelia.dsl.lib.util.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -218,7 +218,7 @@ public class SSHHandler extends Thread {
 			CommandDescriptor descriptor = executions.remove(i);
 			String command = descriptor.toCommandString();
 			String[] data = command.split(" "); // data[2]: compositeName
-			String criterion = Strings.join(Strings.skip(data, 2), " ");
+			String criterion = Arrays.join(Arrays.skip(data, 2), " ");
 			this.expect.sendLine(ShellUtils.runningCompositeName(criterion));
 			Result r = this.expect.expect(regexp(prompt));
 
@@ -236,9 +236,9 @@ public class SSHHandler extends Thread {
 			int nExecutions = components.size();
 			String have = nExecutions == 1 ? " has " : " have ";
 			String s = nExecutions == 1 ? "" : "s";
-			String message = "Component" + s + " '"
-					+ Strings.join(components, "', '", "' and '") + "'" + have
-					+ "been stopped";
+			String message = "Component" + s + " '" 
+					+ Arrays.join(components.toArray(new String[0]), "', '", "' and '")
+					+ "'" + have + "been stopped";
 			Log.success(this.host, message);
 		}
 

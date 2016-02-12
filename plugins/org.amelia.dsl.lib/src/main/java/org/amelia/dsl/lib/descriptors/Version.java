@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.amelia.dsl.lib.util.Arrays;
 import org.amelia.dsl.lib.util.Pair;
-import org.amelia.dsl.lib.util.Strings;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -131,7 +131,7 @@ public class Version {
 
 				// It must be compliant with all expressions
 				compliant &= compare(expression.getKey(),
-						Strings.join(parts, ""), Strings.join(rest, ""));
+						Arrays.join(parts, ""), Arrays.join(rest, ""));
 			}
 		}
 

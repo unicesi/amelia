@@ -128,13 +128,13 @@ public class Commands {
 			arguments.add("run");
 			arguments.add(this.compositeName);
 			arguments.add("-libpath");
-			arguments.add(Strings.join(this.libpath, ":"));
+			arguments.add(Arrays.join(this.libpath, ":"));
 			if (this.serviceName != null)
 				arguments.add("-s " + this.serviceName);
 			if (this.methodName != null)
 				arguments.add("-m " + this.methodName);
 			if (this.arguments != null)
-				arguments.add("-p " + Strings.join(this.arguments, " "));
+				arguments.add("-p " + Arrays.join(this.arguments, " "));
 
 			CommandDescriptor run = new CommandDescriptor.Builder()
 					.withCallable(callableTask(arguments))
@@ -150,7 +150,7 @@ public class Commands {
 		}
 		
 		private CallableTask<Integer> callableTask(final List<String> arguments) {
-			final String[] errors = Strings.concatenate(errorTexts,
+			final String[] errors = Arrays.concatenate(errorTexts,
 					new String[] {
 							"Error when parsing the composite file '" + compositeName + "'",
 							"Could not start the SCA composite '" + compositeName + "'",
@@ -167,7 +167,8 @@ public class Commands {
 						expect = expect.withTimeout(timeout, TimeUnit.MILLISECONDS);
 
 					// Execute the command and obtain the process ID
-					expect.sendLine("frascati " + Strings.join(arguments, " ") + " &");
+					expect.sendLine("frascati "
+							+ Arrays.join(arguments.toArray(new String[0]), " ") + " &");
 					String _pid = expect.expect(regexp("\\[\\d+\\] (\\d+)")).group(1);
 
 					// Detach the process
@@ -272,7 +273,7 @@ public class Commands {
 				"Permission denied" };
 		CommandDescriptor compile = new CommandDescriptor.Builder()
 				.withCommand("frascati")
-				.withArguments("compile", sourceDirectory, outputFile, Strings.join(classpath, ":"))
+				.withArguments("compile", sourceDirectory, outputFile, Arrays.join(classpath, ":"))
 				.withErrorText(errors)
 				.withErrorMessage(outputFile + ".jar could not been generated")
 				.withSuccessMessage(outputFile + ".jar has been generated")

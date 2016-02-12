@@ -26,6 +26,7 @@ import java.util.Observable;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.amelia.dsl.lib.util.Arrays;
 import org.amelia.dsl.lib.util.CallableTask;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.ShellUtils;
@@ -130,7 +131,7 @@ public class CommandDescriptor extends Observable {
 					
 					try {
 						// Execute the command and expect for a successful execution
-						expect.sendLine(command + " " + Strings.join(arguments, " "));
+						expect.sendLine(command + " " + Arrays.join(arguments, " "));
 						String response = expect.expect(regexp(releaseRegexp)).getBefore();
 						if (Strings.containsAnyOf(response, errorTexts)) {
 							Log.error(host, errorMessage);
@@ -172,7 +173,7 @@ public class CommandDescriptor extends Observable {
 	public CommandDescriptor(final Builder builder) {
 		this.internalId = UUID.randomUUID();
 		this.command = builder.command + " "
-				+ Strings.join(builder.arguments, " ");
+				+ Arrays.join(builder.arguments, " ");
 		this.releaseRegexp = builder.releaseRegexp;
 		this.timeout = builder.timeout;
 		this.errorTexts = builder.errorTexts;
