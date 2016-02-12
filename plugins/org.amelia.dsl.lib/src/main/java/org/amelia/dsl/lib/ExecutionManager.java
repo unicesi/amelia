@@ -38,6 +38,12 @@ public class ExecutionManager {
 	private DescriptorGraph executionGraph;
 
 	/**
+	 * The variable indicating whether any deployment is in trance of
+	 * abortion
+	 */
+	private static volatile boolean globallyAborting = false;
+	
+	/**
 	 * The variable indicating whether the current deployment is in trance of
 	 * abortion
 	 */
@@ -75,6 +81,7 @@ public class ExecutionManager {
 			public void uncaughtException(Thread t, Throwable e) {
 				if (!aborting && !shuttingDown) {
 					aborting = true;
+					globallyAborting = true;
 					String message = e.getMessage().replaceAll(
 							"^((\\w)+(\\.\\w+)+:\\s)*", "");
 
@@ -225,6 +232,10 @@ public class ExecutionManager {
 
 	public boolean isAborting() {
 		return aborting;
+	}
+	
+	public static boolean isAnySubsystemAborting() {
+		return globallyAborting;
 	}
 
 	public boolean isShuttingDown() {
