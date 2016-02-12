@@ -48,7 +48,9 @@ public class Subsystem {
 	}
 
 	public void start() {
-		Log.info("Starting deploying of subsystem '" + alias + "'");
+		Log.print(Log.SEPARATOR_LONG);
+		Log.print("Deploying subsystem '" + alias + "'");
+		Log.print(Log.SEPARATOR_LONG);
 	}
 
 	public void error() {
@@ -56,8 +58,7 @@ public class Subsystem {
 	}
 
 	public void done() {
-		Log.info("Finished deploying subsystem '" + alias + "'\n"
-				+ Log.SEPARATOR_WITHOUT_TIME);
+		Log.info("Finished deploying subsystem '" + alias + "'");
 	}
 	
 	public boolean dependsOn(Subsystem... subsystems) {
