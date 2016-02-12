@@ -55,10 +55,12 @@ public class Commands {
 		private long timeout;
 		private String releaseRegexp;
 		private String successMessage;
+		private String[] errorTexts;
 
 		public RunBuilder() {
 			this.timeout = 0;
 			this.releaseRegexp = "Press Ctrl\\+C to quit\\.\\.\\.|Call done!";
+			this.errorTexts = new String[0];
 		}
 
 		public RunBuilder withComposite(final String compositeName) {
@@ -105,6 +107,11 @@ public class Commands {
 			this.successMessage = successMessage;
 			return this;
 		}
+		
+		public RunBuilder withErrorTexts(String... errorTexts) {
+			this.errorTexts = errorTexts;
+			return this;
+		}
 
 		/**
 		 * TODO: create a task based on the default task and a process detach
@@ -135,6 +142,7 @@ public class Commands {
 					.withArguments(arguments.toArray(new String[0]))
 					.withReleaseRegexp(this.releaseRegexp)
 					.withSuccessMessage(this.successMessage)
+					.withErrorText(this.errorTexts)
 					.withTimeout(this.timeout)
 					.isExecution()
 					.build();
@@ -142,10 +150,11 @@ public class Commands {
 		}
 		
 		private CallableTask<Integer> callableTask(final List<String> arguments) {
-			final String[] errors = {
-					"Error when parsing the composite file '" + compositeName + "'",
-					"Could not start the SCA composite '" + compositeName + "'",
-					"Cannot instantiate the FraSCAti factory" };
+			final String[] errors = Strings.concatenate(errorTexts,
+					new String[] {
+							"Error when parsing the composite file '" + compositeName + "'",
+							"Could not start the SCA composite '" + compositeName + "'",
+							"Cannot instantiate the FraSCAti factory" });
 			return new CallableTask<Integer>() {
 
 				@Override public Integer call(Host host, String prompt)
