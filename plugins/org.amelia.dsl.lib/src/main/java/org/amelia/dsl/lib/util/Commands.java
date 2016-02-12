@@ -142,8 +142,10 @@ public class Commands {
 		}
 		
 		private CallableTask<Integer> callableTask(final List<String> arguments) {
-			final String[] errors = { "Error when parsing the composite file '"
-					+ compositeName + "'", "Cannot instantiate the FraSCAti factory" };
+			final String[] errors = {
+					"Error when parsing the composite file '" + compositeName + "'",
+					"Could not start the SCA composite '" + compositeName + "'",
+					"Cannot instantiate the FraSCAti factory" };
 			return new CallableTask<Integer>() {
 
 				@Override public Integer call(Host host, String prompt)
