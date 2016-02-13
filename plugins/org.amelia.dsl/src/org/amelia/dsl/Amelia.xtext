@@ -52,9 +52,22 @@ Compilation
 	:	'compile' source = XExpression output = XExpression classpath = XExpression
 	;
 
+//Run
+//	:	'run' hasPort ?= '-r' port = XExpression
+//		composite = XExpression '-libpath' libpath = XExpression 
+//		hasService ?= '-s' service = XExpression?
+//		hasMethod ?= '-m' method = XExpression?
+//	;
+
+CustomCommand
+	:	expression = COMMAND
+	;
+
 CommandLiteral
 	:	ChangeDirectory
 	|	Compilation
+	|	CustomCommand
+//	|	Run
 	;
 
 XLiteral returns XExpression
@@ -66,4 +79,8 @@ XLiteral returns XExpression
 	|	XStringLiteral
 	|	XTypeLiteral
 	|	CommandLiteral
+	;
+
+terminal COMMAND
+	:	'´' -> '´'
 	;

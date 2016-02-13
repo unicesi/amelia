@@ -24,6 +24,7 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
 import org.amelia.dsl.amelia.Compilation
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
+import org.amelia.dsl.amelia.CustomCommand
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -34,8 +35,15 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		switch (expression) {
 			ChangeDirectory: _computeTypes(expression, state)
 			Compilation: _computeTypes(expression, state)
+			CustomCommand: _computeTypes(expression, state)
 			default: super.computeTypes(expression, state)
 		}
+	}
+	
+	def protected _computeTypes(CustomCommand command, ITypeComputationState state) {
+		// set the actual type for the entire expression
+		val result = getRawTypeForName(CommandDescriptor, state);
+		state.acceptActualType(result);
 	}
 	
 	def protected _computeTypes(ChangeDirectory command, ITypeComputationState state) {

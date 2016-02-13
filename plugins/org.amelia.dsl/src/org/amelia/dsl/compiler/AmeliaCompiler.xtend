@@ -26,6 +26,8 @@ import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.amelia.dsl.amelia.CommandLiteral
 import org.amelia.dsl.amelia.Compilation
 import org.amelia.dsl.lib.util.Commands
+import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -36,6 +38,7 @@ class AmeliaCompiler extends XbaseCompiler {
 		switch (obj) {
 			ChangeDirectory: _toJavaExpression(obj, appendable)
 			Compilation: _toJavaExpression(obj, appendable)
+			CustomCommand: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
 	}
@@ -59,6 +62,15 @@ class AmeliaCompiler extends XbaseCompiler {
 			};
 			declareFreshLocalVariable(expr, b, later);
 		}
+	}
+	
+	/*
+	 * TODO: parse command and arguments. Also, add a way to further initialize this element (e.g., messages)
+	 */
+	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable b) {
+		b.append("new ").append(CommandDescriptor.Builder).append("()")
+			.append(".withCommand(\"").append(expr.expression).append("\")")
+			.append(".build()");
 	}
 	
 	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable b) {
