@@ -23,6 +23,7 @@ import java.util.List;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.eclipse.xtext.xbase.lib.Inline;
+import org.eclipse.xtext.xbase.lib.Pure;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -193,6 +194,23 @@ public class CommandExtensions {
 			all &= descriptor.dependsOn(dependencies);
 		}
 		return all;
+	}
+	
+	/**
+	 * The binary {@code +} operator.
+	 * 
+	 * @param left
+	 *            The command at the left hand side of the plus operand
+	 * @param right
+	 *            The command at the right hand side of the plus operand
+	 * @return A new {@link CommandDescriptor} with the same configuration as
+	 *         {@code left}, but augmenting its command with {@code right}.
+	 */
+	@Pure
+	@Inline(value = "$1.augmentWith($2)")
+	public static CommandDescriptor operator_plus(
+			CommandDescriptor left, CommandDescriptor right) {
+		return left.augmentWith(right);
 	}
 
 }
