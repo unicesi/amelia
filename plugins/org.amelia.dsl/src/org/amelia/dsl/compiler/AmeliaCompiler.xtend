@@ -27,6 +27,8 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
+import org.amelia.dsl.amelia.OnHostBlockExpression
+import org.amelia.dsl.amelia.RuleDeclaration
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -38,6 +40,8 @@ class AmeliaCompiler extends XbaseCompiler {
 			ChangeDirectory: _toJavaExpression(obj, appendable)
 			Compilation: _toJavaExpression(obj, appendable)
 			CustomCommand: _toJavaExpression(obj, appendable)
+			OnHostBlockExpression: _toJavaExpression(obj, appendable)
+			RuleDeclaration: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
 	}
@@ -45,36 +49,94 @@ class AmeliaCompiler extends XbaseCompiler {
 	override doInternalToJavaStatement(XExpression expr, ITreeAppendable appendable, boolean isReferenced) {
 		switch (expr) {
 			CommandLiteral: _toJavaStatement(expr, appendable, isReferenced)
+			OnHostBlockExpression: _toJavaStatement(expr, appendable, isReferenced)
+			RuleDeclaration: _toJavaStatement(expr, appendable, isReferenced)
 			default: super.doInternalToJavaStatement(expr, appendable, isReferenced)
 		}
 	}
 	
-	override protected boolean isVariableDeclarationRequired(XExpression expr, ITreeAppendable b) {
+	override protected boolean isVariableDeclarationRequired(XExpression expr, ITreeAppendable appendable) {
 		switch (expr) {
 			CommandLiteral: return false
-			default: return super.isVariableDeclarationRequired(expr, b)
+			default: return super.isVariableDeclarationRequired(expr, appendable)
 		}
 	}
 	
-	def protected void _toJavaStatement(CommandLiteral expr, ITreeAppendable b, boolean isReferenced) {
+	def protected void _toJavaStatement(OnHostBlockExpression block, ITreeAppendable appendable, boolean isReferenced) {
+		val b = appendable.trace(block, false);
+		if (block.rules.isEmpty())
+			return;
+		if (block.rules.size()==1) {
+			internalToJavaStatement(block.rules.get(0), b, isReferenced);
+			return;
+		}
+		if (isReferenced)
+			declareSyntheticVariable(block, b);
+		for (var i = 0; i < block.rules.size(); i++) {
+			val ex = block.rules.get(i);
+			if (i < block.rules.size() - 1) {
+				internalToJavaStatement(ex, b, false);
+			} else {
+				internalToJavaStatement(ex, b, isReferenced);
+				if (isReferenced) {
+					b.newLine().append(getVarName(block, b)).append(" = ");
+					internalToConvertedExpression(ex, b, getLightweightType(block));
+					b.append(";");
+				}
+			}
+		}
+	}
+	
+	def protected void _toJavaExpression(OnHostBlockExpression expr, ITreeAppendable appendable) {
+		if (expr.rules.isEmpty()) {
+			appendable.append("null");
+			return;
+		}
+		if (expr.rules.size() == 1) {
+			// conversion was already performed for single expression blocks
+			internalToConvertedExpression(expr.rules.get(0), appendable, null);
+			return;
+		}
+		val b = appendable.trace(expr, false);
+		b.append(getVarName(expr, b));
+	}
+	
+	def protected void _toJavaStatement(RuleDeclaration expr, ITreeAppendable appendable, boolean isReferenced) {
 		if (!isReferenced) {
-			internalToConvertedExpression(expr, b);
-			b.append(";");
-		} else if (isVariableDeclarationRequired(expr, b)) {
+			internalToConvertedExpression(expr, appendable);
+			appendable.append(";");
+		} else if (isVariableDeclarationRequired(expr, appendable)) {
 			val later = new Later() {
 				override void exec(ITreeAppendable appendable) {
 					internalToConvertedExpression(expr, appendable);
 				}
 			};
-			declareFreshLocalVariable(expr, b, later);
+			declareFreshLocalVariable(expr, appendable, later);
+		}
+	}
+	
+	def protected void _toJavaExpression(RuleDeclaration expr, ITreeAppendable appendable) {
+		appendable.append('''/* RuleDeclaration «expr.name»*/''');
+	}
+	
+	def protected void _toJavaStatement(CommandLiteral expr, ITreeAppendable appendable, boolean isReferenced) {
+		if (!isReferenced) {
+			internalToConvertedExpression(expr, appendable);
+			appendable.append(";");
+		} else if (isVariableDeclarationRequired(expr, appendable)) {
+			val later = new Later() {
+				override void exec(ITreeAppendable appendable) {
+					internalToConvertedExpression(expr, appendable);
+				}
+			};
+			declareFreshLocalVariable(expr, appendable, later);
 		}
 	}
 	
 	/*
 	 * TODO: Add a way to further initialize this element (e.g., messages)
 	 */
-	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable b) {
-		// Remove command delimiters (´), and escape " and \
+	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable appendable) {
 		// (1) Remove command delimiters (´)
 		// (2) Escape $ \ "
 		// (3) Interpolate variables
@@ -87,23 +149,23 @@ class AmeliaCompiler extends XbaseCompiler {
 			.replaceAll("\\\\\\$", "\\$")
 			.split("\n")
 		val expression = lines.map[l|l.trim].filter[l|!l.isEmpty].join(" ")
-		b.append(Commands).append(".generic(\"").append(expression).append("\")");
+		appendable.append(Commands).append(".generic(\"").append(expression).append("\")");
 	}
 	
-	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable b) {
-		b.append(Commands).append(".cd").append("(")
-		internalToConvertedExpression(expr.directory, b)
-		b.append(")")
+	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable appendable) {
+		appendable.append(Commands).append(".cd").append("(")
+		internalToConvertedExpression(expr.directory, appendable)
+		appendable.append(")")
 	}
 	
-	def protected void _toJavaExpression(Compilation expr, ITreeAppendable b) {
-		b.append(Commands).append(".compile").append("(")
-		internalToConvertedExpression(expr.source, b)
-		b.append(", ")
-		internalToConvertedExpression(expr.output, b)
-		b.append(", ")
-		internalToConvertedExpression(expr.classpath, b)
-		b.append(")")
+	def protected void _toJavaExpression(Compilation expr, ITreeAppendable appendable) {
+		appendable.append(Commands).append(".compile").append("(")
+		internalToConvertedExpression(expr.source, appendable)
+		appendable.append(", ")
+		internalToConvertedExpression(expr.output, appendable)
+		appendable.append(", ")
+		internalToConvertedExpression(expr.classpath, appendable)
+		appendable.append(")")
 	}
 
 }

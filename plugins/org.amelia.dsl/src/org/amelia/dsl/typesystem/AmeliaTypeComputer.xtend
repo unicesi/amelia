@@ -19,12 +19,13 @@
 package org.amelia.dsl.typesystem
 
 import org.amelia.dsl.amelia.ChangeDirectory
+import org.amelia.dsl.amelia.Compilation
+import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.amelia.OnHostBlockExpression
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
-import org.amelia.dsl.amelia.Compilation
-import org.amelia.dsl.lib.descriptors.CommandDescriptor
-import org.amelia.dsl.amelia.CustomCommand
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -36,8 +37,17 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 			ChangeDirectory: _computeTypes(expression, state)
 			Compilation: _computeTypes(expression, state)
 			CustomCommand: _computeTypes(expression, state)
+			OnHostBlockExpression: _computeTypes(expression, state)
 			default: super.computeTypes(expression, state)
 		}
+	}
+	
+	def protected _computeTypes(OnHostBlockExpression block, ITypeComputationState state) {
+		// Compute type for the inner expressions
+		state.withinScope(block);
+		val noExpectationState = state.withoutExpectation();
+		noExpectationState.computeTypes(block.host);
+		addLocalToCurrentScope(block.host, state);
 	}
 	
 	def protected _computeTypes(CustomCommand command, ITypeComputationState state) {
