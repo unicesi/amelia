@@ -50,7 +50,6 @@ class AmeliaCompiler extends XbaseCompiler {
 	}
 	
 	def protected void _toJavaStatement(CommandLiteral expr, ITreeAppendable b, boolean isReferenced) {
-		println(expr)
 		if (!isReferenced) {
 			internalToConvertedExpression(expr, b);
 			b.append(";");
