@@ -27,6 +27,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
+import java.util.regex.Matcher
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -72,6 +73,8 @@ class AmeliaCompiler extends XbaseCompiler {
 			.trim
 			.substring(1, expr.expression.length - 1)
 			.replaceAll("\\\\´", "´")
+			.replaceAll("\\\\", "\\\\\\\\")
+			.replaceAll("\"", "\\\\\"")
 			.split("\n")
 		val expression = new StringBuilder
 		for (line : lines) {
