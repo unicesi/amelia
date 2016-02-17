@@ -19,15 +19,14 @@
 package org.amelia.dsl.compiler
 
 import org.amelia.dsl.amelia.ChangeDirectory
+import org.amelia.dsl.amelia.CommandLiteral
+import org.amelia.dsl.amelia.Compilation
+import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.lib.util.Commands
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
-import org.amelia.dsl.amelia.CommandLiteral
-import org.amelia.dsl.amelia.Compilation
-import org.amelia.dsl.lib.util.Commands
-import org.amelia.dsl.amelia.CustomCommand
-import org.amelia.dsl.lib.descriptors.CommandDescriptor
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -51,6 +50,7 @@ class AmeliaCompiler extends XbaseCompiler {
 	}
 	
 	def protected void _toJavaStatement(CommandLiteral expr, ITreeAppendable b, boolean isReferenced) {
+		println(expr)
 		if (!isReferenced) {
 			internalToConvertedExpression(expr, b);
 			b.append(";");
@@ -68,9 +68,17 @@ class AmeliaCompiler extends XbaseCompiler {
 	 * TODO: parse command and arguments. Also, add a way to further initialize this element (e.g., messages)
 	 */
 	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable b) {
-		b.append("new ").append(CommandDescriptor.Builder).append("()")
-			.append(".withCommand(\"").append(expr.expression).append("\")")
-			.append(".build()");
+		// Remove command delimiters
+		val lines = expr.expression
+			.trim
+			.substring(1, expr.expression.length - 1)
+			.replaceAll("\\\\´", "´")
+			.split("\n")
+		val expression = new StringBuilder
+		for (line : lines) {
+			expression.append(line.trim)
+		}
+		b.append(Commands).append(".generic(\"").append(expression).append("\")");
 	}
 	
 	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable b) {
