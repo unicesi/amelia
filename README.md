@@ -1,2 +1,2 @@
 # Amelia
-:airplane: A deployment library for the FraSCAti middleware
+A Domain Specific Language for deploying FraSCAti applications
