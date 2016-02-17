@@ -359,5 +359,23 @@ public class Commands {
 				.build();
 		return check;
 	}
+	
+	/**
+	 * Configures a {@link CommandDescriptor} to execute the given command
+	 * expression
+	 * 
+	 * @param command
+	 *            The command expression
+	 * @param errorTexts
+	 *            The possible error texts to catch if something goes wrong
+	 * @return A new {@link CommandDescriptor} instance configured with the
+	 *         given command expression.
+	 */
+	public static CommandDescriptor generic(final String command, final String... errorTexts) {
+		CommandDescriptor result = new CommandDescriptor.Builder()
+				.withErrorText(errorTexts)
+				.withCommand(command).build();
+		return result;
+	}
 
 }
