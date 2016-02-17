@@ -33,7 +33,7 @@ TypeDeclaration
 
 SubsystemDeclaration returns Subsystem
 	:	includes = IncludeSection?
-		'subsystem' name = ID body = XBlockExpression
+		'subsystem' name = ID body = SubsystemBlockExpression
 	;
 
 IncludeSection
@@ -41,7 +41,29 @@ IncludeSection
 	;
 
 IncludeDeclaration
-	:	'include' includedType = [TypeDeclaration|QualifiedName] ->';'?
+	:	'include' includedType = [TypeDeclaration | QualifiedName] ->';'?
+	;
+
+SubsystemBlockExpression returns XBlockExpression
+	:	{SubsystemBlockExpression} '{' (expressions += InternalSubsystemDeclaration)* '}'
+	;
+
+InternalSubsystemDeclaration returns XExpression
+	:	XVariableDeclaration ->';'?
+	|	OnHostBlockExpression
+	;
+
+//VariableDeclaration returns XExpression
+//	:	{VariableDeclaration}
+//		(writeable?='var'|'val') (=>(type=JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
+//	;
+
+OnHostBlockExpression
+	:	'on' host = XExpression '{' rules += RuleDeclaration* '}'
+	;
+
+RuleDeclaration returns XExpression
+	:	{RuleDeclaration} name = ID ':' dependencies += [RuleDeclaration | ID]
 	;
 
 ChangeDirectory
@@ -79,6 +101,10 @@ XLiteral returns XExpression
 	|	XStringLiteral
 	|	XTypeLiteral
 	|	CommandLiteral
+	;
+
+terminal ID
+	:	'^'? ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*
 	;
 
 terminal COMMAND
