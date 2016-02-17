@@ -27,7 +27,6 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
-import java.util.regex.Matcher
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -50,6 +49,13 @@ class AmeliaCompiler extends XbaseCompiler {
 		}
 	}
 	
+	override protected boolean isVariableDeclarationRequired(XExpression expr, ITreeAppendable b) {
+		switch (expr) {
+			CommandLiteral: return false
+			default: return super.isVariableDeclarationRequired(expr, b)
+		}
+	}
+	
 	def protected void _toJavaStatement(CommandLiteral expr, ITreeAppendable b, boolean isReferenced) {
 		if (!isReferenced) {
 			internalToConvertedExpression(expr, b);
@@ -65,13 +71,12 @@ class AmeliaCompiler extends XbaseCompiler {
 	}
 	
 	/*
-	 * TODO: parse command and arguments. Also, add a way to further initialize this element (e.g., messages)
+	 * TODO: Add a way to further initialize this element (e.g., messages)
 	 */
 	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable b) {
-		// Remove command delimiters
+		// Remove command delimiters (´), and escape " and \
 		val lines = expr.expression
-			.trim
-			.substring(1, expr.expression.length - 1)
+			.trim.substring(1, expr.expression.length - 1)
 			.replaceAll("\\\\´", "´")
 			.replaceAll("\\\\", "\\\\\\\\")
 			.replaceAll("\"", "\\\\\"")
