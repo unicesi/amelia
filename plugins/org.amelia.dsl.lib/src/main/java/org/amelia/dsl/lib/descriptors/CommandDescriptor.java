@@ -184,6 +184,34 @@ public class CommandDescriptor extends Observable {
 		this.dependencies = new ArrayList<CommandDescriptor>();
 		this.hosts = new ArrayList<Host>();
 	}
+	
+	/**
+	 * Augments this command by concatenating a command at the end. The commands
+	 * are concatenated using the {@code &&} operator.
+	 * 
+	 * @param command
+	 *            The descriptor providing the command to augment {@code this}
+	 *            command.
+	 * @return A new {@link CommandDescriptor} instance with the same
+	 *         configuration as {@code this} command, but augmenting its command
+	 *         with {@code command}.
+	 */
+	public CommandDescriptor augmentWith(CommandDescriptor command) {
+		CommandDescriptor.Builder builder = new CommandDescriptor.Builder()
+				.withCommand(toCommandString() + " && " + command.toCommandString())
+				.withCallable(callable())
+				.withErrorMessage(errorMessage())
+				.withErrorText(errorTexts())
+				.withReleaseRegexp(releaseRegexp())
+				.withSuccessMessage(successMessage())
+				.withTimeout(timeout());
+		if (isExecution())
+			builder.isExecution();
+		CommandDescriptor result = builder.build();
+		result.dependsOn(dependencies().toArray(new CommandDescriptor[0]));
+		result.runsOn(hosts().toArray(new Host[0]));
+		return result;
+	}
 
 	public boolean isOk(String response) {
 		return this.errorTexts == null
