@@ -82,5 +82,5 @@ XLiteral returns XExpression
 	;
 
 terminal COMMAND
-	:	'´' -> '´'
+	:	'´' (!'´'|'\\''´')* '´'
 	;
