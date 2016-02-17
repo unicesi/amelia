@@ -75,11 +75,16 @@ class AmeliaCompiler extends XbaseCompiler {
 	 */
 	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable b) {
 		// Remove command delimiters (´), and escape " and \
+		// (1) Remove command delimiters (´)
+		// (2) Escape $ \ "
+		// (3) Interpolate variables
 		val lines = expr.expression
 			.trim.substring(1, expr.expression.length - 1)
 			.replaceAll("\\\\´", "´")
-			.replaceAll("\\\\", "\\\\\\\\")
+			.replaceAll("\\\\([^\\\\$])", "\\\\\\\\$1")
 			.replaceAll("\"", "\\\\\"")
+			.replaceAll("([^\\\\])\\$((\\^)?[a-zA-Z_][a-zA-Z_0-9]*)", "$1\" + $2 + \"")
+			.replaceAll("\\\\\\$", "\\$")
 			.split("\n")
 		val expression = lines.map[l|l.trim].filter[l|!l.isEmpty].join(" ")
 		b.append(Commands).append(".generic(\"").append(expression).append("\")");
