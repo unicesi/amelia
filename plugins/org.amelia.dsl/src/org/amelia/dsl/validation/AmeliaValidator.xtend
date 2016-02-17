@@ -21,19 +21,21 @@ package org.amelia.dsl.validation
 import java.util.ArrayList
 import java.util.Arrays
 import java.util.Collection
+import java.util.List
 import java.util.Set
 import org.amelia.dsl.amelia.AmeliaPackage
+import org.amelia.dsl.amelia.ChangeDirectory
+import org.amelia.dsl.amelia.Compilation
 import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.Subsystem
+import org.amelia.dsl.lib.descriptors.Host
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
-import org.amelia.dsl.amelia.ChangeDirectory
-import org.amelia.dsl.amelia.Compilation
-import java.util.List
+import org.amelia.dsl.amelia.OnHostBlockExpression
 
 /**
  * This class contains custom validation rules. 
@@ -171,6 +173,14 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			if (showError)
 				error('''The classpath must be of type List<String>, «classpathType.simpleName» was found instead''',
 					AmeliaPackage.Literals.COMPILATION__CLASSPATH, INVALID_PARAMETER_TYPE)
+		}
+	}
+	
+	@Check
+	def void checkHost(OnHostBlockExpression declaration) {
+		if (declaration.host.actualType.getSuperType(Host) == null) {
+			error('''The host must be of type «Host.simpleName»''',
+				AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOST, INVALID_PARAMETER_TYPE)
 		}
 	}
 	
