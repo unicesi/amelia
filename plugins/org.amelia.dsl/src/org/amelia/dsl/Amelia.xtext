@@ -84,3 +84,7 @@ XLiteral returns XExpression
 terminal COMMAND
 	:	'´' (!'´'|'\\''´')* '´'
 	;
+
+terminal SL_COMMENT
+	:	'--' !('\n'|'\r')* ('\r'? '\n')?
+	;
