@@ -81,10 +81,7 @@ class AmeliaCompiler extends XbaseCompiler {
 			.replaceAll("\\\\", "\\\\\\\\")
 			.replaceAll("\"", "\\\\\"")
 			.split("\n")
-		val expression = new StringBuilder
-		for (line : lines) {
-			expression.append(line.trim)
-		}
+		val expression = lines.map[l|l.trim].filter[l|!l.isEmpty].join(" ")
 		b.append(Commands).append(".generic(\"").append(expression).append("\")");
 	}
 	
