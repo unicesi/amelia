@@ -36,6 +36,8 @@ import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
 import org.amelia.dsl.amelia.OnHostBlockExpression
+import org.amelia.dsl.amelia.CustomCommand
+import java.util.regex.Pattern
 
 /**
  * This class contains custom validation rules. 
@@ -181,6 +183,17 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (declaration.host.actualType.getSuperType(Host) == null) {
 			error('''The host must be of type «Host.simpleName»''',
 				AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOST, INVALID_PARAMETER_TYPE)
+		}
+	}
+	
+	@Check
+	def void checkVariableInterpolation(CustomCommand command) {
+		// TODO: validate whether or not variables exist
+		val pattern = Pattern.compile("([^\\\\])\\$((\\^)?[a-zA-Z_][a-zA-Z_0-9]*)")
+		val matcher = pattern.matcher(command.expression)
+		while (matcher.find) {
+			val variable = matcher.group(2)
+			println(variable)
 		}
 	}
 	
