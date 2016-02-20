@@ -131,13 +131,17 @@ public class CommandDescriptor extends Observable {
 					
 					try {
 						// Execute the command and expect for a successful execution
-						expect.sendLine(command + " " + Arrays.join(arguments, " "));
+						String _command = command + " " + Arrays.join(arguments, " ");
+						expect.sendLine(_command);
 						String response = expect.expect(regexp(releaseRegexp)).getBefore();
 						if (Strings.containsAnyOf(response, errorTexts)) {
 							Log.error(host, errorMessage);
 							throw new RuntimeException(errorMessage);
-						} else {							
-							Log.success(host, successMessage == null ? command : successMessage);
+						} else {
+							Log.success(host,
+									successMessage == null
+											|| successMessage.isEmpty()
+													? _command : successMessage);
 						}
 					} catch(ExpectIOException e) {
 						String response = e.getInputBuffer();
@@ -223,11 +227,13 @@ public class CommandDescriptor extends Observable {
 	}
 
 	public String doneMessage() {
-		return successMessage == null ? toString() : successMessage;
+		return successMessage == null || successMessage.isEmpty() ? toString()
+				: successMessage;
 	}
 
 	public String failMessage() {
-		return errorMessage == null ? toString() : errorMessage;
+		return errorMessage == null || errorMessage.isEmpty() ? toString()
+				: errorMessage;
 	}
 
 	public String toCommandString() {
@@ -270,7 +276,7 @@ public class CommandDescriptor extends Observable {
 
 	@Override
 	public String toString() {
-		return "[" + this.command + "]";
+		return toCommandString();
 	}
 
 	@Override
