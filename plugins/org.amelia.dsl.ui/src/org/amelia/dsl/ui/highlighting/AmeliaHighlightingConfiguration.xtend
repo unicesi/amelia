@@ -18,11 +18,8 @@
  */
 package org.amelia.dsl.ui.highlighting
 
-import org.eclipse.swt.graphics.RGB
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor
 import org.eclipse.xtext.xbase.ui.highlighting.XbaseHighlightingConfiguration
-import org.eclipse.xtext.ui.editor.utils.TextStyle
-import org.eclipse.swt.SWT
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -30,28 +27,14 @@ import org.eclipse.swt.SWT
 class AmeliaHighlightingConfiguration extends XbaseHighlightingConfiguration {
 	
 	public static val String CUSTOM_COMMAND_ID = "amelia.custom_command";
-	public static val String CUSTOM_COMMAND_PROGRAM_ID = "amelia.custom_command_program";
 	
 	override configure(IHighlightingConfigurationAcceptor acceptor) {
 		acceptor.acceptDefaultHighlighting(CUSTOM_COMMAND_ID, "Custom command literals", customCommand());
-		acceptor.acceptDefaultHighlighting(CUSTOM_COMMAND_PROGRAM_ID, "Program in custom command", customCommandProgram());
 		super.configure(acceptor);
 	}
 
 	def customCommand() {
-		val textStyle = defaultTextStyle.copy;
-		textStyle.color = new RGB(0, 125, 62)
-		return textStyle;
-	}
-	
-	def customCommandProgram() {
-		val textStyle = customCommand.copy;
-		textStyle.style = SWT.BOLD
-		return textStyle;
-	}
-	
-	override TextStyle commentTextStyle() {
-		val textStyle = numberTextStyle.copy;
+		val textStyle = stringTextStyle.copy;
 		return textStyle;
 	}
 	

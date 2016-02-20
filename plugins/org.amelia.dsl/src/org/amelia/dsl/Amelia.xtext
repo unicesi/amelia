@@ -18,7 +18,8 @@
  */
 grammar org.amelia.dsl.Amelia with org.eclipse.xtext.xbase.Xbase
 
-import "http://www.eclipse.org/xtext/xbase/Xbase"
+import "http://www.eclipse.org/xtext/xbase/Xbase" as xbase
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 generate amelia "http://www.amelia.org/dsl/Amelia"
 
@@ -44,11 +45,11 @@ IncludeDeclaration
 	:	'include' includedType = [TypeDeclaration | QualifiedName] ->';'?
 	;
 
-SubsystemBlockExpression returns XBlockExpression
+SubsystemBlockExpression returns xbase::XBlockExpression
 	:	{SubsystemBlockExpression} '{' (expressions += InternalSubsystemDeclaration)* '}'
 	;
 
-InternalSubsystemDeclaration returns XExpression
+InternalSubsystemDeclaration returns xbase::XExpression
 	:	XVariableDeclaration ->';'?
 	|	OnHostBlockExpression
 	;
@@ -62,7 +63,7 @@ OnHostBlockExpression
 	:	'on' host = XExpression '{' rules += RuleDeclaration* '}'
 	;
 
-RuleDeclaration returns XExpression
+RuleDeclaration returns xbase::XExpression
 	:	{RuleDeclaration} name = ID ':' dependencies += [RuleDeclaration | ID]
 	;
 
@@ -82,7 +83,7 @@ Compilation
 //	;
 
 CustomCommand
-	:	expression = COMMAND
+	:	value = Template
 	;
 
 CommandLiteral
@@ -92,7 +93,7 @@ CommandLiteral
 //	|	Run
 	;
 
-XLiteral returns XExpression
+XLiteral returns xbase::XExpression
 	:	XCollectionLiteral
 	|	XClosure
 	|	XBooleanLiteral
@@ -103,12 +104,53 @@ XLiteral returns XExpression
 	|	CommandLiteral
 	;
 
-terminal ID
-	:	'^'? ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*
+Template
+	:	{Template} (expressions += TextLiteral)
+	| 	(
+			expressions += TextStartLiteral 
+			(expressions += XExpression (expressions += TextMidLiteral expressions += XExpression)*)
+			expressions += TextEndLiteral
+		)
+	;
+	
+TextLiteral
+	:	{TextLiteral} value = TextVerbatimValue
 	;
 
-terminal COMMAND
-	:	'´' (!'´'|'\\''´')* '´'
+TextVerbatimValue returns ecore::EString
+	:	TEXT
+	;
+
+TextStartLiteral
+	:	{TextStartLiteral} value = TEXTSTART
+	;
+	
+TextMidLiteral
+	:	{TextMidLiteral} value = TEXTMID
+	;
+	
+TextEndLiteral
+	:	{TextEndLiteral} value = TEXTEND
+	;
+
+terminal TEXT
+	:	"'" ('\\' . | !('\\' | "'" | '{' | '}') )* "'"
+	;
+
+terminal TEXTSTART
+	:	"'" ('\\' . | !('\\' | "'" | '{') )* '{'
+	;
+
+terminal TEXTMID
+	:	'}' ('\\' . | !('\\' | "'" | '{') )* '{'
+	;
+
+terminal TEXTEND
+	:	'}' ('\\' . | !('\\' | "'" | '{') )* "'"
+	;
+
+terminal STRING
+	:	'"' ( '\\' . /* ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') */ | !('\\'|'"') )* '"'?
 	;
 
 terminal SL_COMMENT

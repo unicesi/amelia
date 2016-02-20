@@ -29,6 +29,10 @@ import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.RuleDeclaration
+import org.amelia.dsl.amelia.TextLiteral
+import org.amelia.dsl.amelia.TextStartLiteral
+import org.amelia.dsl.amelia.TextMidLiteral
+import org.amelia.dsl.amelia.TextEndLiteral
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -133,23 +137,41 @@ class AmeliaCompiler extends XbaseCompiler {
 		}
 	}
 	
+	def protected String formatCommandText(String value) {
+		var lines = value
+			.substring(1, value.length - 1)
+			.replaceAll("\"", "\\\\\"")
+			.replaceAll("\\\\\\{", "{")
+			.replaceAll("\\\\\\}", "}")
+			.split("\n")
+		if (lines.length > 1)
+			lines = lines.map[l|l.replaceAll("^\\s*", "")] // left trim
+		return lines.filter[l|!l.isEmpty].join(" ")
+	}
+	
 	/*
 	 * TODO: Add a way to further initialize this element (e.g., messages)
 	 */
 	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable appendable) {
-		// (1) Remove command delimiters (´)
-		// (2) Escape $ \ "
-		// (3) Interpolate variables
-		val lines = expr.expression
-			.trim.substring(1, expr.expression.length - 1)
-			.replaceAll("\\\\´", "´")
-			.replaceAll("\\\\([^\\\\$])", "\\\\\\\\$1")
-			.replaceAll("\"", "\\\\\"")
-			.replaceAll("([^\\\\])\\$((\\^)?[a-zA-Z_][a-zA-Z_0-9]*)", "$1\" + $2 + \"")
-			.replaceAll("\\\\\\$", "\\$")
-			.split("\n")
-		val expression = lines.map[l|l.trim].filter[l|!l.isEmpty].join(" ")
-		appendable.append(Commands).append(".generic(\"").append(expression).append("\")");
+		appendable.append(Commands).append(".generic(\"")
+		for (part : expr.value.expressions) {
+			switch (part) {
+				TextLiteral:
+					appendable.append(part.value.formatCommandText)
+				TextStartLiteral:
+					appendable.append(part.value.formatCommandText)
+				TextMidLiteral:
+					appendable.append(part.value.formatCommandText)
+				TextEndLiteral:
+					appendable.append(part.value.formatCommandText)
+				XExpression: {
+					appendable.append("\" + ")
+					internalToConvertedExpression(part, appendable)
+					appendable.append(" + \"")
+				}
+			}
+		}
+		appendable.append("\")")
 	}
 	
 	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable appendable) {

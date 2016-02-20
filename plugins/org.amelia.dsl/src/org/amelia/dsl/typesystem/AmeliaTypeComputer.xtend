@@ -51,6 +51,16 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 	}
 	
 	def protected _computeTypes(CustomCommand command, ITypeComputationState state) {
+		// Compute type for the inner expressions
+		state.withinScope(command);
+		val noExpectationState = state.withoutExpectation();
+		for (part : command.value.expressions) {
+			if (part instanceof XExpression) {
+				noExpectationState.computeTypes(part);
+				addLocalToCurrentScope(part, state);
+			}
+		}
+		
 		// set the actual type for the entire expression
 		val result = getRawTypeForName(CommandDescriptor, state);
 		state.acceptActualType(result);

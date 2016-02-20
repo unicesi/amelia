@@ -26,18 +26,26 @@ import java.util.Set
 import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.ChangeDirectory
 import org.amelia.dsl.amelia.Compilation
+import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.Model
+import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.lib.descriptors.Host
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.validation.Check
+import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBlockExpression
+import org.eclipse.xtext.xbase.XBooleanLiteral
+import org.eclipse.xtext.xbase.XClosure
+import org.eclipse.xtext.xbase.XCollectionLiteral
+import org.eclipse.xtext.xbase.XExpression
+import org.eclipse.xtext.xbase.XNullLiteral
+import org.eclipse.xtext.xbase.XNumberLiteral
+import org.eclipse.xtext.xbase.XStringLiteral
+import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
-import org.amelia.dsl.amelia.OnHostBlockExpression
-import org.amelia.dsl.amelia.CustomCommand
-import java.util.regex.Pattern
 
 /**
  * This class contains custom validation rules. 
@@ -187,13 +195,16 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkVariableInterpolation(CustomCommand command) {
-		// TODO: validate whether or not variables exist
-		val pattern = Pattern.compile("([^\\\\])\\$((\\^)?[a-zA-Z_][a-zA-Z_0-9]*)")
-		val matcher = pattern.matcher(command.expression)
-		while (matcher.find) {
-			val variable = matcher.group(2)
-			println(variable)
+	def void checkInterpolatedExpression(CustomCommand command) {
+		for (part : command.value.expressions) {
+			if (part instanceof XExpression) {
+				val allowed = #[XAbstractFeatureCall, XCollectionLiteral, XClosure, XBooleanLiteral, XNumberLiteral,
+					XNullLiteral, XStringLiteral, XTypeLiteral]
+				if (!allowed.map[type|type.isInstance(part)].exists[v|v]) {
+					error("The expression is not allowed in this context", AmeliaPackage.Literals.CUSTOM_COMMAND__VALUE,
+						INVALID_PARAMETER_TYPE)
+				}
+			}
 		}
 	}
 	

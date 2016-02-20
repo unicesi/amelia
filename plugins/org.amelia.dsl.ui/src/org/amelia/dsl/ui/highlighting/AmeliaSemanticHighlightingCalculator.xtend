@@ -18,12 +18,15 @@
  */
 package org.amelia.dsl.ui.highlighting
 
-import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.amelia.TextLiteral
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.ide.editor.syntaxcoloring.IHighlightedPositionAcceptor
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.xbase.ide.highlighting.XbaseHighlightingCalculator
+import org.amelia.dsl.amelia.TextStartLiteral
+import org.amelia.dsl.amelia.TextMidLiteral
+import org.amelia.dsl.amelia.TextEndLiteral
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -32,12 +35,15 @@ class AmeliaSemanticHighlightingCalculator extends XbaseHighlightingCalculator {
 	
 	override protected boolean highlightElement(EObject object, IHighlightedPositionAcceptor acceptor, CancelIndicator cancelIndicator) {
 		switch (object) {
-			CustomCommand: highlightCustomCommand(object, acceptor)
+			TextLiteral: highlightCustomCommand(object, acceptor)
+			TextStartLiteral: highlightCustomCommand(object, acceptor)
+			TextMidLiteral: highlightCustomCommand(object, acceptor)
+			TextEndLiteral: highlightCustomCommand(object, acceptor)
 		}
 		return super.highlightElement(object, acceptor, cancelIndicator)
 	}
 	
-	def protected highlightCustomCommand(CustomCommand expr, IHighlightedPositionAcceptor acceptor) {
+	def protected highlightCustomCommand(EObject expr, IHighlightedPositionAcceptor acceptor) {
 		val node = NodeModelUtils.findActualNodeFor(expr);
 		highlightNode(acceptor, node, AmeliaHighlightingConfiguration.CUSTOM_COMMAND_ID);
 		// TODO: lexical highlight: http://www.eclipse.org/forums/index.php?t=msg&goto=479001&
