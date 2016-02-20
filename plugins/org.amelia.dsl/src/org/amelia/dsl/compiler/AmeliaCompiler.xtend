@@ -143,6 +143,8 @@ class AmeliaCompiler extends XbaseCompiler {
 			.replaceAll("\"", "\\\\\"")
 			.replaceAll("\\\\\\{", "{")
 			.replaceAll("\\\\\\}", "}")
+			.replaceAll("\\\\\\'", "'")
+			.replaceAll("(\\\\)([^\"])", "$1$1$2") // replace \_ by \\_
 			.split("\n")
 		if (lines.length > 1)
 			lines = lines.map[l|l.replaceAll("^\\s*", "")] // left trim
