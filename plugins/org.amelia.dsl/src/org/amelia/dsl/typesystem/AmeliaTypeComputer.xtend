@@ -18,8 +18,6 @@
  */
 package org.amelia.dsl.typesystem
 
-import org.amelia.dsl.amelia.ChangeDirectory
-import org.amelia.dsl.amelia.Compilation
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.StringLiteral
@@ -27,6 +25,8 @@ import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
+import org.amelia.dsl.amelia.CdCommand
+import org.amelia.dsl.amelia.CompileCommand
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -35,8 +35,8 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 	
 	override computeTypes(XExpression expression, ITypeComputationState state) {
 		switch (expression) {
-			ChangeDirectory: _computeTypes(expression, state)
-			Compilation: _computeTypes(expression, state)
+			CdCommand: _computeTypes(expression, state)
+			CompileCommand: _computeTypes(expression, state)
 			CustomCommand: _computeTypes(expression, state)
 			OnHostBlockExpression: _computeTypes(expression, state)
 			StringLiteral: _computeTypes(expression, state)
@@ -79,7 +79,7 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		state.acceptActualType(result);
 	}
 	
-	def protected _computeTypes(ChangeDirectory command, ITypeComputationState state) {
+	def protected _computeTypes(CdCommand command, ITypeComputationState state) {
 		// Compute type for the inner expressions
 		state.withinScope(command);
 		val noExpectationState = state.withoutExpectation();
@@ -91,7 +91,7 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		state.acceptActualType(result);
 	}
 	
-	def protected _computeTypes(Compilation command, ITypeComputationState state) {
+	def protected _computeTypes(CompileCommand command, ITypeComputationState state) {
 		// Compute type for the inner expressions
 		state.withinScope(command);
 		val noExpectationState = state.withoutExpectation();

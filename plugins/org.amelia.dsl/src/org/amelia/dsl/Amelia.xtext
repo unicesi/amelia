@@ -62,11 +62,11 @@ RuleDeclaration returns xbase::XExpression
 	:	{RuleDeclaration} name = ID ':' dependencies += [RuleDeclaration | ID]
 	;
 
-ChangeDirectory
+CdCommand
 	:	'cd' directory = XExpression
 	;
 
-Compilation
+CompileCommand
 	:	'compile' source = XExpression output = XExpression classpath = XExpression
 	;
 
@@ -82,8 +82,8 @@ CustomCommand
 	;
 
 CommandLiteral
-	:	ChangeDirectory
-	|	Compilation
+	:	CdCommand
+	|	CompileCommand
 	|	CustomCommand
 //	|	Run
 	;

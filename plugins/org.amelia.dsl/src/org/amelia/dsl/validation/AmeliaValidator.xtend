@@ -24,11 +24,13 @@ import java.util.Collection
 import java.util.List
 import java.util.Set
 import org.amelia.dsl.amelia.AmeliaPackage
-import org.amelia.dsl.amelia.ChangeDirectory
-import org.amelia.dsl.amelia.Compilation
+import org.amelia.dsl.amelia.CdCommand
+import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.OnHostBlockExpression
+import org.amelia.dsl.amelia.RuleDeclaration
+import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.lib.descriptors.Host
 import org.eclipse.emf.common.util.URI
@@ -46,8 +48,6 @@ import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
-import org.amelia.dsl.amelia.RuleDeclaration
-import org.amelia.dsl.amelia.StringLiteral
 
 /**
  * This class contains custom validation rules. 
@@ -153,27 +153,27 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkDirectory(ChangeDirectory expr) {
+	def void checkDirectory(CdCommand expr) {
 		if (expr.directory.actualType.getSuperType(String) == null) {
 			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
-				AmeliaPackage.Literals.CHANGE_DIRECTORY__DIRECTORY, INVALID_PARAMETER_TYPE)
+				AmeliaPackage.Literals.CD_COMMAND__DIRECTORY, INVALID_PARAMETER_TYPE)
 		}
 	}
 
 	@Check
-	def void checkDirectory(Compilation expr) {
+	def void checkDirectory(CompileCommand expr) {
 		if (expr.source.actualType.getSuperType(String) == null) {
 			error('''The source parameter must be of type String, «expr.source.actualType.simpleName» was found instead''',
-				AmeliaPackage.Literals.COMPILATION__SOURCE, INVALID_PARAMETER_TYPE)
+				AmeliaPackage.Literals.COMPILE_COMMAND__SOURCE, INVALID_PARAMETER_TYPE)
 		}
 		if (expr.output.actualType.getSuperType(String) == null) {
 			error('''The output parameter must be of type String, «expr.output.actualType.simpleName» was found instead''',
-				AmeliaPackage.Literals.COMPILATION__OUTPUT, INVALID_PARAMETER_TYPE)
+				AmeliaPackage.Literals.COMPILE_COMMAND__OUTPUT, INVALID_PARAMETER_TYPE)
 		}
 		val classpathType = expr.classpath.actualType
 		if (classpathType.getSuperType(typeof(String[])) == null && classpathType.getSuperType(List) == null) {
 			error('''The classpath must be of type String[], «classpathType.simpleName» was found instead''',
-				AmeliaPackage.Literals.COMPILATION__CLASSPATH, INVALID_PARAMETER_TYPE)
+				AmeliaPackage.Literals.COMPILE_COMMAND__CLASSPATH, INVALID_PARAMETER_TYPE)
 		} else if (classpathType.getSuperType(List) != null) {
 			var showError = false
 			if (classpathType.getSuperType(List).typeArguments.length == 1) {
@@ -184,7 +184,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 
 			if (showError)
 				error('''The classpath must be of type List<String>, «classpathType.simpleName» was found instead''',
-					AmeliaPackage.Literals.COMPILATION__CLASSPATH, INVALID_PARAMETER_TYPE)
+					AmeliaPackage.Literals.COMPILE_COMMAND__CLASSPATH, INVALID_PARAMETER_TYPE)
 		}
 	}
 	

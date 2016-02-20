@@ -18,9 +18,9 @@
  */
 package org.amelia.dsl.compiler
 
-import org.amelia.dsl.amelia.ChangeDirectory
+import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CommandLiteral
-import org.amelia.dsl.amelia.Compilation
+import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.InterpolatedString
 import org.amelia.dsl.amelia.OnHostBlockExpression
@@ -43,8 +43,8 @@ class AmeliaCompiler extends XbaseCompiler {
 
 	override internalToConvertedExpression(XExpression obj, ITreeAppendable appendable) {
 		switch (obj) {
-			ChangeDirectory: _toJavaExpression(obj, appendable)
-			Compilation: _toJavaExpression(obj, appendable)
+			CdCommand: _toJavaExpression(obj, appendable)
+			CompileCommand: _toJavaExpression(obj, appendable)
 			CustomCommand: _toJavaExpression(obj, appendable)
 			OnHostBlockExpression: _toJavaExpression(obj, appendable)
 			RuleDeclaration: _toJavaExpression(obj, appendable)
@@ -206,13 +206,13 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append(")")
 	}
 	
-	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable appendable) {
+	def protected void _toJavaExpression(CdCommand expr, ITreeAppendable appendable) {
 		appendable.append(Commands).append(".cd").append("(")
 		internalToConvertedExpression(expr.directory, appendable)
 		appendable.append(")")
 	}
 	
-	def protected void _toJavaExpression(Compilation expr, ITreeAppendable appendable) {
+	def protected void _toJavaExpression(CompileCommand expr, ITreeAppendable appendable) {
 		appendable.append(Commands).append(".compile").append("(")
 		internalToConvertedExpression(expr.source, appendable)
 		appendable.append(", ")
