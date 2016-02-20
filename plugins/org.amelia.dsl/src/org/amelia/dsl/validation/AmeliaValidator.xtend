@@ -46,6 +46,8 @@ import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
+import org.amelia.dsl.amelia.RuleDeclaration
+import org.amelia.dsl.amelia.StringLiteral
 
 /**
  * This class contains custom validation rules. 
@@ -195,16 +197,24 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkInterpolatedExpression(CustomCommand command) {
-		for (part : command.value.expressions) {
+	def void checkInterpolatedExpression(StringLiteral literal) {
+		for (part : literal.value.expressions) {
 			if (part instanceof XExpression) {
 				val allowed = #[XAbstractFeatureCall, XCollectionLiteral, XClosure, XBooleanLiteral, XNumberLiteral,
 					XNullLiteral, XStringLiteral, XTypeLiteral]
 				if (!allowed.map[type|type.isInstance(part)].exists[v|v]) {
-					error("The expression is not allowed in this context", AmeliaPackage.Literals.CUSTOM_COMMAND__VALUE,
+					error("The expression is not allowed in this context", AmeliaPackage.Literals.STRING_LITERAL__VALUE,
 						INVALID_PARAMETER_TYPE)
 				}
 			}
+		}
+	}
+	
+	@Check
+	def void checkCustomCommand(CustomCommand command) {
+		if (command.value.actualType.getSuperType(String) == null) {
+			error("The command expression must be of type String", AmeliaPackage.Literals.CUSTOM_COMMAND__VALUE,
+				INVALID_PARAMETER_TYPE)
 		}
 	}
 	
@@ -213,7 +223,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	 * https://github.com/xtext/seven-languages-xtext/blob/master/languages/\
 	 * org.xtext.builddsl/src/org/xtext/builddsl/validation/BuildDSLValidator.xtend
 	 */
-	def private Collection<EObject> findDependentElements(EObject it, (Set<EObject>)=>void cycleHandler) {
+	def private Collection<EObject> findDependentElements(EObject it, (Set<EObject>) => void cycleHandler) {
 		// 1. collect all tasks that we depend on
 		val elements = <EObject>newLinkedHashSet
 		internalFindDependentTasksRec(it, elements)
@@ -224,7 +234,10 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		while (changed) {
 			changed = false
 			for (t : elements.toList) {
-				val dependencies = if (t instanceof Subsystem) t.includes.includeDeclarations
+				val dependencies = if (t instanceof Subsystem)
+						t.includes.includeDeclarations
+					else if (t instanceof RuleDeclaration)
+						t.dependencies
 				if (result.containsAll(dependencies)) {
 					changed = true
 					result.add(t)
@@ -240,7 +253,10 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	def private void internalFindDependentTasksRec(EObject e, Set<EObject> set) {
 		if (!set.add(e))
 			return;
-		val dependencies = if (e instanceof Subsystem) e.includes.includeDeclarations
+		val dependencies = if (e instanceof Subsystem)
+				e.includes.includeDeclarations
+			else if (e instanceof RuleDeclaration)
+				e.dependencies
 		for (t : dependencies) 
 			internalFindDependentTasksRec(t, set)
 	}

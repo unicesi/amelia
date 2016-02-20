@@ -22,17 +22,19 @@ import org.amelia.dsl.amelia.ChangeDirectory
 import org.amelia.dsl.amelia.CommandLiteral
 import org.amelia.dsl.amelia.Compilation
 import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.amelia.InterpolatedString
+import org.amelia.dsl.amelia.OnHostBlockExpression
+import org.amelia.dsl.amelia.RuleDeclaration
+import org.amelia.dsl.amelia.StringLiteral
+import org.amelia.dsl.amelia.TextEndLiteral
+import org.amelia.dsl.amelia.TextLiteral
+import org.amelia.dsl.amelia.TextMiddleLiteral
+import org.amelia.dsl.amelia.TextStartLiteral
 import org.amelia.dsl.lib.util.Commands
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
-import org.amelia.dsl.amelia.OnHostBlockExpression
-import org.amelia.dsl.amelia.RuleDeclaration
-import org.amelia.dsl.amelia.TextLiteral
-import org.amelia.dsl.amelia.TextStartLiteral
-import org.amelia.dsl.amelia.TextMidLiteral
-import org.amelia.dsl.amelia.TextEndLiteral
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -46,6 +48,7 @@ class AmeliaCompiler extends XbaseCompiler {
 			CustomCommand: _toJavaExpression(obj, appendable)
 			OnHostBlockExpression: _toJavaExpression(obj, appendable)
 			RuleDeclaration: _toJavaExpression(obj, appendable)
+			StringLiteral: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
 	}
@@ -55,6 +58,7 @@ class AmeliaCompiler extends XbaseCompiler {
 			CommandLiteral: _toJavaStatement(expr, appendable, isReferenced)
 			OnHostBlockExpression: _toJavaStatement(expr, appendable, isReferenced)
 			RuleDeclaration: _toJavaStatement(expr, appendable, isReferenced)
+			StringLiteral: _toJavaStatement(expr, appendable, isReferenced)
 			default: super.doInternalToJavaStatement(expr, appendable, isReferenced)
 		}
 	}
@@ -137,8 +141,12 @@ class AmeliaCompiler extends XbaseCompiler {
 		}
 	}
 	
-	def protected String formatCommandText(String value) {
-		var lines = value
+	def protected String formatCommandText(String value, boolean escapeClosingComment) {
+		var _value = if (escapeClosingComment)
+				value.replaceAll("\\\\* \\/", "\\\\* \\/")
+			else
+				value
+		var lines = _value // Strings.convertToJavaString(_value, true)
 			.substring(1, value.length - 1)
 			.replaceAll("\"", "\\\\\"")
 			.replaceAll("\\\\\\{", "{")
@@ -151,21 +159,22 @@ class AmeliaCompiler extends XbaseCompiler {
 		return lines.filter[l|!l.isEmpty].join(" ")
 	}
 	
-	/*
-	 * TODO: Add a way to further initialize this element (e.g., messages)
-	 */
-	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable appendable) {
-		appendable.append(Commands).append(".generic(\"")
-		for (part : expr.value.expressions) {
+	def protected void compileTemplate(InterpolatedString literal, ITreeAppendable appendable) {
+		compileTemplate(literal, appendable, false)
+	}
+	
+	def protected void compileTemplate(InterpolatedString literal, ITreeAppendable appendable, boolean escapeClosingComment) {
+		appendable.append("\"")
+		for (part : literal.expressions) {
 			switch (part) {
 				TextLiteral:
-					appendable.append(part.value.formatCommandText)
+					appendable.append(part.value.formatCommandText(escapeClosingComment))
 				TextStartLiteral:
-					appendable.append(part.value.formatCommandText)
-				TextMidLiteral:
-					appendable.append(part.value.formatCommandText)
+					appendable.append(part.value.formatCommandText(escapeClosingComment))
+				TextMiddleLiteral:
+					appendable.append(part.value.formatCommandText(escapeClosingComment))
 				TextEndLiteral:
-					appendable.append(part.value.formatCommandText)
+					appendable.append(part.value.formatCommandText(escapeClosingComment))
 				XExpression: {
 					appendable.append("\" + ")
 					internalToConvertedExpression(part, appendable)
@@ -173,7 +182,28 @@ class AmeliaCompiler extends XbaseCompiler {
 				}
 			}
 		}
-		appendable.append("\")")
+		appendable.append("\"")
+	}
+	
+	def void _toJavaExpression(StringLiteral expr, ITreeAppendable b) {
+		compileTemplate(expr.value, b)
+	}
+	
+	def protected void _toJavaStatement(StringLiteral expr, ITreeAppendable b, boolean isReferenced) {
+		generateComment(new Later() {
+			override void exec(ITreeAppendable appendable) {
+				compileTemplate(expr.value, appendable, true)
+			}
+		}, b, isReferenced);
+	}
+	
+	/*
+	 * TODO: Add a way to further initialize this element (e.g., messages)
+	 */
+	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable appendable) {
+		appendable.append(Commands).append(".generic(")
+		internalToConvertedExpression(expr.value, appendable)
+		appendable.append(")")
 	}
 	
 	def protected void _toJavaExpression(ChangeDirectory expr, ITreeAppendable appendable) {

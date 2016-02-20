@@ -22,6 +22,7 @@ import org.amelia.dsl.amelia.ChangeDirectory
 import org.amelia.dsl.amelia.Compilation
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.OnHostBlockExpression
+import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
@@ -38,6 +39,7 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 			Compilation: _computeTypes(expression, state)
 			CustomCommand: _computeTypes(expression, state)
 			OnHostBlockExpression: _computeTypes(expression, state)
+			StringLiteral: _computeTypes(expression, state)
 			default: super.computeTypes(expression, state)
 		}
 	}
@@ -54,15 +56,26 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		// Compute type for the inner expressions
 		state.withinScope(command);
 		val noExpectationState = state.withoutExpectation();
-		for (part : command.value.expressions) {
+		noExpectationState.computeTypes(command.value);
+		addLocalToCurrentScope(command.value, state);
+		
+		// set the actual type for the entire expression
+		val result = getRawTypeForName(CommandDescriptor, state);
+		state.acceptActualType(result);
+	}
+	
+	def protected _computeTypes(StringLiteral literal, ITypeComputationState state) {
+		// Compute type for the inner expressions
+		state.withinScope(literal);
+		val noExpectationState = state.withoutExpectation();
+		for (part : literal.value.expressions) {
 			if (part instanceof XExpression) {
 				noExpectationState.computeTypes(part);
 				addLocalToCurrentScope(part, state);
 			}
 		}
-		
 		// set the actual type for the entire expression
-		val result = getRawTypeForName(CommandDescriptor, state);
+		val result = getRawTypeForName(String, state);
 		state.acceptActualType(result);
 	}
 	

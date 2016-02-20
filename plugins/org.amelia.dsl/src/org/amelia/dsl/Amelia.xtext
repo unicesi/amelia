@@ -54,11 +54,6 @@ InternalSubsystemDeclaration returns xbase::XExpression
 	|	OnHostBlockExpression
 	;
 
-//VariableDeclaration returns XExpression
-//	:	{VariableDeclaration}
-//		(writeable?='var'|'val') (=>(type=JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
-//	;
-
 OnHostBlockExpression
 	:	'on' host = XExpression '{' rules += RuleDeclaration* '}'
 	;
@@ -83,7 +78,7 @@ Compilation
 //	;
 
 CustomCommand
-	:	value = Template
+	:	'$' value = XExpression
 	;
 
 CommandLiteral
@@ -91,6 +86,39 @@ CommandLiteral
 	|	Compilation
 	|	CustomCommand
 //	|	Run
+	;
+
+StringLiteral
+	:	{StringLiteral} value = InterpolatedString;
+
+InterpolatedString
+	:
+		{InterpolatedString} (expressions += TextLiteral)
+	| 	(
+			expressions += TextStartLiteral 
+			(expressions += XExpression (expressions += TextMiddleLiteral expressions += XExpression)*)
+			expressions += TextEndLiteral
+		)
+	;
+
+TextLiteral
+	:	{TextLiteral} value = TextVerbatimValue
+	;
+
+TextVerbatimValue returns ecore::EString
+	:	TEXT
+	;
+
+TextStartLiteral
+	:	{TextStartLiteral} value = TEXT_START
+	;
+	
+TextMiddleLiteral
+	:	{TextMiddleLiteral} value = TEXT_MIDDLE
+	;
+	
+TextEndLiteral
+	:	{TextEndLiteral} value = TEXT_END
 	;
 
 XLiteral returns xbase::XExpression
@@ -102,50 +130,22 @@ XLiteral returns xbase::XExpression
 	|	XStringLiteral
 	|	XTypeLiteral
 	|	CommandLiteral
-	;
-
-Template
-	:	{Template} (expressions += TextLiteral)
-	| 	(
-			expressions += TextStartLiteral 
-			(expressions += XExpression (expressions += TextMidLiteral expressions += XExpression)*)
-			expressions += TextEndLiteral
-		)
-	;
-	
-TextLiteral
-	:	{TextLiteral} value = TextVerbatimValue
-	;
-
-TextVerbatimValue returns ecore::EString
-	:	TEXT
-	;
-
-TextStartLiteral
-	:	{TextStartLiteral} value = TEXTSTART
-	;
-	
-TextMidLiteral
-	:	{TextMidLiteral} value = TEXTMID
-	;
-	
-TextEndLiteral
-	:	{TextEndLiteral} value = TEXTEND
+	|	StringLiteral
 	;
 
 terminal TEXT
 	:	"'" ('\\' . | !('\\' | "'" | '{' | '}') )* "'"
 	;
 
-terminal TEXTSTART
+terminal TEXT_START
 	:	"'" ('\\' . | !('\\' | "'" | '{') )* '{'
 	;
 
-terminal TEXTMID
+terminal TEXT_MIDDLE
 	:	'}' ('\\' . | !('\\' | "'" | '{') )* '{'
 	;
 
-terminal TEXTEND
+terminal TEXT_END
 	:	'}' ('\\' . | !('\\' | "'" | '{') )* "'"
 	;
 
