@@ -49,90 +49,90 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 	
 	def protected _computeTypes(OnHostBlockExpression block, ITypeComputationState state) {
 		// Compute type for the inner expressions
-		state.withinScope(block);
-		val noExpectationState = state.withoutExpectation();
-		noExpectationState.computeTypes(block.host);
-		addLocalToCurrentScope(block.host, state);
+		state.withinScope(block)
+		val noExpectationState = state.withoutExpectation()
+		noExpectationState.computeTypes(block.host)
+		addLocalToCurrentScope(block.host, state)
 	}
 	
 	def protected _computeTypes(CustomCommand command, ITypeComputationState state) {
 		// Compute type for the inner expressions
-		state.withinScope(command);
-		val noExpectationState = state.withoutExpectation();
-		noExpectationState.computeTypes(command.value);
-		addLocalToCurrentScope(command.value, state);
+		state.withinScope(command)
+		val noExpectationState = state.withoutExpectation()
+		noExpectationState.computeTypes(command.value)
+		addLocalToCurrentScope(command.value, state)
 		
 		// set the actual type for the entire expression
 		val result = getRawTypeForName(CommandDescriptor, state);
-		state.acceptActualType(result);
+		state.acceptActualType(result)
 	}
 	
 	def protected _computeTypes(StringLiteral literal, ITypeComputationState state) {
 		// Compute type for the inner expressions
-		state.withinScope(literal);
-		val noExpectationState = state.withoutExpectation();
+		state.withinScope(literal)
+		val noExpectationState = state.withoutExpectation()
 		for (part : literal.value.expressions) {
 			if (part instanceof XExpression) {
-				noExpectationState.computeTypes(part);
-				addLocalToCurrentScope(part, state);
+				noExpectationState.computeTypes(part)
+				addLocalToCurrentScope(part, state)
 			}
 		}
 		// set the actual type for the entire expression
-		val result = getRawTypeForName(String, state);
-		state.acceptActualType(result);
+		val result = getRawTypeForName(String, state)
+		state.acceptActualType(result)
 	}
 	
 	def protected _computeTypes(CdCommand command, ITypeComputationState state) {
 		// Compute type for the inner expressions
-		state.withinScope(command);
-		val noExpectationState = state.withoutExpectation();
-		noExpectationState.computeTypes(command.directory);
-		addLocalToCurrentScope(command.directory, state);
+		state.withinScope(command)
+		val noExpectationState = state.withoutExpectation()
+		noExpectationState.computeTypes(command.directory)
+		addLocalToCurrentScope(command.directory, state)
 		
 		// set the actual type for the entire expression
-		val result = getRawTypeForName(CommandDescriptor, state);
-		state.acceptActualType(result);
+		val result = getRawTypeForName(CommandDescriptor, state)
+		state.acceptActualType(result)
 	}
 	
 	def protected _computeTypes(CompileCommand command, ITypeComputationState state) {
 		// Compute type for the inner expressions
-		state.withinScope(command);
-		val noExpectationState = state.withoutExpectation();
-		noExpectationState.computeTypes(command.source);
-		noExpectationState.computeTypes(command.output);
-		noExpectationState.computeTypes(command.classpath);
-		addLocalToCurrentScope(command.source, state);
-		addLocalToCurrentScope(command.output, state);
-		addLocalToCurrentScope(command.classpath, state);
+		state.withinScope(command)
+		val noExpectationState = state.withoutExpectation()
+		noExpectationState.computeTypes(command.source)
+		noExpectationState.computeTypes(command.output)
+		noExpectationState.computeTypes(command.classpath)
+		addLocalToCurrentScope(command.source, state)
+		addLocalToCurrentScope(command.output, state)
+		addLocalToCurrentScope(command.classpath, state)
 		
 		// set the actual type for the entire expression
-		val result = getRawTypeForName(CommandDescriptor, state);
-		state.acceptActualType(result);
+		val result = getRawTypeForName(CommandDescriptor, state)
+		state.acceptActualType(result)
 	}
 	
 	def protected _computeTypes(RunCommand command, ITypeComputationState state) {
 		// Compute type for the inner expressions
-		state.withinScope(command);
-		val noExpectationState = state.withoutExpectation();
-		noExpectationState.computeTypes(command.composite);
-		addLocalToCurrentScope(command.composite, state);
-		noExpectationState.computeTypes(command.libpath);
-		addLocalToCurrentScope(command.libpath, state);
+		state.withinScope(command)
+		val noExpectationState = state.withoutExpectation()
+		noExpectationState.computeTypes(command.composite)
+		addLocalToCurrentScope(command.composite, state)
+		noExpectationState.computeTypes(command.libpath)
+		addLocalToCurrentScope(command.libpath, state)
 		if (command.hasPort) {
-			noExpectationState.computeTypes(command.port);
-			addLocalToCurrentScope(command.port, state);
+			noExpectationState.computeTypes(command.port)
+			addLocalToCurrentScope(command.port, state)
 		}
 		if (command.hasService) {
-			noExpectationState.computeTypes(command.service);
-			addLocalToCurrentScope(command.service, state);
+			noExpectationState.computeTypes(command.service)
+			addLocalToCurrentScope(command.service, state)
 		}
 		if (command.hasMethod) {
-			noExpectationState.computeTypes(command.method);
-			addLocalToCurrentScope(command.method, state);
+			noExpectationState.computeTypes(command.method)
+			addLocalToCurrentScope(command.method, state)
 		}
 		if (command.hasParams) {
-			noExpectationState.computeTypes(command.params);
-			addLocalToCurrentScope(command.params, state);
+			noExpectationState.computeTypes(command.params)
+			addLocalToCurrentScope(command.params, state)
 		}	
 		// set the actual type for the entire expression
 		val result = if (command.initializedLater)
