@@ -67,7 +67,8 @@ CdCommand
 	;
 
 CompileCommand
-	:	'compile' source = XExpression output = XExpression classpath = XExpression 
+	:	'compile' source = XExpression output = XExpression 
+		(=> classpath = XExpression?)
 		(=> initializedLater ?= '...')?
 	;
 

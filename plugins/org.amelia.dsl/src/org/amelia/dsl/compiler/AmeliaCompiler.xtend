@@ -239,8 +239,10 @@ class AmeliaCompiler extends XbaseCompiler {
 		internalToConvertedExpression(expr.source, appendable)
 		appendable.append(", ")
 		internalToConvertedExpression(expr.output, appendable)
-		appendable.append(", ")
-		internalToConvertedExpression(expr.classpath, appendable)
+		if (expr.classpath != null) {
+			appendable.append(", ")
+			internalToConvertedExpression(expr.classpath, appendable)
+		}
 		appendable.append(")")
 	}
 	
