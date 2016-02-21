@@ -233,18 +233,30 @@ public class Commands {
 	 *         change the working directory
 	 */
 	public static CommandDescriptor cd(final String directory) {
+		return cdBuilder(directory).build();
+	}
+	
+	/**
+	 * Configures a {@link CommandDescriptor.Builder} to change the current working
+	 * directory
+	 * 
+	 * @param directory
+	 *            The new working directory
+	 * @return a {@link CommandDescriptor.Builder} with the necessary configuration to
+	 *         change the working directory
+	 */
+	public static CommandDescriptor.Builder cdBuilder(final String directory) {
 		String errorMessage = "Could not change working directory to " + ANSI.YELLOW.format(directory);
 		String successMessage = "New working directory: " + ANSI.YELLOW.format(directory);
 		String[] errors = { "No existe el fichero o el directorio",
 				"Permiso denegado", "No such file or directory",
 				"Permission denied" };
-		CommandDescriptor cd = new CommandDescriptor.Builder()
+		CommandDescriptor.Builder cd = new CommandDescriptor.Builder()
 				.withCommand("cd")
 				.withArguments(directory)
 				.withErrorText(errors)
 				.withErrorMessage(errorMessage)
-				.withSuccessMessage(successMessage)
-				.build();
+				.withSuccessMessage(successMessage);
 		return cd;
 	}
 	
@@ -288,16 +300,51 @@ public class Commands {
 	 */
 	public static CommandDescriptor compile(final String sourceDirectory,
 			final String outputFile, final String... classpath) {
+		return compileBuilder(sourceDirectory, outputFile, classpath).build();
+	}
+	
+	/**
+	 * Configures a {@link CommandDescriptor.Builder} to compile a source
+	 * directory
+	 * 
+	 * @param sourceDirectory
+	 *            The directory containing all the java sources
+	 * @param outputFile
+	 *            The name of the output jar file
+	 * @param classpath
+	 *            The source extra classpath
+	 * @return a {@link CommandDescriptor.Builder} with the necessary
+	 *         configuration to compile the sources
+	 */
+	public static CommandDescriptor.Builder compileBuilder(final String sourceDirectory,
+			final String outputFile, final List<String> classpath) {
+		return compileBuilder(sourceDirectory, outputFile, classpath.toArray(new String[0]));
+	}
+	
+	/**
+	 * Configures a {@link CommandDescriptor.Builder} to compile a source
+	 * directory
+	 * 
+	 * @param sourceDirectory
+	 *            The directory containing all the java sources
+	 * @param outputFile
+	 *            The name of the output jar file
+	 * @param classpath
+	 *            The source extra classpath
+	 * @return a {@link CommandDescriptor.Builder} with the necessary
+	 *         configuration to compile the sources
+	 */
+	public static CommandDescriptor.Builder compileBuilder(final String sourceDirectory,
+			final String outputFile, final String... classpath) {
 		String[] errors = { "No existe el fichero o el directorio",
 				"Permiso denegado", "No such file or directory",
 				"Permission denied" };
-		CommandDescriptor compile = new CommandDescriptor.Builder()
+		CommandDescriptor.Builder compile = new CommandDescriptor.Builder()
 				.withCommand("frascati")
 				.withArguments("compile", sourceDirectory, outputFile, Arrays.join(classpath, ":"))
 				.withErrorText(errors)
 				.withErrorMessage(outputFile + ".jar could not been generated")
-				.withSuccessMessage(outputFile + ".jar has been generated")
-				.build();
+				.withSuccessMessage(outputFile + ".jar has been generated");
 		return compile;
 	}
 	
