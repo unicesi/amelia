@@ -153,7 +153,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkDirectory(CdCommand expr) {
+	def void checkCdCommand(CdCommand expr) {
 		if (expr.directory.actualType.getSuperType(String) == null) {
 			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.CD_COMMAND__DIRECTORY, INVALID_PARAMETER_TYPE)
@@ -161,7 +161,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 
 	@Check
-	def void checkDirectory(CompileCommand expr) {
+	def void checkCompileCommand(CompileCommand expr) {
 		if (expr.source.actualType.getSuperType(String) == null) {
 			error('''The source parameter must be of type String, «expr.source.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.COMPILE_COMMAND__SOURCE, INVALID_PARAMETER_TYPE)
