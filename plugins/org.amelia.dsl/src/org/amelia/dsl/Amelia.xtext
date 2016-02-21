@@ -59,7 +59,12 @@ OnHostBlockExpression
 	;
 
 RuleDeclaration returns xbase::XExpression
-	:	{RuleDeclaration} name = ID ':' dependencies += [RuleDeclaration | ID]
+	:	{RuleDeclaration} name = ID ':' dependencies += [RuleDeclaration | ID]? (',' dependencies += [RuleDeclaration | ID])* '\n'
+		body = SpaceAwareBlockExpression -> ';'
+	;
+
+SpaceAwareBlockExpression returns xbase::XExpression
+	:	{SpaceAwareBlockExpression} (expressions += XExpression)*
 	;
 
 CdCommand
@@ -158,8 +163,4 @@ terminal TEXT_END
 
 terminal STRING
 	:	'"' ( '\\' . /* ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') */ | !('\\'|'"') )* '"'?
-	;
-
-terminal SL_COMMENT
-	:	'--' !('\n'|'\r')* ('\r'? '\n')?
 	;
