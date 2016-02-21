@@ -30,6 +30,7 @@ import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.RuleDeclaration
+import org.amelia.dsl.amelia.RunCommand
 import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.lib.descriptors.Host
@@ -48,7 +49,6 @@ import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
-import org.amelia.dsl.amelia.RunCommand
 
 /**
  * This class contains custom validation rules. 
@@ -142,7 +142,12 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkCdCommand(CdCommand expr) {
-		if (expr.directory.actualType.getSuperType(String) == null) {
+		val allowed = #[XAbstractFeatureCall, XStringLiteral, StringLiteral]
+		if (!allowed.map[type|type.isInstance(expr.directory)].exists[v|v]) {
+			error("This expression is not allowed in this context", AmeliaPackage.Literals.CD_COMMAND__DIRECTORY,
+				INVALID_PARAMETER_TYPE)
+		} else if (expr.directory.actualType.getSuperType(String) ==
+			null) {
 			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.CD_COMMAND__DIRECTORY, INVALID_PARAMETER_TYPE)
 		}
@@ -256,7 +261,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				val allowed = #[XAbstractFeatureCall, XCollectionLiteral, XClosure, XBooleanLiteral, XNumberLiteral,
 					XNullLiteral, XStringLiteral, XTypeLiteral]
 				if (!allowed.map[type|type.isInstance(part)].exists[v|v]) {
-					error("The expression is not allowed in this context", AmeliaPackage.Literals.STRING_LITERAL__VALUE,
+					error("This expression is not allowed in this context", AmeliaPackage.Literals.STRING_LITERAL__VALUE,
 						INVALID_PARAMETER_TYPE)
 				}
 			}

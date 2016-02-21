@@ -21,12 +21,13 @@ package org.amelia.dsl.jvmmodel
 import com.google.inject.Inject
 import java.util.Map
 import org.amelia.dsl.amelia.Subsystem
+import org.amelia.dsl.amelia.VariableDeclaration
+import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
+import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
-import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -54,11 +55,23 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			if (!isPreIndexingPhase) {
 				documentation = subsystem.documentation
 				superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
+				for (declaration : subsystem.body.expressions.filter(VariableDeclaration)) {
+					members += declaration.toField(declaration.name, declaration.type ?: inferredType) [
+						documentation = declaration.documentation
+						initializer = declaration.right
+						final = !declaration.writeable
+						static = true
+					]
+				}
 				members += subsystem.toMethod("deploy", typeRef(void)) [
 					exceptions += typeRef(Exception)
 					parameters += subsystem.toParameter("subsystem", typeRef(String))
-					parameters += subsystem.toParameter("dependencies", typeRef(Map, typeRef(String), typeRef(org.amelia.dsl.lib.Subsystem)))
-					body = subsystem.body
+					parameters +=
+						subsystem.toParameter("dependencies",
+							typeRef(Map, typeRef(String), typeRef(org.amelia.dsl.lib.Subsystem)))
+					body = [
+						append("/* empty */")
+					]
 				]
 			}
 		]

@@ -45,26 +45,26 @@ IncludeDeclaration
 	:	'include' includedType = [TypeDeclaration | QualifiedName] ->';'?
 	;
 
-SubsystemBlockExpression returns xbase::XBlockExpression
+SubsystemBlockExpression
 	:	{SubsystemBlockExpression} '{' (expressions += InternalSubsystemDeclaration)* '}'
 	;
 
-InternalSubsystemDeclaration returns xbase::XExpression
-	:	XVariableDeclaration ->';'?
+InternalSubsystemDeclaration
+	:	VariableDeclaration ->';'?
 	|	OnHostBlockExpression
 	;
+
+VariableDeclaration
+	:	{VariableDeclaration}
+		(writeable?='var'|'val') (=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?;
 
 OnHostBlockExpression
 	:	'on' host = XExpression '{' rules += RuleDeclaration* '}'
 	;
 
-RuleDeclaration returns xbase::XExpression
-	:	{RuleDeclaration} name = ID ':' dependencies += [RuleDeclaration | ID]? (',' dependencies += [RuleDeclaration | ID])* '\n'
-		body = SpaceAwareBlockExpression -> ';'
-	;
-
-SpaceAwareBlockExpression returns xbase::XExpression
-	:	{SpaceAwareBlockExpression} (expressions += XExpression)*
+RuleDeclaration
+	:	name = ID ':' (dependencies += [RuleDeclaration | ID] (',' dependencies += [RuleDeclaration | ID])*)?
+		'|' (expressions += XExpression)+ -> ';'
 	;
 
 CdCommand
