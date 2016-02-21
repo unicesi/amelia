@@ -67,6 +67,9 @@ public class Commands {
 			this.compositeName = compositeName;
 			return this;
 		}
+		public RunBuilder withLibpath(final List<String> libs) {
+			return withLibpath(libs.toArray(new String[0]));
+		}
 
 		public RunBuilder withLibpath(final String... libs) {
 			this.libpath = libs;
@@ -81,6 +84,10 @@ public class Commands {
 		public RunBuilder withMethod(final String methodName) {
 			this.methodName = methodName;
 			return this;
+		}
+		
+		public RunBuilder withArguments(final List<String> arguments) {
+			return withArguments(arguments.toArray(new String[0]));
 		}
 
 		public RunBuilder withArguments(final String... arguments) {
@@ -106,6 +113,10 @@ public class Commands {
 		public RunBuilder withSuccessMessage(final String successMessage) {
 			this.successMessage = successMessage;
 			return this;
+		}
+		
+		public RunBuilder withErrorTexts(final List<String> errorTexts) {
+			return withErrorTexts(errorTexts.toArray(new String[0]));
 		}
 		
 		public RunBuilder withErrorTexts(String... errorTexts) {
