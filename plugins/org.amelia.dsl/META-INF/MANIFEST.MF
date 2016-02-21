@@ -30,5 +30,5 @@ Export-Package: org.amelia.dsl.generator,
  org.amelia.dsl.amelia.util,
  org.amelia.dsl.jvmmodel
 Import-Package: org.apache.log4j
-Bundle-ClassPath: org.amelia.dsl.lib-0.0.1-SNAPSHOT-dependencies.jar,
- .
+Bundle-ClassPath: .,
+ org.amelia.dsl.lib-0.5.0-SNAPSHOT-dependencies.jar
