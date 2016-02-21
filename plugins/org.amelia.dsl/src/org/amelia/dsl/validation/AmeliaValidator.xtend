@@ -48,6 +48,7 @@ import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
+import org.amelia.dsl.amelia.RunCommand
 
 /**
  * This class contains custom validation rules. 
@@ -157,6 +158,68 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (expr.directory.actualType.getSuperType(String) == null) {
 			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.CD_COMMAND__DIRECTORY, INVALID_PARAMETER_TYPE)
+		}
+	}
+	
+	@Check
+	def void checkRunCommand(RunCommand expr) {
+		if (expr.composite.actualType.getSuperType(String) == null) {
+			error('''The composite parameter must be of type String, «expr.port.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.RUN_COMMAND__COMPOSITE, INVALID_PARAMETER_TYPE)
+		}
+		if (expr.hasPort 
+			&& expr.port.actualType.getSuperType(int) == null 
+			&& expr.port.actualType.getSuperType(Integer) == null
+		) {
+			error('''The port parameter must be of type integer, «expr.port.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.RUN_COMMAND__PORT, INVALID_PARAMETER_TYPE)
+		}
+		if (expr.hasService && expr.service.actualType.getSuperType(String) == null) {
+			error('''The service parameter must be of type String, «expr.service.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.RUN_COMMAND__SERVICE, INVALID_PARAMETER_TYPE)
+		}
+		if (expr.hasMethod && expr.method.actualType.getSuperType(String) == null) {
+			error('''The method parameter must be of type String, «expr.method.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.RUN_COMMAND__METHOD, INVALID_PARAMETER_TYPE)
+		}
+		val paramsType = expr.params.actualType
+		if (expr.hasParams
+			&& paramsType.getSuperType(typeof(String)) == null
+			&& paramsType.getSuperType(typeof(String[])) == null
+			&& paramsType.getSuperType(List) == null
+		) {
+			error('''The method parameter must be of type String or String[], «paramsType.simpleName» was found instead''',
+				AmeliaPackage.Literals.RUN_COMMAND__PARAMS, INVALID_PARAMETER_TYPE)
+		} else if (paramsType.getSuperType(List) != null) {
+			var showError = false
+			if (paramsType.getSuperType(List).typeArguments.length == 1) {
+				if (!paramsType.getSuperType(List).typeArguments.get(0).identifier.equals(String.canonicalName))
+					showError = true
+			} else
+				showError = true
+
+			if (showError)
+				error('''The classpath must be of type List<String>, «paramsType.simpleName» was found instead''',
+					AmeliaPackage.Literals.RUN_COMMAND__PARAMS, INVALID_PARAMETER_TYPE)
+		}
+		val libpathType = expr.libpath.actualType
+		if (libpathType.getSuperType(typeof(String)) == null 
+			&& libpathType.getSuperType(typeof(String[])) == null 
+			&& libpathType.getSuperType(List) == null
+		) {
+			error('''The libpath parameter must be of type String or String[], «libpathType.simpleName» was found instead''',
+				AmeliaPackage.Literals.RUN_COMMAND__LIBPATH, INVALID_PARAMETER_TYPE)
+		} else if (libpathType.getSuperType(List) != null) {
+			var showError = false
+			if (libpathType.getSuperType(List).typeArguments.length == 1) {
+				if (!libpathType.getSuperType(List).typeArguments.get(0).identifier.equals(String.canonicalName))
+					showError = true
+			} else
+				showError = true
+
+			if (showError)
+				error('''The libpath must be of type List<String>, «libpathType.simpleName» was found instead''',
+					AmeliaPackage.Literals.RUN_COMMAND__LIBPATH, INVALID_PARAMETER_TYPE)
 		}
 	}
 
