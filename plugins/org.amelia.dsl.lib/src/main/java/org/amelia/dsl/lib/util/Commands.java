@@ -48,6 +48,7 @@ public class Commands {
 	public static class RunBuilder {
 		
 		private String compositeName;
+		private int port;
 		private String[] libpath;
 		private String serviceName;
 		private String methodName;
@@ -58,6 +59,7 @@ public class Commands {
 		private String[] errorTexts;
 
 		public RunBuilder() {
+			this.port = -1;
 			this.timeout = 0;
 			this.releaseRegexp = "Press Ctrl\\+C to quit\\.\\.\\.|Call done!";
 			this.errorTexts = new String[0];
@@ -67,6 +69,12 @@ public class Commands {
 			this.compositeName = compositeName;
 			return this;
 		}
+		
+		public RunBuilder withPort(final int port) {
+			this.port = port;
+			return this;
+		}
+		
 		public RunBuilder withLibpath(final List<String> libs) {
 			return withLibpath(libs.toArray(new String[0]));
 		}
@@ -134,6 +142,10 @@ public class Commands {
 
 			List<String> arguments = new ArrayList<String>();
 			arguments.add("run");
+			if (port != -1) {
+				arguments.add("-r");
+				arguments.add(String.valueOf(port));
+			}
 			arguments.add(this.compositeName);
 			arguments.add("-libpath");
 			arguments.add(Arrays.join(this.libpath, ":"));
