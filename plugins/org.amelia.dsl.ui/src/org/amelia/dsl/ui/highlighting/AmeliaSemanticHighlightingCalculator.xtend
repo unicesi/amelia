@@ -46,7 +46,6 @@ class AmeliaSemanticHighlightingCalculator extends XbaseHighlightingCalculator {
 	def protected highlightCustomCommand(EObject expr, IHighlightedPositionAcceptor acceptor) {
 		val node = NodeModelUtils.findActualNodeFor(expr);
 		highlightNode(acceptor, node, AmeliaHighlightingConfiguration.CUSTOM_COMMAND_ID);
-		// TODO: lexical highlight: http://www.eclipse.org/forums/index.php?t=msg&goto=479001&
 	}
 	
 }

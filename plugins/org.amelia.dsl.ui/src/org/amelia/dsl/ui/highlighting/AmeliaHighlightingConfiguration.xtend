@@ -26,15 +26,15 @@ import org.eclipse.xtext.xbase.ui.highlighting.XbaseHighlightingConfiguration
  */
 class AmeliaHighlightingConfiguration extends XbaseHighlightingConfiguration {
 	
-	public static val String CUSTOM_COMMAND_ID = "amelia.custom_command";
+	public static val String CUSTOM_COMMAND_ID = "amelia.custom_command"
 	
 	override configure(IHighlightingConfigurationAcceptor acceptor) {
-		acceptor.acceptDefaultHighlighting(CUSTOM_COMMAND_ID, "Custom command literals", customCommand());
-		super.configure(acceptor);
+		acceptor.acceptDefaultHighlighting(CUSTOM_COMMAND_ID, "Custom command literals", customCommand())
+		super.configure(acceptor)
 	}
 
 	def customCommand() {
-		val textStyle = stringTextStyle.copy;
+		val textStyle = stringTextStyle.copy
 		return textStyle;
 	}
 	

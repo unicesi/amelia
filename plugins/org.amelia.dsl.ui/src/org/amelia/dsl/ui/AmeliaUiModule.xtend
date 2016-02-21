@@ -23,6 +23,8 @@ import org.amelia.dsl.ui.highlighting.AmeliaHighlightingConfiguration
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 import org.amelia.dsl.ui.highlighting.AmeliaSemanticHighlightingCalculator
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
+import org.eclipse.xtext.ui.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
+import org.amelia.dsl.ui.highlighting.AmeliaAntlrTokenToAttributeIdMapper
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -33,12 +35,18 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculat
 class AmeliaUiModule extends AbstractAmeliaUiModule {
 	
 	override Class<? extends ISemanticHighlightingCalculator> bindIdeSemanticHighlightingCalculator() {
-		return AmeliaSemanticHighlightingCalculator;
+		return AmeliaSemanticHighlightingCalculator
 	}
 
 	override Class<? extends IHighlightingConfiguration> bindIHighlightingConfiguration() {
-		return AmeliaHighlightingConfiguration;
+		return AmeliaHighlightingConfiguration
 	}
 	
+	def Class<? extends IHighlightingConfiguration> bindILexicalHighlightingConfiguration() {
+		return AmeliaHighlightingConfiguration
+	}
 	
+	override Class<? extends AbstractAntlrTokenToAttributeIdMapper> bindAbstractAntlrTokenToAttributeIdMapper() {
+		return AmeliaAntlrTokenToAttributeIdMapper
+	}
 }
