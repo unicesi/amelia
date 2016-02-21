@@ -214,18 +214,28 @@ class AmeliaCompiler extends XbaseCompiler {
 		} else {
 			appendable.append(Commands).append(".generic(")
 			internalToConvertedExpression(expr.value, appendable)
-			appendable.append(")")	
+			appendable.append(")")
 		}
 	}
 	
 	def protected void _toJavaExpression(CdCommand expr, ITreeAppendable appendable) {
-		appendable.append(Commands).append(".cd").append("(")
+		appendable.append(Commands)
+		if (expr.initializedLater)
+			appendable.append(".cdBuilder")
+		else
+			appendable.append(".cd")
+		appendable.append("(")
 		internalToConvertedExpression(expr.directory, appendable)
 		appendable.append(")")
 	}
 	
 	def protected void _toJavaExpression(CompileCommand expr, ITreeAppendable appendable) {
-		appendable.append(Commands).append(".compile").append("(")
+		appendable.append(Commands)
+		if (expr.initializedLater)
+			appendable.append(".compileBuilder")
+		else
+			appendable.append(".compile")
+		appendable.append("(")
 		internalToConvertedExpression(expr.source, appendable)
 		appendable.append(", ")
 		internalToConvertedExpression(expr.output, appendable)

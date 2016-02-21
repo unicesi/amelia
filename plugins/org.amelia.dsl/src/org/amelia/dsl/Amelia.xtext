@@ -63,11 +63,12 @@ RuleDeclaration returns xbase::XExpression
 	;
 
 CdCommand
-	:	'cd' directory = XExpression
+	:	'cd' directory = XExpression (=> initializedLater ?= '...')?
 	;
 
 CompileCommand
-	:	'compile' source = XExpression output = XExpression classpath = XExpression
+	:	'compile' source = XExpression output = XExpression classpath = XExpression 
+		(=> initializedLater ?= '...')?
 	;
 
 RunCommand
