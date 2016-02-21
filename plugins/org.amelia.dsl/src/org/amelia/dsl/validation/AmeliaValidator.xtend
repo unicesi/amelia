@@ -141,19 +141,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkNoRecursiveDependencies(Subsystem subsystem) {
-		subsystem.findDependentElements [ cycle |
-			if (cycle.size == 1) {
-				error('''The subsystem '«subsystem.name»' cannot depend on itself.''', 
-					  cycle.head, AmeliaPackage.Literals.SUBSYSTEM__NAME, CYCLIC_DEPENDENCY)
-			} else {
-				error('''There is a cyclic dependency that involves subsystems «cycle.filter(Subsystem).map[name].join(", ")»''', 
-					  cycle.head, AmeliaPackage.Literals.SUBSYSTEM__NAME, CYCLIC_DEPENDENCY)
-			}
-		]
-	}
-	
-	@Check
 	def void checkCdCommand(CdCommand expr) {
 		if (expr.directory.actualType.getSuperType(String) == null) {
 			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
@@ -284,6 +271,32 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		}
 	}
 	
+	@Check
+	def void checkNoRecursiveDependencies(Subsystem subsystem) {
+		subsystem.findDependentElements [ cycle |
+			if (cycle.size == 1) {
+				error('''The subsystem '«subsystem.name»' cannot depend on itself.''', 
+					  cycle.head, AmeliaPackage.Literals.SUBSYSTEM__NAME, CYCLIC_DEPENDENCY)
+			} else {
+				error('''There is a cyclic dependency that involves subsystems «cycle.filter(Subsystem).map[name].join(", ")»''', 
+					  cycle.head, AmeliaPackage.Literals.SUBSYSTEM__NAME, CYCLIC_DEPENDENCY)
+			}
+		]
+	}
+	
+	@Check
+	def void checkNoRecursiveDependencies(RuleDeclaration rule) {
+		rule.findDependentElements [ cycle |
+			if (cycle.size == 1) {
+				error('''The rule '«rule.name»' cannot depend on itself.''', 
+					  cycle.head, AmeliaPackage.Literals.RULE_DECLARATION__NAME, CYCLIC_DEPENDENCY)
+			} else {
+				error('''There is a cyclic dependency that involves rules «cycle.filter(RuleDeclaration).map[name].join(", ")»''', 
+					  cycle.head, AmeliaPackage.Literals.RULE_DECLARATION__NAME, CYCLIC_DEPENDENCY)
+			}
+		]
+	}
+	
 	/**
 	 * Adapted from 
 	 * https://github.com/xtext/seven-languages-xtext/blob/master/languages/\
@@ -301,7 +314,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			changed = false
 			for (t : elements.toList) {
 				val dependencies = if (t instanceof Subsystem)
-						t.includes.includeDeclarations
+						t.includes.includeDeclarations.map[d|d.includedType]
 					else if (t instanceof RuleDeclaration)
 						t.dependencies
 				if (result.containsAll(dependencies)) {
@@ -320,7 +333,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (!set.add(e))
 			return;
 		val dependencies = if (e instanceof Subsystem)
-				e.includes.includeDeclarations
+				e.includes.includeDeclarations.map[d|d.includedType]
 			else if (e instanceof RuleDeclaration)
 				e.dependencies
 		for (t : dependencies) 
