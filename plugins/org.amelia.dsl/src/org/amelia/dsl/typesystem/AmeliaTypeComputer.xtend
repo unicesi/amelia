@@ -63,7 +63,10 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		addLocalToCurrentScope(command.value, state)
 		
 		// set the actual type for the entire expression
-		val result = getRawTypeForName(CommandDescriptor, state);
+		val result = if (command.initializedLater)
+				getRawTypeForName(CommandDescriptor.Builder, state)
+			else
+				getRawTypeForName(CommandDescriptor, state)
 		state.acceptActualType(result)
 	}
 	

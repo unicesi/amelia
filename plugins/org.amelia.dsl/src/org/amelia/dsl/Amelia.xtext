@@ -83,7 +83,7 @@ RunCommand
 	;
 
 CustomCommand
-	:	'$' value = XExpression
+	:	'$' value = XExpression (=> initializedLater ?= '...')?
 	;
 
 CommandLiteral

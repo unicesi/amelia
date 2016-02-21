@@ -36,6 +36,7 @@ import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.amelia.dsl.amelia.RunCommand
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -203,9 +204,18 @@ class AmeliaCompiler extends XbaseCompiler {
 	 * TODO: Add a way to further initialize this element (e.g., messages)
 	 */
 	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable appendable) {
-		appendable.append(Commands).append(".generic(")
-		internalToConvertedExpression(expr.value, appendable)
-		appendable.append(")")
+		if (expr.initializedLater) {
+			appendable.append("new ").append(CommandDescriptor.Builder).append("()")
+			appendable.increaseIndentation.increaseIndentation
+			appendable.newLine.append(".withCommand(")
+			internalToConvertedExpression(expr.value, appendable)
+			appendable.append(")")
+			appendable.decreaseIndentation.decreaseIndentation
+		} else {
+			appendable.append(Commands).append(".generic(")
+			internalToConvertedExpression(expr.value, appendable)
+			appendable.append(")")	
+		}
 	}
 	
 	def protected void _toJavaExpression(CdCommand expr, ITreeAppendable appendable) {
