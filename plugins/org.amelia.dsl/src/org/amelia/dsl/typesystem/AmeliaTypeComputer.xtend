@@ -27,6 +27,8 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
 import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CompileCommand
+import org.amelia.dsl.amelia.RunCommand
+import org.amelia.dsl.lib.util.Commands
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -37,6 +39,7 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		switch (expression) {
 			CdCommand: _computeTypes(expression, state)
 			CompileCommand: _computeTypes(expression, state)
+			RunCommand: _computeTypes(expression, state)
 			CustomCommand: _computeTypes(expression, state)
 			OnHostBlockExpression: _computeTypes(expression, state)
 			StringLiteral: _computeTypes(expression, state)
@@ -105,5 +108,37 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		// set the actual type for the entire expression
 		val result = getRawTypeForName(CommandDescriptor, state);
 		state.acceptActualType(result);
+	}
+	
+	def protected _computeTypes(RunCommand command, ITypeComputationState state) {
+		// Compute type for the inner expressions
+		state.withinScope(command);
+		val noExpectationState = state.withoutExpectation();
+		noExpectationState.computeTypes(command.composite);
+		addLocalToCurrentScope(command.composite, state);
+		noExpectationState.computeTypes(command.libpath);
+		addLocalToCurrentScope(command.libpath, state);
+		if (command.hasPort) {
+			noExpectationState.computeTypes(command.port);
+			addLocalToCurrentScope(command.port, state);
+		}
+		if (command.hasService) {
+			noExpectationState.computeTypes(command.service);
+			addLocalToCurrentScope(command.service, state);
+		}
+		if (command.hasMethod) {
+			noExpectationState.computeTypes(command.method);
+			addLocalToCurrentScope(command.method, state);
+		}
+		if (command.hasParams) {
+			noExpectationState.computeTypes(command.params);
+			addLocalToCurrentScope(command.params, state);
+		}	
+		// set the actual type for the entire expression
+		val result = if (command.initializedLater)
+				getRawTypeForName(Commands.RunBuilder, state)
+			else
+				getRawTypeForName(CommandDescriptor, state)
+		state.acceptActualType(result)
 	}
 }

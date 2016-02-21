@@ -35,6 +35,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
+import org.amelia.dsl.amelia.RunCommand
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -45,6 +46,7 @@ class AmeliaCompiler extends XbaseCompiler {
 		switch (obj) {
 			CdCommand: _toJavaExpression(obj, appendable)
 			CompileCommand: _toJavaExpression(obj, appendable)
+			RunCommand: _toJavaExpression(obj, appendable)
 			CustomCommand: _toJavaExpression(obj, appendable)
 			OnHostBlockExpression: _toJavaExpression(obj, appendable)
 			RuleDeclaration: _toJavaExpression(obj, appendable)
@@ -220,6 +222,42 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append(", ")
 		internalToConvertedExpression(expr.classpath, appendable)
 		appendable.append(")")
+	}
+	
+	def protected void _toJavaExpression(RunCommand expr, ITreeAppendable appendable) {
+		appendable.append(Commands).append(".run").append("()")
+		appendable.increaseIndentation.increaseIndentation
+		
+		appendable.newLine.append(".withComposite(")
+		internalToConvertedExpression(expr.composite, appendable)
+		appendable.append(")")
+		
+		appendable.newLine.append(".withLibpath(")
+		internalToConvertedExpression(expr.libpath, appendable)
+		appendable.append(")")
+		if (expr.hasPort) {
+			appendable.newLine.append(".withPort(")
+			internalToConvertedExpression(expr.port, appendable)
+			appendable.append(")")
+		}
+		if (expr.hasService) {
+			appendable.newLine.append(".withService(")
+			internalToConvertedExpression(expr.service, appendable)
+			appendable.append(")")
+		}
+		if (expr.hasMethod) {
+			appendable.newLine.append(".withMethod(")
+			internalToConvertedExpression(expr.method, appendable)
+			appendable.append(")")
+		}
+		if (expr.hasParams) {
+			appendable.newLine.append(".withArguments(")
+			internalToConvertedExpression(expr.params, appendable)
+			appendable.append(")")
+		}
+		if (!expr.initializedLater)
+			appendable.append(".build()")
+		appendable.decreaseIndentation.decreaseIndentation
 	}
 
 }

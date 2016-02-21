@@ -70,12 +70,17 @@ CompileCommand
 	:	'compile' source = XExpression output = XExpression classpath = XExpression
 	;
 
-//Run
-//	:	'run' hasPort ?= '-r' port = XExpression
-//		composite = XExpression '-libpath' libpath = XExpression 
-//		hasService ?= '-s' service = XExpression?
-//		hasMethod ?= '-m' method = XExpression?
-//	;
+RunCommand
+	:
+		'run' (hasPort ?= '-r' port = XExpression)?
+		composite = XExpression '-libpath' libpath = XExpression
+		(=>
+			hasService ?= ('-s' | '--service-name') service = XExpression
+			hasMethod ?= ('-m' | '--method-name') method = XExpression
+			(=> hasParams ?= '-p' params = XExpression)?
+		)?
+		(=> initializedLater ?= '...')?
+	;
 
 CustomCommand
 	:	'$' value = XExpression
@@ -85,7 +90,7 @@ CommandLiteral
 	:	CdCommand
 	|	CompileCommand
 	|	CustomCommand
-//	|	Run
+	|	RunCommand
 	;
 
 StringLiteral
