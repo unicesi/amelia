@@ -234,8 +234,11 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				AmeliaPackage.Literals.COMPILE_COMMAND__OUTPUT, INVALID_PARAMETER_TYPE)
 		}
 		val classpathType = expr.classpath.actualType
-		if (classpathType.getSuperType(typeof(String[])) == null && classpathType.getSuperType(List) == null) {
-			error('''The classpath must be of type String[], «classpathType.simpleName» was found instead''',
+		if (classpathType.getSuperType(typeof(String)) == null 
+			&& classpathType.getSuperType(typeof(String[])) == null 
+			&& classpathType.getSuperType(List) == null
+		) {
+			error('''The classpath must be of type String or String[], «classpathType.simpleName» was found instead''',
 				AmeliaPackage.Literals.COMPILE_COMMAND__CLASSPATH, INVALID_PARAMETER_TYPE)
 		} else if (classpathType.getSuperType(List) != null) {
 			var showError = false
