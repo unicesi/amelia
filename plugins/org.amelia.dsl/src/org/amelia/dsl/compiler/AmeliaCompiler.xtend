@@ -36,6 +36,8 @@ import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.eclipse.xtext.util.Strings
+import org.amelia.dsl.amelia.EvalCommand
+import org.pascani.dsl.lib.sca.FrascatiUtils
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -48,6 +50,7 @@ class AmeliaCompiler extends XbaseCompiler {
 			CompileCommand: _toJavaExpression(obj, appendable)
 			RunCommand: _toJavaExpression(obj, appendable)
 			CustomCommand: _toJavaExpression(obj, appendable)
+			EvalCommand: _toJavaExpression(obj, appendable)
 			StringLiteral: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
@@ -83,7 +86,6 @@ class AmeliaCompiler extends XbaseCompiler {
 	}
 	
 	def protected String formatCommandText(String value, boolean escapeClosingComment) {
-		// FIXME: review character scaping. Valid chars such as \n shouldn't be escaped
 		var _value = if (escapeClosingComment)
 				value.replaceAll("\\\\* \\/", "\\\\* \\/")
 			else
@@ -137,9 +139,6 @@ class AmeliaCompiler extends XbaseCompiler {
 		}, b, isReferenced);
 	}
 	
-	/*
-	 * TODO: Add a way to further initialize this element (e.g., messages)
-	 */
 	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable appendable) {
 		if (expr.initializedLater) {
 			appendable.append("new ").append(CommandDescriptor.Builder).append("()")
@@ -153,6 +152,18 @@ class AmeliaCompiler extends XbaseCompiler {
 			internalToConvertedExpression(expr.value, appendable)
 			appendable.append(")")
 		}
+	}
+	
+	def protected void _toJavaExpression(EvalCommand expr, ITreeAppendable appendable) {
+		appendable.append(Commands)
+		appendable.append(".registerFScript(")
+		internalToConvertedExpression(expr.script, appendable)
+		appendable.append(", ")
+		if (expr.uri != null)
+			internalToConvertedExpression(expr.uri, appendable)
+		else
+			appendable.append(FrascatiUtils).append(".DEFAULT_BINDING_URI")
+		appendable.append(")")
 	}
 	
 	def protected void _toJavaExpression(CdCommand expr, ITreeAppendable appendable) {

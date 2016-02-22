@@ -91,6 +91,10 @@ RunCommand
 		(=> initializedLater ?= '...')?
 	;
 
+EvalCommand
+	:	(=> 'on' uri = XExpression)? 'eval' script = XExpression
+	;
+
 CustomCommand
 	:	'$' value = XExpression (=> initializedLater ?= '...')?
 	;
@@ -100,6 +104,7 @@ CommandLiteral
 	|	CompileCommand
 	|	CustomCommand
 	|	RunCommand
+	|	EvalCommand
 	;
 
 StringLiteral
