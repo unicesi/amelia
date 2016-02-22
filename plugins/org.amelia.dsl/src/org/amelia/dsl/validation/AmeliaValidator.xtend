@@ -237,8 +237,9 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			if (classpathType.getSuperType(List).typeArguments.length == 1) {
 				if (!classpathType.getSuperType(List).typeArguments.get(0).identifier.equals(String.canonicalName))
 					showError = true
-			} else
+			} else {
 				showError = true
+			}
 
 			if (showError)
 				error('''The classpath must be of type List<String>, «classpathType.simpleName» was found instead''',
@@ -248,9 +249,22 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkHost(OnHostBlockExpression declaration) {
-		if (declaration.host.actualType.getSuperType(Host) == null) {
-			error('''The host must be of type «Host.simpleName»''',
+		val hostType = declaration.host.actualType
+		if (hostType.getSuperType(Host) == null && hostType.getSuperType(List) == null) {
+			error('''The host must be of type «Host.simpleName» or List<«Host.simpleName»>''',
 				AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOST, INVALID_PARAMETER_TYPE)
+		} else if (hostType.getSuperType(List) != null) {
+		var showError = false
+		if (hostType.getSuperType(List).typeArguments.length == 1) {
+			if (!hostType.getSuperType(List).typeArguments.get(0).identifier.equals(Host.canonicalName))
+				showError = true
+			} else {
+				showError = true	
+			}
+	
+			if (showError)
+				error('''The hosts parameter must be of type List<«hostType.simpleName»>, «hostType.simpleName» was found instead''',
+					AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOST, INVALID_PARAMETER_TYPE)
 		}
 	}
 	
