@@ -60,7 +60,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						documentation = declaration.documentation
 						initializer = declaration.right
 						final = !declaration.writeable
-						static = true
 					]
 				}
 				members += subsystem.toMethod("deploy", typeRef(void)) [
