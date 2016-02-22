@@ -65,7 +65,7 @@ OnHostBlockExpression
 
 RuleDeclaration
 	:	name = ID ':' (dependencies += [RuleDeclaration | ID] (',' dependencies += [RuleDeclaration | ID])*)?
-		'|' (expressions += XExpression)* -> ';'
+		'|' (expressions += XExpression)*
 	;
 
 CdCommand
