@@ -56,15 +56,16 @@ InternalSubsystemDeclaration
 
 VariableDeclaration
 	:	{VariableDeclaration}
-		(writeable?='var'|'val') (=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?;
+		(writeable?='var'|'val') (=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
+	;
 
 OnHostBlockExpression
-	:	'on' host = XExpression '{' rules += RuleDeclaration* '}'
+	:	'on' '(' host = XExpression ')' '[' (rules += RuleDeclaration)* ']'
 	;
 
 RuleDeclaration
 	:	name = ID ':' (dependencies += [RuleDeclaration | ID] (',' dependencies += [RuleDeclaration | ID])*)?
-		'|' (expressions += XExpression)+ -> ';'
+		'|' (expressions += XExpression)* -> ';'
 	;
 
 CdCommand
