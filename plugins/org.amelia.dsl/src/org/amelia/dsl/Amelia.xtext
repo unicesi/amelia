@@ -25,6 +25,7 @@ generate amelia "http://www.amelia.org/dsl/Amelia"
 
 Model
 	:	('package' name = QualifiedName ->';'?)?
+		importSection = XImportSection?
 		typeDeclaration = TypeDeclaration?
 	;
 
