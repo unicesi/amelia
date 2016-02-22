@@ -61,6 +61,11 @@
 			<version>${xtextVersion}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.pascani</groupId>
+			<artifactId>org.pascani.dsl.lib.sca</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

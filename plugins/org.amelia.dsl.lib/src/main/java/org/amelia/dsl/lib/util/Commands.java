@@ -20,7 +20,10 @@ package org.amelia.dsl.lib.util;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -29,6 +32,8 @@ import java.util.regex.Pattern;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.descriptors.Version;
+import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
+import org.pascani.dsl.lib.sca.FrascatiUtils;
 
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectIOException;
@@ -446,6 +451,72 @@ public class Commands {
 				.withErrorText(errorTexts)
 				.withCommand(command).build();
 		return result;
+	}
+	
+	/**
+	 * Configures a {@link CommandDescriptor} to evaluate the given FScript in
+	 * the specified FraSCAti runtime.
+	 * 
+	 * @param script
+	 *            The script to evaluate
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @return A new {@link CommandDescriptor} instance configured to evaluate
+	 *         the given script.
+	 */
+	public static CommandDescriptor evalFScript(final String script, final URI bindingUri) {
+		CommandDescriptor eval = new CommandDescriptor.Builder()
+				.withCallable(new CallableTask<Collection<SCANamedNode>>() {
+					@Override public Collection<SCANamedNode> call(Host host,
+							String prompt) throws Exception {
+						return FrascatiUtils.eval(script, bindingUri);
+					}
+				}).build();
+		return eval;
+	}
+	
+	/**
+	 * Configures a {@link CommandDescriptor} to register the given FScript file
+	 * in the specified FraSCAti runtime.
+	 * 
+	 * @param script
+	 *            A {@link File} pointing to the FScript to register
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @return A new {@link CommandDescriptor} instance configured to register
+	 *         the given FScript file.
+	 */
+	public static CommandDescriptor registerFScript(final File script, final URI bindingUri) {
+		CommandDescriptor register = new CommandDescriptor.Builder()
+				.withCallable(new CallableTask<List<String>>() {
+					@Override public List<String> call(Host host,
+							String prompt) throws Exception {
+						return FrascatiUtils.registerScript(script, bindingUri);
+					}
+				}).build();
+		return register;
+	}
+	
+	/**
+	 * Configures a {@link CommandDescriptor} to register the given FScript in
+	 * the specified FraSCAti runtime.
+	 * 
+	 * @param script
+	 *            The FScript to register
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @return A new {@link CommandDescriptor} instance configured to register
+	 *         the given FScript.
+	 */
+	public static CommandDescriptor registerFScript(final String script, final URI bindingUri) {
+		CommandDescriptor register = new CommandDescriptor.Builder()
+				.withCallable(new CallableTask<List<String>>() {
+					@Override public List<String> call(Host host,
+							String prompt) throws Exception {
+						return FrascatiUtils.registerScript(script, bindingUri);
+					}
+				}).build();
+		return register;
 	}
 
 }
