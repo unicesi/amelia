@@ -139,28 +139,27 @@ XLiteral returns xbase::XExpression
 	|	XBooleanLiteral
 	|	XNumberLiteral
 	|	XNullLiteral
-	|	XStringLiteral
 	|	XTypeLiteral
 	|	CommandLiteral
 	|	StringLiteral
 	;
 
 terminal TEXT
-	:	"'" ('\\' . | !('\\' | "'" | '{' | '}') )* "'"
+	:	'"' ('\\' . | !('\\' | '"' | '{' | '}') )* '"'
 	;
 
 terminal TEXT_START
-	:	"'" ('\\' . | !('\\' | "'" | '{') )* '{'
+	:	'"' ('\\' . | !('\\' | '"' | '{') )* '{'
 	;
 
 terminal TEXT_MIDDLE
-	:	'}' ('\\' . | !('\\' | "'" | '{') )* '{'
+	:	'}' ('\\' . | !('\\' | '"' | '{') )* '{'
 	;
 
 terminal TEXT_END
-	:	'}' ('\\' . | !('\\' | "'" | '{') )* "'"
+	:	'}' ('\\' . | !('\\' | '"' | '{') )* '"'
 	;
 
 terminal STRING
-	:	'"' ( '\\' . /* ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') */ | !('\\'|'"') )* '"'?
+	:	"'" ( '\\' . /* ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') */ | !('\\'|"'") )* "'"?
 	;

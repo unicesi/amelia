@@ -35,6 +35,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
+import org.eclipse.xtext.util.Strings
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -87,14 +88,12 @@ class AmeliaCompiler extends XbaseCompiler {
 				value.replaceAll("\\\\* \\/", "\\\\* \\/")
 			else
 				value
-		var lines = _value // Strings.convertToJavaString(_value, true)
+		_value = _value
 			.substring(1, value.length - 1)
-			.replaceAll("\"", "\\\\\"")
+			.replaceAll("\\\\\"", "\"")
 			.replaceAll("\\\\\\{", "{")
 			.replaceAll("\\\\\\}", "}")
-			.replaceAll("\\\\\\'", "'")
-			.replaceAll("(\\\\)([^\"])", "$1$1$2") // replace \_ by \\_
-			.split("\n")
+		var lines = Strings.convertToJavaString(_value, true).split("\n")
 		if (lines.length > 1)
 			lines = lines.map[l|l.replaceAll("^\\s*", "")] // left trim
 		return lines.filter[l|!l.isEmpty].join(" ")
