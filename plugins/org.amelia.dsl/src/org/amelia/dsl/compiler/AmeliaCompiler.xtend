@@ -156,7 +156,7 @@ class AmeliaCompiler extends XbaseCompiler {
 	
 	def protected void _toJavaExpression(EvalCommand expr, ITreeAppendable appendable) {
 		appendable.append(Commands)
-		appendable.append(".registerFScript(")
+		appendable.append(".evalFScript(")
 		internalToConvertedExpression(expr.script, appendable)
 		appendable.append(", ")
 		if (expr.uri != null)
