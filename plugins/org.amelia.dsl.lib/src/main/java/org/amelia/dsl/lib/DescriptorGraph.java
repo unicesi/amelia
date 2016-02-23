@@ -242,12 +242,12 @@ public class DescriptorGraph
 	/**
 	 * Resolve dependencies and do nothing after deployment has been finished
 	 */
-	public void resolve(final boolean stopPreviousExecutions)
+	public void execute(final boolean stopPreviousExecutions)
 			throws InterruptedException, IOException {
-		resolve(stopPreviousExecutions, false, false);
+		execute(stopPreviousExecutions, false, false);
 	}
 
-	public void resolve(final boolean stopPreviousExecutions,
+	public void execute(final boolean stopPreviousExecutions,
 			final boolean shutdownAfterDeployment,
 			final boolean stopExecutionsWhenFinish)
 					throws InterruptedException, IOException {
