@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.TreeSet;
@@ -72,7 +71,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 						public Void call() throws Exception {
 							subsystem.start();
 							subsystem.deployment().deploy(subsystem.alias(),
-									depsAsMap());
+									dependencies);
 							if (!shutdown)
 								subsystem.done();
 							else
@@ -109,15 +108,6 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 
 			while (this.doneSignal.getCount() > 0)
 				this.doneSignal.countDown();
-		}
-
-		public Map<String, Subsystem> depsAsMap() {
-			Map<String, Subsystem> deps = new HashMap<String, Subsystem>();
-
-			for (Subsystem subsystem : this.dependencies)
-				deps.put(subsystem.alias(), subsystem);
-
-			return deps;
 		}
 	}
 

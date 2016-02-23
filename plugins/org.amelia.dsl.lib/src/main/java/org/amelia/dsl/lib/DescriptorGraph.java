@@ -338,6 +338,10 @@ public class DescriptorGraph
 			thread.join();
 	}
 	
+	public ExecutionManager executionManager() {
+		return this.executionManager;
+	}
+	
 	public String subsystem() {
 		return this.subsystem;
 	}

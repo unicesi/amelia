@@ -19,8 +19,8 @@
 package org.amelia.dsl.lib;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.amelia.dsl.lib.util.Log;
 
@@ -30,9 +30,21 @@ import org.amelia.dsl.lib.util.Log;
 public class Subsystem {
 
 	public abstract static class Deployment extends OpenObservable {
-		// TODO: provide access for other classes to shutdown their dependencies
+
+		protected DescriptorGraph graph;
+		
 		public abstract void deploy(String subsystem,
-				Map<String, Subsystem> dependencies) throws Exception;
+				List<Subsystem> dependencies) throws Exception;
+		
+		public void shutdown(boolean stopExecutedComponents) {
+			this.graph.executionManager().shutdown(stopExecutedComponents);
+		}
+		
+		public void releaseDependencies(Collection<Subsystem> subsystems) {
+			for (Subsystem dependency : subsystems) {
+				dependency.deployment().shutdown(true);
+			}
+		}
 	}
 
 	private final String alias;

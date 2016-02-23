@@ -205,7 +205,8 @@ public class ExecutionManager {
 		// Prevent shutting down more than once
 		if (!shuttingDown) {
 			shuttingDown = true;
-			Log.info("Starting deployment shutdown");
+			Log.info("Starting deployment shutdown ("
+					+ this.executionGraph.subsystem() + ")");
 
 			try {
 				Host[] sshHosts = executionGraph.sshHosts()
