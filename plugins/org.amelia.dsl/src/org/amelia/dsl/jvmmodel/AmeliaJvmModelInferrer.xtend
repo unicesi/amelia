@@ -24,15 +24,14 @@ import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.VariableDeclaration
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
+import org.amelia.dsl.lib.descriptors.Host
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
+import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.eclipse.xtext.common.types.JvmVisibility
-import org.amelia.dsl.lib.descriptors.Host
-import java.util.List
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
