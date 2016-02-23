@@ -76,13 +76,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					body = [
 						var currentHostBlock = 0
 						for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
-							append(Host).append('''[] hosts«currentHostBlock» = {''')
+							append(Host).append('''[] hosts«currentHostBlock» = { ''')
 							for (var currentHost = 0; currentHost < hostBlock.hosts.length; currentHost++) {
 								append("getHost" + currentHostBlock + currentHost + "()")
 								if (currentHost < hostBlock.hosts.length - 1)
 									append(", ")
 							}
-							append("};")
+							append(" };")
 							newLine
 							for (rule : hostBlock.rules) {
 								var currentCommand = 0
