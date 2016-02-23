@@ -32,6 +32,8 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.amelia.dsl.lib.DescriptorGraph
+import org.amelia.dsl.lib.util.Arrays
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -75,10 +77,12 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					}	
 				}
 				members += subsystem.toMethod("deploy", typeRef(void)) [
+					val subsystemParam = "subsystem"
+					val dependenciesParam = "dependencies"
 					exceptions += typeRef(Exception)
-					parameters += subsystem.toParameter("subsystem", typeRef(String))
+					parameters += subsystem.toParameter(subsystemParam, typeRef(String))
 					parameters +=
-						subsystem.toParameter("dependencies",
+						subsystem.toParameter(dependenciesParam,
 							typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
 					body = [
 						var currentHostBlock = 0
@@ -104,16 +108,23 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 											dependencies += dependency + "[0]"
 										}
 										append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')
+										newLine
 									} else if (currentCommand > 0) {
 										append('''«rule.name»[«currentCommand»].dependsOn(«rule.name»[«(currentCommand - 1)»]);''')
+										newLine
 									}
 									currentCommand++
-									if (currentCommand == rule.commands.length)
-										newLine
 								}
 							}
 							currentHostBlock++
 						}
+						val rules = subsystem.body.expressions
+							.filter(OnHostBlockExpression).map[h|h.rules].flatten.map[r|r.name].join(", ")
+						append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
+						append('''super.graph.addDescriptors(''').append(Arrays).append('''.concatAll(«rules»));''').newLine
+						append('''super.graph.execute(true);''').newLine
+						append('''releaseDependencies(«dependenciesParam»);''').newLine
+						append('''shutdown(true);''')
 					]
 				]
 				var currentHostBlock = 0
