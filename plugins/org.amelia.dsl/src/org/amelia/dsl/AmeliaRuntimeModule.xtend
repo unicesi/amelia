@@ -35,6 +35,8 @@ import org.amelia.dsl.outputconfiguration.OutputConfigurationAwaredGenerator
 import com.google.inject.Singleton
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
+import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.amelia.dsl.runtime.AmeliaQualifiedNameProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -82,6 +84,10 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 
 	def Class<? extends XbaseCompiler> bindXbaseCompiler() {
 		return AmeliaCompiler
+	}
+	
+	override Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
+		return AmeliaQualifiedNameProvider
 	}
 	
 }

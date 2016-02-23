@@ -18,8 +18,15 @@
  */
 package org.amelia.dsl.scoping
 
+import org.amelia.dsl.amelia.AmeliaPackage
+import org.amelia.dsl.amelia.IncludeDeclaration
+import org.amelia.dsl.amelia.RuleDeclaration
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.scoping.Scopes
+import org.amelia.dsl.amelia.Model
+import org.amelia.dsl.amelia.Subsystem
 
 /**
  * This class contains custom scoping description.
@@ -30,10 +37,23 @@ import org.eclipse.emf.ecore.EReference
  * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaScopeProvider extends AmeliaImportedNamespaceAwareLocalScopeProvider {
-	
+
 	override getScope(EObject context, EReference reference) {
 		switch (context) {
-			default: return super.getScope(context, reference)
+			RuleDeclaration case reference == AmeliaPackage.Literals.RULE_DECLARATION__DEPENDENCIES: {
+				val subsystem = (EcoreUtil2.getRootContainer(context) as Model).typeDeclaration as Subsystem
+				val candidates = if (subsystem.includes == null)
+						EcoreUtil2.getAllContentsOfType(subsystem, RuleDeclaration)
+					else
+						subsystem.includes.includeDeclarations.map[i|i.rules].flatten
+				return Scopes.scopeFor(candidates)
+			}
+			IncludeDeclaration case reference == AmeliaPackage.Literals.INCLUDE_DECLARATION__RULES: {
+				val candidates = EcoreUtil2.getAllContentsOfType(context.includedType, RuleDeclaration);
+				return Scopes.scopeFor(candidates)
+			}
+			default:
+				return super.getScope(context, reference)
 		}
 	}
 

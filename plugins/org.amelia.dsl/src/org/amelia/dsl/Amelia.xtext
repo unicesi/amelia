@@ -43,7 +43,8 @@ IncludeSection
 	;
 
 IncludeDeclaration
-	:	'include' includedType = [TypeDeclaration | QualifiedName] ->';'?
+	:	'from' includedType = [TypeDeclaration | QualifiedName] 
+		'include' rules += [RuleDeclaration | ID] (',' rules += [RuleDeclaration | ID])* ->';'?
 	;
 
 SubsystemBlockExpression
@@ -65,7 +66,7 @@ OnHostBlockExpression
 	;
 
 RuleDeclaration
-	:	name = ID ':' (dependencies += [RuleDeclaration | ID] (',' dependencies += [RuleDeclaration | ID])*)?
+	:	name = ID ':' (dependencies += [RuleDeclaration | QualifiedName] (',' dependencies += [RuleDeclaration | QualifiedName])*)?
 		'|' (commands += XExpression)*
 	;
 

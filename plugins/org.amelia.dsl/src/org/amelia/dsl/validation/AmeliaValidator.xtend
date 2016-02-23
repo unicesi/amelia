@@ -27,6 +27,9 @@ import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.amelia.EvalCommand
+import org.amelia.dsl.amelia.IncludeDeclaration
+import org.amelia.dsl.amelia.IncludeSection
 import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.RuleDeclaration
@@ -36,6 +39,7 @@ import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.lib.descriptors.Host
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBlockExpression
@@ -49,7 +53,6 @@ import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
-import org.amelia.dsl.amelia.EvalCommand
 
 /**
  * This class contains custom validation rules. 
@@ -65,6 +68,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
 	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
 	public static val INVALID_PARAMETER_TYPE = "amelia.issue.invalidParameterType"
+	public static val INVALID_SELF_INCLUDE = "amelia.issue.invalidSelfInclude"
 	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
 	
 	def fromURItoFQN(URI resourceURI) {
@@ -316,6 +320,32 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 					  cycle.head, AmeliaPackage.Literals.RULE_DECLARATION__NAME, CYCLIC_DEPENDENCY)
 			}
 		]
+	}
+	
+	/**
+	 * Check rules inside an include declaration and its siblings
+	 */
+	@Check
+	def checkEventInImportDeclaration(IncludeDeclaration includeDeclaration) {
+		// Rule name is unique
+		val includeSection = includeDeclaration.eContainer as IncludeSection
+		val rules = includeSection.includeDeclarations.toList.map[d|d.rules].flatten
+		for (rule : includeDeclaration.rules) {
+			val count = rules.filter[r|r.name.equals(rule.name)].size
+			if (count > 1) {
+				error("Duplicate local variable " + rule.name, AmeliaPackage.Literals.INCLUDE_DECLARATION__RULES,
+					DUPLICATE_LOCAL_VARIABLE)
+			}
+		}
+	}
+	
+	@Check
+	def checkIncludeIsExternal(IncludeDeclaration includeDeclaration) {
+		val subsystem = (EcoreUtil2.getRootContainer(includeDeclaration) as Model).typeDeclaration as Subsystem
+		if (subsystem.equals(includeDeclaration.includedType)) {
+			error("A subsystem cannot include rules from itself",
+				AmeliaPackage.Literals.INCLUDE_DECLARATION__INCLUDED_TYPE, INVALID_SELF_INCLUDE)
+		}
 	}
 	
 	/**
