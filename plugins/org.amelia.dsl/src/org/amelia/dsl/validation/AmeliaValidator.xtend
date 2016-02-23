@@ -49,6 +49,7 @@ import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
+import org.amelia.dsl.amelia.EvalCommand
 
 /**
  * This class contains custom validation rules. 
@@ -248,23 +249,24 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkHost(OnHostBlockExpression declaration) {
-		val hostType = declaration.host.actualType
-		if (hostType.getSuperType(Host) == null && hostType.getSuperType(List) == null) {
-			error('''The host must be of type «Host.simpleName» or List<«Host.simpleName»>''',
-				AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOST, INVALID_PARAMETER_TYPE)
-		} else if (hostType.getSuperType(List) != null) {
-		var showError = false
-		if (hostType.getSuperType(List).typeArguments.length == 1) {
-			if (!hostType.getSuperType(List).typeArguments.get(0).identifier.equals(Host.canonicalName))
-				showError = true
-			} else {
-				showError = true	
-			}
+	def void checkEvalCommand(EvalCommand expr) {
+		if (expr.uri != null && expr.uri.actualType.getSuperType(java.net.URI) == null) {
+			error('''The binding URI must be of type URI, «expr.uri.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.EVAL_COMMAND__URI, INVALID_PARAMETER_TYPE)
+		}
+		
+		if (expr.script != null && expr.script.actualType.getSuperType(String) == null) {
+			error('''The script must be of type String, «expr.script.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.EVAL_COMMAND__SCRIPT, INVALID_PARAMETER_TYPE)
+		}
+	}
 	
-			if (showError)
-				error('''The hosts parameter must be of type List<«hostType.simpleName»>, «hostType.simpleName» was found instead''',
-					AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOST, INVALID_PARAMETER_TYPE)
+	@Check
+	def void checkHost(OnHostBlockExpression declaration) {
+		val types = declaration.hosts.map[h|h.actualType.getSuperType(Host)]
+		if (types.exists[t|t == null]) {
+			error('''Hosts must be of type «Host.simpleName»''', AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOSTS,
+				INVALID_PARAMETER_TYPE)
 		}
 	}
 	

@@ -61,12 +61,12 @@ VariableDeclaration
 	;
 
 OnHostBlockExpression
-	:	'on' '(' host = XExpression ')' '[' (rules += RuleDeclaration)* ']'
+	:	'on' '(' hosts += XExpression (',' hosts += XExpression)* ')' '[' (rules += RuleDeclaration)* ']'
 	;
 
 RuleDeclaration
 	:	name = ID ':' (dependencies += [RuleDeclaration | ID] (',' dependencies += [RuleDeclaration | ID])*)?
-		'|' (expressions += XExpression)*
+		'|' (commands += XExpression)*
 	;
 
 CdCommand
@@ -74,11 +74,14 @@ CdCommand
 	;
 
 CompileCommand
-	:	'compile' source = XExpression output = XExpression 
+	:	'compile' source = XExpression output = XExpression
 		(=> classpath = XExpression?)
 		(=> initializedLater ?= '...')?
 	;
 
+
+// TODO: turn command parameters into: 
+// parameters += CommandParam (name = PARAM_NAME value = XExpression)
 RunCommand
 	:
 		'run' (hasPort ?= '-r' port = XExpression)?

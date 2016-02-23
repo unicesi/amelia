@@ -20,14 +20,19 @@ package org.amelia.dsl.jvmmodel
 
 import com.google.inject.Inject
 import java.util.Map
+import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.VariableDeclaration
+import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.eclipse.xtext.common.types.JvmVisibility
+import org.amelia.dsl.lib.descriptors.Host
+import java.util.List
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -69,9 +74,62 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						subsystem.toParameter("dependencies",
 							typeRef(Map, typeRef(String), typeRef(org.amelia.dsl.lib.Subsystem)))
 					body = [
-						append("/* empty */")
+						var currentHostBlock = 0
+						for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
+							append(Host).append('''[] hosts«currentHostBlock» = {''')
+							for (var currentHost = 0; currentHost < hostBlock.hosts.length; currentHost++) {
+								append("getHost" + currentHostBlock + currentHost + "()")
+								if (currentHost < hostBlock.hosts.length - 1)
+									append(", ")
+							}
+							append("};")
+							newLine
+							for (rule : hostBlock.rules) {
+								var currentCommand = 0
+								for (command : rule.commands) {
+									append(CommandDescriptor)
+									append(" " + rule.name + currentCommand)
+									append(" = " + "init" + rule.name.toFirstUpper + currentCommand + "();").newLine
+									append(rule.name + currentCommand).append(".runsOn(").append("hosts" + currentHostBlock).append(");").newLine
+									if (currentCommand == 0 && !rule.dependencies.empty) {
+										val dependencies = newArrayList
+										for (dependency : rule.dependencies.map[r|r.name]) {
+											dependencies += dependency + "0"
+										}
+										append(rule.name + currentCommand)
+										append(".dependsOn(").append(dependencies.join(", ")).append(");")
+										newLine
+									} else if (currentCommand > 0) {
+										append(rule.name + currentCommand)
+										append(".dependsOn(").append(rule.name + (currentCommand - 1)).append(");")
+										newLine
+									}
+									currentCommand++
+								}
+							}
+							currentHostBlock++
+						}
 					]
 				]
+				var currentHostBlock = 0
+				for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
+					var currentHost = 0
+					for (host : hostBlock.hosts) {
+						members += host.toMethod("getHost" + currentHostBlock + currentHost++, typeRef(Host)) [
+							body = host
+						]
+					}
+					for (rule : hostBlock.rules) {
+						var currentCommand = 0
+						for (command : rule.commands) {
+							members += rule.toMethod("init" + rule.name.toFirstUpper + currentCommand++, typeRef(CommandDescriptor)) [
+								visibility = JvmVisibility::PRIVATE
+								body = command
+							]
+						}
+					}
+					currentHostBlock++
+				}
 			}
 		]
 	}
