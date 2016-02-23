@@ -40,8 +40,8 @@ public class Subsystem {
 			this.graph.executionManager().shutdown(stopExecutedComponents);
 		}
 		
-		public void releaseDependencies(Collection<Subsystem> subsystems) {
-			for (Subsystem dependency : subsystems) {
+		public void releaseDependencies(Collection<Subsystem> dependencies) {
+			for (Subsystem dependency : dependencies) {
 				dependency.deployment().shutdown(true);
 			}
 		}
