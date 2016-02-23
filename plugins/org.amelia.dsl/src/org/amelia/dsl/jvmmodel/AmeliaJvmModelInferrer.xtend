@@ -19,7 +19,7 @@
 package org.amelia.dsl.jvmmodel
 
 import com.google.inject.Inject
-import java.util.Map
+import java.util.List
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.VariableDeclaration
@@ -79,7 +79,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					parameters += subsystem.toParameter("subsystem", typeRef(String))
 					parameters +=
 						subsystem.toParameter("dependencies",
-							typeRef(Map, typeRef(String), typeRef(org.amelia.dsl.lib.Subsystem)))
+							typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
 					body = [
 						var currentHostBlock = 0
 						for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
