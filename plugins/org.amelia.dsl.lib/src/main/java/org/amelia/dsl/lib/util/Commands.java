@@ -175,7 +175,7 @@ public class Commands {
 		}
 		
 		private CallableTask<Integer> callableTask(final List<String> arguments) {
-			final String[] errors = Arrays.concatenate(errorTexts,
+			final String[] errors = Arrays.concatAll(errorTexts,
 					new String[] {
 							"Error when parsing the composite file '" + compositeName + "'",
 							"Could not start the SCA composite '" + compositeName + "'",

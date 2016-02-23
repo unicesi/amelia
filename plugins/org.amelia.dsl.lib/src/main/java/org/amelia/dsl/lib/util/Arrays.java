@@ -24,13 +24,24 @@ import java.security.InvalidParameterException;
  * @author Miguel Jiménez - Initial contribution and API
  * 
  * TODO: document this class
+ * TODO: use generics
  */
 public class Arrays {
 	
-	public static String[] concatenate(String[] left, String[] right) {
-		String[] result = new String[left.length + right.length];
-		System.arraycopy(left, 0, result, 0, left.length);
-		System.arraycopy(right, 0, result, left.length, right.length);
+	/*
+	 * Taken from: http://stackoverflow.com/a/784842/738968
+	 */
+	public static <T> T[] concatAll(T[] first, T[]... rest) {
+		int totalLength = first.length;
+		for (T[] array : rest) {
+			totalLength += array.length;
+		}
+		T[] result = java.util.Arrays.copyOf(first, totalLength);
+		int offset = first.length;
+		for (T[] array : rest) {
+			System.arraycopy(array, 0, result, offset, array.length);
+			offset += array.length;
+		}
 		return result;
 	}
 	
