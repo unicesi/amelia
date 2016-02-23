@@ -43,8 +43,7 @@ IncludeSection
 	;
 
 IncludeDeclaration
-	:	'from' includedType = [TypeDeclaration | QualifiedName] 
-		'include' rules += [RuleDeclaration | ID] (',' rules += [RuleDeclaration | ID])* ->';'?
+	:	'include' includedType = [TypeDeclaration | QualifiedName] ->';'?
 	;
 
 SubsystemBlockExpression

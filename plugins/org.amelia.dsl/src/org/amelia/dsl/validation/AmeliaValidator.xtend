@@ -64,6 +64,7 @@ import org.eclipse.xtext.xbase.XbasePackage
 class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	public static val CYCLIC_DEPENDENCY = "amelia.issue.cyclicDependency"
+	public static val DUPLICATE_INCLUDE = "amelia.issue.duplicateInclude"
 	public static val DUPLICATE_LOCAL_VARIABLE = "amelia.issue.duplicateLocalVariable"
 	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
 	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
@@ -326,24 +327,22 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	 * Check rules inside an include declaration and its siblings
 	 */
 	@Check
-	def checkEventInImportDeclaration(IncludeDeclaration includeDeclaration) {
-		// Rule name is unique
+	def checkDuplicateIncludes(IncludeDeclaration includeDeclaration) {
 		val includeSection = includeDeclaration.eContainer as IncludeSection
-		val rules = includeSection.includeDeclarations.toList.map[d|d.rules].flatten
-		for (rule : includeDeclaration.rules) {
-			val count = rules.filter[r|r.name.equals(rule.name)].size
-			if (count > 1) {
-				error("Duplicate local variable " + rule.name, AmeliaPackage.Literals.INCLUDE_DECLARATION__RULES,
-					DUPLICATE_LOCAL_VARIABLE)
-			}
+		val duplicates = includeSection.includeDeclarations
+			.filter [i|i.includedType.equals(includeDeclaration.includedType)]
+			.filter[i|!i.equals(includeDeclaration)]
+		for (subsystem : duplicates) {
+			error("Duplicate include statement", AmeliaPackage.Literals.INCLUDE_DECLARATION__INCLUDED_TYPE,
+				DUPLICATE_INCLUDE)
 		}
 	}
 	
 	@Check
-	def checkIncludeIsExternal(IncludeDeclaration includeDeclaration) {
+	def checkSelfIncludes(IncludeDeclaration includeDeclaration) {
 		val subsystem = (EcoreUtil2.getRootContainer(includeDeclaration) as Model).typeDeclaration as Subsystem
 		if (subsystem.equals(includeDeclaration.includedType)) {
-			error("A subsystem cannot include rules from itself",
+			error("A subsystem cannot include itself",
 				AmeliaPackage.Literals.INCLUDE_DECLARATION__INCLUDED_TYPE, INVALID_SELF_INCLUDE)
 		}
 	}
