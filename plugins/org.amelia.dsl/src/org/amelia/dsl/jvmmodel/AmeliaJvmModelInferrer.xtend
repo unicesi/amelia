@@ -66,6 +66,14 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						final = !declaration.writeable
 					]
 				}
+				for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
+					for (rule : hostBlock.rules) {
+						members += rule.toField(rule.name, typeRef(CommandDescriptor).addArrayTypeDimension) [
+							initializer = '''new «CommandDescriptor»[«rule.commands.length»]'''
+							final = true
+						]
+					}	
+				}
 				members += subsystem.toMethod("deploy", typeRef(void)) [
 					exceptions += typeRef(Exception)
 					parameters += subsystem.toParameter("subsystem", typeRef(String))
@@ -86,24 +94,22 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							for (rule : hostBlock.rules) {
 								var currentCommand = 0
 								for (command : rule.commands) {
-									append(CommandDescriptor)
-									append(" " + rule.name + currentCommand)
-									append(" = " + "init" + rule.name.toFirstUpper + currentCommand + "();").newLine
-									append(rule.name + currentCommand).append(".runsOn(").append("hosts" + currentHostBlock).append(");").newLine
+									append('''«rule.name»[«currentCommand»]''')
+									append(''' = init«rule.name.toFirstUpper»«currentCommand»();''').newLine
+									append('''«rule.name»[«currentCommand»]''')
+									append('''.runsOn(hosts«currentHostBlock»);''').newLine
 									if (currentCommand == 0 && !rule.dependencies.empty) {
 										val dependencies = newArrayList
 										for (dependency : rule.dependencies.map[r|r.name]) {
-											dependencies += dependency + "0"
+											dependencies += dependency + "[0]"
 										}
-										append(rule.name + currentCommand)
-										append(".dependsOn(").append(dependencies.join(", ")).append(");")
-										newLine
+										append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')
 									} else if (currentCommand > 0) {
-										append(rule.name + currentCommand)
-										append(".dependsOn(").append(rule.name + (currentCommand - 1)).append(");")
-										newLine
+										append('''«rule.name»[«currentCommand»].dependsOn(«rule.name»[«(currentCommand - 1)»]);''')
 									}
 									currentCommand++
+									if (currentCommand == rule.commands.length)
+										newLine
 								}
 							}
 							currentHostBlock++
