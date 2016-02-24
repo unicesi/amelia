@@ -125,7 +125,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 //						append('''super.graph.execute(true);''').newLine
 //						append('''releaseDependencies(«dependenciesParam»);''').newLine
 //						append('''shutdown(true);''')
-						append('''super.graph.execute(true, true, false);''')
+						append('''super.graph.execute(true);''')
 					]
 				]
 				var currentHostBlock = 0
