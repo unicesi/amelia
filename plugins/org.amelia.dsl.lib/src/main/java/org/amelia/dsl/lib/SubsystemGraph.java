@@ -214,18 +214,17 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		shutdown(stopExecutedComponents);
 		long end = System.nanoTime();
 		
+		Log.print(Log.SEPARATOR_LONG);
 		if (!ExecutionManager.isAnySubsystemAborting()) {
-			Log.print(Log.SEPARATOR_LONG);
 			Log.print("DEPLOYMENT SUCCESS");
-			Log.print(Log.SEPARATOR_LONG);
-			Log.print("Total time: "
-					+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s");
-			Log.print("Finished at: " + new Date());
-			Log.print(Log.SEPARATOR_LONG);
 		} else {
-			Log.print(Log.SEPARATOR_LONG + "\nDEPLOYMENT ERROR\n"
-					+ Log.SEPARATOR_LONG);
+			Log.print("DEPLOYMENT ERROR");
 		}
+		Log.print(Log.SEPARATOR_LONG);
+		Log.print("Total time: "
+				+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s");
+		Log.print("Finished at: " + new Date());
+		Log.print(Log.SEPARATOR_LONG);
 	}
 
 	public void shutdown(final boolean stopExecutedComponents) {
