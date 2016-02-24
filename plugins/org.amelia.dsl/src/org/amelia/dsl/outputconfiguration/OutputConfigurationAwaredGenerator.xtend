@@ -21,11 +21,15 @@ package org.amelia.dsl.outputconfiguration
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.xbase.compiler.JvmModelGenerator
+import org.amelia.dsl.generator.AmeliaGenerator
+import com.google.inject.Inject
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 class OutputConfigurationAwaredGenerator extends JvmModelGenerator {
+	
+	@Inject private AmeliaGenerator generator
 
 	override void doGenerate(Resource input, IFileSystemAccess fsa) {
 		val _contents = input.getContents()
@@ -36,6 +40,7 @@ class OutputConfigurationAwaredGenerator extends JvmModelGenerator {
 				if (outputConfiguration == AmeliaOutputConfigurationProvider::AMELIA_OUTPUT) {
 					val sfsa = new SingleOutputConfigurationFileSystemAccess(fsa, outputConfiguration)
 					this.internalDoGenerate(obj, sfsa) // AmeliaJvmModelInferrer
+					this.generator.doGenerate(input, fsa) // AmeliaGenerator
 				}
 			}
 			if (adapters.isEmpty) {

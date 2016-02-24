@@ -18,10 +18,21 @@
  */
 package org.amelia.dsl.generator
 
+import com.google.inject.Inject
+import java.util.List
+import org.amelia.dsl.amelia.AmeliaPackage
+import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
+import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.AbstractGenerator
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
+import org.eclipse.xtext.generator.IFileSystemAccess
+import org.eclipse.xtext.generator.IGenerator
+import org.eclipse.xtext.resource.IContainer
+import org.eclipse.xtext.resource.IEObjectDescription
+import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
+import org.amelia.dsl.lib.Subsystem
+import org.amelia.dsl.lib.SubsystemGraph
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.naming.IQualifiedNameProvider
 
 /**
  * Generates code from your model files on save.
@@ -30,13 +41,56 @@ import org.eclipse.xtext.generator.IGeneratorContext
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-class AmeliaGenerator extends AbstractGenerator {
+class AmeliaGenerator implements IGenerator {
+	
+	@Inject ResourceDescriptionsProvider resourceDescriptionsProvider
+	
+	@Inject IContainer.Manager containerManager
+	
+	@Inject extension IQualifiedNameProvider
 
-	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(typeof(Greeting))
-//				.map[name]
-//				.join(', '))
+	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
+		val subsystems = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem)
+		val s = Subsystem.canonicalName
+		val content = '''
+			package amelia;
+			
+			public class AmeliaMain {
+				public static void main(String[] args) throws InterruptedException {
+					«FOR subsystem : subsystems»
+						«s» «subsystem.qualifiedName.toString("_")» = new «s»("«subsystem.qualifiedName.toString»", new «subsystem.qualifiedName»());
+					«ENDFOR»
+					«FOR subsystem : subsystems»
+						«val eObject = subsystem.getEObject(resource) as org.amelia.dsl.amelia.Subsystem»
+						«val _includes = eObject.includes»
+						«IF _includes != null»
+							«val  includes = _includes.includeDeclarations.map[i|(i.includedType as org.amelia.dsl.amelia.Subsystem).fullyQualifiedName.toString("_")]»
+							«subsystem.qualifiedName.toString("_")».dependsOn(«includes.join(", ")»);
+						«ENDIF»
+					«ENDFOR»
+					«SubsystemGraph.canonicalName» graph = «SubsystemGraph.canonicalName».getInstance();
+					graph.addSubsystems(«subsystems.map[r|r.qualifiedName.toString("_")].join(", ")»);
+					graph.execute(true);
+				}
+			}
+		'''
+		fsa.generateFile("amelia/AmeliaMain.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
+	}
+	
+	def List<IEObjectDescription> getEObjectDescriptions(Resource resource, EClass eClass) {
+	    val descriptions = newArrayList;
+	    val resourceDescriptions = resourceDescriptionsProvider.getResourceDescriptions(resource);
+	    val resourceDescription = resourceDescriptions.getResourceDescription(resource.getURI());
+	    for (c : containerManager.getVisibleContainers(resourceDescription, resourceDescriptions)) {
+	        for (ob : c.getExportedObjectsByType(eClass)) {
+	            descriptions.add(ob);
+	        }
+	    }
+	    return descriptions;
+	}
+	
+	def EObject getEObject(IEObjectDescription description, Resource resource) {
+		val resourceSet = resource.getResourceSet()
+		return resourceSet.getEObject(description.getEObjectURI(), true)
 	}
 }
