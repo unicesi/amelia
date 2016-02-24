@@ -194,7 +194,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		return get(a).add(b);
 	}
 
-	public void resolve() throws InterruptedException {
+	public void execute() throws InterruptedException {
 		CountDownLatch doneSignal = new CountDownLatch(this.subsystems.size());
 
 		for (Subsystem subsystem : this.subsystems) {
