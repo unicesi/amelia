@@ -67,29 +67,18 @@ public class ExecutionManager {
 
 	public ExecutionManager(DescriptorGraph executionGraph) {
 		this.executionGraph = executionGraph;
-		reset();
-	}
-
-	/**
-	 * Initializes all the class members
-	 */
-	public void reset() {
 		this.hostFixedWidth = 0;
 		this.aborting = false;
 		this.shuttingDown = false;
 		exceptionHandler = new Thread.UncaughtExceptionHandler() {
 			public void uncaughtException(Thread t, Throwable e) {
-				if (!aborting && !shuttingDown) {
-					aborting = true;
+				if (!globallyAborting) {
 					globallyAborting = true;
 					String message = e.getMessage().replaceAll(
 							"^((\\w)+(\\.\\w+)+:\\s)*", "");
-
 					logger.error(e.getMessage(), e);
 					Log.error("Stopping deployment: " + message);
-
 					SubsystemGraph.getInstance().shutdown(true);
-					shutdown(true);
 				}
 			}
 		};
@@ -220,11 +209,10 @@ public class ExecutionManager {
 				closeFTPConnections(ftpHosts);
 				closeSSHConnections(sshHosts);
 			} catch (Exception e) {
-				Log.error("Deployment shutdown unsuccessful. See logs for more information");
+				Log.error(
+						"Deployment shutdown unsuccessful. See logs for more information");
 				Log.error("Shutting system down abruptly");
 				logger.error(e);
-			} finally {
-				reset();
 			}
 		}
 	}

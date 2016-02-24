@@ -136,8 +136,6 @@ public class DescriptorGraph
 	private final TreeSet<DependencyThread> threads;
 
 	private final ExecutionManager executionManager;
-	
-	private boolean shutdownAfterDeployment;
 
 	public DescriptorGraph(String subsystem) {
 		new Configuration().setProperties();
@@ -253,9 +251,6 @@ public class DescriptorGraph
 			final boolean shutdownAfterDeployment,
 			final boolean stopExecutionsWhenFinish)
 					throws InterruptedException, IOException {
-		
-		this.shutdownAfterDeployment = shutdownAfterDeployment;
-		
 		// Open SSH and FTP connections before dependencies resolution
 		executionManager.openSSHConnections(this.sshHosts.toArray(new Host[0]));
 		executionManager.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
@@ -360,9 +355,5 @@ public class DescriptorGraph
 	
 	public Set<Host> ftpHosts() {
 		return this.ftpHosts;
-	}
-	
-	public boolean shutdownAfterDeployment() {
-		return this.shutdownAfterDeployment;
 	}
 }
