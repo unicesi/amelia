@@ -205,9 +205,8 @@ public class ExecutionManager {
 		// Prevent shutting down more than once
 		if (!shuttingDown) {
 			shuttingDown = true;
-			Log.info("Starting deployment shutdown ("
+			Log.info("Shutting down deployment ("
 					+ this.executionGraph.subsystem() + ")");
-
 			try {
 				Host[] sshHosts = executionGraph.sshHosts()
 						.toArray(new Host[0]);
@@ -216,11 +215,10 @@ public class ExecutionManager {
 
 				if (stopCurrentExecutions)
 					executionGraph.stopExecutions();
-
+				
 				executionGraph.stopCurrentThreads();
 				closeFTPConnections(ftpHosts);
 				closeSSHConnections(sshHosts);
-				Log.info("Deployment shutdown successful");
 			} catch (Exception e) {
 				Log.error("Deployment shutdown unsuccessful. See logs for more information");
 				Log.error("Shutting system down abruptly");

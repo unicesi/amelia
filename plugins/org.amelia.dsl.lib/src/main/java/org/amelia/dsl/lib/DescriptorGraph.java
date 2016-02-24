@@ -282,7 +282,7 @@ public class DescriptorGraph
 			}
 		}
 
-		Log.info("Starting execution of commands (" + totalTasks + ")");
+		Log.info("Executing commands (" + totalTasks + ")");
 		for (DependencyThread thread : this.threads)
 			thread.start();
 
@@ -313,31 +313,26 @@ public class DescriptorGraph
 	}
 
 	public void stopExecutions() throws IOException {
-		Log.info("Stopping previous executions");
 		Map<Host, List<CommandDescriptor>> executionsPerHost = new HashMap<Host, List<CommandDescriptor>>();
-		
 		for (CommandDescriptor descriptor : this.tasks.keySet()) {
 			if (descriptor.isExecution()) {
 				List<ScheduledTask<?>> commands = this.tasks.get(descriptor);
 				for (ScheduledTask<?> command : commands) {
 					if (!executionsPerHost.containsKey(command.host()))
-						executionsPerHost.put(command.host(), new ArrayList<CommandDescriptor>());
+						executionsPerHost.put(command.host(),
+								new ArrayList<CommandDescriptor>());
 					executionsPerHost.get(command.host()).add(descriptor);
 				}
 			}
 		}
-
 		for (Host host : executionsPerHost.keySet()) {
 			host.stopExecutions(executionsPerHost.get(host));
 		}
 	}
 
 	public void stopCurrentThreads() throws InterruptedException {
-		Log.info("Waitting for current threads to stop");
-
 		for (DependencyThread thread : this.threads)
 			thread.shutdown();
-
 		for (DependencyThread thread : this.threads)
 			thread.join();
 	}

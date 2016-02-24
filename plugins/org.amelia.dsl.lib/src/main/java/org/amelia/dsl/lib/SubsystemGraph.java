@@ -231,12 +231,16 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 	public void shutdown(final boolean stopExecutedComponents) {
 		if(!this.shutdown) {
 			this.shutdown = true;
-			
-			Log.print(Log.SEPARATOR_LONG);
-			for (Subsystem subsystem : this.subsystems)
-				if(!subsystem.deployment().isShutdown())
+			boolean any = false;
+			for (Subsystem subsystem : this.subsystems) {
+				if(!subsystem.deployment().isShutdown()) {
+					if (!any) {
+						any = true;
+						Log.print(Log.SEPARATOR_LONG);
+					}
 					subsystem.deployment().shutdown(stopExecutedComponents);
-			
+				}
+			}
 			this.taskQueue.shutdown();
 			for (DependencyThread thread : this.threads)
 				thread.shutdown();
