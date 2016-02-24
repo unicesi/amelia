@@ -194,7 +194,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		return get(a).add(b);
 	}
 
-	public void execute() throws InterruptedException {
+	public void execute(boolean stopExecutedComponents) throws InterruptedException {
 		CountDownLatch doneSignal = new CountDownLatch(this.subsystems.size());
 
 		for (Subsystem subsystem : this.subsystems) {
@@ -211,7 +211,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			thread.start();
 
 		doneSignal.await();
-		shutdown();
+		shutdown(stopExecutedComponents);
 		long end = System.nanoTime();
 		
 		if (!ExecutionManager.isAnySubsystemAborting()) {
@@ -228,9 +228,14 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		}
 	}
 
-	public void shutdown() {
+	public void shutdown(final boolean stopExecutedComponents) {
 		if(!this.shutdown) {
 			this.shutdown = true;
+			
+			for (Subsystem subsystem : this.subsystems)
+				if(!subsystem.deployment().isShutdown())
+					subsystem.deployment().shutdown(stopExecutedComponents);
+			
 			this.taskQueue.shutdown();
 			for (DependencyThread thread : this.threads)
 				thread.shutdown();

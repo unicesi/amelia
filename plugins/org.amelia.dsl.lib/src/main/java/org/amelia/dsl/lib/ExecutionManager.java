@@ -88,7 +88,7 @@ public class ExecutionManager {
 					logger.error(e.getMessage(), e);
 					Log.error("Stopping deployment: " + message);
 
-					SubsystemGraph.getInstance().shutdown();
+					SubsystemGraph.getInstance().shutdown(true);
 					shutdown(true);
 				}
 			}
