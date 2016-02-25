@@ -230,6 +230,9 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 	public void shutdown(final boolean stopExecutedComponents) {
 		if(!this.shutdown) {
 			this.shutdown = true;
+			this.taskQueue.shutdown();
+			for (DependencyThread thread : this.threads)
+				thread.shutdown();
 			boolean any = false;
 			for (Subsystem subsystem : this.subsystems) {
 				if(!subsystem.deployment().isShutdown()) {
@@ -240,9 +243,6 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 					subsystem.deployment().shutdown(stopExecutedComponents);
 				}
 			}
-			this.taskQueue.shutdown();
-			for (DependencyThread thread : this.threads)
-				thread.shutdown();
 			instance = null;
 		}
 	}
