@@ -62,9 +62,10 @@ class AmeliaGenerator implements IGenerator {
 					«ENDFOR»
 					«FOR subsystem : subsystems»
 						«val eObject = subsystem.getEObject(resource) as org.amelia.dsl.amelia.Subsystem»
-						«val _includes = eObject.includes»
-						«IF _includes != null»
-							«val  includes = _includes.includeDeclarations.map[i|(i.includedType as org.amelia.dsl.amelia.Subsystem).fullyQualifiedName.toString("_")]»
+						«IF eObject.includes != null»
+							«val includes = eObject.includes.includeDeclarations.map[ i |
+								(i.includedType as org.amelia.dsl.amelia.Subsystem).fullyQualifiedName.toString("_")
+							]»
 							«subsystem.qualifiedName.toString("_")».dependsOn(«includes.join(", ")»);
 						«ENDIF»
 					«ENDFOR»
@@ -74,6 +75,7 @@ class AmeliaGenerator implements IGenerator {
 				}
 			}
 		'''
+		
 		fsa.generateFile("amelia/AmeliaMain.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
 	}
 	
