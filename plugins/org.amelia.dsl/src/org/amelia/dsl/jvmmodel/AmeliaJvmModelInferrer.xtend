@@ -104,8 +104,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 									append('''.runsOn(hosts«currentHostBlock»);''').newLine
 									if (currentCommand == 0 && !rule.dependencies.empty) {
 										val dependencies = newArrayList
-										for (dependency : rule.dependencies.map[r|r.name]) {
-											dependencies += dependency + "[0]"
+										for (dependency : rule.dependencies) {
+											dependencies += '''«dependency.name»[«dependency.commands.length - 1»]'''
 										}
 										append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')
 										newLine
