@@ -119,9 +119,9 @@
 					</execution>
 				</executions>
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
+					<descriptors>
+						<descriptor>src/main/resources/assembly/jar.xml</descriptor>
+					</descriptors>
 					<finalName>${project.artifactId}-${project.version}-dependencies</finalName>
         			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
