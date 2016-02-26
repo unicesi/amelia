@@ -19,24 +19,24 @@
 package org.amelia.dsl
 
 import com.google.inject.Binder
+import com.google.inject.Singleton
 import com.google.inject.name.Names
+import org.amelia.dsl.compiler.AmeliaCompiler
+import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
+import org.amelia.dsl.outputconfiguration.OutputConfigurationAwaredGenerator
+import org.amelia.dsl.runtime.AmeliaQualifiedNameProvider
+import org.amelia.dsl.scoping.AmeliaImplicitlyImportedFeatures
 import org.amelia.dsl.scoping.AmeliaScopeProvider
+import org.amelia.dsl.typesystem.AmeliaTypeComputer
+import org.eclipse.xtext.generator.IGenerator
+import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.linking.LinkingScopeProviderBinding
+import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
-import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
-import org.amelia.dsl.scoping.AmeliaImplicitlyImportedFeatures
-import org.amelia.dsl.compiler.AmeliaCompiler
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
-import org.amelia.dsl.typesystem.AmeliaTypeComputer
+import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
-import org.eclipse.xtext.generator.IGenerator
-import org.amelia.dsl.outputconfiguration.OutputConfigurationAwaredGenerator
-import com.google.inject.Singleton
-import org.eclipse.xtext.generator.IOutputConfigurationProvider
-import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
-import org.eclipse.xtext.naming.IQualifiedNameProvider
-import org.amelia.dsl.runtime.AmeliaQualifiedNameProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.

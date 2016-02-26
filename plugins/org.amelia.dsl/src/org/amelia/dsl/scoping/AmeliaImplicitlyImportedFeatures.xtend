@@ -1,8 +1,8 @@
 package org.amelia.dsl.scoping
 
-import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.amelia.dsl.lib.util.CommandExtensions
 import org.amelia.dsl.lib.util.Hosts
+import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 
 /**
  * @author Miguel Jiménez - Initial contribution and API

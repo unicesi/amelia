@@ -18,11 +18,11 @@
  */
 package org.amelia.dsl.outputconfiguration
 
+import com.google.inject.Inject
+import org.amelia.dsl.generator.AmeliaGenerator
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.xbase.compiler.JvmModelGenerator
-import org.amelia.dsl.generator.AmeliaGenerator
-import com.google.inject.Inject
 
 /**
  * @author Miguel Jiménez - Initial contribution and API

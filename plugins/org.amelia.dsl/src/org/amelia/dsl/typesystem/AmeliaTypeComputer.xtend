@@ -21,6 +21,7 @@ package org.amelia.dsl.typesystem
 import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.amelia.EvalCommand
 import org.amelia.dsl.amelia.RunCommand
 import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
@@ -28,7 +29,6 @@ import org.amelia.dsl.lib.util.Commands
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
-import org.amelia.dsl.amelia.EvalCommand
 
 /**
  * @author Miguel Jiménez - Initial contribution and API

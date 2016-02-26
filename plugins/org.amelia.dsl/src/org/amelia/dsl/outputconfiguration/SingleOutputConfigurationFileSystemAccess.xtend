@@ -18,10 +18,10 @@
  */
 package org.amelia.dsl.outputconfiguration
 
+import org.eclipse.emf.common.util.URI
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IFileSystemAccessExtension
 import org.eclipse.xtext.generator.IFileSystemAccessExtension2
-import org.eclipse.emf.common.util.URI
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -31,7 +31,7 @@ class SingleOutputConfigurationFileSystemAccess implements IFileSystemAccess, IF
 	protected IFileSystemAccess fsa
 	protected String outputConfigurationName
 
-	new(org.eclipse.xtext.generator.IFileSystemAccess fsa, String outputConfigurationName) {
+	new(IFileSystemAccess fsa, String outputConfigurationName) {
 		this.fsa = fsa
 		this.outputConfigurationName = outputConfigurationName
 	}

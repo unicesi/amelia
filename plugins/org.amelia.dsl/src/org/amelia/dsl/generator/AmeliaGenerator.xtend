@@ -21,19 +21,19 @@ package org.amelia.dsl.generator
 import com.google.inject.Inject
 import java.util.List
 import org.amelia.dsl.amelia.AmeliaPackage
+import org.amelia.dsl.amelia.DependDeclaration
+import org.amelia.dsl.amelia.Subsystem
+import org.amelia.dsl.lib.SubsystemGraph
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IGenerator
+import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.resource.IContainer
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
-import org.amelia.dsl.lib.Subsystem
-import org.amelia.dsl.lib.SubsystemGraph
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.naming.IQualifiedNameProvider
-import org.amelia.dsl.amelia.DependDeclaration
 
 /**
  * Generates code from your model files on save.
@@ -52,7 +52,7 @@ class AmeliaGenerator implements IGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
 		val subsystems = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem)
-		val s = Subsystem.canonicalName
+		val s = org.amelia.dsl.lib.Subsystem.canonicalName
 		val content = '''
 			package amelia;
 			
@@ -62,10 +62,10 @@ class AmeliaGenerator implements IGenerator {
 						«s» «subsystem.qualifiedName.toString("_")» = new «s»("«subsystem.qualifiedName.toString»", new «subsystem.qualifiedName»());
 					«ENDFOR»
 					«FOR subsystem : subsystems»
-						«val eObject = subsystem.getEObject(resource) as org.amelia.dsl.amelia.Subsystem»
+						«val eObject = subsystem.getEObject(resource) as Subsystem»
 						«IF eObject != null && eObject.extensions != null»
 							«val dependencies = eObject.extensions.declarations.filter(DependDeclaration).map[ i |
-								(i.element as org.amelia.dsl.amelia.Subsystem).fullyQualifiedName.toString("_")
+								(i.element as Subsystem).fullyQualifiedName.toString("_")
 							]»
 							«subsystem.qualifiedName.toString("_")».dependsOn(«dependencies.join(", ")»);
 						«ENDIF»

@@ -18,13 +18,13 @@
  */
 package org.amelia.dsl.ui
 
-import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import org.amelia.dsl.ui.highlighting.AmeliaAntlrTokenToAttributeIdMapper
 import org.amelia.dsl.ui.highlighting.AmeliaHighlightingConfiguration
-import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 import org.amelia.dsl.ui.highlighting.AmeliaSemanticHighlightingCalculator
+import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
-import org.amelia.dsl.ui.highlighting.AmeliaAntlrTokenToAttributeIdMapper
+import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.

@@ -18,10 +18,10 @@
  */
 package org.amelia.dsl.outputconfiguration
 
+import java.util.Set
+import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.generator.OutputConfiguration
-import org.eclipse.xtext.generator.IFileSystemAccess
-import java.util.Set
 
 /**
  * @author Miguel Jiménez - Initial contribution and API

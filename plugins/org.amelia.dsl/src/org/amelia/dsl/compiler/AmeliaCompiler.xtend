@@ -22,6 +22,7 @@ import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CommandLiteral
 import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.amelia.EvalCommand
 import org.amelia.dsl.amelia.InterpolatedString
 import org.amelia.dsl.amelia.RunCommand
 import org.amelia.dsl.amelia.StringLiteral
@@ -31,12 +32,11 @@ import org.amelia.dsl.amelia.TextMiddleLiteral
 import org.amelia.dsl.amelia.TextStartLiteral
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.amelia.dsl.lib.util.Commands
+import org.eclipse.xtext.util.Strings
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
-import org.eclipse.xtext.util.Strings
-import org.amelia.dsl.amelia.EvalCommand
 import org.pascani.dsl.lib.sca.FrascatiUtils
 
 /**
