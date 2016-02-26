@@ -38,13 +38,14 @@ import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.RunCommand
 import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.amelia.Subsystem
+import org.amelia.dsl.amelia.SubsystemBlockExpression
+import org.amelia.dsl.amelia.VariableDeclaration
 import org.amelia.dsl.lib.descriptors.Host
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
-import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XBooleanLiteral
 import org.eclipse.xtext.xbase.XClosure
 import org.eclipse.xtext.xbase.XCollectionLiteral
@@ -53,8 +54,6 @@ import org.eclipse.xtext.xbase.XNullLiteral
 import org.eclipse.xtext.xbase.XNumberLiteral
 import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
-import org.eclipse.xtext.xbase.XVariableDeclaration
-import org.eclipse.xtext.xbase.XbasePackage
 
 /**
  * This class contains custom validation rules. 
@@ -67,6 +66,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	public static val CYCLIC_DEPENDENCY = "amelia.issue.cyclicDependency"
 	public static val DUPLICATE_EXTENSION_DECLARATION = "amelia.issue.duplicateInclude"
+	public static val DUPLICATE_LOCAL_RULE = "amelia.issue.duplicateLocalRule"
 	public static val DUPLICATE_LOCAL_VARIABLE = "amelia.issue.duplicateLocalVariable"
 	public static val INVALID_EXTENSION_DECLARATION = "amelia.issue.invalidExtensionDeclaration"
 	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
@@ -117,23 +117,35 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def checkVariableNameIsUnique(XVariableDeclaration varDecl) {
+	def checkVariableNameIsUnique(VariableDeclaration varDecl) {
 		val parent = varDecl.eContainer.eContainer
 		switch (parent) {
 			Subsystem: {
-				val duplicateVars = (parent.body as XBlockExpression).expressions.filter [ v |
+				val duplicateVars = (parent.body as SubsystemBlockExpression).expressions.filter [ v |
 					switch (v) {
-						XVariableDeclaration case v.name.equals(varDecl.name):
+						VariableDeclaration case v.name.equals(varDecl.name):
 							return !v.equals(varDecl)
 						default:
 							return false
 					}
 				]
 				if (!duplicateVars.isEmpty) {
-					error("Duplicate local variable " + varDecl.name, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
+					error("Duplicate local variable " + varDecl.name, AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME,
 						DUPLICATE_LOCAL_VARIABLE)
 				}
 			}
+		}
+	}
+	
+	@Check
+	def checkRuleNameIsUnique(RuleDeclaration rule) {
+		val subsystem = (EcoreUtil2.getRootContainer(rule) as Model).typeDeclaration as Subsystem
+		val duplicates = subsystem.body.expressions.filter(OnHostBlockExpression).map[o|o.rules].flatten.filter [ r |
+			r.name.equals(rule.name) && !rule.equals(r)
+		]
+		if (!duplicates.isEmpty) {
+			error("Duplicate local rule " + rule.name, AmeliaPackage.Literals.RULE_DECLARATION__NAME,
+				DUPLICATE_LOCAL_RULE)
 		}
 	}
 	
