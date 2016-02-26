@@ -62,7 +62,7 @@ class AmeliaGenerator implements IGenerator {
 					«ENDFOR»
 					«FOR subsystem : subsystems»
 						«val eObject = subsystem.getEObject(resource) as org.amelia.dsl.amelia.Subsystem»
-						«IF eObject.includes != null»
+						«IF eObject != null && eObject.includes != null»
 							«val includes = eObject.includes.includeDeclarations.map[ i |
 								(i.includedType as org.amelia.dsl.amelia.Subsystem).fullyQualifiedName.toString("_")
 							]»
