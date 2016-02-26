@@ -33,6 +33,7 @@ import org.amelia.dsl.lib.Subsystem
 import org.amelia.dsl.lib.SubsystemGraph
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.amelia.dsl.amelia.DependDeclaration
 
 /**
  * Generates code from your model files on save.
@@ -62,11 +63,11 @@ class AmeliaGenerator implements IGenerator {
 					«ENDFOR»
 					«FOR subsystem : subsystems»
 						«val eObject = subsystem.getEObject(resource) as org.amelia.dsl.amelia.Subsystem»
-						«IF eObject != null && eObject.includes != null»
-							«val includes = eObject.includes.includeDeclarations.map[ i |
-								(i.includedType as org.amelia.dsl.amelia.Subsystem).fullyQualifiedName.toString("_")
+						«IF eObject != null && eObject.extensions != null»
+							«val dependencies = eObject.extensions.declarations.filter(DependDeclaration).map[ i |
+								(i.element as org.amelia.dsl.amelia.Subsystem).fullyQualifiedName.toString("_")
 							]»
-							«subsystem.qualifiedName.toString("_")».dependsOn(«includes.join(", ")»);
+							«subsystem.qualifiedName.toString("_")».dependsOn(«dependencies.join(", ")»);
 						«ENDIF»
 					«ENDFOR»
 					«SubsystemGraph.canonicalName» graph = «SubsystemGraph.canonicalName».getInstance();

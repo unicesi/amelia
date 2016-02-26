@@ -27,9 +27,11 @@ import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
+import org.amelia.dsl.amelia.DependDeclaration
 import org.amelia.dsl.amelia.EvalCommand
+import org.amelia.dsl.amelia.ExtensionDeclaration
+import org.amelia.dsl.amelia.ExtensionSection
 import org.amelia.dsl.amelia.IncludeDeclaration
-import org.amelia.dsl.amelia.IncludeSection
 import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.RuleDeclaration
@@ -64,12 +66,13 @@ import org.eclipse.xtext.xbase.XbasePackage
 class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	public static val CYCLIC_DEPENDENCY = "amelia.issue.cyclicDependency"
-	public static val DUPLICATE_INCLUDE = "amelia.issue.duplicateInclude"
+	public static val DUPLICATE_EXTENSION_DECLARATION = "amelia.issue.duplicateInclude"
 	public static val DUPLICATE_LOCAL_VARIABLE = "amelia.issue.duplicateLocalVariable"
+	public static val INVALID_EXTENSION_DECLARATION = "amelia.issue.invalidExtensionDeclaration"
 	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
 	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
 	public static val INVALID_PARAMETER_TYPE = "amelia.issue.invalidParameterType"
-	public static val INVALID_SELF_INCLUDE = "amelia.issue.invalidSelfInclude"
+	public static val INVALID_SELF_EXTENSION = "amelia.issue.invalidSelfInclude"
 	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
 	
 	def fromURItoFQN(URI resourceURI) {
@@ -323,27 +326,37 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		]
 	}
 	
-	/**
-	 * Check rules inside an include declaration and its siblings
-	 */
 	@Check
-	def checkDuplicateIncludes(IncludeDeclaration includeDeclaration) {
-		val includeSection = includeDeclaration.eContainer as IncludeSection
-		val duplicates = includeSection.includeDeclarations
-			.filter [i|i.includedType.equals(includeDeclaration.includedType)]
-			.filter[i|!i.equals(includeDeclaration)]
-		for (subsystem : duplicates) {
-			error("Duplicate include statement", AmeliaPackage.Literals.INCLUDE_DECLARATION__INCLUDED_TYPE,
-				DUPLICATE_INCLUDE)
+	def checkIncludesOrDependsNotBoth(ExtensionDeclaration extensionDeclaration) {
+		val extendSection = extensionDeclaration.eContainer as ExtensionSection
+		val duplicates = extendSection.declarations
+			.filter [i|i.element.equals(extensionDeclaration.element)]
+			.filter[i|!i.equals(extensionDeclaration)]
+		val extensionType = if (extensionDeclaration instanceof IncludeDeclaration)
+				"include"
+			else if (extensionDeclaration instanceof DependDeclaration)
+				"depend"
+		for (declaration : duplicates) {
+			if (declaration.class.equals(extensionDeclaration.class)) {
+				error('''Duplicate «extensionType» statement''', AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
+					DUPLICATE_EXTENSION_DECLARATION)
+			} else {
+				error("A subsystem cannot depends on a subsystem that is also included",
+					AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
+			}
 		}
 	}
 	
 	@Check
-	def checkSelfIncludes(IncludeDeclaration includeDeclaration) {
-		val subsystem = (EcoreUtil2.getRootContainer(includeDeclaration) as Model).typeDeclaration as Subsystem
-		if (subsystem.equals(includeDeclaration.includedType)) {
-			error("A subsystem cannot include itself",
-				AmeliaPackage.Literals.INCLUDE_DECLARATION__INCLUDED_TYPE, INVALID_SELF_INCLUDE)
+	def checkSelfIncludes(ExtensionDeclaration extensionDeclaration) {
+		val subsystem = (EcoreUtil2.getRootContainer(extensionDeclaration) as Model).typeDeclaration as Subsystem
+		if (subsystem.equals(extensionDeclaration.element)) {
+			val relation = if (extensionDeclaration instanceof IncludeDeclaration)
+					"include"
+				else if (extensionDeclaration instanceof DependDeclaration)
+					"depend on"
+			error('''A subsystem cannot «relation» itself''',
+				AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_SELF_EXTENSION)
 		}
 	}
 	
@@ -364,7 +377,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			changed = false
 			for (t : elements.toList) {
 				val dependencies = if (t instanceof Subsystem)
-						t.includes.includeDeclarations.map[d|d.includedType]
+						t.extensions.declarations.map[d|d.element]
 					else if (t instanceof RuleDeclaration)
 						t.dependencies
 				if (result.containsAll(dependencies)) {
@@ -383,7 +396,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (!set.add(e))
 			return;
 		val dependencies = if (e instanceof Subsystem)
-				e.includes.includeDeclarations.map[d|d.includedType]
+				e.extensions.declarations.map[d|d.element]
 			else if (e instanceof RuleDeclaration)
 				e.dependencies
 		for (t : dependencies) 

@@ -34,16 +34,25 @@ TypeDeclaration
 	;
 
 SubsystemDeclaration returns Subsystem
-	:	includes = IncludeSection?
+	:	extensions = ExtensionSection?
 		'subsystem' name = ID body = SubsystemBlockExpression
 	;
 
-IncludeSection
-	:	includeDeclarations += IncludeDeclaration+
+ExtensionSection
+	:	declarations += ExtensionDeclaration+
+	;
+
+ExtensionDeclaration
+	:	DependDeclaration
+	|	IncludeDeclaration
 	;
 
 IncludeDeclaration
-	:	'include' includedType = [TypeDeclaration | QualifiedName] ->';'?
+	:	'includes' element = [TypeDeclaration | QualifiedName] ->';'?
+	;
+
+DependDeclaration
+	:	'depends' 'on' element = [TypeDeclaration | QualifiedName] ->';'?
 	;
 
 SubsystemBlockExpression
@@ -65,8 +74,9 @@ OnHostBlockExpression
 	;
 
 RuleDeclaration
-	:	name = ID ':' (dependencies += [RuleDeclaration | QualifiedName] (',' dependencies += [RuleDeclaration | QualifiedName])*)?
-		'|' (commands += XExpression)*
+	:	name = ID ':' 
+		(=> (dependencies += [RuleDeclaration | QualifiedName] (',' dependencies += [RuleDeclaration | QualifiedName])*)? ';')?
+		(commands += XExpression)*
 	;
 
 CdCommand
