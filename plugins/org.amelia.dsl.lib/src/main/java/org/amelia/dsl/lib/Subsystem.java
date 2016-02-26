@@ -41,7 +41,8 @@ public class Subsystem {
 		}
 		
 		public boolean isShutdown() {
-			return this.graph.executionManager().isShuttingDown();
+			return this.graph == null
+					|| this.graph.executionManager().isShuttingDown();
 		}
 		
 		public void releaseDependencies(Collection<Subsystem> dependencies) {
