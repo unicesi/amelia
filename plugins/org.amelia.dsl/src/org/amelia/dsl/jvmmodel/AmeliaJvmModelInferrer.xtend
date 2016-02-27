@@ -120,12 +120,11 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						}
 						val rules = subsystem.body.expressions
 							.filter(OnHostBlockExpression).map[h|h.rules].flatten.map[r|r.name].join(", ")
-						append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
-						append('''super.graph.addDescriptors(''').append(Arrays).append('''.concatAll(«rules»));''').newLine
-//						append('''super.graph.execute(true);''').newLine
-//						append('''releaseDependencies(«dependenciesParam»);''').newLine
-//						append('''shutdown(true);''')
-						append('''super.graph.execute(true);''')
+						if (!rules.empty) {
+							append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
+							append('''super.graph.addDescriptors(''').append(Arrays).append('''.concatAll(«rules»));''').newLine
+							append('''super.graph.execute(true);''')
+						}
 					]
 				]
 				var currentHostBlock = 0
