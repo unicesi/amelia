@@ -73,6 +73,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						members += rule.toField(rule.name, typeRef(CommandDescriptor).addArrayTypeDimension) [
 							initializer = '''new «CommandDescriptor»[«rule.commands.length»]'''
 							final = true
+							static = true
+							visibility = JvmVisibility.PUBLIC
 						]
 					}	
 				}
@@ -98,19 +100,19 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							for (rule : hostBlock.rules) {
 								var currentCommand = 0
 								for (command : rule.commands) {
-									append('''«rule.name»[«currentCommand»]''')
+									append('''«rule.name.toString»[«currentCommand»]''')
 									append(''' = init«rule.name.toFirstUpper»«currentCommand»();''').newLine
 									append('''«rule.name»[«currentCommand»]''')
 									append('''.runsOn(hosts«currentHostBlock»);''').newLine
 									if (currentCommand == 0 && !rule.dependencies.empty) {
 										val dependencies = newArrayList
 										for (dependency : rule.dependencies) {
-											dependencies += '''«dependency.name»[«dependency.commands.length - 1»]'''
+											dependencies += '''«dependency.fullyQualifiedName»[«dependency.commands.length - 1»]'''
 										}
 										append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')
 										newLine
 									} else if (currentCommand > 0) {
-										append('''«rule.name»[«currentCommand»].dependsOn(«rule.name»[«(currentCommand - 1)»]);''')
+										append('''«rule.name»[«currentCommand»].dependsOn(«rule.fullyQualifiedName»[«(currentCommand - 1)»]);''')
 										newLine
 									}
 									currentCommand++

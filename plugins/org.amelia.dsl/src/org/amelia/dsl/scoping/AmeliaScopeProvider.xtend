@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.Scopes
+import org.amelia.dsl.amelia.IncludeDeclaration
 
 /**
  * This class contains custom scoping description.
@@ -41,7 +42,12 @@ class AmeliaScopeProvider extends AmeliaImportedNamespaceAwareLocalScopeProvider
 		switch (context) {
 			RuleDeclaration case reference == AmeliaPackage.Literals.RULE_DECLARATION__DEPENDENCIES: {
 				val subsystem = (EcoreUtil2.getRootContainer(context) as Model).typeDeclaration as Subsystem
-				val candidates = EcoreUtil2.getAllContentsOfType(subsystem, RuleDeclaration)
+				var candidates = EcoreUtil2.getAllContentsOfType(subsystem, RuleDeclaration)
+				if (subsystem.extensions != null) {
+					candidates += subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
+						EcoreUtil2.getAllContentsOfType((i.element as Subsystem), RuleDeclaration)
+					].flatten
+				}
 				return Scopes.scopeFor(candidates)
 			}
 			default:
