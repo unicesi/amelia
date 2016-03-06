@@ -68,6 +68,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val DUPLICATE_EXTENSION_DECLARATION = "amelia.issue.duplicateInclude"
 	public static val DUPLICATE_LOCAL_RULE = "amelia.issue.duplicateLocalRule"
 	public static val DUPLICATE_LOCAL_VARIABLE = "amelia.issue.duplicateLocalVariable"
+	public static val EMPTY_COMMAND_LIST = "amelia.issue.emptyCommandList"
 	public static val INVALID_EXTENSION_DECLARATION = "amelia.issue.invalidExtensionDeclaration"
 	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
 	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
@@ -369,6 +370,14 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 					"depend on"
 			error('''A subsystem cannot «relation» itself''',
 				AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_SELF_EXTENSION)
+		}
+	}
+	
+	@Check
+	def checkNoEmptyRules(RuleDeclaration rule) {
+		if (rule.commands.empty) {
+			error("There must be at least one command", AmeliaPackage.Literals.RULE_DECLARATION__COMMANDS,
+				EMPTY_COMMAND_LIST)
 		}
 	}
 	
