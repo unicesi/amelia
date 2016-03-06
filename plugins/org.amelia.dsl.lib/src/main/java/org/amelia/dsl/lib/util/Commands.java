@@ -179,6 +179,8 @@ public class Commands {
 					new String[] {
 							"Error when parsing the composite file '" + compositeName + "'",
 							"Could not start the SCA composite '" + compositeName + "'",
+							"Could not start Jetty server",
+							"Address already in use",
 							"Cannot instantiate the FraSCAti factory" });
 			return new CallableTask<Integer>() {
 
