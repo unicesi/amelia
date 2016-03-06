@@ -253,7 +253,8 @@ public class Commands {
 	public static CommandDescriptor.Builder cdBuilder(final String directory) {
 		String errorMessage = "Could not change working directory to " + ANSI.YELLOW.format(directory);
 		String successMessage = "New working directory: " + ANSI.YELLOW.format(directory);
-		String[] errors = { "No existe el fichero o el directorio",
+		String[] errors = { "No existe el fichero o el directorio", 
+				"No existe el archivo o el directorio",
 				"Permiso denegado", "No such file or directory",
 				"Permission denied" };
 		CommandDescriptor.Builder cd = new CommandDescriptor.Builder()
