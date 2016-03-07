@@ -49,13 +49,11 @@ public class ShellUtils {
 	 *         prompt
 	 */
 	public static String ameliaPromptFormat(String shell) {
-
 		// e.g., [Amelia 2015-09-28 18:54:34 user@grid0:~/Desktop]$
 		String bash = "[Amelia \\D{%F %T} \\u@\\h:\\w]$ ";
 		String zsh = "[Amelia %D{%Y-%m-%d %H:%M:%S} %n% @%m% :%~]$ ";
-
 		String command = "PS1=\"";
-
+		
 		if (shell.contains("bash"))
 			command += bash + "\"";
 		else
@@ -73,9 +71,7 @@ public class ShellUtils {
 		String user = "([a-z_][a-z0-9_]{0,30})";
 		String host = "([a-zA-Z0-9-\\.]{0,24})";
 		String directory = "((\\/)?([^\\/ ]+(\\/)?)+|\\/)";
-
 		StringBuilder regexp = new StringBuilder();
-
 		regexp.append("\\[Amelia ");
 		regexp.append(date + " ");
 		regexp.append(time + " ");
@@ -84,7 +80,6 @@ public class ShellUtils {
 		regexp.append(host + ":");
 		regexp.append(directory);
 		regexp.append("\\]\\$ ");
-
 		return regexp.toString();
 	}
 
@@ -97,12 +92,10 @@ public class ShellUtils {
 	 */
 	public static String killCommand(String criterion) {
 		StringBuilder sb = new StringBuilder();
-
 		sb.append("for pid in ");
 		sb.append("$(" + searchPIDs(criterion) + "); ");
 		sb.append("do kill -SIGTERM $pid; ");
 		sb.append("done");
-
 		return sb.toString();
 	}
 
@@ -113,24 +106,18 @@ public class ShellUtils {
 	 */
 	public static String runningCompositeName(String criterion) {
 		StringBuilder sb = new StringBuilder();
-
 		sb.append("ps -ef ");
 		sb.append("| grep \"" + criterion + "\" ");
 		sb.append("| grep -v grep ");
-		sb.append("| awk '{ print $11 }' ");
-		sb.append("| head -1");
-
 		return sb.toString();
 	}
 
 	private static String searchPIDs(String criterion) {
 		StringBuilder sb = new StringBuilder();
-
 		sb.append("ps -ef ");
 		sb.append("| grep \"" + criterion + "\" ");
 		sb.append("| grep -v grep ");
 		sb.append("| awk '{ print $2 }'");
-
 		return sb.toString();
 	}
 

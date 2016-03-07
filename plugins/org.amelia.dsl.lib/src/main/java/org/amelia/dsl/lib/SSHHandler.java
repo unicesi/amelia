@@ -218,12 +218,11 @@ public class SSHHandler extends Thread {
 			CommandDescriptor descriptor = executions.remove(i);
 			String command = descriptor.toCommandString();
 			String[] data = command.split(" "); // data[2]: compositeName
-			String criterion = Arrays.join(Arrays.skip(data, 2), " ");
-			this.expect.sendLine(ShellUtils.runningCompositeName(criterion));
+			this.expect.sendLine(ShellUtils.runningCompositeName(command));
 			Result r = this.expect.expect(regexp(prompt));
 
 			if (r.getBefore().contains(data[2])) {
-				this.expect.sendLine(ShellUtils.killCommand(criterion));
+				this.expect.sendLine(ShellUtils.killCommand(command));
 				this.expect.expect(regexp(prompt));
 
 				components.add(data[2]);
