@@ -30,6 +30,8 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.amelia.dsl.lib.descriptors.AssetBundle;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
@@ -256,7 +258,7 @@ public class DescriptorGraph
 		executionManager.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
 
 		if (stopPreviousExecutions && this.sshHosts.size() > 0)
-			stopExecutions();
+			stopAllExecutions();
 
 		int totalTasks = countTotalTasks();
 		CountDownLatch doneSignal = new CountDownLatch(totalTasks);
@@ -306,9 +308,38 @@ public class DescriptorGraph
 
 		return n;
 	}
-
-	public void stopExecutions() throws IOException {
-		Map<Host, List<CommandDescriptor>> executionsPerHost = new HashMap<Host, List<CommandDescriptor>>();
+	
+	public void stopExecutions(String[] compositeNames) throws IOException {
+		List<String> _compositeNames = Arrays.asList(compositeNames);
+		Map<Host, List<CommandDescriptor>> executionsPerHost = 
+				new HashMap<Host, List<CommandDescriptor>>();
+		for (CommandDescriptor descriptor : this.tasks.keySet()) {
+			if (descriptor.isExecution()) {
+				// FIXME: Can composite names contain other characters?
+				Pattern pattern = Pattern.compile(
+						"(frascati run) (\\-r [0-9]+ )?([\\w\\-]+)(.*)");
+				Matcher matcher = pattern.matcher(descriptor.toCommandString());
+				if (matcher.find()
+						&& _compositeNames.contains(matcher.group(3))) {
+					_compositeNames.remove(matcher.group(3));
+					List<ScheduledTask<?>> commands = this.tasks.get(descriptor);
+					for (ScheduledTask<?> command : commands) {
+						if (!executionsPerHost.containsKey(command.host()))
+							executionsPerHost.put(command.host(),
+									new ArrayList<CommandDescriptor>());
+						executionsPerHost.get(command.host()).add(descriptor);
+					}
+				}
+			}
+		}
+		for (Host host : executionsPerHost.keySet()) {
+			host.stopExecutions(executionsPerHost.get(host));
+		}
+	}
+	
+	public void stopAllExecutions() throws IOException {
+		Map<Host, List<CommandDescriptor>> executionsPerHost = 
+				new HashMap<Host, List<CommandDescriptor>>();
 		for (CommandDescriptor descriptor : this.tasks.keySet()) {
 			if (descriptor.isExecution()) {
 				List<ScheduledTask<?>> commands = this.tasks.get(descriptor);
@@ -342,10 +373,8 @@ public class DescriptorGraph
 
 	public Set<Host> hosts() {
 		Set<Host> hosts = new TreeSet<Host>();
-
 		hosts.addAll(this.ftpHosts);
 		hosts.addAll(this.sshHosts);
-
 		return hosts;
 	}
 	

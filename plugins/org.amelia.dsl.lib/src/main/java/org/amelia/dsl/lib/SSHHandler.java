@@ -208,7 +208,6 @@ public class SSHHandler extends Thread {
 	public int stopExecutions(List<CommandDescriptor> executions) throws IOException {
 		// FIXME: Improve the search string to identify deployed composites when
 		// the classpath is different (libraries are in different order)
-
 		String prompt = ShellUtils.ameliaPromptRegexp();
 		List<String> components = new ArrayList<String>();
 
@@ -220,17 +219,15 @@ public class SSHHandler extends Thread {
 			String[] data = command.split(" "); // data[2]: compositeName
 			this.expect.sendLine(ShellUtils.runningCompositeName(command));
 			Result r = this.expect.expect(regexp(prompt));
-
+			
 			if (r.getBefore().contains(data[2])) {
 				this.expect.sendLine(ShellUtils.killCommand(command));
 				this.expect.expect(regexp(prompt));
-
 				components.add(data[2]);
 				logger.info("Execution of composite " + data[2]
 						+ " was successfully stopped in " + this.host);
 			}
 		}
-
 		if (!components.isEmpty()) {
 			int nExecutions = components.size();
 			String have = nExecutions == 1 ? " has " : " have ";
@@ -240,7 +237,6 @@ public class SSHHandler extends Thread {
 					+ "'" + have + "been stopped";
 			Log.success(this.host, message);
 		}
-
 		return components.size();
 	}
 

@@ -36,8 +36,12 @@ public class Subsystem {
 		public abstract void deploy(String subsystem,
 				List<Subsystem> dependencies) throws Exception;
 		
-		public void shutdown(boolean stopExecutedComponents) {
-			this.graph.executionManager().shutdown(stopExecutedComponents);
+		public void shutdownAndStopComponents(String[] compositeNames) {
+			this.graph.executionManager().shutdown(compositeNames);
+		}
+		
+		public void shutdown(boolean stopAllExecutedComponents) {
+			this.graph.executionManager().shutdown(stopAllExecutedComponents);
 		}
 		
 		public boolean isShutdown() {

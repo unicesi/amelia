@@ -186,11 +186,9 @@ public class ExecutionManager {
 		for (Host host : hosts)
 			host.stopExecutions();
 	}
-
-	/**
-	 * Terminates the execution
-	 */
-	public void shutdown(boolean stopCurrentExecutions) {
+	
+	private void shutdown(boolean stopAllExecutedComponents,
+			String[] compositeNames) {
 		// Prevent shutting down more than once
 		if (!shuttingDown) {
 			shuttingDown = true;
@@ -201,10 +199,10 @@ public class ExecutionManager {
 						.toArray(new Host[0]);
 				Host[] ftpHosts = executionGraph.ftpHosts()
 						.toArray(new Host[0]);
-
-				if (stopCurrentExecutions)
-					executionGraph.stopExecutions();
-				
+				if(stopAllExecutedComponents)
+					executionGraph.stopAllExecutions();
+				else
+					executionGraph.stopExecutions(compositeNames);
 				executionGraph.stopCurrentThreads();
 				closeFTPConnections(ftpHosts);
 				closeSSHConnections(sshHosts);
@@ -215,6 +213,21 @@ public class ExecutionManager {
 				logger.error(e);
 			}
 		}
+	}
+	
+	/**
+	 * Stop the given executed components and then terminates the execution
+	 */
+	public void shutdown(String... compositeNames) {
+		shutdown(false, compositeNames);
+	}
+
+	/**
+	 * (if requested) Stop all of the executed components, and then terminates
+	 * the execution
+	 */
+	public void shutdown(boolean stopAllCurrentExecutions) {
+		shutdown(stopAllCurrentExecutions, new String[0]);
 	}
 
 	public boolean isAborting() {
