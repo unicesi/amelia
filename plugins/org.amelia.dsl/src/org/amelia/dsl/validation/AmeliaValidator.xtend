@@ -354,7 +354,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				error('''Duplicate «extensionType» statement''', AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
 					DUPLICATE_EXTENSION_DECLARATION)
 			} else {
-				error("A subsystem cannot depends on a subsystem that is also included",
+				error("A subsystem cannot depend on a subsystem that is also included",
 					AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
 			}
 		}
