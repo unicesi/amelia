@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
@@ -215,11 +217,10 @@ public class SSHHandler extends Thread {
 		// components)
 		for (int i = executions.size() - 1; i >= 0; i--) {
 			CommandDescriptor descriptor = executions.remove(i);
-			String command = descriptor.toCommandString();
+			String command = prepareRunCommand(descriptor.toCommandString());
 			String[] data = command.split(" "); // data[0]: compositeName
 			this.expect.sendLine(ShellUtils.runningCompositeName(command));
 			Result r = this.expect.expect(regexp(prompt));
-			
 			if (r.getBefore().contains(data[0])) {
 				this.expect.sendLine(ShellUtils.killCommand(command));
 				this.expect.expect(regexp(prompt));
@@ -228,6 +229,21 @@ public class SSHHandler extends Thread {
 						+ " was successfully stopped in " + this.host);
 			}
 		}
+		notifyAboutStoppedExecutions(components);
+		return components.size();
+	}
+	
+	private String prepareRunCommand(String command) {
+		// remove the "frascati run" part
+		Pattern pattern = Pattern.compile("(frascati run) (\\-r [0-9]+ )?(.*)");
+		Matcher matcher = pattern.matcher(command);
+		if (matcher.find()) {
+			command = matcher.group(3);
+		}
+		return command;
+	}
+	
+	private void notifyAboutStoppedExecutions(List<String> components) {
 		if (!components.isEmpty()) {
 			int nExecutions = components.size();
 			String have = nExecutions == 1 ? " has " : " have ";
@@ -237,7 +253,6 @@ public class SSHHandler extends Thread {
 					+ "'" + have + "been stopped";
 			Log.success(this.host, message);
 		}
-		return components.size();
 	}
 
 	/**

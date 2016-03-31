@@ -39,6 +39,7 @@ import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.ScheduledTask;
+import org.amelia.dsl.lib.util.Strings;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -309,25 +310,23 @@ public class DescriptorGraph
 		return n;
 	}
 	
-	public void stopExecutions(String[] compositeNames) throws IOException {
-		List<String> _compositeNames = Arrays.asList(compositeNames);
+	public void stopExecutions(final String[] compositeNames) throws IOException {
 		Map<Host, List<CommandDescriptor>> executionsPerHost = 
 				new HashMap<Host, List<CommandDescriptor>>();
 		for (CommandDescriptor descriptor : this.tasks.keySet()) {
 			if (descriptor.isExecution()) {
-				// FIXME: Can composite names contain other characters?
+				// FIXME: Can composite names contain other characters? (group 3)
 				Pattern pattern = Pattern.compile(
 						"(frascati run) (\\-r [0-9]+ )?([\\w\\-]+)(.*)");
 				Matcher matcher = pattern.matcher(descriptor.toCommandString());
-				if (matcher.find()
-						&& _compositeNames.contains(matcher.group(3))) {
-					_compositeNames.remove(matcher.group(3));
-					List<ScheduledTask<?>> commands = this.tasks.get(descriptor);
-					for (ScheduledTask<?> command : commands) {
-						if (!executionsPerHost.containsKey(command.host()))
-							executionsPerHost.put(command.host(),
-									new ArrayList<CommandDescriptor>());
-						executionsPerHost.get(command.host()).add(descriptor);
+				if (matcher.find()) {
+					if (Strings.containsAnyOf(matcher.group(3), compositeNames)) {
+						for (ScheduledTask<?> command : this.tasks.get(descriptor)) {
+							if (!executionsPerHost.containsKey(command.host()))
+								executionsPerHost.put(command.host(),
+										new ArrayList<CommandDescriptor>());
+							executionsPerHost.get(command.host()).add(descriptor);
+						}
 					}
 				}
 			}

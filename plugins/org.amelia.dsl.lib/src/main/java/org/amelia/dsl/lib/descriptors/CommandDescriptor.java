@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.amelia.dsl.lib.util.Arrays;
 import org.amelia.dsl.lib.util.CallableTask;
@@ -239,15 +237,7 @@ public class CommandDescriptor extends Observable {
 	}
 
 	public String toCommandString() {
-		String commandString = this.command;
-		if (isExecution()) {
-			Pattern pattern = Pattern.compile("(frascati run) (\\-r [0-9]+ )?(.*)");
-			Matcher matcher = pattern.matcher(this.command);
-			if (matcher.find()) {
-				commandString = matcher.group(3);
-			}
-		}
-		return commandString;
+		return this.command;
 	}
 	
 	public boolean dependsOn(CommandDescriptor... dependencies) {
