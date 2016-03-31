@@ -34,6 +34,8 @@ import org.amelia.dsl.lib.util.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.jcraft.jsch.JSchException;
+
 /**
  * @author Miguel Jiménez - Initial contribution and API
  * 
@@ -90,11 +92,13 @@ public class Host implements Comparable<Host> {
 		this(hostname, ftpPort, sshPort, username, password, randomName());
 	}
 
-	public void openSSHConnection(String subsystem) throws InterruptedException {
+	public void openSSHConnection(String subsystem)
+			throws InterruptedException, JSchException, IOException {
 		if (this.ssh == null)
 			this.ssh = new SSHHandler(this, subsystem);
 
 		if (!this.ssh.isConnected()) {
+			this.ssh.setup();
 			this.ssh.start();
 			this.ssh.join();
 

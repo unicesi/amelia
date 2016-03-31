@@ -254,9 +254,22 @@ public class DescriptorGraph
 			final boolean shutdownAfterDeployment,
 			final boolean stopExecutionsWhenFinish)
 					throws InterruptedException, IOException {
+		
 		// Open SSH and FTP connections before dependencies resolution
-		executionManager.openSSHConnections(this.sshHosts.toArray(new Host[0]));
-		executionManager.openFTPConnections(this.ftpHosts.toArray(new Host[0]));
+		Thread setupThread = new Thread() {
+			public void run() {
+				// Handle connection errors
+				setDefaultUncaughtExceptionHandler(ExecutionManager.exceptionHandler());
+				try {
+					executionManager.openSSHConnections(sshHosts.toArray(new Host[0]));
+					executionManager.openFTPConnections(ftpHosts.toArray(new Host[0]));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		setupThread.start();
+		setupThread.join();
 
 		if (stopPreviousExecutions && this.sshHosts.size() > 0)
 			stopAllExecutions();

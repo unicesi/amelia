@@ -99,26 +99,17 @@ public class SSHHandler extends Thread {
 		// Handle uncaught exceptions
 		this.taskQueue.setUncaughtExceptionHandler(ExecutionManager.exceptionHandler());
 	}
+	
+	public void setup() throws JSchException, IOException {
+		connect();
+		initialize();
+		configure();
+	}
 
 	@Override
 	public void run() {
-		try {
-			connect();
-			initialize();
-			configure();
-
-			// Once it's configured, it's ready to execute commands
-			this.taskQueue.start();
-
-		} catch (JSchException e) {
-			logger.error("Error establishing SSH connection", e);
-			Log.error(this.host, "Error establishing connection");
-			System.exit(0);
-		} catch (IOException e) {
-			logger.error("Error initializing SSH connection", e);
-			Log.error(this.host, "Error initializing connection");
-			System.exit(0);
-		}
+		// Once it's configured, it's ready to execute commands
+		this.taskQueue.start();
 	}
 
 	private void connect() throws JSchException, IOException {

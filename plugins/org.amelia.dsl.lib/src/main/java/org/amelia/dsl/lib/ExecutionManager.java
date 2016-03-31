@@ -25,6 +25,8 @@ import org.amelia.dsl.lib.util.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.jcraft.jsch.JSchException;
+
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
@@ -112,22 +114,24 @@ public class ExecutionManager {
 	 *            The array of hosts containing the SSH handler
 	 * @throws InterruptedException
 	 *             If any thread interrupts any of the handler threads
+	 * @throws IOException
+	 *             If there is an error while initiating the SSH connection
+	 * @throws JSchException
+	 *             If there is an error establishing the SSH connection
 	 */
-	public void openSSHConnections(Host... hosts) throws InterruptedException {
-
+	public void openSSHConnections(Host... hosts)
+			throws InterruptedException, JSchException, IOException {
 		if (hosts.length > 0)
 			Log.info("Establishing SSH connections (" + hosts.length + ")");
 
 		for (Host host : hosts) {
 			host.openSSHConnection(this.executionGraph.subsystem());
-
 			if (hostFixedWidth < host.toString().length())
 				hostFixedWidth = host.toString().length();
 
 			logger.info("SSH connection for " + host
 					+ " was successfully established");
 		}
-
 		// set a common (fixed) width for all hosts
 		for (Host host : executionGraph.hosts()) {
 			host.setFixedWidth(hostFixedWidth);
