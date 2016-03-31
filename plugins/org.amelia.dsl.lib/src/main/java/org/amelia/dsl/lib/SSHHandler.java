@@ -216,15 +216,15 @@ public class SSHHandler extends Thread {
 		for (int i = executions.size() - 1; i >= 0; i--) {
 			CommandDescriptor descriptor = executions.remove(i);
 			String command = descriptor.toCommandString();
-			String[] data = command.split(" "); // data[2]: compositeName
+			String[] data = command.split(" "); // data[0]: compositeName
 			this.expect.sendLine(ShellUtils.runningCompositeName(command));
 			Result r = this.expect.expect(regexp(prompt));
 			
-			if (r.getBefore().contains(data[2])) {
+			if (r.getBefore().contains(data[0])) {
 				this.expect.sendLine(ShellUtils.killCommand(command));
 				this.expect.expect(regexp(prompt));
-				components.add(data[2]);
-				logger.info("Execution of composite " + data[2]
+				components.add(data[0]);
+				logger.info("Execution of composite " + data[0]
 						+ " was successfully stopped in " + this.host);
 			}
 		}
