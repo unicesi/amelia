@@ -20,7 +20,9 @@ package org.amelia.dsl.jvmmodel
 
 import com.google.inject.Inject
 import java.util.List
+import org.amelia.dsl.amelia.IncludeDeclaration
 import org.amelia.dsl.amelia.OnHostBlockExpression
+import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.VariableDeclaration
 import org.amelia.dsl.lib.DescriptorGraph
@@ -31,14 +33,13 @@ import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.eclipse.xtext.naming.QualifiedName
+import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
-import org.amelia.dsl.amelia.IncludeDeclaration
-import org.amelia.dsl.amelia.RuleDeclaration
-import org.eclipse.xtext.naming.QualifiedName
+import org.eclipse.xtext.common.types.JvmField
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -64,7 +65,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
-				val sufix = System.nanoTime + ""
+				val suffix = System.nanoTime + ""
 				documentation = subsystem.documentation
 				if (!subsystem.fragment)
 					superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
@@ -77,16 +78,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						final = !declaration.writeable
 					]
 				}
-				// Transform fragment includes into fields
-				if (subsystem.extensions != null) {
-					for (include : subsystem.extensions.declarations.filter(IncludeDeclaration)) {
-						val fqn = include.element.fullyQualifiedName
-						members += include.toField(fqn.toString("_") + sufix, typeRef(fqn.toString)) [
-							initializer = '''new «fqn»()'''
-							final = true
-						]
-					}
-				}
+				// Transform fragment includes into fields (recursive)
+				members += getIncludesAsFields(subsystem, suffix)
+				
 				// Transform rules inside on-host blocks into array fields
 				for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
 					for (rule : hostBlock.rules) {
@@ -100,7 +94,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				// Setup rules' commands
 				if (subsystem.fragment) {
 					members += subsystem.toConstructor[
-						body = subsystem.setup(null, sufix)
+						body = subsystem.setup(null, suffix)
 					]
 				} else {
 					members += subsystem.toMethod("deploy", typeRef(void)) [
@@ -111,7 +105,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						parameters +=
 							subsystem.toParameter(dependenciesParam,
 								typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
-						body = subsystem.setup(subsystemParam, sufix)
+						body = subsystem.setup(subsystemParam, suffix)
 					]
 				}
 				// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
@@ -134,11 +128,32 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					}
 					currentHostBlock++
 				}
+				
+				// Method to return all rules from included subsystems
+				members += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
+					body = [
+						val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.map [r|
+							r.name
+						].toList
+						if (subsystem.extensions != null) {
+							val includes = subsystem.extensions.declarations.filter(IncludeDeclaration).map [d|
+								d.element as Subsystem
+							]
+							for (var i = 0; i < includes.size; i++) {
+								val includedSubsystem = includes.get(i)
+								rules += '''«includedSubsystem.fullyQualifiedName.toString("_")»«suffix».getAllRules()'''
+							}
+						}
+						append("return ").append(Arrays).append(".concatAll(").increaseIndentation.newLine
+						append(rules.join(",\n")).decreaseIndentation.newLine
+						append(");")
+					]
+				]
 			}
 		]
 	}
 	
-	def Procedure1<ITreeAppendable> setup(Subsystem subsystem, String subsystemParam, String sufix) {
+	def Procedure1<ITreeAppendable> setup(Subsystem subsystem, String subsystemParam, String suffix) {
 		return [
 			var currentHostBlock = 0
 			for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
@@ -160,12 +175,12 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						if (currentCommand == 0 && !rule.dependencies.empty) {
 							val dependencies = newArrayList
 							for (dependency : rule.dependencies) {
-								dependencies += '''«dependency.getAccessName(subsystem, sufix)»[«dependency.commands.length - 1»]'''
+								dependencies += '''«dependency.getAccessName(subsystem, suffix)»[«dependency.commands.length - 1»]'''
 							}
 							append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')
 							newLine
 						} else if (currentCommand > 0) {
-							append('''«rule.name»[«currentCommand»].dependsOn(«rule.getAccessName(subsystem, sufix)»[«(currentCommand - 1)»]);''')
+							append('''«rule.name»[«currentCommand»].dependsOn(«rule.getAccessName(subsystem, suffix)»[«(currentCommand - 1)»]);''')
 							newLine
 						}
 						currentCommand++
@@ -175,31 +190,50 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			}
 			
 			if (!subsystem.fragment) {
-				val subsystemRules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.map [ r |
-					r.getAccessName(subsystem, sufix)
-				]
-				val includes = subsystem.extensions.declarations.filter(IncludeDeclaration).map [ d |
-					d.element as Subsystem
-				]
-				val includedRules = includes.map[s|s.body.expressions.filter(OnHostBlockExpression)].flatten.map [ h |
-					h.rules
-				].flatten.map[r|r.getAccessName(subsystem, sufix)]
-				val rules = (subsystemRules + includedRules).join(", ")
+				val rules = subsystem.getAllIncludedRules(suffix)
 				if (!rules.empty) {
 					append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
-					append('''super.graph.addDescriptors(''').append(Arrays).append('''.concatAll(«rules»));''').newLine
+					append('''super.graph.addDescriptors(getAllRules());''').newLine
 					append('''super.graph.execute(true);''')
 				}
 			}
 		]
 	}
 	
-	def getAccessName(RuleDeclaration rule, Subsystem subsystem, String sufix) {
+	def List<JvmField> getIncludesAsFields(Subsystem subsystem, String suffix) {
+		val members = newArrayList
+		if (subsystem.extensions != null) {
+			for (include : subsystem.extensions.declarations.filter(IncludeDeclaration)) {
+				val includedSubsystem = include.element as Subsystem
+				val fqn = includedSubsystem.fullyQualifiedName
+				// members += getIncludesAsFields(includedSubsystem, suffix)
+				members += includedSubsystem.toField(fqn.toString("_") + suffix, typeRef(fqn.toString)) [
+					initializer = '''new «fqn»()'''
+					final = true
+				]
+			}
+		}
+		return members
+	}
+	
+	def List<RuleDeclaration> getAllIncludedRules(Subsystem subsystem, String suffix) {
+		val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.toList
+		if (subsystem.extensions != null) {
+			val includes = subsystem.extensions.declarations.filter(IncludeDeclaration).map [ d |
+				d.element as Subsystem
+			]
+			for (fragment : includes)
+				rules += fragment.getAllIncludedRules(suffix)
+		}
+		return rules
+	}
+	
+	def getAccessName(RuleDeclaration rule, Subsystem subsystem, String suffix) {
 		val segments = rule.fullyQualifiedName.segments
 		val containerFQN = QualifiedName.create(segments.subList(0, segments.length - 1))
 		var accessName = rule.name
 		if (!containerFQN.equals(subsystem.fullyQualifiedName)) {
-			accessName = containerFQN.toString("_") + sufix + "." + rule.name
+			accessName = containerFQN.toString("_") + suffix + "." + rule.name
 		}
 		return accessName
 	}
