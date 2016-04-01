@@ -374,6 +374,24 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
+	def checkFragments(ExtensionDeclaration extensionDeclaration) {
+		switch (extensionDeclaration) {
+			IncludeDeclaration: {
+				if (!(extensionDeclaration.element as Subsystem).fragment) {
+					error("Included subsystems must be fragments",
+						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
+				}
+			}
+			DependDeclaration: {
+				if ((extensionDeclaration.element as Subsystem).fragment) {
+					error("Subsystems depended upon cannot be fragments",
+						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
+				}
+			}
+		}
+	}
+	
+	@Check
 	def checkNoEmptyRules(RuleDeclaration rule) {
 		if (rule.commands.empty) {
 			error("There must be at least one command", AmeliaPackage.Literals.RULE_DECLARATION__COMMANDS,
