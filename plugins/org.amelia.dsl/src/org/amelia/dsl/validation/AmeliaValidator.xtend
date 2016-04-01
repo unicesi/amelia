@@ -387,7 +387,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			DependDeclaration: {
 				val subsystem = (EcoreUtil2.getRootContainer(extensionDeclaration) as Model).typeDeclaration as Subsystem
 				if (subsystem.fragment) {
-					error("Fragments cannot depend on subsystems",
+					error("Fragments cannot have dependencies",
 						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
 				}
 				if (extensionDeclaration.element instanceof Subsystem) {
