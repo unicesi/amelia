@@ -27,6 +27,7 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.Scopes
 import org.amelia.dsl.amelia.IncludeDeclaration
+import java.util.Collections
 
 /**
  * This class contains custom scoping description.
@@ -45,7 +46,10 @@ class AmeliaScopeProvider extends AmeliaImportedNamespaceAwareLocalScopeProvider
 				var candidates = EcoreUtil2.getAllContentsOfType(subsystem, RuleDeclaration)
 				if (subsystem.extensions != null) {
 					candidates += subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
-						EcoreUtil2.getAllContentsOfType((i.element as Subsystem), RuleDeclaration)
+						if (i instanceof Subsystem)
+							EcoreUtil2.getAllContentsOfType((i.element as Subsystem), RuleDeclaration)
+						else
+							Collections.EMPTY_LIST
 					].flatten
 				}
 				return Scopes.scopeFor(candidates)
