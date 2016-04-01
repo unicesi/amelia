@@ -46,7 +46,7 @@ class AmeliaScopeProvider extends AmeliaImportedNamespaceAwareLocalScopeProvider
 				var candidates = EcoreUtil2.getAllContentsOfType(subsystem, RuleDeclaration)
 				if (subsystem.extensions != null) {
 					candidates += subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
-						if (i instanceof Subsystem)
+						if (i.element instanceof Subsystem)
 							EcoreUtil2.getAllContentsOfType((i.element as Subsystem), RuleDeclaration)
 						else
 							Collections.EMPTY_LIST
