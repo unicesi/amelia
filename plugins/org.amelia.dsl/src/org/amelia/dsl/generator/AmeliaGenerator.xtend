@@ -51,7 +51,8 @@ class AmeliaGenerator implements IGenerator {
 	@Inject extension IQualifiedNameProvider
 
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
-		val subsystems = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem)
+		val subsystemDescriptions = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem)
+		val subsystems = subsystemDescriptions.map[d|d.getEObject(resource) as Subsystem].filter[e|!e.fragment]
 		val s = org.amelia.dsl.lib.Subsystem.canonicalName
 		val content = '''
 			package amelia;
@@ -59,24 +60,24 @@ class AmeliaGenerator implements IGenerator {
 			public class AmeliaMain {
 				public static void main(String[] args) throws InterruptedException {
 					«FOR subsystem : subsystems»
-						«s» «subsystem.qualifiedName.toString("_")» = new «s»("«subsystem.qualifiedName.toString»", new «subsystem.qualifiedName»());
+						«s» «subsystem.fullyQualifiedName.toString("_")» = new «s»("«subsystem.fullyQualifiedName»", new «subsystem.fullyQualifiedName»());
 					«ENDFOR»
 					«FOR subsystem : subsystems»
-						«val eObject = subsystem.getEObject(resource) as Subsystem»
-						«IF eObject != null && eObject.extensions != null»
-							«val dependencies = eObject.extensions.declarations.filter(DependDeclaration).map[ i |
+						«IF subsystem != null && subsystem.extensions != null»
+							«val dependencies = subsystem.extensions.declarations.filter(DependDeclaration).map[ i |
 								(i.element as Subsystem).fullyQualifiedName.toString("_")
 							]»
-							«subsystem.qualifiedName.toString("_")».dependsOn(«dependencies.join(", ")»);
+							«IF !subsystem.extensions.declarations.filter(DependDeclaration).empty»
+								«subsystem.fullyQualifiedName.toString("_")».dependsOn(«dependencies.join(", ")»);
+							«ENDIF»
 						«ENDIF»
 					«ENDFOR»
 					«SubsystemGraph.canonicalName» graph = «SubsystemGraph.canonicalName».getInstance();
-					graph.addSubsystems(«subsystems.map[r|r.qualifiedName.toString("_")].join(", ")»);
+					graph.addSubsystems(«subsystems.map[r|r.fullyQualifiedName.toString("_")].join(", ")»);
 					graph.execute(true);
 				}
 			}
 		'''
-		
 		fsa.generateFile("amelia/AmeliaMain.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
 	}
 	

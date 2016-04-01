@@ -34,6 +34,8 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -60,7 +62,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				documentation = subsystem.documentation
-				superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
+				if (!subsystem.fragment)
+					superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
 				for (declaration : subsystem.body.expressions.filter(VariableDeclaration)) {
 					members += declaration.toField(declaration.name, declaration.type ?: inferredType) [
 						documentation = declaration.documentation
@@ -78,57 +81,22 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						]
 					}	
 				}
-				members += subsystem.toMethod("deploy", typeRef(void)) [
-					val subsystemParam = "subsystem"
-					val dependenciesParam = "dependencies"
-					exceptions += typeRef(Exception)
-					parameters += subsystem.toParameter(subsystemParam, typeRef(String))
-					parameters +=
-						subsystem.toParameter(dependenciesParam,
-							typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
-					body = [
-						var currentHostBlock = 0
-						for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
-							append(Host).append('''[] hosts«currentHostBlock» = { ''')
-							for (var currentHost = 0; currentHost < hostBlock.hosts.length; currentHost++) {
-								append("getHost" + currentHostBlock + currentHost + "()")
-								if (currentHost < hostBlock.hosts.length - 1)
-									append(", ")
-							}
-							append(" };")
-							newLine
-							for (rule : hostBlock.rules) {
-								var currentCommand = 0
-								for (command : rule.commands) {
-									append('''«rule.name.toString»[«currentCommand»]''')
-									append(''' = init«rule.name.toFirstUpper»«currentCommand»();''').newLine
-									append('''«rule.name»[«currentCommand»]''')
-									append('''.runsOn(hosts«currentHostBlock»);''').newLine
-									if (currentCommand == 0 && !rule.dependencies.empty) {
-										val dependencies = newArrayList
-										for (dependency : rule.dependencies) {
-											dependencies += '''«dependency.fullyQualifiedName»[«dependency.commands.length - 1»]'''
-										}
-										append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')
-										newLine
-									} else if (currentCommand > 0) {
-										append('''«rule.name»[«currentCommand»].dependsOn(«rule.fullyQualifiedName»[«(currentCommand - 1)»]);''')
-										newLine
-									}
-									currentCommand++
-								}
-							}
-							currentHostBlock++
-						}
-						val rules = subsystem.body.expressions
-							.filter(OnHostBlockExpression).map[h|h.rules].flatten.map[r|r.name].join(", ")
-						if (!rules.empty) {
-							append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
-							append('''super.graph.addDescriptors(''').append(Arrays).append('''.concatAll(«rules»));''').newLine
-							append('''super.graph.execute(true);''')
-						}
+				if (subsystem.fragment) {
+					members += subsystem.toConstructor[
+						body = subsystem.setup(null)
 					]
-				]
+				} else {
+					members += subsystem.toMethod("deploy", typeRef(void)) [
+						val subsystemParam = "subsystem"
+						val dependenciesParam = "dependencies"
+						exceptions += typeRef(Exception)
+						parameters += subsystem.toParameter(subsystemParam, typeRef(String))
+						parameters +=
+							subsystem.toParameter(dependenciesParam,
+								typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
+						body = subsystem.setup(subsystemParam)
+					]
+				}
 				var currentHostBlock = 0
 				for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
 					var currentHost = 0
@@ -147,6 +115,56 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						}
 					}
 					currentHostBlock++
+				}
+			}
+		]
+	}
+	
+	def Procedure1<ITreeAppendable> setup(Subsystem subsystem, String subsystemParam) {
+		return [
+			var currentHostBlock = 0
+			for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
+				append(Host).append('''[] hosts«currentHostBlock» = { ''')
+				for (var currentHost = 0; currentHost < hostBlock.hosts.length; currentHost++) {
+					append("getHost" + currentHostBlock + currentHost + "()")
+					if (currentHost < hostBlock.hosts.length - 1)
+						append(", ")
+				}
+				append(" };")
+				newLine
+				for (rule : hostBlock.rules) {
+					var currentCommand = 0
+					for (command : rule.commands) {
+						append('''«rule.name.toString»[«currentCommand»]''')
+						append(''' = init«rule.name.toFirstUpper»«currentCommand»();''').newLine
+						append('''«rule.name»[«currentCommand»]''')
+						append('''.runsOn(hosts«currentHostBlock»);''').newLine
+						if (currentCommand == 0 && !rule.dependencies.empty) {
+							val dependencies = newArrayList
+							for (dependency : rule.dependencies) {
+								dependencies += '''«dependency.fullyQualifiedName»[«dependency.commands.length - 1»]'''
+							}
+							append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')
+							newLine
+						} else if (currentCommand >
+							0) {
+							append('''«rule.name»[«currentCommand»].dependsOn(«rule.fullyQualifiedName»[«(currentCommand - 1)»]);''')
+							newLine
+						}
+						currentCommand++
+					}
+				}
+				currentHostBlock++
+			}
+			
+			if (!subsystem.fragment) {
+				val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.map [r|
+					r.name
+				].join(", ")
+				if (!rules.empty) {
+					append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
+					append('''super.graph.addDescriptors(''').append(Arrays).append('''.concatAll(«rules»));''').newLine
+					append('''super.graph.execute(true);''')
 				}
 			}
 		]
