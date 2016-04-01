@@ -385,14 +385,16 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				}
 			}
 			DependDeclaration: {
-				if ((extensionDeclaration.element as Subsystem).fragment) {
-					error("Subsystems depended upon cannot be fragments",
-						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_FRAGMENT_DEPENDENCY)
-				}
 				val subsystem = (EcoreUtil2.getRootContainer(extensionDeclaration) as Model).typeDeclaration as Subsystem
 				if (subsystem.fragment) {
 					error("Fragments cannot depend on subsystems",
 						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
+				}
+				if (extensionDeclaration.element instanceof Subsystem) {
+					if ((extensionDeclaration.element as Subsystem).fragment) {
+						error("Subsystems depended upon cannot be fragments",
+							AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_FRAGMENT_DEPENDENCY)
+					}
 				}
 			}
 		}
