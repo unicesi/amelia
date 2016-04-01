@@ -71,6 +71,8 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val EMPTY_COMMAND_LIST = "amelia.issue.emptyCommandList"
 	public static val INVALID_EXTENSION_DECLARATION = "amelia.issue.invalidExtensionDeclaration"
 	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
+	public static val INVALID_FRAGMENT_DEPENDENCY = "amelia.issue.invalidFragmentDependency"
+	public static val INVALID_NON_FRAGMENT_INCLUDE = "amelia.issue.invalidNonFragmentInclude"
 	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
 	public static val INVALID_PARAMETER_TYPE = "amelia.issue.invalidParameterType"
 	public static val INVALID_SELF_EXTENSION = "amelia.issue.invalidSelfInclude"
@@ -379,13 +381,13 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			IncludeDeclaration: {
 				if (!(extensionDeclaration.element as Subsystem).fragment) {
 					error("Included subsystems must be fragments",
-						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
+						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_NON_FRAGMENT_INCLUDE)
 				}
 			}
 			DependDeclaration: {
 				if ((extensionDeclaration.element as Subsystem).fragment) {
 					error("Subsystems depended upon cannot be fragments",
-						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
+						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_FRAGMENT_DEPENDENCY)
 				}
 			}
 		}
