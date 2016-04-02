@@ -22,8 +22,8 @@
 	</modules>
 	<licenses>
 		<license>
-			<name>GNU Lesser General Public License, Version 2</name>
-			<url>https://www.gnu.org/licenses/lgpl-2.0.txt</url>
+			<name>GNU Lesser General Public License, Version 3</name>
+			<url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
