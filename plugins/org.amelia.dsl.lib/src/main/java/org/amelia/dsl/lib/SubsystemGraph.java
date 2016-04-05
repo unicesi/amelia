@@ -229,7 +229,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		Log.print("Finished at: " + new Date());
 		Log.print(Log.SEPARATOR_LONG);
 		
-		return ExecutionManager.isAnySubsystemAborting();
+		return !ExecutionManager.isAnySubsystemAborting();
 	}
 
 	public void shutdown(final boolean stopExecutedComponents) {
