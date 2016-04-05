@@ -87,11 +87,12 @@ public class DescriptorGraph
 				if (!this.shutdown) {
 					this.handler.executeCommand(this.descriptor, this.command);
 					this.descriptor.done(this.handler.host());
-
 					// Release this dependency
-					// FIXME: Temporary workaround to avoid service-not-bound
-					// errors (RMI)
-					Thread.sleep(2000);
+					if (this.descriptor.isExecution()) {
+						// FIXME: Temporary workaround to avoid service-not-bound
+						// errors (RMI)
+						Thread.sleep(2000);
+					}
 					this.descriptor.notifyObservers();
 				}
 			} catch (Exception e) {
