@@ -257,6 +257,7 @@ public class DescriptorGraph
 					throws InterruptedException, IOException {
 		
 		// Open SSH and FTP connections before dependencies resolution
+		final List<Boolean> connectionOk = new ArrayList<Boolean>();
 		Thread setupThread = new Thread() {
 			public void run() {
 				// Handle connection errors
@@ -264,13 +265,17 @@ public class DescriptorGraph
 				try {
 					executionManager.openSSHConnections(sshHosts.toArray(new Host[0]));
 					executionManager.openFTPConnections(ftpHosts.toArray(new Host[0]));
+					connectionOk.add(true);
 				} catch (Exception e) {
+					connectionOk.add(false);
 					throw new RuntimeException(e);
 				}
 			}
 		};
 		setupThread.start();
 		setupThread.join();
+		if (!connectionOk.get(0))
+			return;
 
 		if (stopPreviousExecutions && this.sshHosts.size() > 0)
 			stopAllExecutions();
