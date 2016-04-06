@@ -197,7 +197,7 @@ Library.
    </license>
 
    <url>
-      <update label="Amelia" url="http://amelia.migueljimenez.co/"/>
+      <update label="Amelia" url="http://migueljimenez.co/amelia/"/>
       <discovery label="Xtext" url="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/"/>
    </url>
 
