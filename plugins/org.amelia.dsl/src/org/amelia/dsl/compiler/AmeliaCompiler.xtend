@@ -39,8 +39,6 @@ import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.pascani.dsl.lib.sca.FrascatiUtils
 
-//import org.pascani.dsl.lib.sca.FrascatiUtils
-
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
