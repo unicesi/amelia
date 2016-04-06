@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtext.xbase.lib,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
  org.eclipse.xtext.common.types,
- org.amelia.dsl.lib;bundle-version="0.5.0"
+ org.amelia.dsl.lib.osgi
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.amelia.dsl.generator,
  org.amelia.dsl.parser.antlr.internal,
