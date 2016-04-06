@@ -204,13 +204,14 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		val members = newArrayList
 		if (subsystem.extensions != null) {
 			for (include : subsystem.extensions.declarations.filter(IncludeDeclaration)) {
-				val includedSubsystem = include.element as Subsystem
-				val fqn = includedSubsystem.fullyQualifiedName
-				// members += getIncludesAsFields(includedSubsystem, suffix)
-				members += includedSubsystem.toField(fqn.toString("_") + suffix, typeRef(fqn.toString)) [
-					initializer = '''new «fqn»()'''
-					final = true
-				]
+				if (include.element instanceof Subsystem) {
+					val includedSubsystem = include.element as Subsystem
+					val fqn = includedSubsystem.fullyQualifiedName
+					members += includedSubsystem.toField(fqn.toString("_") + suffix, typeRef(fqn.toString)) [
+						initializer = '''new «fqn»()'''
+						final = true
+					]
+				}
 			}
 		}
 		return members

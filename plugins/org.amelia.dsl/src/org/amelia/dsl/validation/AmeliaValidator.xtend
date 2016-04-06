@@ -378,7 +378,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkFragments(ExtensionDeclaration extensionDeclaration) {
 		switch (extensionDeclaration) {
-			IncludeDeclaration: {
+			IncludeDeclaration case extensionDeclaration.element instanceof Subsystem: {
 				if (!(extensionDeclaration.element as Subsystem).fragment) {
 					error("Included subsystems must be fragments",
 						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_NON_FRAGMENT_INCLUDE)
