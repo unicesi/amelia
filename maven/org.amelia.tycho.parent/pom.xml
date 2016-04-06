@@ -6,7 +6,7 @@
 	<artifactId>org.amelia.tycho.parent</artifactId>
 	<packaging>pom</packaging>
 	<properties>
-		<tycho-version>0.23.1</tycho-version>
+		<tycho-version>0.24.0</tycho-version>
 		<xtextVersion>2.9.1</xtextVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.6</maven.compiler.source>
