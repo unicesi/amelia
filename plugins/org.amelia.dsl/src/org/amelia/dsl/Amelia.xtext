@@ -70,7 +70,7 @@ VariableDeclaration
 	;
 
 OnHostBlockExpression
-	:	'on' '(' hosts += XExpression (',' hosts += XExpression)* ')' '[' (rules += RuleDeclaration)* ']'
+	:	'on' '(' hosts += XExpression (',' hosts += XExpression)* ')' '{' (rules += RuleDeclaration)* '}'
 	;
 
 RuleDeclaration
