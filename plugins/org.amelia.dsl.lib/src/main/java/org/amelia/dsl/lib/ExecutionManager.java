@@ -48,6 +48,12 @@ public class ExecutionManager {
 	/**
 	 * The variable indicating whether the current deployment is in trance of
 	 * abortion
+	 * 
+	 * FIXME: this variable is not being used because (currently) its update
+	 * must be performed from the exception handler, which is static and used by
+	 * any thread. To be used from there (if there is no better option) it must
+	 * exist a way to identify the {@link DescriptorGraph} from which the
+	 * exception is raised.
 	 */
 	private volatile boolean aborting;
 
