@@ -65,7 +65,7 @@ class AmeliaGenerator implements IGenerator {
 					«FOR subsystem : subsystems»
 						«IF subsystem != null && subsystem.extensions != null»
 							«val dependencies = subsystem.extensions.declarations.filter(DependDeclaration).map[ i |
-								(i.element as Subsystem).fullyQualifiedName.toString("_")
+								if (i.element instanceof Subsystem) (i.element as Subsystem).fullyQualifiedName.toString("_")
 							]»
 							«IF !subsystem.extensions.declarations.filter(DependDeclaration).empty»
 								«subsystem.fullyQualifiedName.toString("_")».dependsOn(«dependencies.join(", ")»);
