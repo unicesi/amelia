@@ -66,7 +66,8 @@ InternalSubsystemDeclaration
 
 VariableDeclaration
 	:	{VariableDeclaration}
-		(writeable?='var'|'val') (=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
+		(writeable?='var'|'val'|param?='param')
+		(=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
 	;
 
 OnHostBlockExpression
