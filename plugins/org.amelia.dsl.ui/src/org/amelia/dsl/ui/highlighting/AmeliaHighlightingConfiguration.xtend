@@ -19,6 +19,7 @@
 package org.amelia.dsl.ui.highlighting
 
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor
+import org.eclipse.xtext.ui.editor.utils.TextStyle
 import org.eclipse.xtext.xbase.ui.highlighting.XbaseHighlightingConfiguration
 
 /**
@@ -36,6 +37,14 @@ class AmeliaHighlightingConfiguration extends XbaseHighlightingConfiguration {
 	def customCommand() {
 		val textStyle = stringTextStyle.copy
 		return textStyle;
+	}
+	
+	override TextStyle staticField(){
+		return defaultTextStyle().copy();
+	}
+	
+	override TextStyle field(){
+		return defaultTextStyle().copy();
 	}
 	
 }
