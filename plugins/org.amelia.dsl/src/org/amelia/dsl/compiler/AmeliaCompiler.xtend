@@ -92,9 +92,10 @@ class AmeliaCompiler extends XbaseCompiler {
 				value
 		_value = _value
 			.substring(1, value.length - 1)
-			.replaceAll("\\\\\"", "\"")
-			.replaceAll("\\\\\\{", "{")
-			.replaceAll("\\\\\\}", "}")
+			.replaceAll("\\\\\"", "\\\"")
+			.replaceAll("\\\\'", "'")
+			.replaceAll("\\\\\\<", "<")
+			.replaceAll("\\\\\\>", ">")
 		var lines = Strings.convertToJavaString(_value, true).split("\n")
 		if (lines.length > 1)
 			lines = lines.map[l|l.replaceAll("^\\s*", "")] // left trim

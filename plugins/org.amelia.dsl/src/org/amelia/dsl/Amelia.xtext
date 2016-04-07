@@ -160,26 +160,27 @@ XLiteral returns xbase::XExpression
 	|	XNumberLiteral
 	|	XNullLiteral
 	|	XTypeLiteral
+	|	XStringLiteral
 	|	CommandLiteral
 	|	StringLiteral
 	;
 
 terminal TEXT
-	:	'"' ('\\' . | !('\\' | '"' | '{' | '}') )* '"'
+	:	"'" ('\\' . | !('\\' | "'" | '<' | '>') )* "'"
 	;
 
 terminal TEXT_START
-	:	'"' ('\\' . | !('\\' | '"' | '{') )* '{'
+	:	"'" ('\\' . | !('\\' | "'" | '<') )* '<'
 	;
 
 terminal TEXT_MIDDLE
-	:	'}' ('\\' . | !('\\' | '"' | '{') )* '{'
+	:	'>' ('\\' . | !('\\' | "'" | '<') )* '<'
 	;
 
 terminal TEXT_END
-	:	'}' ('\\' . | !('\\' | '"' | '{') )* '"'
+	:	'>' ('\\' . | !('\\' | "'" | '<') )* "'"
 	;
 
 terminal STRING
-	:	"'" ( '\\' . /* ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') */ | !('\\'|"'") )* "'"?
+	:	'"' ( '\\' . /* ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') */ | !('\\'|'"') )* '"'?
 	;
