@@ -176,8 +176,8 @@ public class CommandDescriptor extends Observable {
 
 	public CommandDescriptor(final Builder builder) {
 		this.internalId = UUID.randomUUID();
-		this.command = builder.command + " "
-				+ Arrays.join(builder.arguments, " ");
+		this.command = builder.command + (builder.arguments.length > 0
+				? " " + Arrays.join(builder.arguments, " ") : "");
 		this.releaseRegexp = builder.releaseRegexp;
 		this.timeout = builder.timeout;
 		this.errorTexts = builder.errorTexts;
@@ -203,7 +203,6 @@ public class CommandDescriptor extends Observable {
 	public CommandDescriptor augmentWith(CommandDescriptor command) {
 		CommandDescriptor.Builder builder = new CommandDescriptor.Builder()
 				.withCommand(toCommandString() + " && " + command.toCommandString())
-				.withCallable(callable())
 				.withErrorMessage(errorMessage())
 				.withErrorText(errorTexts())
 				.withReleaseRegexp(releaseRegexp())
