@@ -81,13 +81,16 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	def fromURItoFQN(URI resourceURI) {
 		// e.g., platform:/resource/<project>/<source-folder>/org/example/.../TypeDecl.pascani
 		var segments = new ArrayList
-
-		// Remove the first 3 segments, and return the package and file segments
-		segments.addAll(resourceURI.segmentsList.subList(3, resourceURI.segments.size - 1))
-
-		// Remove file extension and add the last segment
-		segments.add(resourceURI.lastSegment.substring(0, resourceURI.lastSegment.lastIndexOf(".")))
-
+		if (resourceURI.segments.size > 1) {
+			// Remove the first 3 segments, and return the package and file segments
+			segments.addAll(resourceURI.segmentsList.subList(3, resourceURI.segments.size - 1))
+			// Remove file extension and add the last segment
+			segments.add(resourceURI.lastSegment.substring(0, resourceURI.lastSegment.lastIndexOf(".")))
+		} else if(resourceURI.lastSegment.contains(".")) {
+			segments.add(resourceURI.lastSegment.substring(0, resourceURI.lastSegment.lastIndexOf(".")))
+		} else {
+			segments.add(resourceURI.lastSegment)
+		}
 		return segments.fold("", [r, t|if(r.isEmpty) t else r + "." + t])
 	}
 
@@ -156,7 +159,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	def checkPackageMatchesPhysicalDirectory(Model model) {
 		val packageSegments = model.name.split("\\.")
 		val fqn = fromURItoFQN(model.typeDeclaration.eResource.URI)
-		var expectedPackage = fqn.substring(0, fqn.lastIndexOf("."))
+		var expectedPackage = if(fqn.contains(".")) fqn.substring(0, fqn.lastIndexOf(".")) else ""
 
 		if (!Arrays.equals(expectedPackage.split("\\."), packageSegments)) {
 			error("The declared package '" + model.name + "' does not match the expected package '" + expectedPackage +
