@@ -132,6 +132,8 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 					switch (v) {
 						VariableDeclaration case v.name.equals(varDecl.name):
 							return !v.equals(varDecl)
+						RuleDeclaration case v.name.equals(varDecl.name):
+							return true
 						default:
 							return false
 					}
@@ -149,6 +151,8 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		val subsystem = (EcoreUtil2.getRootContainer(rule) as Model).typeDeclaration as Subsystem
 		val duplicates = subsystem.body.expressions.filter(OnHostBlockExpression).map[o|o.rules].flatten.filter [ r |
 			r.name.equals(rule.name) && !rule.equals(r)
+		] + subsystem.body.expressions.filter(VariableDeclaration).filter [ v |
+			v.name.equals(rule.name)
 		]
 		if (!duplicates.isEmpty) {
 			error("Duplicate local rule " + rule.name, AmeliaPackage.Literals.RULE_DECLARATION__NAME,
