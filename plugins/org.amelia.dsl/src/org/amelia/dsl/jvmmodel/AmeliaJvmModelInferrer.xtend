@@ -66,6 +66,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				val suffix = System.nanoTime + ""
+				val params = newArrayList
 				documentation = subsystem.documentation
 				if (!subsystem.fragment)
 					superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
@@ -75,8 +76,14 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					members += declaration.toField(declaration.name, declaration.type ?: inferredType) [
 						documentation = declaration.documentation
 						initializer = declaration.right
-						final = !declaration.writeable
+						if (declaration.param) {
+							final = !declaration.writeable && declaration.right == null
+						} else {
+							final = !declaration.writeable && declaration.right != null
+						}
 					]
+					if (declaration.param)
+						params += declaration
 				}
 				// Transform fragment includes into fields (recursive)
 				members += getIncludesAsFields(subsystem, suffix)
@@ -97,6 +104,18 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						body = subsystem.setup(null, suffix)
 					]
 				} else {
+					// Empty constructor to avoid compilation errors in the default (Amelia) main
+					members += subsystem.toConstructor[]
+					members += subsystem.toConstructor [
+						for (param : params) {
+							if (param.type != null || param.right != null)
+								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
+						}
+						body = [
+							for (param : params)
+								append('''this.«param.name» = «param.name»;''')
+						]
+					]
 					members += subsystem.toMethod("deploy", typeRef(void)) [
 						val subsystemParam = "subsystem"
 						val dependenciesParam = "dependencies"
