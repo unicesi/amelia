@@ -104,18 +104,20 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						body = subsystem.setup(null, suffix)
 					]
 				} else {
-					// Empty constructor to avoid compilation errors in the default (Amelia) main
-					members += subsystem.toConstructor[]
-					members += subsystem.toConstructor [
-						for (param : params) {
-							if (param.type != null || param.right != null)
-								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
-						}
-						body = [
-							for (param : params)
-								append('''this.«param.name» = «param.name»;''')
+					// Empty constructor to avoid compilation errors in the default (Amelia) main when there are parameters
+					if (!params.empty) {
+						members += subsystem.toConstructor[]
+						members += subsystem.toConstructor [
+							for (param : params) {
+								if (param.type != null || param.right != null)
+									parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
+							}
+							body = [
+								for (param : params)
+									append('''this.«param.name» = «param.name»;''')
+							]
 						]
-					]
+					}
 					members += subsystem.toMethod("deploy", typeRef(void)) [
 						val subsystemParam = "subsystem"
 						val dependenciesParam = "dependencies"
