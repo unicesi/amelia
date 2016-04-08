@@ -74,6 +74,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val INVALID_FRAGMENT_DEPENDENCY = "amelia.issue.invalidFragmentDependency"
 	public static val INVALID_NON_FRAGMENT_INCLUDE = "amelia.issue.invalidNonFragmentInclude"
 	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
+	public static val INVALID_PARAM_DECLARATION = "amelia.issue.invalidParamDeclaration"
 	public static val INVALID_PARAMETER_TYPE = "amelia.issue.invalidParameterType"
 	public static val INVALID_SELF_EXTENSION = "amelia.issue.invalidSelfInclude"
 	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
@@ -407,6 +408,14 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (rule.commands.empty) {
 			error("There must be at least one command", AmeliaPackage.Literals.RULE_DECLARATION__COMMANDS,
 				EMPTY_COMMAND_LIST)
+		}
+	}
+	
+	@Check
+	def checkInferrableType(VariableDeclaration declaration) {
+		if (declaration.param && declaration.type == null && declaration.right == null) {
+			error("This parameter must have either an explicit type or an initial value",
+				AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME, INVALID_PARAM_DECLARATION)
 		}
 	}
 	
