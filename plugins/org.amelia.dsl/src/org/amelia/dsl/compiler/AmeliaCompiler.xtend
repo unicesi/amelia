@@ -96,10 +96,10 @@ class AmeliaCompiler extends XbaseCompiler {
 			.replaceAll("\\\\'", "'")
 			.replaceAll("\\\\\\<", "<")
 			.replaceAll("\\\\\\>", ">")
-		var lines = Strings.convertToJavaString(_value, true).split("\n")
+		var lines = _value.split("\n")
 		if (lines.length > 1)
-			lines = lines.map[l|l.replaceAll("^\\s*", "")] // left trim
-		return lines.filter[l|!l.isEmpty].join(" ")
+			lines = lines.map[l|l.replaceAll("^\\s+", "")] // left trim
+		return lines.map[l|Strings.convertToJavaString(l, true)].filter[l|!l.isEmpty].join(" ")
 	}
 	
 	def protected void compileTemplate(InterpolatedString literal, ITreeAppendable appendable) {
