@@ -14,12 +14,12 @@
 	</properties>
 	<modules>
 		<module>../org.amelia.dsl.target</module>
+		<module>../org.amelia.dsl.lib</module>
 		<module>../../plugins/org.amelia.dsl</module>
 		<module>../../plugins/org.amelia.dsl.ide</module>
-		<module>../../plugins/org.amelia.dsl.lib</module>
 		<module>../../plugins/org.amelia.dsl.lib.osgi</module>
 		<module>../../plugins/org.amelia.dsl.ui</module>
-		<module>../../plugins/org.amelia.dsl.web</module>
+		<module>../../web/org.amelia.dsl.web</module>
 	</modules>
 	<licenses>
 		<license>

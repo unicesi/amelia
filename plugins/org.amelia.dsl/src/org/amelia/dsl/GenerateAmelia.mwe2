@@ -35,6 +35,7 @@ Workflow {
 				}
 				web = {
 					enabled = true
+					root = "../../web/org.amelia.dsl.web/"
 				}
 				createEclipseMetaData = true
 			}

@@ -102,7 +102,7 @@
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../org.amelia.dsl.web/src-gen/</directory>
+							<directory>${basedir}/../../web/org.amelia.dsl.web/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>
