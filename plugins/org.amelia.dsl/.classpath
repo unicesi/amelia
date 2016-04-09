@@ -5,10 +5,11 @@
 		<accessrules>
 			<accessrule kind="accessible" pattern="org/eclipse/xtext/xbase/**"/>
 			<accessrule kind="accessible" pattern="org/amelia/dsl/lib/**"/>
+			<accessrule kind="accessible" pattern="org/pascani/dsl/lib/**"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="src" path="src/"/>
-	<classpathentry kind="src" path="src-gen/"/>
-	<classpathentry kind="src" path="xtend-gen/"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src-gen"/>
+	<classpathentry kind="src" path="xtend-gen"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
