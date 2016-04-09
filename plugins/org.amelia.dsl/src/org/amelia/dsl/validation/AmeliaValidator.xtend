@@ -26,6 +26,7 @@ import java.util.Set
 import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CompileCommand
+import org.amelia.dsl.amelia.ConfigBlockExpression
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.DependDeclaration
 import org.amelia.dsl.amelia.EvalCommand
@@ -54,8 +55,6 @@ import org.eclipse.xtext.xbase.XNullLiteral
 import org.eclipse.xtext.xbase.XNumberLiteral
 import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
-import org.amelia.dsl.amelia.ConfigBlockExpression
-import org.amelia.dsl.amelia.TypeDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
 
 /**
