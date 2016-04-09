@@ -54,6 +54,9 @@ import org.eclipse.xtext.xbase.XNullLiteral
 import org.eclipse.xtext.xbase.XNumberLiteral
 import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
+import org.amelia.dsl.amelia.ConfigBlockExpression
+import org.amelia.dsl.amelia.TypeDeclaration
+import org.eclipse.xtext.xbase.XbasePackage
 
 /**
  * This class contains custom validation rules. 
@@ -64,6 +67,7 @@ import org.eclipse.xtext.xbase.XTypeLiteral
  */
 class AmeliaValidator extends AbstractAmeliaValidator {
 	
+	public static val CONFIGURE_NOT_ALLOWED = "amelia.issue.configureNotAllowed"
 	public static val CYCLIC_DEPENDENCY = "amelia.issue.cyclicDependency"
 	public static val DUPLICATE_EXTENSION_DECLARATION = "amelia.issue.duplicateInclude"
 	public static val DUPLICATE_LOCAL_RULE = "amelia.issue.duplicateLocalRule"
@@ -420,6 +424,15 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (declaration.param && declaration.type == null && declaration.right == null) {
 			error("This parameter must have either an explicit type or an initial value",
 				AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME, INVALID_PARAM_DECLARATION)
+		}
+	}
+	
+	@Check
+	def checkConfigureBlock(ConfigBlockExpression configBlock) {
+		val subsystem = (EcoreUtil2.getRootContainer(configBlock) as Model).typeDeclaration as Subsystem
+		if (!subsystem.body.expressions.filter(ConfigBlockExpression).filter[c|!c.equals(configBlock)].empty) {
+			error("Subsystems can only contain one configuration block",
+				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS, CONFIGURE_NOT_ALLOWED)
 		}
 	}
 	
