@@ -59,15 +59,20 @@ SubsystemBlockExpression
 	:	{SubsystemBlockExpression} '{' (expressions += InternalSubsystemDeclaration)* '}'
 	;
 
-InternalSubsystemDeclaration
+InternalSubsystemDeclaration returns xbase::XExpression
 	:	VariableDeclaration ->';'?
 	|	OnHostBlockExpression
+	|	ConfigBlockExpression
 	;
 
 VariableDeclaration
 	:	{VariableDeclaration}
 		(writeable?='var'|'val'|param?='param')
 		(=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
+	;
+
+ConfigBlockExpression returns xbase::XBlockExpression
+	:	{ConfigBlockExpression} 'configure' '{' (expressions += XExpressionOrVarDeclaration ';'?)* '}'
 	;
 
 OnHostBlockExpression
