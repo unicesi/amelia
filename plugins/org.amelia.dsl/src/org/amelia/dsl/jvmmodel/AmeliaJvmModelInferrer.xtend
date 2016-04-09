@@ -40,6 +40,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 import org.eclipse.xtext.common.types.JvmField
+import org.amelia.dsl.amelia.ConfigBlockExpression
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -67,47 +68,77 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			if (!isPreIndexingPhase) {
 				val suffix = System.nanoTime + ""
 				val params = newArrayList
+				val fields = newArrayList
+				val constructors = newArrayList
+				val methods = newArrayList
+				var currentHostBlock = 0
+				
 				documentation = subsystem.documentation
 				if (!subsystem.fragment)
 					superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
 				
-				// Transform variable declarations into fields
-				for (declaration : subsystem.body.expressions.filter(VariableDeclaration)) {
-					members += declaration.toField(declaration.name, declaration.type ?: inferredType) [
-						documentation = declaration.documentation
-						initializer = declaration.right
-						if (declaration.param) {
-							final = !declaration.writeable && declaration.right == null
-						} else {
-							final = !declaration.writeable && declaration.right != null
+				for (e : subsystem.body.expressions) {
+					switch (e) {
+						VariableDeclaration: {
+							// Transform variable declarations into fields
+							fields += e.toField(e.name, e.type ?: inferredType) [
+								documentation = e.documentation
+								initializer = e.right
+								if (e.param) {
+									final = !e.writeable && e.right == null
+								} else {
+									final = !e.writeable && e.right != null
+								}
+							]
+							if (e.param)
+								params += e
 						}
-					]
-					if (declaration.param)
-						params += declaration
+						ConfigBlockExpression: {
+							methods += e.toMethod("configure", typeRef(void)) [
+								body = e
+							]
+						}
+						OnHostBlockExpression: {
+							// Transform rules inside on-host blocks into array fields
+							for (rule : e.rules) {
+								fields += rule.toField(rule.name, typeRef(CommandDescriptor).addArrayTypeDimension) [
+									initializer = '''new «CommandDescriptor»[«rule.commands.length»]'''
+									final = true
+									visibility = JvmVisibility.PUBLIC
+								]
+								var currentCommand = 0
+								for (command : rule.commands) {
+									methods += rule.toMethod("init" + rule.name.toFirstUpper + currentCommand++, typeRef(CommandDescriptor)) [
+										visibility = JvmVisibility::PRIVATE
+										body = command
+									]
+								}
+							}
+							
+							// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
+							var currentHost = 0
+							for (host : e.hosts) {
+								methods += host.toMethod("getHost" + currentHostBlock + currentHost++, typeRef(Host)) [
+									body = host
+								]
+							}
+							currentHostBlock++
+						}
+					}
 				}
 				// Transform fragment includes into fields (recursive)
-				members += getIncludesAsFields(subsystem, suffix)
-				
-				// Transform rules inside on-host blocks into array fields
-				for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
-					for (rule : hostBlock.rules) {
-						members += rule.toField(rule.name, typeRef(CommandDescriptor).addArrayTypeDimension) [
-							initializer = '''new «CommandDescriptor»[«rule.commands.length»]'''
-							final = true
-							visibility = JvmVisibility.PUBLIC
-						]
-					}	
-				}
+				fields += getIncludesAsFields(subsystem, suffix)
+
 				// Setup rules' commands
 				if (subsystem.fragment) {
-					members += subsystem.toConstructor[
+					constructors += subsystem.toConstructor[
 						body = subsystem.setup(null, suffix)
 					]
 				} else {
 					// Empty constructor to avoid compilation errors in the default (Amelia) main when there are parameters
 					if (!params.empty) {
-						members += subsystem.toConstructor[]
-						members += subsystem.toConstructor [
+						constructors += subsystem.toConstructor[]
+						constructors += subsystem.toConstructor [
 							for (param : params) {
 								if (param.type != null || param.right != null)
 									parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
@@ -118,7 +149,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							]
 						]
 					}
-					members += subsystem.toMethod("deploy", typeRef(void)) [
+					methods += subsystem.toMethod("deploy", typeRef(void)) [
 						val subsystemParam = "subsystem"
 						val dependenciesParam = "dependencies"
 						exceptions += typeRef(Exception)
@@ -129,29 +160,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						body = subsystem.setup(subsystemParam, suffix)
 					]
 				}
-				// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
-				var currentHostBlock = 0
-				for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
-					var currentHost = 0
-					for (host : hostBlock.hosts) {
-						members += host.toMethod("getHost" + currentHostBlock + currentHost++, typeRef(Host)) [
-							body = host
-						]
-					}
-					for (rule : hostBlock.rules) {
-						var currentCommand = 0
-						for (command : rule.commands) {
-							members += rule.toMethod("init" + rule.name.toFirstUpper + currentCommand++, typeRef(CommandDescriptor)) [
-								visibility = JvmVisibility::PRIVATE
-								body = command
-							]
-						}
-					}
-					currentHostBlock++
-				}
 				
 				// Method to return all rules from included subsystems
-				members += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
+				methods += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
 					body = [
 						val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.map [r|
 							r.name
@@ -170,6 +181,11 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						append(");")
 					]
 				]
+				
+				// Add class members
+				members += fields
+				members += constructors
+				members += methods
 			}
 		]
 	}
