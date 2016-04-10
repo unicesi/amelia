@@ -41,6 +41,7 @@ import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 import org.eclipse.xtext.common.types.JvmField
 import org.amelia.dsl.amelia.ConfigBlockExpression
+import java.util.ArrayList
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -71,7 +72,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				val fields = newArrayList
 				val constructors = newArrayList
 				val methods = newArrayList
+				val getters = newArrayList
 				var currentHostBlock = 0
+				val hasConfigBlock = newArrayList(false)
 				
 				documentation = subsystem.documentation
 				if (!subsystem.fragment)
@@ -94,7 +97,12 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								params += e
 						}
 						ConfigBlockExpression: {
+							// There is only one configuration block
+							hasConfigBlock.add(0, true)
 							methods += e.toMethod("configure", typeRef(void)) [
+								exceptions += typeRef(Exception)
+								parameters +=
+									e.toParameter("dependencies", typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
 								body = e
 							]
 						}
@@ -108,7 +116,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								]
 								var currentCommand = 0
 								for (command : rule.commands) {
-									methods += rule.toMethod("init" + rule.name.toFirstUpper + currentCommand++, typeRef(CommandDescriptor)) [
+									getters += rule.toMethod("init" + rule.name.toFirstUpper + currentCommand++, typeRef(CommandDescriptor)) [
 										visibility = JvmVisibility::PRIVATE
 										body = command
 									]
@@ -118,7 +126,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
 							var currentHost = 0
 							for (host : e.hosts) {
-								methods += host.toMethod("getHost" + currentHostBlock + currentHost++, typeRef(Host)) [
+								getters += host.toMethod("getHost" + currentHostBlock + currentHost++, typeRef(Host)) [
 									body = host
 								]
 							}
@@ -137,13 +145,21 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				} else {
 					// Empty constructor to avoid compilation errors in the default (Amelia) main when there are parameters
 					if (!params.empty) {
-						constructors += subsystem.toConstructor[]
+						constructors += subsystem.toConstructor[
+							if (hasConfigBlock.get(0)) {
+								body = [
+									append('''this.dependencies«suffix» = new ''')
+									append(ArrayList).append("<").append(org.amelia.dsl.lib.Subsystem).append(">();")
+								]
+							}
+						]
 						constructors += subsystem.toConstructor [
 							for (param : params) {
 								if (param.type != null || param.right != null)
 									parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
 							}
 							body = [
+								append("this();").newLine
 								for (param : params)
 									append('''this.«param.name» = «param.name»;''')
 							]
@@ -151,7 +167,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					}
 					methods += subsystem.toMethod("deploy", typeRef(void)) [
 						val subsystemParam = "subsystem"
-						val dependenciesParam = "dependencies"
+						val dependenciesParam = "dependencies" + suffix
 						exceptions += typeRef(Exception)
 						parameters += subsystem.toParameter(subsystemParam, typeRef(String))
 						parameters +=
@@ -162,7 +178,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				}
 				
 				// Method to return all rules from included subsystems
-				methods += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
+				getters += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
 					body = [
 						val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.map [r|
 							r.name
@@ -181,11 +197,55 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						append(");")
 					]
 				]
-				
+				// Wrapper methods to hide the internal implementation
+				if (hasConfigBlock.get(0)) {
+					fields +=
+						subsystem.toField("dependencies" + suffix, typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
+					methods += subsystem.toMethod("execute", typeRef(void)) [
+						exceptions += typeRef(Exception)
+						parameters += subsystem.toParameter("stopExecutionsWhenFinish", typeRef(boolean))
+						body = '''super.graph.execute(stopExecutionsWhenFinish);'''
+					]
+					methods += subsystem.toMethod("execute", typeRef(void)) [
+						exceptions += typeRef(Exception)
+						parameters += subsystem.toParameter("stopPreviousExecutions", typeRef(boolean))
+						parameters += subsystem.toParameter("shutdownAfterDeployment", typeRef(boolean))
+						parameters += subsystem.toParameter("stopExecutionsWhenFinish", typeRef(boolean))
+						body = '''
+							super.graph.execute(
+								shutdownAfterDeployment, 
+								shutdownAfterDeployment, 
+								stopExecutionsWhenFinish);
+						'''
+					]
+					methods += subsystem.toMethod("release", typeRef(void)) [
+						parameters +=
+							subsystem.toParameter("clazz", typeRef(Class, typeRef(org.amelia.dsl.lib.Subsystem)))
+						parameters += subsystem.toParameter("compositeNames", typeRef(List, typeRef(String)))
+						body = [
+							append("String fqn = clazz.getClass().getCanonicalName();").newLine
+							append(org.amelia.dsl.lib.Subsystem).append(" dependency = null;").newLine
+							append('''
+								for (Subsystem subsystem : this.dependencies«suffix») {
+									if (subsystem.alias().equals(fqn)) {
+										dependency = subsystem;
+										break;
+									}
+								}
+								if (dependency != null) {
+									releaseDependency(dependency, compositeNames.toArray(new String[0]));
+								} else {
+									throw new IllegalArgumentException("Subsystem " + fqn + " is not a dependency");
+								}
+							''')
+						]
+					]
+				}
 				// Add class members
 				members += fields
 				members += constructors
 				members += methods
+				members += getters
 			}
 		]
 	}
@@ -228,9 +288,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			
 			if (!subsystem.fragment) {
 				val rules = subsystem.getAllIncludedRules(suffix)
-				if (!rules.empty) {
-					append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
-					append('''super.graph.addDescriptors(getAllRules());''').newLine
+				val hasConfigBlock = subsystem.body.expressions.exists[c|c instanceof ConfigBlockExpression]
+				append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
+				append('''super.graph.addDescriptors(getAllRules());''').newLine
+				if (hasConfigBlock) {
+					append('''this.dependencies«suffix» = dependencies«suffix»;''').newLine
+					append('''configure(dependencies«suffix»);''')
+				} else if (!rules.empty) {
 					append('''super.graph.execute(true);''')
 				}
 			}
