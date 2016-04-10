@@ -42,6 +42,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 import org.eclipse.xtext.common.types.JvmField
 import org.amelia.dsl.amelia.ConfigBlockExpression
 import java.util.ArrayList
+import org.amelia.dsl.lib.Subsystem.Deployment
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -166,7 +167,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						]
 					}
 					methods += subsystem.toMethod("deploy", typeRef(void)) [
-						val subsystemParam = "subsystem"
+						val subsystemParam = "subsystem" + suffix
 						val dependenciesParam = "dependencies" + suffix
 						exceptions += typeRef(Exception)
 						parameters += subsystem.toParameter(subsystemParam, typeRef(String))
@@ -220,7 +221,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					]
 					methods += subsystem.toMethod("release", typeRef(void)) [
 						parameters +=
-							subsystem.toParameter("clazz", typeRef(Class, typeRef(org.amelia.dsl.lib.Subsystem)))
+							subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
 						parameters += subsystem.toParameter("compositeNames", typeRef(List, typeRef(String)))
 						body = [
 							append("String fqn = clazz.getClass().getCanonicalName();").newLine
