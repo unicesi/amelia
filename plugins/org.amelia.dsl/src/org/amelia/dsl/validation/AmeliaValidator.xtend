@@ -433,6 +433,10 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			error("Subsystems can only contain one configuration block",
 				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS, CONFIGURE_NOT_ALLOWED)
 		}
+		if (subsystem.fragment) {
+			error("Fragments cannot have configuration blocks", XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS,
+				CONFIGURE_NOT_ALLOWED)
+		}
 	}
 	
 	/**
