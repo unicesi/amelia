@@ -224,7 +224,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
 						parameters += subsystem.toParameter("compositeNames", typeRef(List, typeRef(String)))
 						body = [
-							append("String fqn = clazz.getClass().getCanonicalName();").newLine
+							append("String fqn = clazz.getCanonicalName();").newLine
 							append(org.amelia.dsl.lib.Subsystem).append(" dependency = null;").newLine
 							append('''
 								for (Subsystem subsystem : this.dependencies«suffix») {
