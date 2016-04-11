@@ -29,6 +29,11 @@
 	<artifactId>org.amelia.dsl.lib</artifactId>
 	<name>Amelia Runtime Library</name>
 	
+	<properties>
+		<jarFileName>${project.artifactId}-${project.version}</jarFileName>
+		<bundleDir>../../plugins/org.amelia.dsl.lib.osgi/</bundleDir>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -122,9 +127,26 @@
 					<descriptors>
 						<descriptor>src/main/resources/assembly/jar.xml</descriptor>
 					</descriptors>
-					<finalName>${project.artifactId}-${project.version}-dependencies</finalName>
+					<finalName>${jarFileName}-dependencies</finalName>
         			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+          			<execution>
+          				<phase>package</phase>
+          				<goals>
+          					<goal>run</goal>
+          				</goals>
+          				<configuration>
+          					<tasks>
+          						<copy file="target/${jarFileName}-dependencies.jar" tofile="${bundleDir}/${jarFileName}-dependencies.jar"/>
+          						<copy file="target/${jarFileName}-sources.jar" tofile="${bundleDir}/${jarFileName}-sources.jar"/>
+          					</tasks>
+          				</configuration>
+          			</execution>
+          		</executions>
 			</plugin>
 		</plugins>
 	</build>
