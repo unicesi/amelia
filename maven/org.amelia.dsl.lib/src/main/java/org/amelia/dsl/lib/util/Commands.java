@@ -345,6 +345,7 @@ public class Commands {
 	public static CommandDescriptor.Builder compileBuilder(final String sourceDirectory,
 			final String outputFile, final String... classpath) {
 		String[] errors = { "No existe el fichero o el directorio",
+				"No existe el archivo o el directorio",
 				"Permiso denegado", "No such file or directory",
 				"Permission denied" };
 		CommandDescriptor.Builder compile = new CommandDescriptor.Builder()
