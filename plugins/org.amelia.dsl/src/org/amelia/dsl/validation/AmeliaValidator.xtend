@@ -438,8 +438,8 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				CONFIGURE_NOT_ALLOWED)
 		}
 		if (configBlock.expressions.empty) {
-			error("Configuration blocks must contain at least one statement",
-				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS)
+			// An empty execution configuration leads to the false execution of a subsystem
+			error("The execution configuration cannot be empty", XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS)
 		}
 	}
 	
