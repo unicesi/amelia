@@ -437,6 +437,10 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			error("Fragments cannot have configuration blocks", XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS,
 				CONFIGURE_NOT_ALLOWED)
 		}
+		if (configBlock.expressions.empty) {
+			error("Configuration blocks must contain at least one statement",
+				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS)
+		}
 	}
 	
 	/**
