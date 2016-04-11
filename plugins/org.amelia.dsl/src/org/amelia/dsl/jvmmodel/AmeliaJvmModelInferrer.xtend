@@ -193,9 +193,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								rules += '''«includedSubsystem.fullyQualifiedName.toString("_")»«suffix».getAllRules()'''
 							}
 						}
-						append("return ").append(Arrays).append(".concatAll(").increaseIndentation.newLine
-						append(rules.join(",\n")).decreaseIndentation.newLine
-						append(");")
+						if (rules.empty) {
+							append("return new ").append(CommandDescriptor).append("[0];")
+						} else {
+							append("return ").append(Arrays).append(".concatAll(").increaseIndentation.newLine
+							append(rules.join(",\n")).decreaseIndentation.newLine
+							append(");")
+						}
 					]
 				]
 				// Wrapper methods to hide the internal implementation
