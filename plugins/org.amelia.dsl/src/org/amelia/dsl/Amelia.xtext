@@ -72,7 +72,7 @@ VariableDeclaration
 	;
 
 ConfigBlockExpression returns xbase::XBlockExpression
-	:	{ConfigBlockExpression} 'configure' '{' (expressions += XExpressionOrVarDeclaration ';'?)* '}'
+	:	{ConfigBlockExpression} 'config' '{' (expressions += XExpressionOrVarDeclaration ';'?)* '}'
 	;
 
 OnHostBlockExpression
