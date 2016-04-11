@@ -51,7 +51,7 @@
 						<argument>/${project.basedir}/src/org/amelia/dsl/GenerateAmelia.mwe2</argument>
 						<argument>-p</argument>
 						<argument>rootPath=/${project.basedir}/..</argument>
-						<argument>webRoot=web/org.amelia.dsl.web/</argument>
+						<argument>webRoot=${project.basedir}/../../web/org.amelia.dsl.web/</argument>
 					</arguments>
 					<classpathScope>compile</classpathScope>
 					<includePluginDependencies>true</includePluginDependencies>
