@@ -49,10 +49,6 @@ public class Subsystem {
 					|| this.graph.executionManager().isShuttingDown();
 		}
 		
-		public void releaseDependency(Subsystem dependency, String... compositeNames) {
-			dependency.deployment().shutdownAndStopComponents(compositeNames);
-		}
-		
 		public void releaseDependencies(Collection<Subsystem> dependencies) {
 			for (Subsystem dependency : dependencies) {
 				if (!dependency.deployment().isShutdown()) {

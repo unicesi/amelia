@@ -234,26 +234,45 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								stopExecutionsWhenFinish);
 						'''
 					]
-					methods += subsystem.toMethod("release", typeRef(void)) [
+					methods += subsystem.toMethod("searchDependency", typeRef(org.amelia.dsl.lib.Subsystem)) [
+						visibility = JvmVisibility.PRIVATE
 						parameters +=
 							subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
-						parameters += subsystem.toParameter("compositeNames", typeRef(List, typeRef(String)))
 						body = [
-							append("String fqn = clazz.getCanonicalName();").newLine
-							append(org.amelia.dsl.lib.Subsystem).append(" dependency = null;").newLine
+							append(org.amelia.dsl.lib.Subsystem).append(''' dependency = null;''').newLine
+							append('''String fqn = clazz.getCanonicalName();''').newLine
+							append("for (").append(org.amelia.dsl.lib.Subsystem).append(''' subsystem : this.dependencies«suffix») {''')
+							newLine
 							append('''
-								for (Subsystem subsystem : this.dependencies«suffix») {
 									if (subsystem.alias().equals(fqn)) {
 										dependency = subsystem;
 										break;
 									}
 								}
-								if (dependency != null) {
-									releaseDependency(dependency, compositeNames.toArray(new String[0]));
-								} else {
+								if (dependency == null) {
 									throw new IllegalArgumentException("Subsystem " + fqn + " is not a dependency");
 								}
-							''')
+								return dependency;''')
+						]
+					]
+					methods += subsystem.toMethod("release", typeRef(void)) [
+						parameters +=
+							subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
+						parameters += subsystem.toParameter("compositeNames", typeRef(List, typeRef(String)))
+						body = [
+							append(org.amelia.dsl.lib.Subsystem).append(''' dependency = searchDependency(clazz);''')
+							newLine
+							append('''dependency.deployment().shutdownAndStopComponents(compositeNames.toArray(new String[0]));''')
+						]
+					]
+					methods += subsystem.toMethod("release", typeRef(void)) [
+						parameters +=
+							subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
+						parameters += subsystem.toParameter("stopAllComponents", typeRef(boolean))
+						body = [
+							append(org.amelia.dsl.lib.Subsystem).append(" dependency = searchDependency(clazz);")
+							newLine
+							append('''dependency.deployment().shutdown(stopAllComponents);''')
 						]
 					]
 				}
