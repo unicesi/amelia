@@ -143,7 +143,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							}
 							
 							// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
-							getters += e.hosts.toMethod("getHost" + currentHostBlock++, typeRef(Host)) [
+							getters += e.hosts.toMethod("getHost" + currentHostBlock++, e.hosts.inferredType) [
 								body = e.hosts
 							]
 						}
