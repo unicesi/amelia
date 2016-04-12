@@ -19,18 +19,22 @@
 package org.amelia.dsl.jvmmodel
 
 import com.google.inject.Inject
+import java.util.ArrayList
 import java.util.List
+import org.amelia.dsl.amelia.ConfigBlockExpression
 import org.amelia.dsl.amelia.IncludeDeclaration
+import org.amelia.dsl.amelia.MainDeclaration
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.VariableDeclaration
 import org.amelia.dsl.lib.DescriptorGraph
+import org.amelia.dsl.lib.Subsystem.Deployment
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
-import org.amelia.dsl.lib.descriptors.Host
 import org.amelia.dsl.lib.util.Arrays
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
+import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.naming.QualifiedName
@@ -39,11 +43,6 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
-import org.eclipse.xtext.common.types.JvmField
-import org.amelia.dsl.amelia.ConfigBlockExpression
-import java.util.ArrayList
-import org.amelia.dsl.lib.Subsystem.Deployment
-import org.amelia.dsl.amelia.MainDeclaration
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
