@@ -286,8 +286,8 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkHost(OnHostBlockExpression declaration) {
-		val type = declaration.hosts.actualType
+	def void checkHost(OnHostBlockExpression blockExpression) {
+		val type = blockExpression.hosts.actualType
 		val isOk = type.getSuperType(Host) != null || type.getSuperType(List) != null
 		val msg = '''The hosts parameter must be of type «Host.simpleName» or List<«Host.simpleName»>, «type.simpleName» was found instead'''
 		val showError = !isOk || type.getSuperType(List).typeArguments.length == 0 ||
