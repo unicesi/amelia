@@ -101,7 +101,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 
 	@Check
 	def checkSubsystemName(Subsystem subsystem) {
-		val model = (EcoreUtil2.getRootContainer(subsystem) as Model)
+		val model = EcoreUtil2.getRootContainer(subsystem) as Model
 		if (subsystem.name.equals("Amelia") && model.name == null) {
 			error("The fully qualified name 'Amelia' is reserved", AmeliaPackage.Literals.SUBSYSTEM__NAME,
 				RESERVED_TYPE_NAME)
