@@ -105,9 +105,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							fields += e.toField(e.name, e.type ?: inferredType) [
 								documentation = e.documentation
 								initializer = e.right
-								if (e.param) {
-									final = !e.writeable && e.right == null
-								} else {
+								if (!e.param) {
 									final = !e.writeable && e.right != null
 								}
 							]
