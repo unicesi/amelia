@@ -8,7 +8,26 @@
 		<relativePath>../../maven/org.amelia.tycho.parent/pom.xml</relativePath>
 	</parent>
 	<packaging>eclipse-plugin</packaging>
-	
+
 	<artifactId>org.amelia.dsl.lib.osgi</artifactId>
 	<name>Runtime library bundle</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>.</directory>
+							<includes>
+								<include>**/*.jar</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
