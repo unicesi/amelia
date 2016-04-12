@@ -55,9 +55,7 @@ class AmeliaGenerator implements IGenerator {
 		val subsystems = subsystemDescriptions.map[d|d.getEObject(resource) as Subsystem].filter[e|!e.fragment]
 		val s = org.amelia.dsl.lib.Subsystem.canonicalName
 		val content = '''
-			package amelia;
-			
-			public class AmeliaMain {
+			public class Amelia {
 				public static void main(String[] args) throws InterruptedException {
 					«FOR subsystem : subsystems»
 						«s» «subsystem.fullyQualifiedName.toString("_")» = new «s»("«subsystem.fullyQualifiedName»", new «subsystem.fullyQualifiedName»());
@@ -78,7 +76,7 @@ class AmeliaGenerator implements IGenerator {
 				}
 			}
 		'''
-		fsa.generateFile("amelia/AmeliaMain.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
+		fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
 	}
 	
 	def List<IEObjectDescription> getEObjectDescriptions(Resource resource, EClass eClass) {

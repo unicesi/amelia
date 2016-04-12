@@ -81,6 +81,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val INVALID_PARAMETER_TYPE = "amelia.issue.invalidParameterType"
 	public static val INVALID_SELF_EXTENSION = "amelia.issue.invalidSelfInclude"
 	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
+	public static val RESERVED_TYPE_NAME = "amelia.issue.reservedTypeName"
 	
 	def fromURItoFQN(URI resourceURI) {
 		// e.g., platform:/resource/<project>/<source-folder>/org/example/.../TypeDecl.pascani
@@ -99,7 +100,12 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 
 	@Check
-	def checkSubsystemStartsWithCapital(Subsystem subsystem) {
+	def checkSubsystemName(Subsystem subsystem) {
+		val model = (EcoreUtil2.getRootContainer(subsystem) as Model)
+		if (subsystem.name.equals("Amelia") && model.name == null) {
+			error("The fully qualified name 'Amelia' is reserved", AmeliaPackage.Literals.SUBSYSTEM__NAME,
+				RESERVED_TYPE_NAME)
+		}
 		if (!Character.isUpperCase(subsystem.name.charAt(0))) {
 			warning("Name should start with a capital", AmeliaPackage.Literals.SUBSYSTEM__NAME,
 				NON_CAPITAL_NAME)
