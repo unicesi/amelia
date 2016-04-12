@@ -143,13 +143,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							}
 							
 							// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
-							var currentHost = 0
-							for (host : e.hosts) {
-								getters += host.toMethod("getHost" + currentHostBlock + currentHost++, typeRef(Host)) [
-									body = host
-								]
-							}
-							currentHostBlock++
+							getters += e.hosts.toMethod("getHost" + currentHostBlock++, typeRef(Host)) [
+								body = e.hosts
+							]
 						}
 					}
 				}
@@ -277,21 +273,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		return [
 			var currentHostBlock = 0
 			for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
-				append(Host).append('''[] hosts«currentHostBlock» = { ''')
-				for (var currentHost = 0; currentHost < hostBlock.hosts.length; currentHost++) {
-					append("getHost" + currentHostBlock + currentHost + "()")
-					if (currentHost < hostBlock.hosts.length - 1)
-						append(", ")
-				}
-				append(" };")
-				newLine
 				for (rule : hostBlock.rules) {
 					var currentCommand = 0
 					for (command : rule.commands) {
 						append('''«rule.name.toString»[«currentCommand»]''')
 						append(''' = init«rule.name.toFirstUpper»«currentCommand»();''').newLine
 						append('''«rule.name»[«currentCommand»]''')
-						append('''.runsOn(hosts«currentHostBlock»);''').newLine
+						append('''.runsOn(getHost«currentHostBlock»());''').newLine
 						if (currentCommand == 0 && !rule.dependencies.empty) {
 							val dependencies = newArrayList
 							for (dependency : rule.dependencies) {

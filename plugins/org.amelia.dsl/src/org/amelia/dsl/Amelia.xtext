@@ -81,7 +81,7 @@ ConfigBlockExpression returns xbase::XBlockExpression
 	;
 
 OnHostBlockExpression
-	:	'on' '(' hosts += XExpression (',' hosts += XExpression)* ')' '{' (rules += RuleDeclaration)* '}'
+	:	'on' hosts = XExpression '{' (rules += RuleDeclaration)* '}'
 	;
 
 RuleDeclaration

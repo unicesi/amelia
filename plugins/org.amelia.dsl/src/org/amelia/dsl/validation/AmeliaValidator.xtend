@@ -287,10 +287,13 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkHost(OnHostBlockExpression declaration) {
-		val types = declaration.hosts.map[h|h.actualType.getSuperType(Host)]
-		if (types.exists[t|t == null]) {
-			error('''Hosts must be of type «Host.simpleName»''', AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOSTS,
-				INVALID_PARAMETER_TYPE)
+		val type = declaration.hosts.actualType
+		val isOk = type.getSuperType(Host) != null || type.getSuperType(List) != null
+		val msg = '''The hosts parameter must be of type «Host.simpleName» or List<«Host.simpleName»>, «type.simpleName» was found instead'''
+		val showError = !isOk || type.getSuperType(List).typeArguments.length == 0 ||
+			!type.getSuperType(List).typeArguments.get(0).identifier.equals(Host.canonicalName)
+		if (showError) {
+			error(msg, AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOSTS, INVALID_PARAMETER_TYPE)
 		}
 	}
 	

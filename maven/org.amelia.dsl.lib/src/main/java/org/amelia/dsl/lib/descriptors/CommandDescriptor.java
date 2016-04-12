@@ -265,6 +265,10 @@ public class CommandDescriptor extends Observable {
 		return all;
 	}
 	
+	public boolean runsOn(List<Host> hosts) {
+		return runsOn(hosts.toArray(new Host[0]));
+	}
+	
 	public List<Host> hosts() {
 		return this.hosts;
 	}
