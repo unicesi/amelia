@@ -43,6 +43,7 @@ import org.eclipse.xtext.common.types.JvmField
 import org.amelia.dsl.amelia.ConfigBlockExpression
 import java.util.ArrayList
 import org.amelia.dsl.lib.Subsystem.Deployment
+import org.amelia.dsl.amelia.MainDeclaration
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -60,6 +61,23 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 
 	@Inject extension IQualifiedNameProvider
+
+	def dispatch void infer(MainDeclaration main, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		val fqn = ResourceUtils.fromURItoFQN(main.eResource.URI)
+		val clazz = main.toClass(fqn)
+		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
+		acceptor.accept(clazz) [
+			if (!isPreIndexingPhase) {
+				val suffix = System.nanoTime + ""
+				documentation = main.documentation
+				members += main.toMethod("main", typeRef(void)) [
+					static = true
+					parameters += main.toParameter("args" + suffix, typeRef(String).addArrayTypeDimension)
+					body = main.body
+				]
+			}
+		]
+	}
 
 	def dispatch void infer(Subsystem subsystem, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val clazz = subsystem.toClass(subsystem.fullyQualifiedName)

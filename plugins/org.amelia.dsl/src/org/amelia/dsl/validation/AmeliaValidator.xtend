@@ -18,7 +18,7 @@
  */
 package org.amelia.dsl.validation
 
-import java.util.ArrayList
+import java.net.URI
 import java.util.Arrays
 import java.util.Collection
 import java.util.List
@@ -41,8 +41,8 @@ import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.SubsystemBlockExpression
 import org.amelia.dsl.amelia.VariableDeclaration
+import org.amelia.dsl.jvmmodel.ResourceUtils
 import org.amelia.dsl.lib.descriptors.Host
-import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.validation.Check
@@ -82,22 +82,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val INVALID_SELF_EXTENSION = "amelia.issue.invalidSelfInclude"
 	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
 	public static val RESERVED_TYPE_NAME = "amelia.issue.reservedTypeName"
-	
-	def fromURItoFQN(URI resourceURI) {
-		// e.g., platform:/resource/<project>/<source-folder>/org/example/.../TypeDecl.pascani
-		var segments = new ArrayList
-		if (resourceURI.segments.size > 1) {
-			// Remove the first 3 segments, and return the package and file segments
-			segments.addAll(resourceURI.segmentsList.subList(3, resourceURI.segments.size - 1))
-			// Remove file extension and add the last segment
-			segments.add(resourceURI.lastSegment.substring(0, resourceURI.lastSegment.lastIndexOf(".")))
-		} else if(resourceURI.lastSegment.contains(".")) {
-			segments.add(resourceURI.lastSegment.substring(0, resourceURI.lastSegment.lastIndexOf(".")))
-		} else {
-			segments.add(resourceURI.lastSegment)
-		}
-		return segments.fold("", [r, t|if(r.isEmpty) t else r + "." + t])
-	}
 
 	@Check
 	def checkSubsystemName(Subsystem subsystem) {
@@ -172,7 +156,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkPackageMatchesPhysicalDirectory(Model model) {
 		val packageSegments = model.name.split("\\.")
-		val fqn = fromURItoFQN(model.typeDeclaration.eResource.URI)
+		val fqn = ResourceUtils.fromURItoFQN(model.typeDeclaration.eResource.URI)
 		var expectedPackage = if(fqn.contains(".")) fqn.substring(0, fqn.lastIndexOf(".")) else ""
 
 		if (!Arrays.equals(expectedPackage.split("\\."), packageSegments)) {
@@ -290,7 +274,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkEvalCommand(EvalCommand expr) {
-		if (expr.uri != null && expr.uri.actualType.getSuperType(java.net.URI) == null) {
+		if (expr.uri != null && expr.uri.actualType.getSuperType(URI) == null) {
 			error('''The binding URI must be of type URI, «expr.uri.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.EVAL_COMMAND__URI, INVALID_PARAMETER_TYPE)
 		}
