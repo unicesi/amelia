@@ -94,8 +94,8 @@ class AmeliaCompiler extends XbaseCompiler {
 			.substring(1, value.length - 1)
 			.replaceAll("\\\\\"", "\\\"")
 			.replaceAll("\\\\'", "'")
-			.replaceAll("\\\\\\<", "<")
-			.replaceAll("\\\\\\>", ">")
+			.replaceAll("\\\\\\«", "«")
+			.replaceAll("\\\\\\»", "»")
 		var lines = _value.split("\n")
 		if (lines.length > 1)
 			lines = lines.map[l|l.replaceAll("^\\s+", "")] // left trim
