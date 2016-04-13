@@ -18,13 +18,28 @@
  */
 package org.amelia.dsl.lib.util;
 
-import org.eclipse.xtext.xbase.lib.Functions.Function0;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
-
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class RetryableDeployment {
+
+	/**
+	 * A function without any parameters. <b>Taken from the XBase library.</b>
+	 * 
+	 * @param <Result>
+	 *            the result of the single closure {@link #apply() method}.
+	 */
+	public static interface Function<Result> {
+		Result apply();
+	}
+
+	/**
+	 * A procedure without any parameters, e.g. a {@link Runnable}. <b>Taken
+	 * from the XBase library.</b>
+	 */
+	public static interface Procedure {
+		void apply();
+	}
 
 	/**
 	 * Executes the specified deployment until one of two things happens: either
@@ -38,7 +53,7 @@ public class RetryableDeployment {
 	 * @throws Exception
 	 *             In case the deployment throws an {@link Exception}
 	 */
-	public boolean deploy(Function0<Boolean> deployment, int attempts)
+	public boolean deploy(Function<Boolean> deployment, int attempts)
 			throws Exception {
 		return deploy(deployment, attempts, null);
 	}
@@ -58,8 +73,8 @@ public class RetryableDeployment {
 	 * @throws Exception
 	 *             In case the deployment throws an {@link Exception}
 	 */
-	public boolean deploy(Function0<Boolean> deployment, int attempts,
-			Procedure0 errorCallback) throws Exception {
+	public boolean deploy(Function<Boolean> deployment, int attempts,
+			Procedure errorCallback) throws Exception {
 		boolean successful = false;
 		for (int i = 0; i < attempts && !successful; i++) {
 			successful = deployment.apply();
