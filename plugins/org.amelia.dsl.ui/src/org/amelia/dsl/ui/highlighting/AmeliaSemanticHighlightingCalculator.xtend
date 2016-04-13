@@ -18,10 +18,7 @@
  */
 package org.amelia.dsl.ui.highlighting
 
-import org.amelia.dsl.amelia.TextEndLiteral
-import org.amelia.dsl.amelia.TextLiteral
-import org.amelia.dsl.amelia.TextMiddleLiteral
-import org.amelia.dsl.amelia.TextStartLiteral
+import org.amelia.dsl.amelia.RichStringLiteral
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.ide.editor.syntaxcoloring.IHighlightedPositionAcceptor
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
@@ -35,10 +32,7 @@ class AmeliaSemanticHighlightingCalculator extends XbaseHighlightingCalculator {
 	
 	override protected boolean highlightElement(EObject object, IHighlightedPositionAcceptor acceptor, CancelIndicator cancelIndicator) {
 		switch (object) {
-			TextLiteral: highlightCustomCommand(object, acceptor)
-			TextStartLiteral: highlightCustomCommand(object, acceptor)
-			TextMiddleLiteral: highlightCustomCommand(object, acceptor)
-			TextEndLiteral: highlightCustomCommand(object, acceptor)
+			RichStringLiteral: highlightCustomCommand(object, acceptor)
 		}
 		return super.highlightElement(object, acceptor, cancelIndicator)
 	}

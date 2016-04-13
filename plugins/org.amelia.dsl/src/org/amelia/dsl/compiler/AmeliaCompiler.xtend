@@ -24,12 +24,8 @@ import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.EvalCommand
 import org.amelia.dsl.amelia.RichString
+import org.amelia.dsl.amelia.RichStringLiteral
 import org.amelia.dsl.amelia.RunCommand
-import org.amelia.dsl.amelia.StringLiteral
-import org.amelia.dsl.amelia.TextEndLiteral
-import org.amelia.dsl.amelia.TextLiteral
-import org.amelia.dsl.amelia.TextMiddleLiteral
-import org.amelia.dsl.amelia.TextStartLiteral
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.amelia.dsl.lib.util.Commands
 import org.eclipse.xtext.util.Strings
@@ -51,7 +47,7 @@ class AmeliaCompiler extends XbaseCompiler {
 			RunCommand: _toJavaExpression(obj, appendable)
 			CustomCommand: _toJavaExpression(obj, appendable)
 			EvalCommand: _toJavaExpression(obj, appendable)
-			StringLiteral: _toJavaExpression(obj, appendable)
+			RichString: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
 	}
@@ -59,7 +55,7 @@ class AmeliaCompiler extends XbaseCompiler {
 	override doInternalToJavaStatement(XExpression expr, ITreeAppendable appendable, boolean isReferenced) {
 		switch (expr) {
 			CommandLiteral: _toJavaStatement(expr, appendable, isReferenced)
-			StringLiteral: _toJavaStatement(expr, appendable, isReferenced)
+			RichString: _toJavaStatement(expr, appendable, isReferenced)
 			default: super.doInternalToJavaStatement(expr, appendable, isReferenced)
 		}
 	}
@@ -110,13 +106,7 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append("\"")
 		for (part : literal.expressions) {
 			switch (part) {
-				TextLiteral:
-					appendable.append(part.value.formatCommandText(escapeClosingComment))
-				TextStartLiteral:
-					appendable.append(part.value.formatCommandText(escapeClosingComment))
-				TextMiddleLiteral:
-					appendable.append(part.value.formatCommandText(escapeClosingComment))
-				TextEndLiteral:
+				RichStringLiteral:
 					appendable.append(part.value.formatCommandText(escapeClosingComment))
 				XExpression: {
 					appendable.append("\" + ")
@@ -128,14 +118,14 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append("\"")
 	}
 	
-	def void _toJavaExpression(StringLiteral expr, ITreeAppendable b) {
-		compileTemplate(expr.value, b)
+	def void _toJavaExpression(RichString expr, ITreeAppendable b) {
+		compileTemplate(expr, b)
 	}
 	
-	def protected void _toJavaStatement(StringLiteral expr, ITreeAppendable b, boolean isReferenced) {
+	def protected void _toJavaStatement(RichString expr, ITreeAppendable b, boolean isReferenced) {
 		generateComment(new Later() {
 			override void exec(ITreeAppendable appendable) {
-				compileTemplate(expr.value, appendable, true)
+				compileTemplate(expr, appendable, true)
 			}
 		}, b, isReferenced);
 	}

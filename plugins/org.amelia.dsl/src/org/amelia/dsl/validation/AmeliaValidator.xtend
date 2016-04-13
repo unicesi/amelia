@@ -35,9 +35,9 @@ import org.amelia.dsl.amelia.ExtensionSection
 import org.amelia.dsl.amelia.IncludeDeclaration
 import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.OnHostBlockExpression
+import org.amelia.dsl.amelia.RichString
 import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.RunCommand
-import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.SubsystemBlockExpression
 import org.amelia.dsl.amelia.VariableDeclaration
@@ -167,7 +167,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkCdCommand(CdCommand expr) {
-		val allowed = #[XAbstractFeatureCall, XStringLiteral, StringLiteral]
+		val allowed = #[XAbstractFeatureCall, XStringLiteral, RichString]
 		if (!allowed.map[type|type.isInstance(expr.directory)].exists[v|v]) {
 			error("This expression is not allowed in this context", AmeliaPackage.Literals.CD_COMMAND__DIRECTORY,
 				INVALID_PARAMETER_TYPE)
@@ -298,13 +298,13 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def void checkInterpolatedExpression(StringLiteral literal) {
-		for (part : literal.value.expressions) {
+	def void checkInterpolatedExpression(RichString literal) {
+		for (part : literal.expressions) {
 			if (part instanceof XExpression) {
 				val allowed = #[XAbstractFeatureCall, XCollectionLiteral, XClosure, XBooleanLiteral, XNumberLiteral,
 					XNullLiteral, XStringLiteral, XTypeLiteral]
 				if (!allowed.map[type|type.isInstance(part)].exists[v|v]) {
-					error("This expression is not allowed in this context", AmeliaPackage.Literals.STRING_LITERAL__VALUE,
+					error("This expression is not allowed in this context", AmeliaPackage.Literals.RICH_STRING_LITERAL__VALUE,
 						INVALID_PARAMETER_TYPE)
 				}
 			}

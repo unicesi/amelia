@@ -22,8 +22,8 @@ import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.EvalCommand
+import org.amelia.dsl.amelia.RichString
 import org.amelia.dsl.amelia.RunCommand
-import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.amelia.dsl.lib.util.Commands
 import org.eclipse.xtext.xbase.XExpression
@@ -42,7 +42,7 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 			RunCommand: _computeTypes(expression, state)
 			CustomCommand: _computeTypes(expression, state)
 			EvalCommand: _computeTypes(expression, state)
-			StringLiteral: _computeTypes(expression, state)
+			RichString: _computeTypes(expression, state)
 			default: super.computeTypes(expression, state)
 		}
 	}
@@ -76,11 +76,11 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		state.acceptActualType(result)
 	}
 	
-	def protected _computeTypes(StringLiteral literal, ITypeComputationState state) {
+	def protected _computeTypes(RichString literal, ITypeComputationState state) {
 		// Compute type for the inner expressions
 		state.withinScope(literal)
 		val noExpectationState = state.withoutExpectation()
-		for (part : literal.value.expressions) {
+		for (part : literal.expressions) {
 			if (part instanceof XExpression) {
 				noExpectationState.computeTypes(part)
 				addLocalToCurrentScope(part, state)

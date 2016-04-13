@@ -131,37 +131,30 @@ CommandLiteral
 	|	EvalCommand
 	;
 
-StringLiteral
-	:	{StringLiteral} value = RichString;
-
 RichString
 	:
-		{RichString} (expressions += TextLiteral)
+		{RichString} (expressions += RichStringLiteral)
 	| 	(
-			expressions += TextStartLiteral 
-			(expressions += XExpression (expressions += TextMiddleLiteral expressions += XExpression)*)
-			expressions += TextEndLiteral
+			expressions += RichStringLiteralStart 
+			(expressions += XExpression (expressions += RichStringLiteralMiddle expressions += XExpression)*)
+			expressions += RichStringLiteralEnd
 		)
 	;
 
-TextLiteral
-	:	{TextLiteral} value = TextVerbatimValue
+RichStringLiteral
+	:	{RichStringLiteral} value = RICH_TEXT
 	;
 
-TextVerbatimValue returns ecore::EString
-	:	RICH_TEXT
-	;
-
-TextStartLiteral
-	:	{TextStartLiteral} value = RICH_TEXT_START
+RichStringLiteralStart
+	:	{RichStringLiteral} value = RICH_TEXT_START
 	;
 	
-TextMiddleLiteral
-	:	{TextMiddleLiteral} value = RICH_TEXT_MIDDLE
+RichStringLiteralMiddle
+	:	{RichStringLiteral} value = RICH_TEXT_MIDDLE
 	;
 	
-TextEndLiteral
-	:	{TextEndLiteral} value = RICH_TEXT_END
+RichStringLiteralEnd
+	:	{RichStringLiteral} value = RICH_TEXT_END
 	;
 
 XLiteral returns xbase::XExpression
@@ -173,7 +166,7 @@ XLiteral returns xbase::XExpression
 	|	XTypeLiteral
 	|	XStringLiteral
 	|	CommandLiteral
-	|	StringLiteral
+	|	RichString
 	;
 
 terminal RICH_TEXT
