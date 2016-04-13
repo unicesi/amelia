@@ -244,7 +244,7 @@ public class CommandDescriptor extends Observable {
 		for (CommandDescriptor descriptor : dependencies) {
 			if (descriptor.equals(this))
 				throw new IllegalArgumentException("A command cannot depend on itself");
-			if (this.dependencies.contains(dependencies)) {
+			if (this.dependencies.contains(descriptor)) {
 				all = false;
 				continue;
 			}
