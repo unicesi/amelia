@@ -18,11 +18,14 @@
  */
 package org.amelia.dsl.ui
 
+import org.amelia.dsl.ui.editor.bracketmatching.AmeliaBracePairProvider
 import org.amelia.dsl.ui.highlighting.AmeliaAntlrTokenToAttributeIdMapper
 import org.amelia.dsl.ui.highlighting.AmeliaHighlightingConfiguration
 import org.amelia.dsl.ui.highlighting.AmeliaSemanticHighlightingCalculator
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import org.eclipse.xtext.ide.editor.bracketmatching.IBracePairProvider
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
+import org.eclipse.xtext.service.SingletonBinding
 import org.eclipse.xtext.ui.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 
@@ -48,5 +51,9 @@ class AmeliaUiModule extends AbstractAmeliaUiModule {
 	
 	override Class<? extends AbstractAntlrTokenToAttributeIdMapper> bindAbstractAntlrTokenToAttributeIdMapper() {
 		return AmeliaAntlrTokenToAttributeIdMapper
+	}
+	
+	@SingletonBinding override Class<? extends IBracePairProvider> bindIBracePairProvider() {
+		return AmeliaBracePairProvider
 	}
 }
