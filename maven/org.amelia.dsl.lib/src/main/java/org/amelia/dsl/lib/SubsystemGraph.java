@@ -237,6 +237,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			shutdown(stopExecutedComponents);
 			printExecutionSummary(start, System.nanoTime());
 			successful = !ExecutionManager.isAnySubsystemAborting();
+			ExecutionManager.reset();
 		} else {
 			shutdown(stopExecutedComponents);
 		}

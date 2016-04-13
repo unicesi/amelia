@@ -91,6 +91,13 @@ public class ExecutionManager {
 			}
 		};
 	}
+	
+	/**
+	 * Gives default values to global variables
+	 */
+	public static void reset() {
+		globallyAborting = false;
+	}
 
 	/**
 	 * Opens FTP connections with the specified hosts
