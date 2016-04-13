@@ -23,7 +23,7 @@ import org.amelia.dsl.amelia.CommandLiteral
 import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.EvalCommand
-import org.amelia.dsl.amelia.InterpolatedString
+import org.amelia.dsl.amelia.RichString
 import org.amelia.dsl.amelia.RunCommand
 import org.amelia.dsl.amelia.StringLiteral
 import org.amelia.dsl.amelia.TextEndLiteral
@@ -102,11 +102,11 @@ class AmeliaCompiler extends XbaseCompiler {
 		return lines.map[l|Strings.convertToJavaString(l, true)].filter[l|!l.isEmpty].join(" ")
 	}
 	
-	def protected void compileTemplate(InterpolatedString literal, ITreeAppendable appendable) {
+	def protected void compileTemplate(RichString literal, ITreeAppendable appendable) {
 		compileTemplate(literal, appendable, false)
 	}
 	
-	def protected void compileTemplate(InterpolatedString literal, ITreeAppendable appendable, boolean escapeClosingComment) {
+	def protected void compileTemplate(RichString literal, ITreeAppendable appendable, boolean escapeClosingComment) {
 		appendable.append("\"")
 		for (part : literal.expressions) {
 			switch (part) {

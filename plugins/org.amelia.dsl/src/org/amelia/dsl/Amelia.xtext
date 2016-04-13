@@ -132,11 +132,11 @@ CommandLiteral
 	;
 
 StringLiteral
-	:	{StringLiteral} value = InterpolatedString;
+	:	{StringLiteral} value = RichString;
 
-InterpolatedString
+RichString
 	:
-		{InterpolatedString} (expressions += TextLiteral)
+		{RichString} (expressions += TextLiteral)
 	| 	(
 			expressions += TextStartLiteral 
 			(expressions += XExpression (expressions += TextMiddleLiteral expressions += XExpression)*)
