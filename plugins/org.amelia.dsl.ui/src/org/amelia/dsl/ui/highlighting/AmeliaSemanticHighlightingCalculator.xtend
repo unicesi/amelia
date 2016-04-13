@@ -45,7 +45,7 @@ class AmeliaSemanticHighlightingCalculator extends XbaseHighlightingCalculator {
 	
 	def protected highlightCustomCommand(EObject expr, IHighlightedPositionAcceptor acceptor) {
 		val node = NodeModelUtils.findActualNodeFor(expr);
-		highlightNode(acceptor, node, AmeliaHighlightingConfiguration.CUSTOM_COMMAND_ID);
+		highlightNode(acceptor, node, AmeliaHighlightingConfiguration.RICH_TEXT_ID);
 	}
 	
 }

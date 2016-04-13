@@ -16,35 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Amelia DSL. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.amelia.dsl.ui.highlighting
+ package org.amelia.dsl.ui.highlighting
 
-import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor
-import org.eclipse.xtext.ui.editor.utils.TextStyle
-import org.eclipse.xtext.xbase.ui.highlighting.XbaseHighlightingConfiguration
+import org.eclipse.xtext.xbase.ide.highlighting.XbaseHighlightingStyles
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-class AmeliaHighlightingConfiguration extends XbaseHighlightingConfiguration {
-	
-	public static val RICH_TEXT_ID = AmeliaHighlightingStyles.RICH_TEXT_ID
-	
-	override configure(IHighlightingConfigurationAcceptor acceptor) {
-		acceptor.acceptDefaultHighlighting(RICH_TEXT_ID, "Rich text literals", richTextLiterals())
-		super.configure(acceptor)
-	}
-
-	def richTextLiterals() {
-		val textStyle = stringTextStyle.copy
-		return textStyle;
-	}
-	
-	override TextStyle staticField(){
-		return defaultTextStyle().copy();
-	}
-	
-	override TextStyle field(){
-		return defaultTextStyle().copy();
-	}
-	
+interface AmeliaHighlightingStyles extends XbaseHighlightingStyles {
+	String RICH_TEXT_ID = "amelia.richText";
+	String RICH_TEXT_DELIMITER_ID = "amelia.richText.delimiter";
+	String INSIGNIFICANT_TEMPLATE_TEXT = "amelia.insignificant.template.text";
 }
