@@ -149,19 +149,19 @@ TextLiteral
 	;
 
 TextVerbatimValue returns ecore::EString
-	:	TEXT
+	:	RICH_TEXT
 	;
 
 TextStartLiteral
-	:	{TextStartLiteral} value = TEXT_START
+	:	{TextStartLiteral} value = RICH_TEXT_START
 	;
 	
 TextMiddleLiteral
-	:	{TextMiddleLiteral} value = TEXT_MIDDLE
+	:	{TextMiddleLiteral} value = RICH_TEXT_MIDDLE
 	;
 	
 TextEndLiteral
-	:	{TextEndLiteral} value = TEXT_END
+	:	{TextEndLiteral} value = RICH_TEXT_END
 	;
 
 XLiteral returns xbase::XExpression
@@ -176,19 +176,19 @@ XLiteral returns xbase::XExpression
 	|	StringLiteral
 	;
 
-terminal TEXT
+terminal RICH_TEXT
 	:	"'" ('\\' . | !('\\' | "'" | '«' | '»') )* "'"
 	;
 
-terminal TEXT_START
+terminal RICH_TEXT_START
 	:	"'" ('\\' . | !('\\' | "'" | '«') )* '«'
 	;
 
-terminal TEXT_MIDDLE
+terminal RICH_TEXT_MIDDLE
 	:	'»' ('\\' . | !('\\' | "'" | '«') )* '«'
 	;
 
-terminal TEXT_END
+terminal RICH_TEXT_END
 	:	'»' ('\\' . | !('\\' | "'" | '«') )* "'"
 	;
 
