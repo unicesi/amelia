@@ -242,6 +242,21 @@ public class DescriptorGraph
 		get(a).add(b);
 		return true;
 	}
+	
+	/**
+	 * Checks that all of the command dependencies are satisfiable
+	 */
+	public void validate() throws Exception {
+		for (CommandDescriptor descriptor : keySet()) {
+			for (CommandDescriptor dependency : descriptor.dependencies()) {
+				if (!keySet().contains(dependency)) {
+					throw new Exception("Unmeetable command dependency found. "
+							+ "The graph must contain all of the command "
+							+ "descriptors.");
+				}
+			}
+		}
+	}
 
 	/**
 	 * Resolve dependencies and do nothing after deployment has been finished
@@ -255,14 +270,14 @@ public class DescriptorGraph
 			final boolean shutdownAfterDeployment,
 			final boolean stopExecutionsWhenFinish)
 					throws InterruptedException, IOException {
-		
 		// Open SSH and FTP connections before dependencies resolution
 		final List<Boolean> connectionOk = new ArrayList<Boolean>();
 		Thread setupThread = new Thread() {
 			public void run() {
-				// Handle connection errors
+				// Handle setup errors
 				setDefaultUncaughtExceptionHandler(ExecutionManager.exceptionHandler());
 				try {
+					validate();
 					executionManager.openSSHConnections(sshHosts.toArray(new Host[0]));
 					executionManager.openFTPConnections(ftpHosts.toArray(new Host[0]));
 					connectionOk.add(true);

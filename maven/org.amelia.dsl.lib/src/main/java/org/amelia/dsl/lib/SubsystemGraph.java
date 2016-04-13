@@ -193,30 +193,57 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 
 		return get(a).add(b);
 	}
+	
+	/**
+	 * @return whether or not all of the subsystem dependencies are satisfiable
+	 */
+	public boolean validate() {
+		boolean valid = true;
+		for (Subsystem subsystem : keySet()) {
+			for (Subsystem dependency : subsystem.dependencies()) {
+				if (!keySet().contains(dependency)) {
+					Log.error("Unmeetable subsystem dependency '"
+							+ dependency.alias()
+							+ "'. The graph must contain all of the subsystems.");
+					valid = false;
+					break;
+				}
+			}
+		}
+		return valid;
+	}
 
 	/**
 	 * @return whether the execution was successful or not
 	 */
 	public boolean execute(boolean stopExecutedComponents) throws InterruptedException {
-		CountDownLatch doneSignal = new CountDownLatch(this.subsystems.size());
-
-		for (Subsystem subsystem : this.subsystems) {
-			List<Subsystem> dependencies = get(subsystem);
-			DependencyThread thread = new DependencyThread(subsystem,
-					dependencies, doneSignal, this.taskQueue);
-			threads.add(thread);
-		}
-
+		boolean successful = false;
 		Log.printBanner();
-		Log.info("Resolving subsystems (" + this.subsystems.size() + ")");
-		long start = System.nanoTime();
-		for (DependencyThread thread : this.threads)
-			thread.start();
-
-		doneSignal.await();
-		shutdown(stopExecutedComponents);
-		long end = System.nanoTime();
-		
+		if (validate()) {
+			CountDownLatch doneSignal = new CountDownLatch(this.subsystems.size());
+			for (Subsystem subsystem : this.subsystems) {
+				List<Subsystem> dependencies = get(subsystem);
+				DependencyThread thread = new DependencyThread(subsystem,
+						dependencies, doneSignal, this.taskQueue);
+				threads.add(thread);
+			}
+			Log.info("Resolving subsystems (" + this.subsystems.size() + ")");
+			long start = System.nanoTime();
+			for (DependencyThread thread : this.threads) {
+				thread.start();
+			}
+			// Wait for all threads to finish
+			doneSignal.await();
+			shutdown(stopExecutedComponents);
+			printExecutionSummary(start, System.nanoTime());
+			successful = !ExecutionManager.isAnySubsystemAborting();
+		} else {
+			shutdown(stopExecutedComponents);
+		}
+		return successful;
+	}
+	
+	private void printExecutionSummary(final long start, final long end) {
 		Log.print(Log.SEPARATOR_LONG);
 		if (!ExecutionManager.isAnySubsystemAborting()) {
 			Log.print("DEPLOYMENT SUCCESS");
@@ -228,8 +255,6 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 				+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s");
 		Log.print("Finished at: " + new Date());
 		Log.print(Log.SEPARATOR_LONG);
-		
-		return !ExecutionManager.isAnySubsystemAborting();
 	}
 
 	public void shutdown(final boolean stopExecutedComponents) {
