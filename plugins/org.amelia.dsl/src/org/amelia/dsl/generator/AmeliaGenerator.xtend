@@ -23,7 +23,6 @@ import java.util.HashMap
 import java.util.List
 import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.DependDeclaration
-import org.amelia.dsl.amelia.MainDeclaration
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.lib.Subsystem.Deployment
 import org.amelia.dsl.lib.SubsystemGraph
@@ -38,6 +37,7 @@ import org.eclipse.xtext.resource.IContainer
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
 import org.eclipse.xtext.xbase.lib.Functions.Function0
+import org.amelia.dsl.amelia.DeploymentDeclaration
 
 /**
  * Generates code from your model files on save.
@@ -73,7 +73,7 @@ class AmeliaGenerator implements IGenerator {
 		fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
 	}
 	
-	def getCustomImplementation(MainDeclaration main, String fqn, Iterable<Subsystem> subsystems) {
+	def getCustomImplementation(DeploymentDeclaration deployment, String fqn, Iterable<Subsystem> subsystems) {
 		val className = if(fqn.contains(".")) fqn.substring(fqn.lastIndexOf(".")) else fqn
 		val ss = org.amelia.dsl.lib.Subsystem.canonicalName
 		val hm = HashMap.canonicalName

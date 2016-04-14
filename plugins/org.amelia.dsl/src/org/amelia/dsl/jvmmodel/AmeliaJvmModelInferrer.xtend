@@ -20,16 +20,17 @@ package org.amelia.dsl.jvmmodel
 
 import com.google.inject.Inject
 import java.util.ArrayList
+import java.util.HashMap
 import java.util.List
 import org.amelia.dsl.amelia.ConfigBlockExpression
 import org.amelia.dsl.amelia.IncludeDeclaration
-import org.amelia.dsl.amelia.MainDeclaration
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.VariableDeclaration
 import org.amelia.dsl.lib.DescriptorGraph
 import org.amelia.dsl.lib.Subsystem.Deployment
+import org.amelia.dsl.lib.SubsystemGraph
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.amelia.dsl.lib.util.Arrays
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
@@ -42,10 +43,9 @@ import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
-import java.util.HashMap
 import org.eclipse.xtext.xbase.lib.Functions.Function0
-import org.amelia.dsl.lib.SubsystemGraph
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
+import org.amelia.dsl.amelia.DeploymentDeclaration
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -64,16 +64,16 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 
 	@Inject extension IQualifiedNameProvider
 
-	def dispatch void infer(MainDeclaration main, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		val fqn = ResourceUtils.fromURItoFQN(main.eResource.URI)
-		val clazz = main.toClass(fqn)
+	def dispatch void infer(DeploymentDeclaration deployment, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		val fqn = ResourceUtils.fromURItoFQN(deployment.eResource.URI)
+		val clazz = deployment.toClass(fqn)
 		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				val suffix = System.nanoTime + ""
-				documentation = main.documentation
+				documentation = deployment.documentation
 				members +=
-					main.toField("initializers" + suffix,
+					deployment.toField("initializers" + suffix,
 						typeRef(HashMap, typeRef(Class, wildcardExtends(typeRef(Deployment))),
 							typeRef(Function0, wildcardExtends(typeRef(Deployment))))) [
 					visibility = JvmVisibility.PRIVATE
@@ -84,7 +84,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					]
 				]
 				members +=
-					main.toField("subsystems" + suffix,
+					deployment.toField("subsystems" + suffix,
 						typeRef(HashMap, typeRef(String), typeRef(org.amelia.dsl.lib.Subsystem))) [
 					visibility = JvmVisibility.PRIVATE
 					initializer = [
@@ -92,27 +92,27 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							.append(org.amelia.dsl.lib.Subsystem).append(">()")
 					]
 				]
-				members += main.toMethod("main", typeRef(void)) [
+				members += deployment.toMethod("main", typeRef(void)) [
 					static = true
-					parameters += main.toParameter("args", typeRef(String).addArrayTypeDimension)
+					parameters += deployment.toParameter("args", typeRef(String).addArrayTypeDimension)
 					body = [
 						append(clazz).append(" main = new ").append(clazz).append("();").newLine
 						append("main.custom();")
 					]
 				]
-				members += main.toMethod("custom", typeRef(void)) [
+				members += deployment.toMethod("custom", typeRef(void)) [
 					visibility = JvmVisibility.PRIVATE
-					body = main.body
+					body = deployment.body
 				]
-				members += main.toMethod("map", typeRef(void)) [
+				members += deployment.toMethod("map", typeRef(void)) [
 					visibility = JvmVisibility.PRIVATE
-					parameters += main.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
-					parameters += main.toParameter("initializer", typeRef(Function0, wildcardExtends(typeRef(Deployment))))
+					parameters += deployment.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
+					parameters += deployment.toParameter("initializer", typeRef(Function0, wildcardExtends(typeRef(Deployment))))
 					body = '''initializers«suffix».put(clazz, initializer);'''
 				]
-				members += main.toMethod("deploy", typeRef(boolean)) [
+				members += deployment.toMethod("deploy", typeRef(boolean)) [
 					visibility = JvmVisibility.PRIVATE
-					parameters += main.toParameter("stopExecutedComponents", typeRef(boolean))
+					parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
 					exceptions += typeRef(InterruptedException)
 					body = [
 						append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine

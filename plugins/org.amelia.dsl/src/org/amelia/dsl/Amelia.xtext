@@ -31,11 +31,12 @@ Model
 
 TypeDeclaration
 	:	SubsystemDeclaration
-	|	MainDeclaration
+	|	DeploymentDeclaration
 	;
 
-MainDeclaration
-	:	'main' body = XBlockExpression
+DeploymentDeclaration
+	:	extensions = ExtensionSection?
+		'deployment' name = ID body = XBlockExpression
 	;
 
 SubsystemDeclaration returns Subsystem

@@ -87,11 +87,11 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	def checkSubsystemName(Subsystem subsystem) {
 		val model = EcoreUtil2.getRootContainer(subsystem) as Model
 		if (subsystem.name.equals("Amelia") && model.name == null) {
-			error("The fully qualified name 'Amelia' is reserved", AmeliaPackage.Literals.SUBSYSTEM__NAME,
+			error("The fully qualified name 'Amelia' is reserved", AmeliaPackage.Literals.TYPE_DECLARATION__NAME,
 				RESERVED_TYPE_NAME)
 		}
 		if (!Character.isUpperCase(subsystem.name.charAt(0))) {
-			warning("Name should start with a capital", AmeliaPackage.Literals.SUBSYSTEM__NAME,
+			warning("Name should start with a capital", AmeliaPackage.Literals.TYPE_DECLARATION__NAME,
 				NON_CAPITAL_NAME)
 		}
 	}
@@ -112,7 +112,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 
 		if (isPublic && !fileName.equals(subsystem.name)) {
 			error("Subsystem '" + subsystem.name + "' does not match the corresponding file name '" + fileName +
-				"'", AmeliaPackage.Literals.SUBSYSTEM__NAME, INVALID_FILE_NAME)
+				"'", AmeliaPackage.Literals.TYPE_DECLARATION__NAME, INVALID_FILE_NAME)
 		}
 	}
 	
@@ -324,10 +324,10 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		subsystem.findDependentElements [ cycle |
 			if (cycle.size == 1) {
 				error('''The subsystem '«subsystem.name»' cannot depend on itself.''', 
-					  cycle.head, AmeliaPackage.Literals.SUBSYSTEM__NAME, CYCLIC_DEPENDENCY)
+					  cycle.head, AmeliaPackage.Literals.TYPE_DECLARATION__NAME, CYCLIC_DEPENDENCY)
 			} else {
 				error('''There is a cyclic dependency that involves subsystems «cycle.filter(Subsystem).map[name].join(", ")»''', 
-					  cycle.head, AmeliaPackage.Literals.SUBSYSTEM__NAME, CYCLIC_DEPENDENCY)
+					  cycle.head, AmeliaPackage.Literals.TYPE_DECLARATION__NAME, CYCLIC_DEPENDENCY)
 			}
 		]
 	}
