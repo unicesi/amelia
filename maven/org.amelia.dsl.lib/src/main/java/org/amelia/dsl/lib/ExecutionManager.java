@@ -86,7 +86,12 @@ public class ExecutionManager {
 							"^((\\w)+(\\.\\w+)+:\\s)*", "");
 					logger.error(e.getMessage(), e);
 					Log.error("Stopping deployment: " + message);
-					SubsystemGraph.getInstance().shutdown(true);
+					try {
+						SubsystemGraph.getInstance().shutdown(true);
+					} catch (Exception ex) {
+						Log.error("[Call Miguel NOW!] Error while shutting down: " + message);
+						logger.error(ex.getMessage());
+					}
 				}
 			}
 		};

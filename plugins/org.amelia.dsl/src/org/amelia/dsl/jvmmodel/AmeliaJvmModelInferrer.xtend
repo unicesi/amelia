@@ -43,6 +43,9 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
+import java.util.HashMap
+import org.eclipse.xtext.xbase.lib.Functions.Function0
+import org.amelia.dsl.lib.SubsystemGraph
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -69,10 +72,61 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			if (!isPreIndexingPhase) {
 				val suffix = System.nanoTime + ""
 				documentation = main.documentation
+				members +=
+					main.toField("initializers" + suffix,
+						typeRef(HashMap, typeRef(Class, wildcardExtends(typeRef(Deployment))),
+							typeRef(Function0, wildcardExtends(typeRef(Deployment))))) [
+					visibility = JvmVisibility.PRIVATE
+					initializer = [
+						append("new ").append(HashMap)
+							.append("<").append(Class).append("<? extends ").append(Deployment).append(">, ")
+							.append(Function0).append("<? extends ").append(Deployment).append(">>()")
+					]
+				]
+				members +=
+					main.toField("subsystems" + suffix,
+						typeRef(HashMap, typeRef(String), typeRef(org.amelia.dsl.lib.Subsystem))) [
+					visibility = JvmVisibility.PRIVATE
+					initializer = [
+						append("new ").append(HashMap).append("<").append(String).append(", ")
+							.append(org.amelia.dsl.lib.Subsystem).append(">()")
+					]
+				]
 				members += main.toMethod("main", typeRef(void)) [
 					static = true
-					parameters += main.toParameter("args" + suffix, typeRef(String).addArrayTypeDimension)
+					parameters += main.toParameter("args", typeRef(String).addArrayTypeDimension)
+					body = [
+						append(clazz).append(" main = new ").append(clazz).append("();").newLine
+						append("main.custom();")
+					]
+				]
+				members += main.toMethod("custom", typeRef(void)) [
+					visibility = JvmVisibility.PRIVATE
 					body = main.body
+				]
+				members += main.toMethod("map", typeRef(void)) [
+					visibility = JvmVisibility.PRIVATE
+					parameters += main.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
+					parameters += main.toParameter("initializer", typeRef(Function0, wildcardExtends(typeRef(Deployment))))
+					body = '''initializers«suffix».put(clazz, initializer);'''
+				]
+				members += main.toMethod("deploy", typeRef(boolean)) [
+					visibility = JvmVisibility.PRIVATE
+					parameters += main.toParameter("stopExecutedComponents", typeRef(boolean))
+					exceptions += typeRef(InterruptedException)
+					body = [
+						append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine
+						append("for (").append(Class).append("<? extends ").append(Deployment).append('''> clazz : initializers«suffix».keySet()) {''')
+						increaseIndentation.newLine
+						append(org.amelia.dsl.lib.Subsystem).append(" s = new ").append(org.amelia.dsl.lib.Subsystem)
+							.append('''(clazz.getCanonicalName(), initializers«suffix».get(clazz).apply());''').newLine
+						append('''subsystems«suffix».put(clazz.getCanonicalName(), s);''')
+						decreaseIndentation.newLine
+						append("}").newLine
+						//append('''subsystems.get("org.example.Client").dependsOn(subsystems.get("org.example.Server"));''').newLine
+						//append('''graph.addSubsystems(subsystems.get("org.example.Client"), subsystems.get("org.example.Server"));''').newLine
+						append('''return graph.execute(stopExecutedComponents);''')
+					]
 				]
 			}
 		]
