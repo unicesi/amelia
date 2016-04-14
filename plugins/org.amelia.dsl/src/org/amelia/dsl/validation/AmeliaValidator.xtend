@@ -56,6 +56,7 @@ import org.eclipse.xtext.xbase.XNumberLiteral
 import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XbasePackage
+import org.amelia.dsl.amelia.DeploymentDeclaration
 
 /**
  * This class contains custom validation rules. 
@@ -368,38 +369,37 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def checkSelfIncludes(ExtensionDeclaration extensionDeclaration) {
-		val subsystem = (EcoreUtil2.getRootContainer(extensionDeclaration) as Model).typeDeclaration as Subsystem
-		if (subsystem.equals(extensionDeclaration.element)) {
-			val relation = if (extensionDeclaration instanceof IncludeDeclaration)
-					"include"
-				else if (extensionDeclaration instanceof DependDeclaration)
-					"depend on"
-			error('''A subsystem cannot «relation» itself''',
-				AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_SELF_EXTENSION)
+		val typeDecl = (EcoreUtil2.getRootContainer(extensionDeclaration) as Model).typeDeclaration
+		if (typeDecl instanceof Subsystem) {
+			val subsystem = typeDecl as Subsystem
+			if (subsystem.equals(extensionDeclaration.element)) {
+				val relation = if (extensionDeclaration instanceof IncludeDeclaration)
+						"include"
+					else if (extensionDeclaration instanceof DependDeclaration)
+						"depend on"
+				error('''A subsystem cannot «relation» itself''',
+					AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_SELF_EXTENSION)
+			}	
 		}
 	}
 	
 	@Check
 	def checkFragments(ExtensionDeclaration extensionDeclaration) {
-		switch (extensionDeclaration) {
-			IncludeDeclaration case extensionDeclaration.element instanceof Subsystem: {
-				if (!(extensionDeclaration.element as Subsystem).fragment) {
-					error("Included subsystems must be fragments",
-						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_NON_FRAGMENT_INCLUDE)
-				}
-			}
-			DependDeclaration: {
-				val subsystem = (EcoreUtil2.getRootContainer(extensionDeclaration) as Model).typeDeclaration as Subsystem
-				if (subsystem.fragment) {
-					error("Fragments cannot have dependencies",
+		val typeDecl = (EcoreUtil2.getRootContainer(extensionDeclaration) as Model).typeDeclaration
+		if (typeDecl instanceof Subsystem) {
+			switch (extensionDeclaration) {
+				DependDeclaration: {
+					if (typeDecl.fragment) {
+						error("Fragments cannot have dependencies",
 						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
-				} else if (extensionDeclaration.element instanceof Subsystem) {
-					if ((extensionDeclaration.element as Subsystem).fragment) {
-						error("Subsystems depended upon cannot be fragments",
-							AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_FRAGMENT_DEPENDENCY)
+					} else if (extensionDeclaration.element instanceof Subsystem) {
+						if ((extensionDeclaration.element as Subsystem).fragment) {
+							error("Subsystems depended upon cannot be fragments",
+								AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_FRAGMENT_DEPENDENCY)
+						}
 					}
 				}
-			}
+			}	
 		}
 	}
 	
@@ -433,6 +433,23 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (configBlock.expressions.empty) {
 			// An empty execution configuration leads to the false execution of a subsystem
 			error("The execution configuration cannot be empty", XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS)
+		}
+	}
+	
+	@Check
+	def checkDeploymentDeclExtensions(ExtensionDeclaration extensionDecl) {
+		val typeDecl = (EcoreUtil2.getRootContainer(extensionDecl) as Model).typeDeclaration
+		if (typeDecl instanceof DeploymentDeclaration) {
+			switch (extensionDecl) {
+				IncludeDeclaration case extensionDecl.element instanceof DeploymentDeclaration: {
+					error("Deployments can only include subsystems", AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
+						INVALID_EXTENSION_DECLARATION)
+				}
+				DependDeclaration: {
+					error("Deployments cannot have dependencies", AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
+						INVALID_EXTENSION_DECLARATION)
+				}
+			}	
 		}
 	}
 	
