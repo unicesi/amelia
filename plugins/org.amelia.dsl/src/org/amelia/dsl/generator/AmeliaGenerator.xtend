@@ -19,12 +19,10 @@
 package org.amelia.dsl.generator
 
 import com.google.inject.Inject
-import java.util.HashMap
 import java.util.List
 import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.DependDeclaration
 import org.amelia.dsl.amelia.Subsystem
-import org.amelia.dsl.lib.Subsystem.Deployment
 import org.amelia.dsl.lib.SubsystemGraph
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.eclipse.emf.ecore.EClass
@@ -36,8 +34,6 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.resource.IContainer
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
-import org.eclipse.xtext.xbase.lib.Functions.Function0
-import org.amelia.dsl.amelia.DeploymentDeclaration
 
 /**
  * Generates code from your model files on save.
@@ -55,74 +51,14 @@ class AmeliaGenerator implements IGenerator {
 	@Inject extension IQualifiedNameProvider
 
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
-		val subsystemDescriptions = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem)
-		val subsystems = subsystemDescriptions.map[d|d.getEObject(resource) as Subsystem].filter[e|!e.fragment]
-//		val mainDescriptions = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.mainDeclaration)
-//		val mains = mainDescriptions.map[d|d.getEObject(resource) as MainDeclaration]
-//		if (!mains.empty) {
-//			for (MainDeclaration main : mains) {
-//				val fqn = ResourceUtils.fromURItoFQN(main.eResource.URI)
-//				val content = getCustomImplementation(main, fqn, subsystems)
-//				fsa.generateFile(fqn.replaceAll("\\.", "/") + ".java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
-//			}
-//		} else {			
-//			val content = getDefaultMainImpl(subsystems)
-//			fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
-//		}
-		val content = getDefaultMainImpl(subsystems)
-		fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
-	}
-	
-	def getCustomImplementation(DeploymentDeclaration deployment, String fqn, Iterable<Subsystem> subsystems) {
-		val className = if(fqn.contains(".")) fqn.substring(fqn.lastIndexOf(".")) else fqn
-		val ss = org.amelia.dsl.lib.Subsystem.canonicalName
-		val hm = HashMap.canonicalName
-		val dm = Deployment.canonicalName
-		val suffix = System.nanoTime + ""
-		'''
-			public class «className» {
-				
-				private «hm»<String, «ss»> subsystems«suffix» 
-					= new «hm»<String, «ss»>();
-				private «hm»<Class<? extends «dm»>, «Function0.canonicalName»<? extends «dm»>> initializers«suffix» 
-					= new «hm»<Class<? extends «dm»>, «Function0.canonicalName»<? extends «dm»>>();
-				
-				public static void main(final String[] args«suffix») throws Exception {
-						«className» main = new «className»();
-						main.custom();
-				}
-				
-				public void custom() throws Exception {
-					
-				}
-				
-				private void map(Class<? extends «dm»> clazz, «Function0.canonicalName»<? extends «dm»> initializer) {
-					initializers«suffix».put(clazz, initializer);
-				}
-				
-				private boolean deploy(final boolean stopExecutedComponents) throws InterruptedException {
-					«SubsystemGraph.canonicalName» graph = «SubsystemGraph.canonicalName».getInstance();
-					for (Class<? extends «dm»> clazz : initializers«suffix».keySet()) {
-						«ss» subsystem = new «ss»(clazz.getCanonicalName(), initializers«suffix».get(clazz).apply());
-						subsystems«suffix».put(clazz.getCanonicalName(), subsystem);
-					}
-					«FOR subsystem : subsystems»
-						«val dependencies = subsystem.extensions.declarations.filter(DependDeclaration)»
-						«IF !dependencies.empty»
-							subsystems«suffix».get("org.example.Client").dependsOn(subsystems«suffix».get("org.example.Server"));
-							«dependencies.join(
-								'''subsystems«suffix».get("«subsystem.fullyQualifiedName»").dependsOn(''',
-								", ",
-								");",
-								[s|'''subsystems.get("«s.fullyQualifiedName»")''']
-							)»
-						«ENDIF»
-					«ENDFOR»
-					«subsystems.join("graph.addSubsystems(", ", ", ");", [s|'''subsystems«suffix».get("«s.fullyQualifiedName»")'''])»
-					return graph.execute(stopExecutedComponents);
-				}
-			}
-		'''
+		val subsystems = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem).map [ d |
+			d.getEObject(resource) as Subsystem
+		].filter[e|!e.fragment]
+		val deployments = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.deploymentDeclaration)
+		if (!deployments.empty) {
+			val content = getDefaultMainImpl(subsystems)
+			fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)	
+		}
 	}
 	
 	def getDefaultMainImpl(Iterable<Subsystem> subsystems) {

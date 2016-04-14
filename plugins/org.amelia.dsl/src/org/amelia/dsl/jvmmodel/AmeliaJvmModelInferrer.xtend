@@ -46,6 +46,8 @@ import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Functions.Function0
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 import org.amelia.dsl.amelia.DeploymentDeclaration
+import org.amelia.dsl.amelia.DependDeclaration
+import java.util.Collections
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -71,6 +73,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				val suffix = System.nanoTime + ""
+				val subsystems = deployment.extensions.declarations.filter(IncludeDeclaration).map [d|
+					d.element as Subsystem
+				]
 				documentation = deployment.documentation
 				members +=
 					deployment.toField("initializers" + suffix,
@@ -113,19 +118,46 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				members += deployment.toMethod("deploy", typeRef(boolean)) [
 					visibility = JvmVisibility.PRIVATE
 					parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
-					exceptions += typeRef(InterruptedException)
+					exceptions += typeRef(Exception)
 					body = [
 						append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine
+						for (subsystem : subsystems) {
+							val qualifiedName = subsystem.fullyQualifiedName
+							append('''subsystems«suffix».put("«qualifiedName»", new ''')
+								.append(org.amelia.dsl.lib.Subsystem)
+								.append('''("«qualifiedName»", «qualifiedName».class.newInstance()));''')
+								.newLine
+						}
 						append("for (").append(Class).append("<? extends ").append(Deployment).append('''> clazz : initializers«suffix».keySet()) {''')
 						increaseIndentation.newLine
+						append(Deployment).append(''' d = initializers«suffix».get(clazz).apply();''').newLine
 						append(org.amelia.dsl.lib.Subsystem).append(" s = new ").append(org.amelia.dsl.lib.Subsystem)
-							.append('''(clazz.getCanonicalName(), initializers«suffix».get(clazz).apply());''').newLine
+							.append('''(clazz.getCanonicalName(), d);''').newLine
 						append('''subsystems«suffix».put(clazz.getCanonicalName(), s);''')
 						decreaseIndentation.newLine
 						append("}").newLine
-						//append('''subsystems.get("org.example.Client").dependsOn(subsystems.get("org.example.Server"));''').newLine
-						//append('''graph.addSubsystems(subsystems.get("org.example.Client"), subsystems.get("org.example.Server"));''').newLine
-						append('''return graph.execute(stopExecutedComponents);''')
+						append('''
+							«FOR subsystem : subsystems»
+								«val dependencies = 
+									if(subsystem.extensions != null)
+										subsystem.extensions.declarations.filter(DependDeclaration)
+									else
+										Collections.EMPTY_LIST
+								»
+								«IF !dependencies.empty»
+									«dependencies.join(
+										'''subsystems«suffix».get("«subsystem.fullyQualifiedName»").dependsOn(
+										''',
+										",\n",
+										"\n);",
+										[d|'''	subsystems«suffix».get("«d.element.fullyQualifiedName»")''']
+									)»
+								«ENDIF»
+							«ENDFOR»
+						''')
+						append('''graph.addSubsystems(subsystems«suffix».values().toArray(new ''')
+							.append(org.amelia.dsl.lib.Subsystem).append("[0]));")
+						newLine.append("return graph.execute(stopExecutedComponents);")
 					]
 				]
 			}
