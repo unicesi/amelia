@@ -73,9 +73,12 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				val suffix = System.nanoTime + ""
-				val subsystems = deployment.extensions.declarations.filter(IncludeDeclaration).map [d|
-					d.element as Subsystem
-				]
+				val subsystems = if(deployment.extensions != null) 
+						deployment.extensions.declarations.filter(IncludeDeclaration).map [d|
+							d.element as Subsystem
+						]
+					else
+						Collections.EMPTY_LIST
 				documentation = deployment.documentation
 				members +=
 					deployment.toField("initializers" + suffix,
