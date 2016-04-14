@@ -82,16 +82,14 @@ public class ExecutionManager {
 			public void uncaughtException(Thread t, Throwable e) {
 				if (!globallyAborting) {
 					globallyAborting = true;
-					String message = e.getMessage().replaceAll(
-							"^((\\w)+(\\.\\w+)+:\\s)*", "");
-					logger.error(e.getMessage(), e);
-					Log.error("Stopping deployment: " + message);
-					try {
-						SubsystemGraph.getInstance().shutdown(true);
-					} catch (Exception ex) {
-						Log.error("[Call Miguel NOW!] Error while shutting down: " + message);
-						logger.error(ex.getMessage());
+					String message = "";
+					if (e.getMessage() != null) {
+						message = ": " + e.getMessage().replaceAll(
+								"^((\\w)+(\\.\\w+)+:\\s)*", "");						
 					}
+					logger.error(e.getMessage(), e);
+					Log.error("Stopping deployment" + message);
+					SubsystemGraph.getInstance().shutdown(true);
 				}
 			}
 		};
