@@ -96,7 +96,7 @@ public class DescriptorGraph
 					this.descriptor.notifyObservers();
 				}
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				// Notify to main thread
 				this.mainDoneSignal.countDown();
@@ -283,7 +283,7 @@ public class DescriptorGraph
 					connectionOk.add(true);
 				} catch (Exception e) {
 					connectionOk.add(false);
-					throw new RuntimeException(e);
+					throw new RuntimeException(e.getMessage(), e.getCause());
 				}
 			}
 		};

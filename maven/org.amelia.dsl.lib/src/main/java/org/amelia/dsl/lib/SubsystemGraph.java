@@ -241,6 +241,9 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		} else {
 			shutdown(stopExecutedComponents);
 		}
+		// Before return and continue the execution in the main thread, re-start
+		// everything!
+		instance = null;
 		return successful;
 	}
 	
@@ -274,7 +277,6 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 					subsystem.deployment().shutdown(stopExecutedComponents);
 				}
 			}
-			instance = null;
 		}
 	}
 

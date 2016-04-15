@@ -54,7 +54,7 @@ public class SingleThreadTaskQueue extends Thread {
 				this.callback.onComplete(result);
 			} catch (Exception e) {
 				this.callback.onCancel();
-				throw new RuntimeException(e);
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
@@ -76,7 +76,7 @@ public class SingleThreadTaskQueue extends Thread {
 				if (task != null)
 					this.executor.submit(task).get();
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}
 	}
