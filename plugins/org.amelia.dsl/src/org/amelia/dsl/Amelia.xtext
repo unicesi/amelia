@@ -41,7 +41,7 @@ DeploymentDeclaration
 
 SubsystemDeclaration returns Subsystem
 	:	extensions = ExtensionSection?
-		'subsystem' ^fragment ?= 'fragment'? name = ID body = SubsystemBlockExpression
+		'subsystem' name = ID body = SubsystemBlockExpression
 	;
 
 ExtensionSection

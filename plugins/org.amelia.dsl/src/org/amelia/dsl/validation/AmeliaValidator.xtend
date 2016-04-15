@@ -384,26 +384,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def checkFragments(ExtensionDeclaration extensionDeclaration) {
-		val typeDecl = (EcoreUtil2.getRootContainer(extensionDeclaration) as Model).typeDeclaration
-		if (typeDecl instanceof Subsystem) {
-			switch (extensionDeclaration) {
-				DependDeclaration: {
-					if (typeDecl.fragment) {
-						error("Fragments cannot have dependencies",
-						AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_EXTENSION_DECLARATION)
-					} else if (extensionDeclaration.element instanceof Subsystem) {
-						if ((extensionDeclaration.element as Subsystem).fragment) {
-							error("Subsystems depended upon cannot be fragments",
-								AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT, INVALID_FRAGMENT_DEPENDENCY)
-						}
-					}
-				}
-			}	
-		}
-	}
-	
-	@Check
 	def checkNoEmptyRules(RuleDeclaration rule) {
 		if (rule.commands.empty) {
 			error("There must be at least one command", AmeliaPackage.Literals.RULE_DECLARATION__COMMANDS,
@@ -425,10 +405,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (!subsystem.body.expressions.filter(ConfigBlockExpression).filter[c|!c.equals(configBlock)].empty) {
 			error("Subsystems can only contain one configuration block",
 				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS, CONFIGURE_NOT_ALLOWED)
-		}
-		if (subsystem.fragment) {
-			error("Fragments cannot have configuration blocks", XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS,
-				CONFIGURE_NOT_ALLOWED)
 		}
 		if (configBlock.expressions.empty) {
 			// An empty execution configuration leads to the false execution of a subsystem

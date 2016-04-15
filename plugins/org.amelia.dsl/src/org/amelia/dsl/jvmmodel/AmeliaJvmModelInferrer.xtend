@@ -184,8 +184,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				val hasConfigBlock = newArrayList(false)
 				
 				documentation = subsystem.documentation
-				if (!subsystem.fragment)
-					superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
+				superTypes += typeRef(org.amelia.dsl.lib.Subsystem.Deployment)
 				
 				for (e : subsystem.body.expressions) {
 					switch (e) {
@@ -239,44 +238,37 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				fields += getIncludesAsFields(subsystem, suffix)
 
 				// Setup rules' commands
-				if (subsystem.fragment) {
-					constructors += subsystem.toConstructor[
-						body = subsystem.setup(null, suffix)
-					]
-				} else {
-					// Empty constructor to avoid compilation errors in the default (Amelia) main when there are parameters
-					if (!params.empty) {
-						constructors += subsystem.toConstructor[
-							if (hasConfigBlock.get(0)) {
-								body = [
-									append('''this.dependencies«suffix» = new ''')
-									append(ArrayList).append("<").append(org.amelia.dsl.lib.Subsystem).append(">();")
-								]
-							}
-						]
-						constructors += subsystem.toConstructor [
-							for (param : params) {
-								if (param.type != null || param.right != null)
-									parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
-							}
+				// Empty constructor to avoid compilation errors in the default (Amelia) main when there are parameters
+				if (!params.empty) {
+					constructors += subsystem.toConstructor [
+						if (hasConfigBlock.get(0)) {
 							body = [
-								append("this();").newLine
-								for (param : params)
-									append('''this.«param.name» = «param.name»;''')
+								append('''this.dependencies«suffix» = new ''')
+								append(ArrayList).append("<").append(org.amelia.dsl.lib.Subsystem).append(">();")
 							]
+						}
+					]
+					constructors += subsystem.toConstructor [
+						for (param : params) {
+							if (param.type != null || param.right != null)
+								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
+						}
+						body = [
+							append("this();").newLine
+							for (param : params)
+								append('''this.«param.name» = «param.name»;''')
 						]
-					}
-					methods += subsystem.toMethod("deploy", typeRef(void)) [
-						val subsystemParam = "subsystem" + suffix
-						val dependenciesParam = "dependencies" + suffix
-						exceptions += typeRef(Exception)
-						parameters += subsystem.toParameter(subsystemParam, typeRef(String))
-						parameters +=
-							subsystem.toParameter(dependenciesParam,
-								typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
-						body = subsystem.setup(subsystemParam, suffix)
 					]
 				}
+				methods += subsystem.toMethod("deploy", typeRef(void)) [
+					val subsystemParam = "subsystem" + suffix
+					val dependenciesParam = "dependencies" + suffix
+					exceptions += typeRef(Exception)
+					parameters += subsystem.toParameter(subsystemParam, typeRef(String))
+					parameters +=
+						subsystem.toParameter(dependenciesParam, typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
+					body = subsystem.setup(subsystemParam, suffix)
+				]
 				
 				// Method to return all rules from included subsystems
 				getters += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
@@ -402,17 +394,15 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				currentHostBlock++
 			}
 			
-			if (!subsystem.fragment) {
-				val rules = subsystem.getAllIncludedRules(suffix)
-				val hasConfigBlock = subsystem.body.expressions.exists[c|c instanceof ConfigBlockExpression]
-				append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
-				append('''super.graph.addDescriptors(getAllRules());''').newLine
-				if (hasConfigBlock) {
-					append('''this.dependencies«suffix» = dependencies«suffix»;''').newLine
-					append('''configure(dependencies«suffix»);''')
-				} else if (!rules.empty) {
-					append('''super.graph.execute(true);''')
-				}
+			val rules = subsystem.getAllIncludedRules(suffix)
+			val hasConfigBlock = subsystem.body.expressions.exists[c|c instanceof ConfigBlockExpression]
+			append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
+			append('''super.graph.addDescriptors(getAllRules());''').newLine
+			if (hasConfigBlock) {
+				append('''this.dependencies«suffix» = dependencies«suffix»;''').newLine
+				append('''configure(dependencies«suffix»);''')
+			} else if (!rules.empty) {
+				append('''super.graph.execute(true);''')
 			}
 		]
 	}

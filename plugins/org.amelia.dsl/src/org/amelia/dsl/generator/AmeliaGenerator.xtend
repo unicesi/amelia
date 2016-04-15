@@ -53,7 +53,7 @@ class AmeliaGenerator implements IGenerator {
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
 		val subsystems = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem).map [ d |
 			d.getEObject(resource) as Subsystem
-		].filter[e|!e.fragment]
+		]
 		val deployments = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.deploymentDeclaration)
 		if (!deployments.empty) {
 			val content = getDefaultMainImpl(subsystems)
