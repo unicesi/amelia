@@ -75,7 +75,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val EMPTY_COMMAND_LIST = "amelia.issue.emptyCommandList"
 	public static val INVALID_EXTENSION_DECLARATION = "amelia.issue.invalidExtensionDeclaration"
 	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
-	public static val INVALID_FRAGMENT_DEPENDENCY = "amelia.issue.invalidFragmentDependency"
 	public static val INVALID_NON_FRAGMENT_INCLUDE = "amelia.issue.invalidNonFragmentInclude"
 	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
 	public static val INVALID_PARAM_DECLARATION = "amelia.issue.invalidParamDeclaration"
