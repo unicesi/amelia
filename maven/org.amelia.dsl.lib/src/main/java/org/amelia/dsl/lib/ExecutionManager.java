@@ -230,7 +230,7 @@ public class ExecutionManager {
 				Log.error(
 						"Deployment shutdown unsuccessful. See logs for more information");
 				Log.error("Shutting system down abruptly");
-				logger.error(e);
+				logger.error(e.getMessage(), e.getCause());
 			}
 		}
 	}
