@@ -175,6 +175,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				val suffix = System.nanoTime + ""
+				val subsystemParam = "subsystem" + suffix
+				val dependenciesParam = "dependencies" + suffix
 				val params = newArrayList
 				val fields = newArrayList
 				val constructors = newArrayList
@@ -238,16 +240,18 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				fields += getIncludesAsFields(subsystem, suffix)
 
 				// Setup rules' commands
-				// Empty constructor to avoid compilation errors in the default (Amelia) main when there are parameters
-				if (!params.empty) {
-					constructors += subsystem.toConstructor [
+				constructors += subsystem.toConstructor [
+					body = [
 						if (hasConfigBlock.get(0)) {
-							body = [
-								append('''this.dependencies«suffix» = new ''')
-								append(ArrayList).append("<").append(org.amelia.dsl.lib.Subsystem).append(">();")
-							]
+							append('''this.dependencies«suffix» = new ''')
+							append(ArrayList).append("<").append(org.amelia.dsl.lib.Subsystem).append(">();").newLine
+						}
+						if (params.empty) {
+							append("initializeRules();")
 						}
 					]
+				]
+				if (!params.empty) {
 					constructors += subsystem.toConstructor [
 						for (param : params) {
 							if (param.type != null || param.right != null)
@@ -255,19 +259,22 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						}
 						body = [
 							append("this();").newLine
-							for (param : params)
-								append('''this.«param.name» = «param.name»;''')
+							append(params.join("\n", [ p |
+								'''this.«p.name» = «p.name»;'''
+							]))
+							newLine.append("initializeRules();")
 						]
 					]
 				}
+				methods += subsystem.toMethod("initializeRules", typeRef(void)) [
+					body = setupRules(subsystem, subsystemParam, suffix)
+				]
 				methods += subsystem.toMethod("deploy", typeRef(void)) [
-					val subsystemParam = "subsystem" + suffix
-					val dependenciesParam = "dependencies" + suffix
 					exceptions += typeRef(Exception)
 					parameters += subsystem.toParameter(subsystemParam, typeRef(String))
 					parameters +=
 						subsystem.toParameter(dependenciesParam, typeRef(List, typeRef(org.amelia.dsl.lib.Subsystem)))
-					body = subsystem.setup(subsystemParam, suffix)
+					body = subsystem.setupGraph(subsystemParam, suffix)
 				]
 				
 				// Method to return all rules from included subsystems
@@ -366,7 +373,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		]
 	}
 	
-	def Procedure1<ITreeAppendable> setup(Subsystem subsystem, String subsystemParam, String suffix) {
+	def Procedure1<ITreeAppendable> setupRules(Subsystem subsystem, String subsystemParam, String suffix) {
 		return [
 			var currentHostBlock = 0
 			for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
@@ -393,7 +400,11 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				}
 				currentHostBlock++
 			}
-			
+		]
+	}
+	
+	def Procedure1<ITreeAppendable> setupGraph(Subsystem subsystem, String subsystemParam, String suffix) {
+		return [
 			val rules = subsystem.getAllIncludedRules(suffix)
 			val hasConfigBlock = subsystem.body.expressions.exists[c|c instanceof ConfigBlockExpression]
 			append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
