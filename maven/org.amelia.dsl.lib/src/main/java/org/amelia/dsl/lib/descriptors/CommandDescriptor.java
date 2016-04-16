@@ -21,6 +21,7 @@ package org.amelia.dsl.lib.descriptors;
 import static net.sf.expectit.matcher.Matchers.regexp;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
@@ -253,6 +254,10 @@ public class CommandDescriptor extends Observable {
 		return all;
 	}
 	
+	public boolean dependsOn(Collection<CommandDescriptor> dependencies) {
+		return dependsOn(dependencies.toArray(new CommandDescriptor[0]));
+	}
+	
 	public boolean runsOn(Host... hosts) {
 		boolean all = true;
 		for (Host host : hosts) {
@@ -265,7 +270,7 @@ public class CommandDescriptor extends Observable {
 		return all;
 	}
 	
-	public boolean runsOn(List<Host> hosts) {
+	public boolean runsOn(Collection<Host> hosts) {
 		return runsOn(hosts.toArray(new Host[0]));
 	}
 	
