@@ -150,7 +150,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								«IF !dependencies.empty»
 									«dependencies.join(
 										'''subsystems«suffix».get("«subsystem.fullyQualifiedName»").dependsOn(
-										''',
+										''' + "\t",
 										",\n",
 										"\n);",
 										[d|'''	subsystems«suffix».get("«d.element.fullyQualifiedName»")''']
