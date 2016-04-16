@@ -52,16 +52,16 @@ public class Commands {
 	 */
 	public static class RunBuilder {
 		
-		private String compositeName;
-		private int port;
-		private String[] libpath;
-		private String serviceName;
-		private String methodName;
-		private String[] arguments;
-		private long timeout;
-		private String releaseRegexp;
-		private String successMessage;
-		private String[] errorTexts;
+		public String compositeName;
+		public int port;
+		public String[] libpath;
+		public String serviceName;
+		public String methodName;
+		public String[] arguments;
+		public long timeout;
+		public String releaseRegexp;
+		public String successMessage;
+		public String[] errorTexts;
 
 		public RunBuilder() {
 			this.port = -1;

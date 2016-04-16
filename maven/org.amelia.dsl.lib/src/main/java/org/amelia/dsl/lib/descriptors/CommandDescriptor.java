@@ -43,15 +43,15 @@ public class CommandDescriptor extends Observable {
 	
 	public static class Builder {
 
-		private String command;
-		private String[] arguments;
-		private String releaseRegexp;
-		private long timeout;
-		private String[] errorTexts;
-		private String errorMessage;
-		private String successMessage;
-		private CallableTask<?> callable;
-		private boolean execution;
+		public String command;
+		public String[] arguments;
+		public String releaseRegexp;
+		public long timeout;
+		public String[] errorTexts;
+		public String errorMessage;
+		public String successMessage;
+		public CallableTask<?> callable;
+		public boolean execution;
 
 		public Builder() {
 			this.command = "";
