@@ -18,11 +18,7 @@
  */
 package org.amelia.dsl.lib.descriptors;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -31,8 +27,6 @@ import org.amelia.dsl.lib.FTPHandler;
 import org.amelia.dsl.lib.SSHHandler;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.Strings;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.jcraft.jsch.JSchException;
 
@@ -60,11 +54,6 @@ public class Host implements Comparable<Host> {
 	private FTPHandler ftp;
 
 	private int fixedWith;
-
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = LogManager.getLogger(Host.class);
 	
 	/*
 	 * From: https://en.wikipedia.org/wiki/List_of_Disney_animated_universe_characters
@@ -140,44 +129,6 @@ public class Host implements Comparable<Host> {
 
 	public int stopExecutions(List<CommandDescriptor> executions) throws IOException {
 		return this.ssh.stopExecutions(executions);
-	}
-
-	public static Host[] fromFile(String pathname) throws IOException {
-		List<Host> hosts = new ArrayList<Host>();
-		InputStream in = new FileInputStream(pathname);
-		InputStreamReader streamReader = null;
-		BufferedReader bufferedReader = null;
-		try {
-			streamReader = new InputStreamReader(in);
-			bufferedReader = new BufferedReader(streamReader);
-			String line;
-			int l = 1;
-			while ((line = bufferedReader.readLine()) != null) {
-				String[] d = line.split("\t");
-				if (d.length == 5) {
-					int ftpPort = Integer.parseInt(d[1]);
-					int sshPort = Integer.parseInt(d[2]);
-					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4]));
-				} else if (d.length == 6) {
-					int ftpPort = Integer.parseInt(d[1]);
-					int sshPort = Integer.parseInt(d[2]);
-					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4], d[5]));
-				} else {
-					String message = "Bad format in hosts file: [" + l + "] "
-							+ line;
-					RuntimeException e = new RuntimeException(message);
-					logger.error(message, e);
-					throw e;
-				}
-
-				++l;
-			}
-		} finally {
-			in.close();
-			streamReader.close();
-			bufferedReader.close();
-		}
-		return hosts.toArray(new Host[0]);
 	}
 	
 	private static String randomName() {
