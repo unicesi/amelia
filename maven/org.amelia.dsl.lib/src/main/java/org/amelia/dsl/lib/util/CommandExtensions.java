@@ -21,6 +21,7 @@ package org.amelia.dsl.lib.util;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.eclipse.xtext.xbase.lib.Inline;
 import org.eclipse.xtext.xbase.lib.Pure;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -28,7 +29,7 @@ import org.eclipse.xtext.xbase.lib.Pure;
 public class CommandExtensions {
 	
 	/**
-	 * The binary {@code +} operator.
+	 * Augments the left {@link CommandDescriptor} with the right one.
 	 * 
 	 * @param left
 	 *            The command at the left hand side of the plus operand
@@ -42,6 +43,22 @@ public class CommandExtensions {
 	public static CommandDescriptor operator_plus(
 			CommandDescriptor left, CommandDescriptor right) {
 		return left.augmentWith(right);
+	}
+	
+	/**
+	 * Modifies the given {@link CommandDescriptor} builder and builds it
+	 * 
+	 * @param builder
+	 *            The {@link CommandDescriptor} builder
+	 * @param procedure
+	 *            The procedure modifying the builder
+	 * @return the built {@link CommandDescriptor}
+	 */
+	public static CommandDescriptor operator_doubleArrow(
+			final CommandDescriptor.Builder builder,
+			final Procedure1<CommandDescriptor.Builder> procedure) {
+		procedure.apply(builder);
+		return builder.build();
 	}
 
 }
