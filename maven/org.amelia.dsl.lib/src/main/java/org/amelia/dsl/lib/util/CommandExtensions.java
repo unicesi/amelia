@@ -60,5 +60,21 @@ public class CommandExtensions {
 		procedure.apply(builder);
 		return builder.build();
 	}
+	
+	/**
+	 * Modifies the given {@link Commands.RunBuilder} and builds it
+	 * 
+	 * @param builder
+	 *            The run command builder
+	 * @param procedure
+	 *            The procedure modifying the builder
+	 * @return the built {@link CommandDescriptor}
+	 */
+	public static CommandDescriptor operator_doubleArrow(
+			final Commands.RunBuilder builder,
+			final Procedure1<Commands.RunBuilder> procedure) {
+		procedure.apply(builder);
+		return builder.build();
+	}
 
 }
