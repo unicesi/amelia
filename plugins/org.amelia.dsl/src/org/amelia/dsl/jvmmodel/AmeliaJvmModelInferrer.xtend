@@ -47,6 +47,8 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
+import org.amelia.dsl.lib.descriptors.Host
+import com.google.common.collect.Lists
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -390,9 +392,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					var currentCommand = 0
 					for (command : rule.commands) {
 						append('''«rule.name»[«currentCommand»]''')
-						append(''' = init«rule.name.toFirstUpper»«currentCommand»();''')
-						if (!rule.commands.last.equals(command)) 
-							newLine
+						append(''' = init«rule.name.toFirstUpper»«currentCommand»();''').newLine
 						currentCommand++
 					}
 				}
@@ -414,11 +414,15 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			}
 			var currentHostBlock = 0
 			for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
+				if (currentHostBlock > 0)
+					newLine
+				append(List).append("<").append(Host).append(">").append(" hosts" + currentHostBlock)
+					.append(" = ").append(Lists).append('''.newArrayList(getHost«currentHostBlock»());''').newLine
 				for (rule : hostBlock.rules) {
 					var currentCommand = 0
 					for (command : rule.commands) {
 						append('''«rule.name»[«currentCommand»]''')
-						append('''.runsOn(getHost«currentHostBlock»());''')
+						append('''.runsOn(hosts«currentHostBlock»);''')
 						if (currentCommand == 0 && !rule.dependencies.empty) {
 							val dependencies = newArrayList
 							for (dependency : rule.dependencies) {
