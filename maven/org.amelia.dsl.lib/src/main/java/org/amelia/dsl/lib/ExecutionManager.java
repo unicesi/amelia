@@ -111,15 +111,14 @@ public class ExecutionManager {
 	 *             If any thread interrupts any of the handler threads
 	 */
 	public void openFTPConnections(Host... hosts) throws InterruptedException {
-
 		if (hosts.length > 0)
 			Log.info("Establishing FTP connections (" + hosts.length + ")");
-
 		for (Host host : hosts) {
-			host.openFTPConnection();
-
-			logger.info("FTP connection for " + host
-					+ " was successfully established");
+			boolean connected = host.ftp() != null && host.ftp().isConnected();
+			if (host.openFTPConnection() && !connected) {
+				logger.info("FTP connection for " + host
+						+ " was successfully established");
+			}
 		}
 	}
 
@@ -139,18 +138,22 @@ public class ExecutionManager {
 			throws InterruptedException, JSchException, IOException {
 		if (hosts.length > 0)
 			Log.info("Establishing SSH connections (" + hosts.length + ")");
-
+		// First, establish the maximum host name width
 		for (Host host : hosts) {
-			host.openSSHConnection(this.executionGraph.subsystem());
 			if (hostFixedWidth < host.toString().length())
 				hostFixedWidth = host.toString().length();
-
-			logger.info("SSH connection for " + host
-					+ " was successfully established");
 		}
 		// set a common (fixed) width for all hosts
 		for (Host host : executionGraph.hosts()) {
 			host.setFixedWidth(hostFixedWidth);
+		}
+		for (Host host : hosts) {
+			boolean connected = host.ssh() != null && host.ssh().isConnected();
+			if (host.openSSHConnection(this.executionGraph.subsystem())
+					&& !connected) {
+				logger.info("SSH connection for " + host
+						+ " was successfully established");
+			}
 		}
 	}
 
@@ -166,11 +169,12 @@ public class ExecutionManager {
 	public void closeFTPConnections(Host... hosts) throws IOException {
 		if (hosts.length > 0)
 			Log.info("Closing FTP connections");
-
 		for (Host host : hosts) {
-			host.closeFTPConnection();
-			logger.info("FTP connection for " + host
-					+ " was successfully closed");
+			boolean connected = host.ftp() != null && host.ftp().isConnected();
+			if (host.closeFTPConnection() && connected) {
+				logger.info("FTP connection for " + host
+						+ " was successfully closed");
+			}
 		}
 	}
 
@@ -186,11 +190,12 @@ public class ExecutionManager {
 	public void closeSSHConnections(Host... hosts) throws IOException {
 		if (hosts.length > 0)
 			Log.info("Closing SSH connections");
-
 		for (Host host : hosts) {
-			host.closeSSHConnection();
-			logger.info("SSH connection for " + host
-					+ " was successfully closed");
+			boolean connected = host.ssh() != null && host.ssh().isConnected();
+			if (host.closeSSHConnection() && connected) {
+				logger.info("SSH connection for " + host
+						+ " was successfully closed");
+			}
 		}
 	}
 

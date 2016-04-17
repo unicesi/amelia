@@ -81,8 +81,9 @@ public class Host implements Comparable<Host> {
 		this(hostname, ftpPort, sshPort, username, password, randomName());
 	}
 
-	public void openSSHConnection(String subsystem)
+	public boolean openSSHConnection(String subsystem)
 			throws InterruptedException, JSchException, IOException {
+		boolean opened = false;
 		if (this.ssh == null)
 			this.ssh = new SSHHandler(this, subsystem);
 
@@ -91,19 +92,26 @@ public class Host implements Comparable<Host> {
 			this.ssh.start();
 			this.ssh.join();
 
-			if (this.ssh.isConnected())
+			if (this.ssh.isConnected()) {
 				Log.success(this, "Connection established");
+				opened = true;
+			}
 		} else {
 			Log.success(this, "Already opened");
 		}
+		return opened;
 	}
 
-	public void closeSSHConnection() throws IOException {
-		if (this.ssh != null)
-			this.ssh.close();
+	public boolean closeSSHConnection() throws IOException {
+		boolean closed = false;
+		if (this.ssh != null) {
+			closed = this.ssh.close();
+		}
+		return closed;
 	}
 
-	public void openFTPConnection() throws InterruptedException {
+	public boolean openFTPConnection() throws InterruptedException {
+		boolean opened = false;
 		if (this.ftp == null)
 			this.ftp = new FTPHandler(this);
 
@@ -111,16 +119,23 @@ public class Host implements Comparable<Host> {
 			this.ftp.start();
 			this.ftp.join();
 
-			if (this.ftp.client().isConnected())
+			if (this.ftp.client().isConnected()) {
 				Log.success(this, "Connection established");
+				opened = true;
+			}
 		} else {
 			Log.success(this, "Already opened");
 		}
+		return opened;
 	}
 
-	public void closeFTPConnection() throws IOException {
-		if (this.ftp != null)
-			this.ftp.close();
+	public boolean closeFTPConnection() throws IOException {
+		boolean closed = false;
+		if (this.ftp != null) {
+			closed = this.ftp.close();
+		}
+		
+		return closed;
 	}
 
 	public void stopExecutions() throws IOException {

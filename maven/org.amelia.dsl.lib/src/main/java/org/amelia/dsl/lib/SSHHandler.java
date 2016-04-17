@@ -265,15 +265,14 @@ public class SSHHandler extends Thread {
 		return this.expect;
 	}
 
-	public void close() throws IOException {
+	public boolean close() throws IOException {
 		if (this.expect != null)
 			this.expect.close();
-
 		if (this.channel != null && this.channel.isConnected())
 			this.channel.disconnect();
-
 		if (this.session != null && this.session.isConnected())
 			this.session.disconnect();
+		return !this.isConnected();
 	}
 
 	public boolean isConnected() {
