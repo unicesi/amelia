@@ -106,6 +106,7 @@ public class Host implements Comparable<Host> {
 		boolean closed = false;
 		if (this.ssh != null) {
 			closed = this.ssh.close();
+			this.ssh = null;
 		}
 		return closed;
 	}
@@ -133,6 +134,7 @@ public class Host implements Comparable<Host> {
 		boolean closed = false;
 		if (this.ftp != null) {
 			closed = this.ftp.close();
+			this.ftp = null;
 		}
 		
 		return closed;
@@ -143,7 +145,10 @@ public class Host implements Comparable<Host> {
 	}
 
 	public int stopExecutions(List<CommandDescriptor> executions) throws IOException {
-		return this.ssh.stopExecutions(executions);
+		if (this.ssh != null && this.ssh.isConnected()) {			
+			return this.ssh.stopExecutions(executions);
+		}
+		return 0;
 	}
 	
 	private static String randomName() {
