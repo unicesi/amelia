@@ -328,7 +328,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						parameters += subsystem.toParameter("stopExecutionsWhenFinish", typeRef(boolean))
 						body = '''
 							super.graph.execute(
-								shutdownAfterDeployment, 
+								stopPreviousExecutions, 
 								shutdownAfterDeployment, 
 								stopExecutionsWhenFinish);
 						'''
