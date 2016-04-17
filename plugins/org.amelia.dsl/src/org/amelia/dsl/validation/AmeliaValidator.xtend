@@ -384,7 +384,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkNoEmptyRules(RuleDeclaration rule) {
 		if (rule.commands.empty) {
-			error("There must be at least one command", AmeliaPackage.Literals.RULE_DECLARATION__COMMANDS,
+			error("This rule must contain at least one command", AmeliaPackage.Literals.RULE_DECLARATION__COMMANDS,
 				EMPTY_COMMAND_LIST)
 		}
 	}
@@ -405,8 +405,8 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS, CONFIGURE_NOT_ALLOWED)
 		}
 		if (configBlock.expressions.empty) {
-			// An empty execution configuration leads to the false execution of a subsystem
-			error("The execution configuration cannot be empty", XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS)
+			warning("An empty execution configuration does not execute any of the rules",
+				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS)
 		}
 	}
 	
