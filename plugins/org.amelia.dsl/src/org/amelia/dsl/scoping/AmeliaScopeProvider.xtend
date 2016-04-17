@@ -18,7 +18,9 @@
  */
 package org.amelia.dsl.scoping
 
+import java.util.Collections
 import org.amelia.dsl.amelia.AmeliaPackage
+import org.amelia.dsl.amelia.IncludeDeclaration
 import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.Subsystem
@@ -26,8 +28,6 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.Scopes
-import org.amelia.dsl.amelia.IncludeDeclaration
-import java.util.Collections
 
 /**
  * This class contains custom scoping description.
@@ -37,7 +37,7 @@ import java.util.Collections
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-class AmeliaScopeProvider extends AmeliaImportedNamespaceAwareLocalScopeProvider {
+class AmeliaScopeProvider extends AbstractAmeliaScopeProvider {
 
 	override getScope(EObject context, EReference reference) {
 		switch (context) {

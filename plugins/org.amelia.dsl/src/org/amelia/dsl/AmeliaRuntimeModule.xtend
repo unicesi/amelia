@@ -20,7 +20,6 @@ package org.amelia.dsl
 
 import com.google.inject.Binder
 import com.google.inject.Singleton
-import com.google.inject.name.Names
 import org.amelia.dsl.compiler.AmeliaCompiler
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.amelia.dsl.outputconfiguration.OutputConfigurationAwaredGenerator
@@ -33,7 +32,6 @@ import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.linking.LinkingScopeProviderBinding
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.scoping.IScopeProvider
-import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
@@ -44,13 +42,6 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
  * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
-	
-	override void configureIScopeProviderDelegate(Binder binder) {
-		binder
-			.bind(IScopeProvider)
-			.annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE))
-			.to(AmeliaScopeProvider)
-	}
 	
 	override void configureLinkingIScopeProvider(Binder binder) {
 		binder
