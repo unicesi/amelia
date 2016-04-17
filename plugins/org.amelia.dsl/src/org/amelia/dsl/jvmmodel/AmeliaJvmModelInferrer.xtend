@@ -108,8 +108,15 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					parameters += deployment.toParameter("deployment", typeRef(Deployment))
 					body = [
 						append("String clazz = deployment.getClass().getCanonicalName();").newLine
+						append('''if («preffix»subsystems.get(clazz) != null) {''')
+						increaseIndentation.newLine
 						append('''«preffix»subsystems.put(clazz, new ''')
 							.append(Subsystem).append('''(clazz, deployment));''')
+						decreaseIndentation.newLine
+						append('''
+						} else {
+							throw new RuntimeException("Subsystem '" + clazz + "' has not been included in deployment '«deployment.fullyQualifiedName»'");
+						}''')
 					]
 				]
 				members += deployment.toMethod("init", typeRef(void)) [
