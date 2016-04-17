@@ -405,7 +405,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS, CONFIGURE_NOT_ALLOWED)
 		}
 		if (configBlock.expressions.empty) {
-			warning("An empty execution configuration does not execute any of the rules",
+			warning("An empty execution configuration does not execute any of the rules in this subsystem",
 				XbasePackage.Literals.XBLOCK_EXPRESSION__EXPRESSIONS)
 		}
 	}
