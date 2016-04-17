@@ -70,6 +70,7 @@ class AmeliaGenerator implements IGenerator {
 						«s» «subsystem.fullyQualifiedName.toString("_")» = new «s»("«subsystem.fullyQualifiedName»", new «subsystem.fullyQualifiedName»());
 					«ENDFOR»
 					«FOR subsystem : subsystems»
+						«subsystem.fullyQualifiedName.toString("_")».deployment().setup();
 						«IF subsystem != null && subsystem.extensions != null»
 							«val dependencies = subsystem.extensions.declarations.filter(DependDeclaration).map[ i |
 								if (i.element instanceof Subsystem) (i.element as Subsystem).fullyQualifiedName.toString("_")

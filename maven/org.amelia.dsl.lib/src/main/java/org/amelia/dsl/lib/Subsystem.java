@@ -56,6 +56,11 @@ public class Subsystem {
 				}
 			}
 		}
+		
+		/**
+		 * <b>Note</b>: DSL-only intended use
+		 */
+		public void setup() {}
 	}
 
 	private final String alias;
