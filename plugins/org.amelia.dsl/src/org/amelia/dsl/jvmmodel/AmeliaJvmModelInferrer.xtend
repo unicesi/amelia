@@ -318,8 +318,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						]
 					methods += subsystem.toMethod("execute", typeRef(void)) [
 						exceptions += typeRef(Exception)
-						parameters += subsystem.toParameter("stopExecutionsWhenFinish", typeRef(boolean))
-						body = '''super.graph.execute(stopExecutionsWhenFinish);'''
+						parameters += subsystem.toParameter("stopPreviousExecutions", typeRef(boolean))
+						body = '''super.graph.execute(stopPreviousExecutions);'''
 					]
 					methods += subsystem.toMethod("execute", typeRef(void)) [
 						exceptions += typeRef(Exception)
