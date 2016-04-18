@@ -35,6 +35,8 @@ import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
+import org.amelia.dsl.debug.AmeliaStratumBreakpointSupport
+import org.eclipse.xtext.debug.IStratumBreakpointSupport
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -79,6 +81,10 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 	
 	override Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
 		return AmeliaQualifiedNameProvider
+	}
+	
+	override Class<? extends IStratumBreakpointSupport> bindIStratumBreakpointSupport() {
+		return AmeliaStratumBreakpointSupport
 	}
 	
 }
