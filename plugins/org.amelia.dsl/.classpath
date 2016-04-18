@@ -6,6 +6,7 @@
 			<accessrule kind="accessible" pattern="org/eclipse/xtext/xbase/**"/>
 			<accessrule kind="accessible" pattern="org/amelia/dsl/lib/**"/>
 			<accessrule kind="accessible" pattern="org/pascani/dsl/lib/**"/>
+			<accessrule kind="accessible" pattern="org/eclipse/xtext/debug/**"/>
 		</accessrules>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
