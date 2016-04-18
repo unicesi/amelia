@@ -67,7 +67,8 @@ class AmeliaCompiler extends XbaseCompiler {
 		}
 	}
 	
-	def protected void _toJavaStatement(CommandLiteral expr, ITreeAppendable appendable, boolean isReferenced) {
+	def protected void _toJavaStatement(CommandLiteral expr, ITreeAppendable t, boolean isReferenced) {
+		val appendable = t.trace(expr)
 		if (!isReferenced) {
 			internalToConvertedExpression(expr, appendable);
 			appendable.append(";");
@@ -98,8 +99,8 @@ class AmeliaCompiler extends XbaseCompiler {
 		return lines.map[l|Strings.convertToJavaString(l, true)].filter[l|!l.isEmpty].join(" ")
 	}
 	
-	def protected void compileTemplate(RichString literal, ITreeAppendable appendable) {
-		compileTemplate(literal, appendable, false)
+	def protected void compileTemplate(RichString literal, ITreeAppendable t) {
+		compileTemplate(literal, t.trace(literal), false)
 	}
 	
 	def protected void compileTemplate(RichString literal, ITreeAppendable appendable, boolean escapeClosingComment) {
@@ -122,15 +123,17 @@ class AmeliaCompiler extends XbaseCompiler {
 		compileTemplate(expr, b)
 	}
 	
-	def protected void _toJavaStatement(RichString expr, ITreeAppendable b, boolean isReferenced) {
+	def protected void _toJavaStatement(RichString expr, ITreeAppendable t, boolean isReferenced) {
+		val appendable = t.trace(expr)
 		generateComment(new Later() {
 			override void exec(ITreeAppendable appendable) {
 				compileTemplate(expr, appendable, true)
 			}
-		}, b, isReferenced);
+		}, appendable, isReferenced);
 	}
 	
-	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable appendable) {
+	def protected void _toJavaExpression(CustomCommand expr, ITreeAppendable t) {
+		val appendable = t.trace(expr)
 		if (expr.initializedLater) {
 			appendable.append("new ").append(CommandDescriptor.Builder).append("()")
 			appendable.increaseIndentation.increaseIndentation
@@ -145,7 +148,8 @@ class AmeliaCompiler extends XbaseCompiler {
 		}
 	}
 	
-	def protected void _toJavaExpression(EvalCommand expr, ITreeAppendable appendable) {
+	def protected void _toJavaExpression(EvalCommand expr, ITreeAppendable t) {
+		val appendable = t.trace(expr)
 		appendable.append(Commands)
 		appendable.append(".evalFScript(")
 		internalToConvertedExpression(expr.script, appendable)
@@ -157,7 +161,8 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append(")")
 	}
 	
-	def protected void _toJavaExpression(CdCommand expr, ITreeAppendable appendable) {
+	def protected void _toJavaExpression(CdCommand expr, ITreeAppendable t) {
+		val appendable = t.trace(expr)
 		appendable.append(Commands)
 		if (expr.initializedLater)
 			appendable.append(".cdBuilder")
@@ -168,7 +173,8 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append(")")
 	}
 	
-	def protected void _toJavaExpression(CompileCommand expr, ITreeAppendable appendable) {
+	def protected void _toJavaExpression(CompileCommand expr, ITreeAppendable t) {
+		val appendable = t.trace(expr)
 		appendable.append(Commands)
 		if (expr.initializedLater)
 			appendable.append(".compileBuilder")
@@ -185,7 +191,8 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append(")")
 	}
 	
-	def protected void _toJavaExpression(RunCommand expr, ITreeAppendable appendable) {
+	def protected void _toJavaExpression(RunCommand expr, ITreeAppendable t) {
+		val appendable = t.trace(expr)
 		appendable.append(Commands).append(".run").append("()")
 		appendable.increaseIndentation.increaseIndentation
 		
