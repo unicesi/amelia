@@ -72,6 +72,10 @@ Workflow {
 			validator = {
 				// composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"
 			}
+//			Uncomment when the Xtext maven artifacts (2.10.0) are updated
+//			newProjectWizardForEclipse = {
+//			    generate = true
+//			}
 		}
 	}
 }

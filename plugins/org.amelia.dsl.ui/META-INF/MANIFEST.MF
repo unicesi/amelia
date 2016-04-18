@@ -19,7 +19,9 @@ Require-Bundle: org.amelia.dsl,
  org.eclipse.xtext.xbase.lib,
  org.eclipse.jdt.debug.ui,
  org.eclipse.xtext.common.types.ui,
- org.eclipse.xtext.xbase.ui
+ org.eclipse.xtext.xbase.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.amelia.dsl.ui.quickfix,
