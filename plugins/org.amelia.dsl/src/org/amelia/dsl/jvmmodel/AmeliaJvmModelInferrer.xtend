@@ -465,7 +465,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def Procedure1<ITreeAppendable> setupGraph(org.amelia.dsl.amelia.Subsystem subsystem, String subsystemParam) {
 		return [
-			val t = trace(subsystem, true)
 			val rules = subsystem.getAllIncludedRules()
 			val hasConfigBlock = subsystem.body.expressions.exists[c|c instanceof ConfigBlockExpression]
 			trace(subsystem)
@@ -474,7 +473,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			if (hasConfigBlock) {
 				trace(subsystem)
 					.append('''this.«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»dependencies = «org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»dependencies;''').newLine
-				t.append('''configure(«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»dependencies);''')
+				append('''configure(«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»dependencies);''')
 			} else if (!rules.empty) {
 				trace(subsystem).append('''super.graph.execute(true);''')
 			}
