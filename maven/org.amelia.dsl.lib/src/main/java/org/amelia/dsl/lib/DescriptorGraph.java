@@ -103,7 +103,7 @@ public class DescriptorGraph
 			}
 		}
 
-		public void update(Observable o, Object arg) {
+		public synchronized void update(Observable o, Object arg) {
 			this.doneSignal.countDown();
 		}
 
