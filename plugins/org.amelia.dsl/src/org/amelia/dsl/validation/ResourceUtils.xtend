@@ -1,4 +1,4 @@
-package org.amelia.dsl.jvmmodel
+package org.amelia.dsl.validation
 
 import org.eclipse.emf.common.util.URI
 import java.util.ArrayList

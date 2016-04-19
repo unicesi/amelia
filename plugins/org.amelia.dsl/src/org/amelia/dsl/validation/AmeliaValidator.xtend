@@ -41,7 +41,6 @@ import org.amelia.dsl.amelia.RunCommand
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.SubsystemBlockExpression
 import org.amelia.dsl.amelia.VariableDeclaration
-import org.amelia.dsl.jvmmodel.ResourceUtils
 import org.amelia.dsl.lib.descriptors.Host
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
@@ -57,6 +56,7 @@ import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XbasePackage
 import org.amelia.dsl.amelia.DeploymentDeclaration
+import org.amelia.dsl.amelia.TypeDeclaration
 
 /**
  * This class contains custom validation rules. 
@@ -101,17 +101,32 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			error("Package name must be in lower case", AmeliaPackage.Literals.MODEL__NAME)
 		}
 	}
-
+	
 	@Check
-	def checkSubsystemNameMatchesPhysicalName(Subsystem subsystem) {
+	def checkNameMatchesPhysicalName(TypeDeclaration declaration) {
 		// e.g., platform:/resource/<project>/<source-folder>/org/example/.../Subsystem.amelia
-		val URI = subsystem.eResource.URI
+		val URI = declaration.eResource.URI
 		val fileName = URI.lastSegment.substring(0, URI.lastSegment.indexOf(URI.fileExtension) - 1)
-		val isPublic = subsystem.eContainer != null && subsystem.eContainer instanceof Model
+		val isPublic = declaration.eContainer != null && declaration.eContainer instanceof Model
 
-		if (isPublic && !fileName.equals(subsystem.name)) {
-			error("Subsystem '" + subsystem.name + "' does not match the corresponding file name '" + fileName +
-				"'", AmeliaPackage.Literals.TYPE_DECLARATION__NAME, INVALID_FILE_NAME)
+		if (isPublic && !fileName.equals(declaration.name)) {
+			var name = declaration.eClass.name
+			if (name.equals("DeploymentDeclaration"))
+				name = "Deployment"
+			error('''«name» '«declaration.name»' does not match the corresponding file name '«fileName»' ''',
+				AmeliaPackage.Literals.TYPE_DECLARATION__NAME, INVALID_FILE_NAME)
+		}
+	}
+	
+	@Check
+	def checkPackageMatchesPhysicalDirectory(Model model) {
+		val packageSegments = model.name.split("\\.")
+		val fqn = ResourceUtils.fromURItoFQN(model.typeDeclaration.eResource.URI)
+		var expectedPackage = if(fqn.contains(".")) fqn.substring(0, fqn.lastIndexOf(".")) else ""
+
+		if (!Arrays.equals(expectedPackage.split("\\."), packageSegments)) {
+			error('''The declared package '«model.name»' does not match the expected package '«expectedPackage»' ''',
+				AmeliaPackage.Literals.MODEL__NAME, INVALID_PACKAGE_NAME)
 		}
 	}
 	
@@ -149,18 +164,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (!duplicates.isEmpty) {
 			error("Duplicate local rule " + rule.name, AmeliaPackage.Literals.RULE_DECLARATION__NAME,
 				DUPLICATE_LOCAL_RULE)
-		}
-	}
-	
-	@Check
-	def checkPackageMatchesPhysicalDirectory(Model model) {
-		val packageSegments = model.name.split("\\.")
-		val fqn = ResourceUtils.fromURItoFQN(model.typeDeclaration.eResource.URI)
-		var expectedPackage = if(fqn.contains(".")) fqn.substring(0, fqn.lastIndexOf(".")) else ""
-
-		if (!Arrays.equals(expectedPackage.split("\\."), packageSegments)) {
-			error("The declared package '" + model.name + "' does not match the expected package '" + expectedPackage +
-				"'", AmeliaPackage.Literals.MODEL__NAME, INVALID_PACKAGE_NAME)
 		}
 	}
 	
