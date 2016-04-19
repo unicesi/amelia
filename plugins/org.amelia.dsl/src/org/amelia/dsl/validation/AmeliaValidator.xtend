@@ -57,6 +57,7 @@ import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XbasePackage
 import org.amelia.dsl.amelia.DeploymentDeclaration
 import org.amelia.dsl.amelia.TypeDeclaration
+import org.amelia.dsl.amelia.TransferCommand
 
 /**
  * This class contains custom validation rules. 
@@ -177,6 +178,18 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			null) {
 			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.CD_COMMAND__DIRECTORY, INVALID_PARAMETER_TYPE)
+		}
+	}
+	
+	@Check
+	def void checkTransferCommand(TransferCommand expr) {
+		if (expr.source.actualType.getSuperType(String) == null) {
+			error('''The source parameter must be of type String, «expr.source.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.TRANSFER_COMMAND__SOURCE, INVALID_PARAMETER_TYPE)
+		}
+		if (expr.destination.actualType.getSuperType(String) == null) {
+			error('''The destination parameter must be of type String, «expr.destination.actualType.simpleName» was found instead''',
+				AmeliaPackage.Literals.TRANSFER_COMMAND__DESTINATION, INVALID_PARAMETER_TYPE)
 		}
 	}
 	
