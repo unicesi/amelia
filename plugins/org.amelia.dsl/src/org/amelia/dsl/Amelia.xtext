@@ -116,6 +116,10 @@ RunCommand
 		(=> initializedLater ?= '...')?
 	;
 
+TransferCommand
+	:	'transfer' source = XExpression 'to' destination = XExpression
+	;
+
 EvalCommand
 	:	(=> 'on' uri = XExpression)? 'eval' script = XExpression
 	;
@@ -128,8 +132,9 @@ CommandLiteral
 	:	CdCommand
 	|	CompileCommand
 	|	CustomCommand
-	|	RunCommand
 	|	EvalCommand
+	|	RunCommand
+	|	TransferCommand
 	;
 
 RichString
