@@ -301,7 +301,7 @@ public class DescriptorGraph
 		for (CommandDescriptor e : keySet()) {
 			List<CommandDescriptor> dependencies = get(e);
 			List<ScheduledTask<?>> tasks = this.tasks.get(e);
-			int deps = countDependencyThreads(dependencies, tasks);
+			int deps = countDependencyThreads(dependencies);
 
 			for (ScheduledTask<?> task : tasks) {
 				DependencyThread thread = new DependencyThread(e,
@@ -331,13 +331,11 @@ public class DescriptorGraph
 		}
 		return total;
 	}
-
-	private int countDependencyThreads(List<CommandDescriptor> dependencies, List<ScheduledTask<?>> tasks) {
-		int n = dependencies.size();
+	
+	private int countDependencyThreads(List<CommandDescriptor> dependencies) {
+		int n = 0;
 		for (CommandDescriptor e : dependencies)
-			for (ScheduledTask<?> c : tasks)
-				if (c.descriptor().equals(e))
-					++n;
+			n += this.tasks.get(e).size();
 		return n;
 	}
 	
