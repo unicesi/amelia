@@ -95,8 +95,7 @@ public class Hosts {
 					int sshPort = Integer.parseInt(d[2]);
 					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4], d[5]));
 				} else {
-					String message = "Bad format in hosts file: [" + l + "] "
-							+ line;
+					String message = "Bad format in hosts file: [" + l + "] " + line;
 					throw new RuntimeException(message);
 				}
 
