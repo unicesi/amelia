@@ -34,6 +34,7 @@ import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.pascani.dsl.lib.sca.FrascatiUtils
+import org.amelia.dsl.amelia.TransferCommand
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -44,9 +45,10 @@ class AmeliaCompiler extends XbaseCompiler {
 		switch (obj) {
 			CdCommand: _toJavaExpression(obj, appendable)
 			CompileCommand: _toJavaExpression(obj, appendable)
-			RunCommand: _toJavaExpression(obj, appendable)
 			CustomCommand: _toJavaExpression(obj, appendable)
 			EvalCommand: _toJavaExpression(obj, appendable)
+			RunCommand: _toJavaExpression(obj, appendable)
+			TransferCommand: _toJavaExpression(obj, appendable)
 			RichString: _toJavaExpression(obj, appendable)
 			default: super.internalToConvertedExpression(obj, appendable)
 		}
@@ -171,6 +173,17 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append("(")
 		internalToConvertedExpression(expr.directory, appendable)
 		appendable.append(")")
+	}
+	
+	def protected void _toJavaExpression(TransferCommand expr, ITreeAppendable t) {
+		val appendable = t.trace(expr)
+		appendable.append(Commands)
+		appendable.append(".transfer")
+		appendable.append("(")
+		internalToConvertedExpression(expr.source, appendable)
+		appendable.append(", ")
+		internalToConvertedExpression(expr.destination, appendable)
+		appendable.append(", true)")
 	}
 	
 	def protected void _toJavaExpression(CompileCommand expr, ITreeAppendable t) {
