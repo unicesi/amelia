@@ -42,6 +42,7 @@ public class Log {
 	private static final String SUCCESS = ANSI.GREEN.format("SUCCESS");
 	private static final String WARN = ANSI.YELLOW.format("   WARN");
 	private static final String ERROR = ANSI.RED.format("  ERROR");
+	private static final String DEBUG = "  DEBUG";
 	
 	public static void print(String message) {
 		print(message, false);
@@ -69,13 +70,16 @@ public class Log {
 	public static void error(Host host, String message) {
 		print(ERROR + formatHost(host) + message, true);
 	}
+	
+	public static void debug(Host host, String message) {
+		print(DEBUG + formatHost(host) + "--- " + message, true);
+	}
 
 	public static void warning(Host host, String message) {
 		print(WARN + formatHost(host) + message, true);
 	}
 
 	public static void success(Host host, String message) {
-		
 		print(SUCCESS + formatHost(host) + message, true);
 	}
 

@@ -72,13 +72,14 @@ public class Configuration {
 				config.put("execution_timeout", "15000");
 			if (!config.containsKey("color_output"))
 				config.put("color_output", "true");
+			if (!config.containsKey("debug_mode"))
+				config.put("debug_mode", "false");
 
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					logger.error("Error closing stream of configuration file",
-							e);
+					logger.error("Error closing stream of configuration file", e);
 				}
 			}
 		}

@@ -85,6 +85,12 @@ public class DescriptorGraph
 			try {
 				this.doneSignal.await();
 				if (!this.shutdown) {
+					if (Boolean.valueOf(System.getProperty("amelia.debug_mode"))
+							&& this.descriptor.isExecution()) {
+						Log.debug(this.handler.host(), "Composite '"
+								+ getCompositeName(this.descriptor.toCommandString())
+								+ "' has been sent to the execution queue");
+					}
 					this.handler.executeCommand(this.descriptor, this.command);
 					this.descriptor.done(this.handler.host());
 					// Release this dependency
@@ -101,6 +107,16 @@ public class DescriptorGraph
 				// Notify to main thread
 				this.mainDoneSignal.countDown();
 			}
+		}
+		
+		private String getCompositeName(final String runCommand) {
+			String command = runCommand;
+			Pattern pattern = Pattern.compile("(frascati run) (\\-r [0-9]+ )?(.*)");
+			Matcher matcher = pattern.matcher(command);
+			if (matcher.find()) {
+				command = matcher.group(3);
+			}
+			return command.split(" ")[0];
 		}
 
 		public synchronized void update(Observable o, Object arg) {
@@ -140,9 +156,12 @@ public class DescriptorGraph
 	private final TreeSet<DependencyThread> threads;
 
 	private final ExecutionManager executionManager;
+	
+	private final Configuration configuration;
 
 	public DescriptorGraph(String subsystem) {
-		new Configuration().setProperties();
+		this.configuration = new Configuration();
+		this.configuration.setProperties();
 		this.subsystem = subsystem;
 		this.tasks = new HashMap<CommandDescriptor, List<ScheduledTask<?>>>();
 		this.sshHosts = new HashSet<Host>();
