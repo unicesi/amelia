@@ -18,11 +18,6 @@
  */
 package org.amelia.dsl.lib.descriptors;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +27,6 @@ import org.amelia.dsl.lib.util.ANSI;
 import org.amelia.dsl.lib.util.CallableTask;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -43,12 +36,6 @@ public class AssetBundle extends CommandDescriptor {
 	private final Map<String, List<String>> transfers;
 
 	private boolean overwrite;
-
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = LogManager
-			.getLogger(AssetBundle.class);
 
 	public AssetBundle(Map<String, List<String>> transfers,
 			final boolean overwrite) {
@@ -119,38 +106,6 @@ public class AssetBundle extends CommandDescriptor {
 			newText = newText.replaceAll(regexp, entry.getValue());
 		}
 		return newText;
-	}
-
-	public static AssetBundle fromFile(String pathname) throws IOException {
-		AssetBundle bundle = new AssetBundle();
-		InputStream in = new FileInputStream(pathname);
-		InputStreamReader streamReader = null;
-		BufferedReader bufferedReader = null;
-
-		try {
-			streamReader = new InputStreamReader(in);
-			bufferedReader = new BufferedReader(streamReader);
-
-			String line;
-			int l = 1;
-			while ((line = bufferedReader.readLine()) != null) {
-				if (!line.isEmpty() && line.contains("\t")) {
-					String[] data = line.split("\t");
-					bundle.add(data[0], data[1]);
-				} else {
-					logger.warn("Bad format in asset bundle: [" + l + "] "
-							+ line);
-				}
-
-				++l;
-			}
-		} finally {
-			in.close();
-			streamReader.close();
-			bufferedReader.close();
-		}
-
-		return bundle;
 	}
 
 	public AssetBundle add(String local, String remote) {

@@ -20,20 +20,30 @@ package org.amelia.dsl.lib.util;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.amelia.dsl.lib.descriptors.AssetBundle;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.descriptors.Version;
 import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
 import org.pascani.dsl.lib.sca.FrascatiUtils;
+
+import com.google.common.collect.Lists;
 
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectIOException;
@@ -44,7 +54,7 @@ import net.sf.expectit.matcher.Matchers;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Commands {
-	
+
 	/**
 	 * A builder class to configure the execution of SCA components
 	 * 
@@ -522,6 +532,94 @@ public class Commands {
 					}
 				}).build();
 		return register;
+	}
+	
+	/**
+	 * Configures an {@link AssetBundle} to transfer the given local file or
+	 * directory
+	 * 
+	 * @param source
+	 *            The local path of the file or directory to transfer
+	 * @param destination
+	 *            The destination paths where the file or directory will be
+	 *            transfered
+	 * @param overwrite
+	 *            Whether to overwrite or not the remote file or directory if it
+	 *            already exists
+	 * @return A new {@link AssetBundle} instance configured with the given
+	 *         source and destination.
+	 */
+	public static AssetBundle transfer(final String source,
+			final Iterable<String> destination, final boolean overwrite) {
+		Map<String, List<String>> transfers = new HashMap<String, List<String>>();
+		transfers.put(source, Lists.newArrayList(destination));
+		return new AssetBundle(transfers, overwrite);
+	}
+
+	/**
+	 * Configures an {@link AssetBundle} to transfer the given local file or
+	 * directory
+	 * 
+	 * @param source
+	 *            The local path of the file or directory to transfer
+	 * @param destination
+	 *            The destination path where the file or directory will be
+	 *            transfered
+	 * @param overwrite
+	 *            Whether to overwrite or not the remote file or directory if it
+	 *            already exists
+	 * @return A new {@link AssetBundle} instance configured with the given
+	 *         source and destination.
+	 */
+	public static AssetBundle transfer(final String source,
+			final String destination, final boolean overwrite) {
+		return transfer(source, Lists.newArrayList(destination), overwrite);
+	}
+	
+	/**
+	 * Configures an {@link AssetBundle} from a given plain file.
+	 * 
+	 * <p>
+	 * Each row must contain the following columns (each column must be
+	 * separated using the tab character):
+	 * <ul>
+	 * <li>source (local path)
+	 * <li>destination (remote path)
+	 * </ul>
+	 * 
+	 * @param filepath
+	 *            The path of the file containing the transfers
+	 * @return A new {@link AssetBundle} instance configured with sources and
+	 *         destinations from the given file.
+	 * @throws IOException
+	 *             if something bad happens while reading the file
+	 */
+	public static AssetBundle transfer(final String filepath) throws IOException {
+		AssetBundle bundle = new AssetBundle();
+		InputStream in = new FileInputStream(filepath);
+		InputStreamReader streamReader = null;
+		BufferedReader bufferedReader = null;
+		try {
+			streamReader = new InputStreamReader(in);
+			bufferedReader = new BufferedReader(streamReader);
+			String line;
+			int l = 1;
+			while ((line = bufferedReader.readLine()) != null) {
+				if (!line.isEmpty() && line.contains("\t")) {
+					String[] data = line.split("\t");
+					bundle.add(data[0], data[1]);
+				} else {
+					String message = "Bad format in asset bundle: [" + l + "] " + line;
+					throw new RuntimeException(message);
+				}
+				++l;
+			}
+		} finally {
+			in.close();
+			streamReader.close();
+			bufferedReader.close();
+		}
+		return bundle;
 	}
 
 }
