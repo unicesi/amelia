@@ -29,6 +29,8 @@ import org.amelia.dsl.lib.util.Commands
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer
+import org.amelia.dsl.amelia.TransferCommand
+import org.amelia.dsl.lib.descriptors.AssetBundle
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -39,9 +41,10 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 		switch (expression) {
 			CdCommand: _computeTypes(expression, state)
 			CompileCommand: _computeTypes(expression, state)
-			RunCommand: _computeTypes(expression, state)
 			CustomCommand: _computeTypes(expression, state)
 			EvalCommand: _computeTypes(expression, state)
+			RunCommand: _computeTypes(expression, state)
+			TransferCommand: _computeTypes(expression, state)
 			RichString: _computeTypes(expression, state)
 			default: super.computeTypes(expression, state)
 		}
@@ -154,6 +157,20 @@ class AmeliaTypeComputer extends XbaseTypeComputer {
 				getRawTypeForName(Commands.RunBuilder, state)
 			else
 				getRawTypeForName(CommandDescriptor, state)
+		state.acceptActualType(result)
+	}
+	
+	def protected _computeTypes(TransferCommand command, ITypeComputationState state) {
+		// Compute type for the inner expressions
+		state.withinScope(command)
+		val noExpectationState = state.withoutExpectation()
+		noExpectationState.computeTypes(command.source)
+		noExpectationState.computeTypes(command.destination)
+		addLocalToCurrentScope(command.source, state)
+		addLocalToCurrentScope(command.destination, state)
+		
+		// set the actual type for the entire expression
+		val result = getRawTypeForName(AssetBundle, state)
 		state.acceptActualType(result)
 	}
 }
