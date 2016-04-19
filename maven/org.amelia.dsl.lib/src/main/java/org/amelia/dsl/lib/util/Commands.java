@@ -434,6 +434,7 @@ public class Commands {
 			}
 		};
 		CommandDescriptor check = new CommandDescriptor.Builder()
+				.withCommand(versionCommand)
 				.withCallable(callable)
 				.build();
 		return check;
