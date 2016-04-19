@@ -29,6 +29,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +50,8 @@ public class DescriptorGraph
 
 	public class DependencyThread extends Thread
 			implements Observer, Comparable<DependencyThread> {
-
+		
+		private final UUID internalId;
 		private final CommandDescriptor descriptor;
 		private final SSHHandler handler;
 		private final ScheduledTask<?> command;
@@ -67,6 +69,7 @@ public class DescriptorGraph
 				final SSHHandler handler, final ScheduledTask<?> command,
 				final List<CommandDescriptor> dependencies,
 				final int actualDependencies, final CountDownLatch doneSignal) {
+			this.internalId = UUID.randomUUID();
 			this.descriptor = descriptor;
 			this.handler = handler;
 			this.command = command;
@@ -122,12 +125,17 @@ public class DescriptorGraph
 		public synchronized void update(Observable o, Object arg) {
 			this.doneSignal.countDown();
 		}
+		
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			else if ((null == obj) || (obj.getClass() != this.getClass()))
+				return false;
+			return this.compareTo((DependencyThread) obj) == 0;
+		}
 
 		public int compareTo(DependencyThread o) {
-			if (this.dependencies.size() < o.dependencies.size())
-				return -1;
-			else
-				return 1;
+			return this.internalId.compareTo(o.internalId);
 		}
 
 		public void shutdown() {
