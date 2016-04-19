@@ -70,8 +70,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	static val prefix = "＿"
 
 	def dispatch void infer(DeploymentDeclaration deployment, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		val fqn = ResourceUtils.fromURItoFQN(deployment.eResource.URI)
-		val clazz = deployment.toClass(fqn)
+		val clazz = deployment.toClass(deployment.fullyQualifiedName)
 		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
