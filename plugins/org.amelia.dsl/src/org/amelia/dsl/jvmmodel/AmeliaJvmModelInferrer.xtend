@@ -227,7 +227,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						getters += e.toMethod("get" + e.name.toFirstUpper, e.type ?: inferredType) [
 							body = '''return this.«prefix»«fqn».get«e.name.toFirstUpper»();'''
 						]
-					}	
+					}
 				}
 				
 				for (e : subsystem.body.expressions) {
@@ -236,11 +236,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							// Transform variable declarations into fields
 							_parameters += e.toField(e.name, e.type ?: inferredType) [
 								documentation = e.documentation
-								initializer = e.right
-								if (!e.param) {
-									final = !e.writeable && e.right != null
-								}
 							]
+							if (e.right != null) {
+								getters += e.toMethod("init" + e.name.toFirstUpper, e.type ?: inferredType) [
+									visibility = JvmVisibility.PRIVATE
+									body = e.right
+								]								
+							}
 							if (e.param) {
 								params += e
 								getters += e.toGetter(e.name, e.type ?: inferredType)
@@ -276,6 +278,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
 							if (e.hosts != null) {
 								getters += e.hosts.toMethod("getHost" + currentHostBlock++, e.hosts.inferredType) [
+									visibility = JvmVisibility.PRIVATE
 									body = e.hosts
 								]	
 							}
@@ -291,7 +294,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								.append('''this.«prefix»«fqn.toString("_")» = new «fqn»();''')
 								.newLine
 						}
-						trace(subsystem).append("init();")
 					]
 				]
 				if (!params.empty) {
@@ -315,8 +317,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 									.append('''this.«prefix»«fqn.toString("_")» = new «fqn»(«_params.join(", ")»);''')
 									.newLine
 							}
-							trace(subsystem)
-								.append("init();")
 						]
 					]
 				}
@@ -451,6 +451,20 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def Procedure1<ITreeAppendable> initRules(org.amelia.dsl.amelia.Subsystem subsystem) {
 		return [
+			for (varDecl : subsystem.body.expressions.filter(VariableDeclaration)) {
+				if (varDecl.right != null) {
+					if (varDecl.param) {
+						trace(subsystem)
+							.append('''if (this.«varDecl.name» == null)''')
+							.increaseIndentation.newLine
+					}
+					trace(subsystem)
+						.append('''this.«varDecl.name» = init«varDecl.name.toFirstUpper»();''')
+					if (varDecl.param)
+						trace(subsystem).decreaseIndentation
+					trace(subsystem).newLine
+				}
+			}
 			for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
 				for (rule : hostBlock.rules) {
 					var currentCommand = 0
@@ -467,6 +481,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def Procedure1<ITreeAppendable> setupRules(org.amelia.dsl.amelia.Subsystem subsystem, String subsystemParam) {
 		return [
+			trace(subsystem).append("init();").newLine
 			if (subsystem.extensions != null) {
 				val setups = subsystem.extensions.declarations.filter(IncludeDeclaration).map [ d |
 					if (d.element instanceof org.amelia.dsl.amelia.Subsystem)
