@@ -217,19 +217,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					].flatten
 				}
 				
-				// Transform includes into fields (recursive)
+				// Transform includes into fields
 				fields += getIncludesAsFields(subsystem)
-				
-				// Included parameters as getters
-				for (includedSubsystem : includedSubsystems) {
-					val _params = includedSubsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param]
-					val fqn = includedSubsystem.fullyQualifiedName.toString("_")
-					for (e : _params) {
-						getters += e.toMethod("get" + e.name.toFirstUpper, e.type ?: inferredType) [
-							body = '''return this.«prefix»«fqn».get«e.name.toFirstUpper»();'''
-						]
-					}
-				}
 				
 				for (e : subsystem.body.expressions) {
 					switch (e) {
@@ -305,7 +294,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						}
 						for (param : includedParams) {
 							if (param.type != null || param.right != null)
-								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
+								parameters +=
+									param.toParameter(param.fullyQualifiedName.toString("_"),
+										param.type ?: param.right.inferredType)
 						}
 						body = [
 							trace(subsystem)
@@ -313,7 +304,11 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								.newLine
 							for (includedSubsystem : includedSubsystems) {
 								val fqn = includedSubsystem.fullyQualifiedName
-								val _params = includedSubsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param].map[p|p.name]
+								val _params = includedSubsystem.body.expressions.filter(VariableDeclaration).filter [ v |
+									v.param
+								].map [ p |
+									p.fullyQualifiedName.toString("_")
+								]
 								trace(subsystem)
 									.append('''this.«prefix»«fqn.toString("_")» = new «fqn»(«_params.join(", ")»);''')
 									.newLine
@@ -549,7 +544,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				if (include.element instanceof org.amelia.dsl.amelia.Subsystem) {
 					val includedSubsystem = include.element as org.amelia.dsl.amelia.Subsystem
 					val fqn = includedSubsystem.fullyQualifiedName
-					members += includedSubsystem.toField(AmeliaJvmModelInferrer.prefix + fqn.toString("_"), typeRef(fqn.toString))
+					members += includedSubsystem.toField(prefix + fqn.toString("_"), typeRef(fqn.toString))
 				}
 			}
 		}
