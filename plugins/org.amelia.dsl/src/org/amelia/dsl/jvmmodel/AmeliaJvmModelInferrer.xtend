@@ -140,7 +140,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						}
 					]
 				]
-				members += deployment.toMethod("deploy", typeRef(boolean)) [
+				members += deployment.toMethod("start", typeRef(boolean)) [
 					visibility = JvmVisibility.PRIVATE
 					parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
 					exceptions += typeRef(Exception)
