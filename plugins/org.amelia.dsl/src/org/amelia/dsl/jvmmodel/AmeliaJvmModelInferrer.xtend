@@ -18,6 +18,7 @@
  */
 package org.amelia.dsl.jvmmodel
 
+import com.google.common.collect.Lists
 import com.google.inject.Inject
 import java.util.ArrayList
 import java.util.Collections
@@ -35,6 +36,7 @@ import org.amelia.dsl.lib.Subsystem
 import org.amelia.dsl.lib.Subsystem.Deployment
 import org.amelia.dsl.lib.SubsystemGraph
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
+import org.amelia.dsl.lib.descriptors.Host
 import org.amelia.dsl.lib.util.Arrays
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
@@ -47,8 +49,6 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
-import org.amelia.dsl.lib.descriptors.Host
-import com.google.common.collect.Lists
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -82,7 +82,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						Collections.EMPTY_LIST
 				documentation = deployment.documentation
 				members +=
-					deployment.toField(org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix + "subsystems",
+					deployment.toField(AmeliaJvmModelInferrer.prefix + "subsystems",
 						typeRef(HashMap, typeRef(String), typeRef(Subsystem))) [
 					visibility = JvmVisibility.PRIVATE
 					initializer = [
@@ -112,9 +112,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						trace(deployment)
 							.append("String clazz = deployment.getClass().getCanonicalName();")
 							.newLine
-							.append('''if («org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»subsystems.get(clazz) != null) {''')
+							.append('''if («AmeliaJvmModelInferrer.prefix»subsystems.get(clazz) != null) {''')
 							.increaseIndentation.newLine
-						append('''«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»subsystems.put(clazz, new ''')
+						append('''«AmeliaJvmModelInferrer.prefix»subsystems.put(clazz, new ''')
 							.append(Subsystem).append('''(clazz, deployment));''')
 						trace(deployment)
 							.decreaseIndentation.newLine
@@ -132,7 +132,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						for (subsystem : subsystems) {
 							val qualifiedName = subsystem.fullyQualifiedName
 							trace(deployment)
-								.append('''«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»subsystems.put("«qualifiedName»", new ''')
+								.append('''«AmeliaJvmModelInferrer.prefix»subsystems.put("«qualifiedName»", new ''')
 								.append(Subsystem)
 								.append('''("«qualifiedName»", «qualifiedName».class.newInstance()));''')
 							if (!subsystems.last.equals(subsystem))
@@ -157,21 +157,21 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 									»
 									«IF !dependencies.empty»
 										«dependencies.join(
-											'''«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»subsystems.get("«subsystem.fullyQualifiedName»").dependsOn(
+											'''«AmeliaJvmModelInferrer.prefix»subsystems.get("«subsystem.fullyQualifiedName»").dependsOn(
 											''',
 											",\n",
 											"\n);",
-											[d|'''	«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»subsystems.get("«d.element.fullyQualifiedName»")''']
+											[d|'''	«AmeliaJvmModelInferrer.prefix»subsystems.get("«d.element.fullyQualifiedName»")''']
 										)»
 									«ENDIF»
 								«ENDFOR»
 							''')
-					    	.append("for (").append(org.amelia.dsl.lib.Subsystem).append(''' subsystem : «org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»subsystems.values()) {''')
+					    	.append("for (").append(Subsystem).append(''' subsystem : «AmeliaJvmModelInferrer.prefix»subsystems.values()) {''')
 					    	.increaseIndentation.newLine
 					    	.append("subsystem.deployment().setup();")
 					    	.decreaseIndentation.newLine
 					    	.append("}").newLine
-							.append('''graph.addSubsystems(«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»subsystems.values().toArray(new ''')
+							.append('''graph.addSubsystems(«AmeliaJvmModelInferrer.prefix»subsystems.values().toArray(new ''')
 							.append(Subsystem).append("[0]));").newLine
 						append("boolean successful = graph.execute(stopExecutedComponents);")
 						trace(deployment)
@@ -189,9 +189,17 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
-				val subsystemParam = org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix + "subsystem"
-				val dependenciesParam = org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix + "dependencies"
+				val subsystemParam = AmeliaJvmModelInferrer.prefix + "subsystem"
+				val dependenciesParam = AmeliaJvmModelInferrer.prefix + "dependencies"
+				val includedSubsystems = if (subsystem.extensions != null)
+						subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
+							i.element as org.amelia.dsl.amelia.Subsystem
+						]
+					else
+						Collections.EMPTY_LIST
 				val params = newArrayList
+				val includedParams = newArrayList
+				val _parameters = newArrayList
 				val fields = newArrayList
 				val constructors = newArrayList
 				val methods = newArrayList
@@ -202,11 +210,30 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				documentation = subsystem.documentation
 				superTypes += typeRef(Subsystem.Deployment)
 				
+				
+				if (subsystem.extensions != null) {
+					includedParams += includedSubsystems.map [ s |
+						s.body.expressions.filter(VariableDeclaration).filter[v|v.param]
+					].flatten
+				}
+				
+				// Transform includes into fields (recursive)
+				fields += getIncludesAsFields(subsystem)
+				
+				// Included parameters as fields
+				for (param : includedParams) {
+					if (param.type != null || param.right != null) {
+						_parameters += param.toField(param.name, param.type ?: inferredType) [
+							documentation = param.documentation
+						]
+					}
+				}
+				
 				for (e : subsystem.body.expressions) {
 					switch (e) {
 						VariableDeclaration: {
 							// Transform variable declarations into fields
-							fields += e.toField(e.name, e.type ?: inferredType) [
+							_parameters += e.toField(e.name, e.type ?: inferredType) [
 								documentation = e.documentation
 								initializer = e.right
 								if (!e.param) {
@@ -252,12 +279,15 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						}
 					}
 				}
-				// Transform includes into fields (recursive)
-				fields += getIncludesAsFields(subsystem)
-
 				// Setup rules' commands
 				constructors += subsystem.toConstructor [
 					body = [
+						for (includedSubsystem : includedSubsystems) {
+							val fqn = includedSubsystem.fullyQualifiedName
+							trace(subsystem)
+								.append('''this.«prefix»«fqn.toString("_")» = new «fqn»();''')
+								.newLine
+						}
 						trace(subsystem).append("init();")
 					]
 				]
@@ -267,10 +297,25 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							if (param.type != null || param.right != null)
 								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
 						}
+						for (param : includedParams) {
+							if (param.type != null || param.right != null)
+								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
+						}
 						body = [
 							trace(subsystem)
 								.append(params.join("\n", [p|'''this.«p.name» = «p.name»;''']))
-								.newLine.append("init();")
+								.newLine
+								.append(includedParams.join("\n", [p|'''this.«p.name» = «p.name»;''']))
+								.newLine
+							for (includedSubsystem : includedSubsystems) {
+								val fqn = includedSubsystem.fullyQualifiedName
+								val _params = includedSubsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param].map[p|p.name]
+								trace(subsystem)
+									.append('''this.«prefix»«fqn.toString("_")» = new «fqn»(«_params.join(", ")»);''')
+									.newLine
+							}
+							trace(subsystem)
+								.append("init();")
 						]
 					]
 				}
@@ -302,7 +347,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							]
 							for (var i = 0; i < includes.size; i++) {
 								val includedSubsystem = includes.get(i)
-								rules += '''«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»«includedSubsystem.fullyQualifiedName.toString("_")».getAllRules()'''
+								rules += '''«AmeliaJvmModelInferrer.prefix»«includedSubsystem.fullyQualifiedName.toString("_")».getAllRules()'''
 							}
 						}
 						if (rules.empty) {
@@ -319,7 +364,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				// Wrapper methods to hide the internal implementation
 				if (hasConfigBlock.get(0)) {
 					fields +=
-						subsystem.toField(org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix + "dependencies", typeRef(List, typeRef(Subsystem))) [
+						subsystem.toField(AmeliaJvmModelInferrer.prefix + "dependencies", typeRef(List, typeRef(Subsystem))) [
 							initializer = [
 								trace(subsystem)
 									.append("new ").append(ArrayList).append("<").append(Subsystem).append(">()")
@@ -356,7 +401,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							trace(subsystem)
 								.append(Subsystem).append(''' dependency = null;''').newLine
 								.append('''String fqn = clazz.getCanonicalName();''').newLine
-								.append("for (").append(Subsystem).append(''' subsystem : this.«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»dependencies) {''')
+								.append("for (").append(Subsystem).append(''' subsystem : this.«AmeliaJvmModelInferrer.prefix»dependencies) {''')
 								.newLine
 								.append('''
 										if (subsystem.alias().equals(fqn)) {
@@ -394,6 +439,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					]
 				}
 				// Add class members
+				members += _parameters
 				members += fields
 				members += constructors
 				members += methods
@@ -425,7 +471,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					if (d.element instanceof org.amelia.dsl.amelia.Subsystem)
 						d.element as org.amelia.dsl.amelia.Subsystem
 				].join("", "\n", "\n", [ s |
-					'''«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»«s.fullyQualifiedName.toString("_")».setup();'''
+					'''«AmeliaJvmModelInferrer.prefix»«s.fullyQualifiedName.toString("_")».setup();'''
 				])
 				trace(subsystem).append(setups)
 			}
@@ -471,8 +517,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				.append('''super.graph.addDescriptors(getAllRules());''').newLine
 			if (hasConfigBlock) {
 				trace(subsystem)
-					.append('''this.«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»dependencies = «org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»dependencies;''').newLine
-				append('''configure(«org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix»dependencies);''')
+					.append('''this.«AmeliaJvmModelInferrer.prefix»dependencies = «AmeliaJvmModelInferrer.prefix»dependencies;''').newLine
+				append('''configure(«AmeliaJvmModelInferrer.prefix»dependencies);''')
 			} else if (!rules.empty) {
 				trace(subsystem).append('''super.graph.execute(true);''')
 			}
@@ -486,10 +532,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				if (include.element instanceof org.amelia.dsl.amelia.Subsystem) {
 					val includedSubsystem = include.element as org.amelia.dsl.amelia.Subsystem
 					val fqn = includedSubsystem.fullyQualifiedName
-					members += includedSubsystem.toField(org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix + fqn.toString("_"), typeRef(fqn.toString)) [
-						initializer = '''new «fqn»()'''
-						final = true
-					]
+					members += includedSubsystem.toField(AmeliaJvmModelInferrer.prefix + fqn.toString("_"), typeRef(fqn.toString))
 				}
 			}
 		}
@@ -513,7 +556,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		val containerFQN = QualifiedName.create(segments.subList(0, segments.length - 1))
 		var accessName = rule.name
 		if (!containerFQN.equals(subsystem.fullyQualifiedName)) {
-			accessName = org.amelia.dsl.jvmmodel.AmeliaJvmModelInferrer.prefix + containerFQN.toString("_") + "." + rule.name
+			accessName = AmeliaJvmModelInferrer.prefix + containerFQN.toString("_") + "." + rule.name
 		}
 		return accessName
 	}
