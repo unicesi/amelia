@@ -210,7 +210,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				documentation = subsystem.documentation
 				superTypes += typeRef(Subsystem.Deployment)
 				
-				
 				if (subsystem.extensions != null) {
 					includedParams += includedSubsystems.map [ s |
 						s.body.expressions.filter(VariableDeclaration).filter[v|v.param]
@@ -220,13 +219,15 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				// Transform includes into fields (recursive)
 				fields += getIncludesAsFields(subsystem)
 				
-				// Included parameters as fields
-				for (param : includedParams) {
-					if (param.type != null || param.right != null) {
-						_parameters += param.toField(param.name, param.type ?: inferredType) [
-							documentation = param.documentation
+				// Included parameters as getters
+				for (includedSubsystem : includedSubsystems) {
+					val _params = includedSubsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param]
+					val fqn = includedSubsystem.fullyQualifiedName.toString("_")
+					for (e : _params) {
+						getters += e.toMethod("get" + e.name.toFirstUpper, e.type ?: inferredType) [
+							body = '''return this.«prefix»«fqn».get«e.name.toFirstUpper»();'''
 						]
-					}
+					}	
 				}
 				
 				for (e : subsystem.body.expressions) {
@@ -240,8 +241,10 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 									final = !e.writeable && e.right != null
 								}
 							]
-							if (e.param)
+							if (e.param) {
 								params += e
+								getters += e.toGetter(e.name, e.type ?: inferredType)
+							}
 						}
 						ConfigBlockExpression: {
 							// There is only one configuration block
@@ -304,8 +307,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						body = [
 							trace(subsystem)
 								.append(params.join("\n", [p|'''this.«p.name» = «p.name»;''']))
-								.newLine
-								.append(includedParams.join("\n", [p|'''this.«p.name» = «p.name»;''']))
 								.newLine
 							for (includedSubsystem : includedSubsystems) {
 								val fqn = includedSubsystem.fullyQualifiedName
