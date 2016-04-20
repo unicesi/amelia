@@ -193,7 +193,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				val dependenciesParam = AmeliaJvmModelInferrer.prefix + "dependencies"
 				val includedSubsystems = if (subsystem.extensions != null)
 						subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
-							i.element as org.amelia.dsl.amelia.Subsystem
+							if (i.element instanceof org.amelia.dsl.amelia.Subsystem)
+								i.element as org.amelia.dsl.amelia.Subsystem
 						]
 					else
 						Collections.EMPTY_LIST
