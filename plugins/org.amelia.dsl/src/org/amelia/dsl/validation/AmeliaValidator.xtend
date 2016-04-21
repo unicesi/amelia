@@ -77,10 +77,11 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val INVALID_EXTENSION_DECLARATION = "amelia.issue.invalidExtensionDeclaration"
 	public static val INVALID_FILE_NAME = "amelia.issue.invalidName"
 	public static val INVALID_PACKAGE_NAME =  "amelia.issue.invalidPackageName"
-	public static val INVALID_PARAM_DECLARATION = "amelia.issue.invalidParamDeclaration"
 	public static val INVALID_PARAMETER_TYPE = "amelia.issue.invalidParameterType"
 	public static val INVALID_SELF_EXTENSION = "amelia.issue.invalidSelfInclude"
+	public static val MISSING_VARIABLE_TYPE = "amelia.issue.missingDataType"
 	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
+	public static val USING_PRIMITIVE_TYPE = "amelia.issue.usingPrimitiveType"
 	public static val RESERVED_TYPE_NAME = "amelia.issue.reservedTypeName"
 
 	@Check
@@ -151,6 +152,23 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 						DUPLICATE_LOCAL_VARIABLE)
 				}
 			}
+		}
+	}
+	
+	@Check
+	def checkNonPrimitiveTypes(VariableDeclaration e) {
+		val primitives = #["int", "double", "float", "short", "byte", "boolean", "long", "char"]
+		if (e.type != null && primitives.contains(e.type.identifier)) {
+			error("Primitive data types are not allowed", 
+				AmeliaPackage.Literals.VARIABLE_DECLARATION__TYPE, USING_PRIMITIVE_TYPE)
+		}
+	}
+	
+	@Check
+	def checkExplicitTypes(VariableDeclaration e) {
+		if (e.type == null) {
+			error("Missing data type", 
+				AmeliaPackage.Literals.VARIABLE_DECLARATION__TYPE, MISSING_VARIABLE_TYPE)
 		}
 	}
 	
@@ -402,14 +420,6 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (rule.commands.empty) {
 			error("This rule must contain at least one command", AmeliaPackage.Literals.RULE_DECLARATION__COMMANDS,
 				EMPTY_COMMAND_LIST)
-		}
-	}
-	
-	@Check
-	def checkInferrableType(VariableDeclaration declaration) {
-		if (declaration.param && declaration.type == null && declaration.right == null) {
-			error("This parameter must have either an explicit type or an initial value",
-				AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME, INVALID_PARAM_DECLARATION)
 		}
 	}
 	
