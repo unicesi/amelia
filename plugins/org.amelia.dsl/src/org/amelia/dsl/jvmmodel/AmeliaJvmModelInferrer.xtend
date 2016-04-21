@@ -221,6 +221,20 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				// Transform includes into fields
 				fields += getIncludesAsFields(subsystem)
 				
+				// Add a getter for duplicate parameters
+				val duplicates = includedParams.groupBy[p|p.name]
+					.values.filter[l|l.size > 1]
+					.map[l|l.get(0)]
+					.map[v|v.name]
+					.toList
+				for (param : includedParams) {
+					if (!duplicates.contains(param.name)) {
+						getters += param.toMethod("get" + param.name.toFirstUpper, param.type ?: inferredType) [
+							body = '''return this.«param.fullyQualifiedName.skipLast(1).javaName».get«param.name.toFirstUpper»();'''
+						]
+					}
+				}
+				
 				for (e : subsystem.body.expressions) {
 					switch (e) {
 						VariableDeclaration: {
