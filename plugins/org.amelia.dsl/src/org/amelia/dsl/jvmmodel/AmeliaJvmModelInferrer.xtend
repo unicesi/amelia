@@ -49,6 +49,7 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
+import org.eclipse.xtext.common.types.JvmFormalParameter
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -293,15 +294,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							if (param.type != null || param.right != null)
 								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
 						}
-						for (param : includedParams) {
-							if (param.type != null || param.right != null)
-								parameters +=
-									param.toParameter(param.fullyQualifiedName.javaName,
-										param.type ?: param.right.inferredType)
-						}
+						val _recursiveParams = getIncludedParams(includedSubsystems)
+						parameters += _recursiveParams.map[p|
+							p.toParameter(p.fullyQualifiedName.javaName, p.type ?: p.right.inferredType)
+						]
 						body = [
 							trace(subsystem)
-								.append(params.join("\n", [p|'''this.«p.name» = «p.name»;''']))
+								.append(_recursiveParams.join("\n", [p|'''this.«p.name» = «p.name»;''']))
 								.newLine
 							for (includedSubsystem : includedSubsystems) {
 								val fqn = includedSubsystem.fullyQualifiedName
@@ -573,6 +572,22 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				rules += includedSubsystem.getAllIncludedRules()
 		}
 		return rules
+	}
+	
+	def List<VariableDeclaration> getIncludedParams(Iterable<org.amelia.dsl.amelia.Subsystem> includedSubsystems) {
+		val parameters = newArrayList
+		for (s : includedSubsystems) {
+			val includedParams = s.body.expressions.filter(VariableDeclaration).filter[v|v.param]
+			for (param : includedParams) {
+				if (param.type != null || param.right != null)
+					parameters += param
+			}
+			if (s.extensions != null) {
+				val included = s.extensions.declarations.filter(IncludeDeclaration).map[i|i.element as org.amelia.dsl.amelia.Subsystem]
+				parameters += getIncludedParams(included)
+			}
+		}
+		return parameters
 	}
 	
 	def javaName(RuleDeclaration rule, org.amelia.dsl.amelia.Subsystem subsystem) {
