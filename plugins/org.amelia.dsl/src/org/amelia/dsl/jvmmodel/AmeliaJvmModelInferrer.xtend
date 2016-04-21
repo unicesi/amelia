@@ -49,7 +49,6 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
-import org.eclipse.xtext.common.types.JvmFormalParameter
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -192,15 +191,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			if (!isPreIndexingPhase) {
 				val subsystemParam = prefix + "subsystem"
 				val dependenciesParam = prefix + "dependencies"
-				val includedSubsystems = if (subsystem.extensions != null)
-						subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
-							if (i.element instanceof org.amelia.dsl.amelia.Subsystem)
-								i.element as org.amelia.dsl.amelia.Subsystem
-						]
-					else
-						Collections.EMPTY_LIST
-				val params = newArrayList
-				val includedParams = newArrayList
+				val params = subsystem.params
+				val includedSubsystems = subsystem.includedSubsystems
+				val includedParams = subsystem.includedParams(false)
 				val _parameters = newArrayList
 				val fields = newArrayList
 				val constructors = newArrayList
@@ -212,15 +205,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				documentation = subsystem.documentation
 				superTypes += typeRef(Subsystem.Deployment)
 				
-				if (subsystem.extensions != null) {
-					includedParams += includedSubsystems.map [ s |
-						if (s != null)
-							s.body.expressions.filter(VariableDeclaration).filter[v|v.param]
-					].flatten
-				}
-				
 				// Transform includes into fields
-				fields += getIncludesAsFields(subsystem)
+				fields += includesAsFields(subsystem)
 				
 				for (e : subsystem.body.expressions) {
 					switch (e) {
@@ -236,7 +222,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								]								
 							}
 							if (e.param) {
-								params += e
 								getters += e.toGetter(e.name, e.type ?: inferredType)
 							}
 						}
@@ -294,29 +279,24 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							if (param.type != null || param.right != null)
 								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
 						}
-						val _recursiveParams = getIncludedParams(includedSubsystems)
-						parameters += _recursiveParams.map[p|
+						parameters += subsystem.includedParams(true).map[p|
 							p.toParameter(p.fullyQualifiedName.javaName, p.type ?: p.right.inferredType)
 						]
 						body = [
 							trace(subsystem)
-								.append(_recursiveParams.join("\n", [p|'''this.«p.name» = «p.name»;''']))
+								.append(params.join("\n", [p|'''this.«p.name» = «p.name»;''']))
 								.newLine
 							for (includedSubsystem : includedSubsystems) {
 								val fqn = includedSubsystem.fullyQualifiedName
-								val _params = includedSubsystem.body.expressions.filter(VariableDeclaration).filter [ v |
-									v.param
-								].map [ p |
-									p.fullyQualifiedName.javaName
-								]
+								val _params = includedSubsystem.params + includedSubsystem.includedParams(true)
 								trace(subsystem)
-									.append('''this.«includedSubsystem.javaName» = new «fqn»(«_params.join(", ")»);''')
+									.append('''this.«includedSubsystem.javaName» = new «fqn»(«_params.join(", ", [p|p.fullyQualifiedName.javaName])»);''')
 									.newLine
 							}
 						]
 					]
 				}
-				// Add a getter for duplicate parameters
+				// Add a getter for non-duplicate parameters
 				val duplicates = (includedParams + params).groupBy[p|p.name]
 					.values.filter[l|l.size > 1]
 					.map[l|l.get(0).name]
@@ -533,7 +513,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def Procedure1<ITreeAppendable> setupGraph(org.amelia.dsl.amelia.Subsystem subsystem, String subsystemParam) {
 		return [
-			val rules = subsystem.getAllIncludedRules()
+			val rules = subsystem.includedRules
 			val hasConfigBlock = subsystem.body.expressions.exists[c|c instanceof ConfigBlockExpression]
 			trace(subsystem)
 				.append('''super.graph = new ''').append(DescriptorGraph).append('''(«subsystemParam»);''').newLine
@@ -548,7 +528,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		]
 	}
 	
-	def List<JvmField> getIncludesAsFields(org.amelia.dsl.amelia.Subsystem subsystem) {
+	def List<JvmField> includesAsFields(org.amelia.dsl.amelia.Subsystem subsystem) {
 		val members = newArrayList
 		if (subsystem.extensions != null) {
 			for (include : subsystem.extensions.declarations.filter(IncludeDeclaration)) {
@@ -562,30 +542,50 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		return members
 	}
 	
-	def List<RuleDeclaration> getAllIncludedRules(org.amelia.dsl.amelia.Subsystem subsystem) {
+	def List<RuleDeclaration> includedRules(org.amelia.dsl.amelia.Subsystem subsystem) {
 		val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.toList
 		if (subsystem.extensions != null) {
 			val includes = subsystem.extensions.declarations.filter(IncludeDeclaration).map [ d |
 				d.element as org.amelia.dsl.amelia.Subsystem
 			]
 			for (includedSubsystem : includes)
-				rules += includedSubsystem.getAllIncludedRules()
+				rules += includedSubsystem.includedRules()
 		}
 		return rules
 	}
 	
-	def List<VariableDeclaration> getIncludedParams(Iterable<org.amelia.dsl.amelia.Subsystem> includedSubsystems) {
+	def includedSubsystems(org.amelia.dsl.amelia.Subsystem subsystem) {
+		return if (subsystem.extensions != null)
+			subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
+				if (i.element instanceof org.amelia.dsl.amelia.Subsystem)
+					i.element as org.amelia.dsl.amelia.Subsystem
+			]
+		else
+			Collections.EMPTY_LIST
+	}
+	
+	def params(org.amelia.dsl.amelia.Subsystem subsystem) {
+		return subsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param]
+	}
+	
+	def List<VariableDeclaration> includedParams(org.amelia.dsl.amelia.Subsystem subsystem, boolean recursive) {
 		val parameters = newArrayList
+		val includedSubsystems = if (subsystem.extensions != null)
+				subsystem.extensions.declarations.filter(IncludeDeclaration).filter [ i |
+					i.element instanceof org.amelia.dsl.amelia.Subsystem
+				].map [ i |
+					i.element as org.amelia.dsl.amelia.Subsystem
+				]
+			else
+				Collections.EMPTY_LIST
 		for (s : includedSubsystems) {
 			val includedParams = s.body.expressions.filter(VariableDeclaration).filter[v|v.param]
 			for (param : includedParams) {
 				if (param.type != null || param.right != null)
 					parameters += param
 			}
-			if (s.extensions != null) {
-				val included = s.extensions.declarations.filter(IncludeDeclaration).map[i|i.element as org.amelia.dsl.amelia.Subsystem]
-				parameters += getIncludedParams(included)
-			}
+			if (recursive)
+				parameters += includedParams(s, recursive)
 		}
 		return parameters
 	}
