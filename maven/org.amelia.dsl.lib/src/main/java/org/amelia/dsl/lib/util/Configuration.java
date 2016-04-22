@@ -86,7 +86,9 @@ public class Configuration {
 
 		for (Object key : config.keySet()) {
 			String name = (String) key;
-			System.setProperty("amelia." + name, config.getProperty(name));
+			if (System.getProperty("amelia." + name) == null) {				
+				System.setProperty("amelia." + name, config.getProperty(name));
+			}
 		}
 	}
 
