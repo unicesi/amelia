@@ -259,9 +259,13 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			error('''The source parameter must be of type String, «expr.source.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.TRANSFER_COMMAND__SOURCE, INVALID_PARAMETER_TYPE)
 		}
-		if (expr.destination.actualType.getSuperType(String) == null) {
-			error('''The destination parameter must be of type String, «expr.destination.actualType.simpleName» was found instead''',
-				AmeliaPackage.Literals.TRANSFER_COMMAND__DESTINATION, INVALID_PARAMETER_TYPE)
+		val type = expr.destination.actualType
+		val isOk = type.getSuperType(String) != null || type.getSuperType(Iterable) != null
+		val msg = '''The destination parameter must be of type String or Iterable<String>, «type.simpleName» was found instead'''
+		val showError = !isOk || type.getSuperType(List).typeArguments.length == 0 ||
+			!type.getSuperType(Iterable).typeArguments.get(0).identifier.equals(String.canonicalName)
+		if (showError) {
+			error(msg, AmeliaPackage.Literals.TRANSFER_COMMAND__DESTINATION, INVALID_PARAMETER_TYPE)
 		}
 	}
 	
