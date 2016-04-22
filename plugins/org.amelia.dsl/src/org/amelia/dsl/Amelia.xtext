@@ -125,7 +125,7 @@ EvalCommand
 	;
 
 CustomCommand
-	:	'$' value = XExpression (=> initializedLater ?= '...')?
+	:	'cmd' value = XExpression (=> initializedLater ?= '...')?
 	;
 
 CommandLiteral
