@@ -206,7 +206,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				superTypes += typeRef(Subsystem.Deployment)
 				
 				// Transform includes into fields
-				fields += includesAsFields(subsystem)
+				fields += subsystem.includesAsFields
 				
 				for (e : subsystem.body.expressions) {
 					switch (e) {
@@ -279,9 +279,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							if (param.type != null || param.right != null)
 								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
 						}
-						parameters += subsystem.includedParams(true).map[p|
+						parameters += subsystem.includedParams(true).map[ p |
 							p.toParameter(p.fullyQualifiedName.javaName, p.type ?: p.right.inferredType)
-						]
+						].groupBy[p|p.name].values.map[l|l.get(0)]
 						body = [
 							trace(subsystem)
 								.append(params.join("\n", [p|'''this.«p.name» = «p.name»;''']))
