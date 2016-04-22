@@ -75,6 +75,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val CONFIGURE_NOT_ALLOWED = "amelia.issue.configureNotAllowed"
 	public static val CONFLICTING_PARAMETER = "amelia.issue.conflictingParam"
 	public static val CYCLIC_DEPENDENCY = "amelia.issue.cyclicDependency"
+	public static val DISCOURAGED_NAME_USAGE = "amelia.issue.discouragedNameUsage"
 	public static val DUPLICATE_EXTENSION_DECLARATION = "amelia.issue.duplicateInclude"
 	public static val DUPLICATE_LOCAL_RULE = "amelia.issue.duplicateLocalRule"
 	public static val DUPLICATE_LOCAL_VARIABLE = "amelia.issue.duplicateLocalVariable"
@@ -88,6 +89,17 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	public static val NON_CAPITAL_NAME = "amelia.issue.nonCapitalName"
 	public static val USING_PRIMITIVE_TYPE = "amelia.issue.usingPrimitiveType"
 	public static val RESERVED_TYPE_NAME = "amelia.issue.reservedTypeName"
+	
+	@Check
+	def checkUseOfJavaLangNames(TypeDeclaration typeDecl) {
+		val ClassLoader classLoader = this.getClass().getClassLoader()
+		try {
+			val clazz = classLoader.loadClass("java.lang." + typeDecl.name);
+			warning('''The use of type name «typeDecl.name» is discouraged because it can cause unexpected behavior with members from class «clazz.canonicalName»''',
+				AmeliaPackage.Literals.TYPE_DECLARATION__NAME, DISCOURAGED_NAME_USAGE)
+		} catch (ClassNotFoundException e) {
+		}
+	}
 
 	@Check
 	def checkSubsystemName(Subsystem subsystem) {
