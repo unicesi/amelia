@@ -19,6 +19,7 @@
 package org.amelia.dsl.lib.descriptors;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -111,12 +112,14 @@ public class Host implements Comparable<Host> {
 		return closed;
 	}
 
-	public boolean openFTPConnection() throws InterruptedException {
+	public boolean openFTPConnection()
+			throws InterruptedException, SocketException, IOException {
 		boolean opened = false;
 		if (this.ftp == null)
 			this.ftp = new FTPHandler(this);
 
 		if (!this.ftp.isConnected()) {
+			this.ftp.setup();
 			this.ftp.start();
 			this.ftp.join();
 

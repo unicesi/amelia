@@ -19,6 +19,7 @@
 package org.amelia.dsl.lib;
 
 import java.io.IOException;
+import java.net.SocketException;
 
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.util.Log;
@@ -109,8 +110,13 @@ public class ExecutionManager {
 	 *            The array of hosts containing the FTP handler
 	 * @throws InterruptedException
 	 *             If any thread interrupts any of the handler threads
+	 * @throws IOException
+	 *             If there is a connection error
+	 * @throws SocketException
+	 *             If there is a connection error
 	 */
-	public void openFTPConnections(Host... hosts) throws InterruptedException {
+	public void openFTPConnections(Host... hosts)
+			throws InterruptedException, SocketException, IOException {
 		if (hosts.length > 0)
 			Log.info("Establishing FTP connections (" + hosts.length + ")");
 		for (Host host : hosts) {
