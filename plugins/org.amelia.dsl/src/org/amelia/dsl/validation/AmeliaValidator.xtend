@@ -73,6 +73,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Inject extension IQualifiedNameProvider
 	
 	public static val CONFIGURE_NOT_ALLOWED = "amelia.issue.configureNotAllowed"
+	public static val CONFLICTING_PARAMETER = "amelia.issue.conflictingParam"
 	public static val CYCLIC_DEPENDENCY = "amelia.issue.cyclicDependency"
 	public static val DUPLICATE_EXTENSION_DECLARATION = "amelia.issue.duplicateInclude"
 	public static val DUPLICATE_LOCAL_RULE = "amelia.issue.duplicateLocalRule"
@@ -218,7 +219,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 						if (index > -1)
 							list = list.substring(0, index + 1) + " and " + list.substring(index + 3)
 						warning('''This parameter hides the direct access to parameter '«varDecl.name»' from the included subsystem«d» «list»''', 
-							AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME)
+							AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME, CONFLICTING_PARAMETER)
 					}		
 				}
 			}	
