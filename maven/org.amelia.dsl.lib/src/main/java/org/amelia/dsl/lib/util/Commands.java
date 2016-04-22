@@ -549,7 +549,7 @@ public class Commands {
 	 * @return A new {@link AssetBundle} instance configured with the given
 	 *         source and destination.
 	 */
-	public static AssetBundle transfer(final String source,
+	public static AssetBundle scp(final String source,
 			final Iterable<String> destination, final boolean overwrite) {
 		Map<String, List<String>> transfers = new HashMap<String, List<String>>();
 		transfers.put(source, Lists.newArrayList(destination));
@@ -571,9 +571,9 @@ public class Commands {
 	 * @return A new {@link AssetBundle} instance configured with the given
 	 *         source and destination.
 	 */
-	public static AssetBundle transfer(final String source,
+	public static AssetBundle scp(final String source,
 			final String destination, final boolean overwrite) {
-		return transfer(source, Lists.newArrayList(destination), overwrite);
+		return scp(source, Lists.newArrayList(destination), overwrite);
 	}
 	
 	/**
@@ -594,7 +594,7 @@ public class Commands {
 	 * @throws IOException
 	 *             if something bad happens while reading the file
 	 */
-	public static AssetBundle transfer(final String filepath) throws IOException {
+	public static AssetBundle scp(final String filepath) throws IOException {
 		AssetBundle bundle = new AssetBundle();
 		InputStream in = new FileInputStream(filepath);
 		InputStreamReader streamReader = null;

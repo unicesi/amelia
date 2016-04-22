@@ -117,7 +117,7 @@ RunCommand
 	;
 
 TransferCommand
-	:	'transfer' source = XExpression 'to' destination = XExpression
+	:	'scp' source = XExpression 'to' destination = XExpression
 	;
 
 EvalCommand

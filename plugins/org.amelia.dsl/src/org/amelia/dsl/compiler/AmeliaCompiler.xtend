@@ -178,7 +178,7 @@ class AmeliaCompiler extends XbaseCompiler {
 	def protected void _toJavaExpression(TransferCommand expr, ITreeAppendable t) {
 		val appendable = t.trace(expr)
 		appendable.append(Commands)
-		appendable.append(".transfer")
+		appendable.append(".scp")
 		appendable.append("(")
 		internalToConvertedExpression(expr.source, appendable)
 		appendable.append(", ")
