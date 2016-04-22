@@ -173,6 +173,28 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
+	def checkConflictingParams(Subsystem subsystem) {
+		if (subsystem.extensions != null) {
+			val includes = subsystem.extensions.declarations.filter(IncludeDeclaration)
+			val includedSubsystems = includes.map[i|i.element as Subsystem]
+			val conflictingParams = includedSubsystems
+				.map[s|s.body.expressions.filter(VariableDeclaration)].flatten.filter[v|v.param]
+				.groupBy[p|p.name].values.filter[l|l.size > 1]
+			if (!conflictingParams.empty) {
+				var names = conflictingParams.join("'", "', '", "'", [l|l.get(0).name])
+				val index = names.lastIndexOf("', '")
+				if (index > -1)
+					names = names.substring(0, index + 1) + " and " + names.substring(index + 4)
+				val d = if(conflictingParams.size == 1) #["", "s", "Its"] else #["s", "", "Their"]
+				warning('''The parameter«d.get(0)» «names» belong«d.get(1)» to several included subsystems. «d.get(2)» direct access has been hidden''',
+					AmeliaPackage.Literals.TYPE_DECLARATION__NAME)
+			}
+		}
+	}
+	
+	
+	
+	@Check
 	def checkRuleNameIsUnique(RuleDeclaration rule) {
 		val subsystem = (EcoreUtil2.getRootContainer(rule) as Model).typeDeclaration as Subsystem
 		val duplicates = subsystem.body.expressions.filter(OnHostBlockExpression).map[o|o.rules].flatten.filter [ r |
