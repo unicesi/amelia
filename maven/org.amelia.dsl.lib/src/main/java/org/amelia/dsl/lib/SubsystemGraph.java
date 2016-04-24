@@ -25,12 +25,14 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
+import org.amelia.dsl.lib.util.Threads;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -40,6 +42,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 	public class DependencyThread extends Thread
 			implements Observer, Comparable<DependencyThread> {
 
+		private final UUID internalId;
 		private final Subsystem subsystem;
 		private final List<Subsystem> dependencies;
 		private final CountDownLatch doneSignal;
@@ -51,6 +54,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 				final List<Subsystem> dependencies,
 				final CountDownLatch doneSignal,
 				final SingleThreadTaskQueue taskQueue) {
+			this.internalId = UUID.randomUUID();
 			this.subsystem = subsystem;
 			this.dependencies = dependencies;
 			this.doneSignal = new CountDownLatch(dependencies.size());
@@ -84,28 +88,32 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 				}
 			} catch (Exception e) {
 				this.subsystem.error();
-				throw new RuntimeException(e);
+				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				// Notify to main thread
 				this.mainDoneSignal.countDown();
 			}
 		}
 
-		public void update(Observable o, Object arg) {
+		public synchronized void update(Observable o, Object arg) {
 			this.doneSignal.countDown();
 		}
 
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			else if ((null == obj) || (obj.getClass() != this.getClass()))
+				return false;
+			return this.compareTo((DependencyThread) obj) == 0;
+		}
+
 		public int compareTo(DependencyThread o) {
-			if (this.dependencies.size() < o.dependencies.size())
-				return -1;
-			else
-				return 1;
+			return this.internalId.compareTo(o.internalId);
 		}
 
 		public void shutdown() {
 			this.shutdown = true;
 			this.subsystem.deployment().deleteObserver(this);
-
 			while (this.doneSignal.getCount() > 0)
 				this.doneSignal.countDown();
 		}
@@ -156,43 +164,6 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		}
 		return all;
 	}
-
-	/**
-	 * @deprecated use {@link #addSubsystems(Subsystem...)} instead
-	 * @param subsystem
-	 *            The subsystem to add
-	 * @return Whether or not the subsystem was added
-	 */
-	@Deprecated
-	public boolean addSubsystem(Subsystem subsystem) {
-		if (containsKey(subsystem))
-			return false;
-
-		// Add the element with an empty list of dependencies
-		put(subsystem, new ArrayList<Subsystem>());
-		return this.subsystems.add(subsystem);
-	}
-
-	/**
-	 * @deprecated use {@link Subsystem #dependsOn(Subsystem...)} instead
-	 * @param a
-	 *            The dependent subsystem
-	 * @param b
-	 *            The dependency
-	 * @return Whether or not the dependency was added
-	 */
-	@Deprecated
-	public boolean addDependency(Subsystem a, Subsystem b) {
-		if (!containsKey(a) || !containsKey(b))
-			return false;
-
-		// FIXME: search for transitive dependencies
-		if (get(b).contains(a))
-			throw new RuntimeException(String
-					.format("Circular reference detected: %s <-> %s", a, b));
-
-		return get(a).add(b);
-	}
 	
 	/**
 	 * @return whether or not all of the subsystem dependencies are satisfiable
@@ -235,9 +206,12 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			// Wait for all threads to finish
 			doneSignal.await();
 			shutdown(stopExecutedComponents);
+			// FIXME: find out why this line is reached without closing all SSH
+			// connections
+			Thread.sleep(500);
 			printExecutionSummary(start, System.nanoTime());
-			successful = !ExecutionManager.isAnySubsystemAborting();
-			ExecutionManager.reset();
+			successful = !Threads.isAnySubsystemAborting();
+			Threads.reset();
 		} else {
 			shutdown(stopExecutedComponents);
 		}
@@ -248,17 +222,19 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 	}
 	
 	private void printExecutionSummary(final long start, final long end) {
-		Log.print(Log.SEPARATOR_LONG);
-		if (!ExecutionManager.isAnySubsystemAborting()) {
-			Log.print("DEPLOYMENT SUCCESS");
+		StringBuilder sb = new StringBuilder();
+		sb.append(Log.SEPARATOR_LONG + "\n");
+		if (!Threads.isAnySubsystemAborting()) {
+			sb.append("DEPLOYMENT SUCCESS\n");
 		} else {
-			Log.print("DEPLOYMENT ERROR");
+			sb.append("DEPLOYMENT ERROR\n");
 		}
-		Log.print(Log.SEPARATOR_LONG);
-		Log.print("Total time: "
-				+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s");
-		Log.print("Finished at: " + new Date());
-		Log.print(Log.SEPARATOR_LONG);
+		sb.append(Log.SEPARATOR_LONG + "\n");
+		sb.append("Total time: "
+				+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s\n");
+		sb.append("Finished at: " + new Date() + "\n");
+		sb.append(Log.SEPARATOR_LONG);
+		Log.print(sb.toString());
 	}
 
 	public void shutdown(final boolean stopExecutedComponents) {
