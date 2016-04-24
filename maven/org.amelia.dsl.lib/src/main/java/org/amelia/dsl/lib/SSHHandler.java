@@ -39,6 +39,7 @@ import org.amelia.dsl.lib.util.AuthenticationUserInfo;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.ScheduledTask;
 import org.amelia.dsl.lib.util.ShellUtils;
+import org.amelia.dsl.lib.util.Threads;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,7 +98,7 @@ public class SSHHandler extends Thread {
 		this.taskQueue = new SingleThreadTaskQueue();
 
 		// Handle uncaught exceptions
-		this.taskQueue.setUncaughtExceptionHandler(ExecutionManager.exceptionHandler());
+		this.taskQueue.setUncaughtExceptionHandler(Threads.exceptionHandler());
 	}
 	
 	public void setup() throws JSchException, IOException {

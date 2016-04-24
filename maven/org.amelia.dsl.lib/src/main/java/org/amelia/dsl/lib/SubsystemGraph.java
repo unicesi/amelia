@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
+import org.amelia.dsl.lib.util.Threads;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -236,8 +237,8 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			doneSignal.await();
 			shutdown(stopExecutedComponents);
 			printExecutionSummary(start, System.nanoTime());
-			successful = !ExecutionManager.isAnySubsystemAborting();
-			ExecutionManager.reset();
+			successful = !Threads.isAnySubsystemAborting();
+			Threads.reset();
 		} else {
 			shutdown(stopExecutedComponents);
 		}
@@ -249,7 +250,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 	
 	private void printExecutionSummary(final long start, final long end) {
 		Log.print(Log.SEPARATOR_LONG);
-		if (!ExecutionManager.isAnySubsystemAborting()) {
+		if (!Threads.isAnySubsystemAborting()) {
 			Log.print("DEPLOYMENT SUCCESS");
 		} else {
 			Log.print("DEPLOYMENT ERROR");
