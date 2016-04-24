@@ -157,43 +157,6 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		}
 		return all;
 	}
-
-	/**
-	 * @deprecated use {@link #addSubsystems(Subsystem...)} instead
-	 * @param subsystem
-	 *            The subsystem to add
-	 * @return Whether or not the subsystem was added
-	 */
-	@Deprecated
-	public boolean addSubsystem(Subsystem subsystem) {
-		if (containsKey(subsystem))
-			return false;
-
-		// Add the element with an empty list of dependencies
-		put(subsystem, new ArrayList<Subsystem>());
-		return this.subsystems.add(subsystem);
-	}
-
-	/**
-	 * @deprecated use {@link Subsystem #dependsOn(Subsystem...)} instead
-	 * @param a
-	 *            The dependent subsystem
-	 * @param b
-	 *            The dependency
-	 * @return Whether or not the dependency was added
-	 */
-	@Deprecated
-	public boolean addDependency(Subsystem a, Subsystem b) {
-		if (!containsKey(a) || !containsKey(b))
-			return false;
-
-		// FIXME: search for transitive dependencies
-		if (get(b).contains(a))
-			throw new RuntimeException(String
-					.format("Circular reference detected: %s <-> %s", a, b));
-
-		return get(a).add(b);
-	}
 	
 	/**
 	 * @return whether or not all of the subsystem dependencies are satisfiable

@@ -227,63 +227,6 @@ public class DescriptorGraph
 		}
 		return added;
 	}
-
-	/**
-	 * @deprecated use {@link CommandDescriptor#runsOn(Host)} instead
-	 * @param a
-	 *            The command descriptor
-	 * @param hosts
-	 *            The hosts where the command runs
-	 * @return Whether or not the command was added
-	 */
-	@Deprecated
-	public boolean addDescriptor(CommandDescriptor a, Host... hosts) {
-		if (containsKey(a))
-			return false;
-
-		// The only known use of the FTP connection is the AssetBundle
-		if (a instanceof AssetBundle)
-			this.ftpHosts.addAll(Arrays.asList(hosts));
-		else
-			this.sshHosts.addAll(Arrays.asList(hosts));
-
-		// Add the element with an empty list of dependencies
-		put(a, new ArrayList<CommandDescriptor>());
-		this.tasks.put(a, new ArrayList<ScheduledTask<?>>());
-
-		// Add an executable task per host
-		for (Host host : hosts) {
-			ScheduledTask<?> task = new ScheduledTask<Object>(host, a);
-			this.tasks.get(a).add(task);
-		}
-
-		return true;
-	}
-
-	/**
-	 * @deprecated Use {@link CommandDescriptor#dependsOn(CommandDescriptor)}
-	 *             instead
-	 * @param a
-	 *            The dependent command
-	 * @param b
-	 *            The dependency
-	 * @return Whether or not the dependency was added
-	 */
-	@Deprecated
-	public boolean addDependency(CommandDescriptor a, CommandDescriptor b) {
-		if (!containsKey(a) || !containsKey(b))
-			return false;
-		else if(a == b)
-			return false;
-
-		// FIXME: search for transitive dependencies
-		if (get(b).contains(a))
-			throw new RuntimeException(String
-					.format("Circular reference detected: %s <-> %s", a, b));
-
-		get(a).add(b);
-		return true;
-	}
 	
 	/**
 	 * Checks that all of the command dependencies are satisfiable
