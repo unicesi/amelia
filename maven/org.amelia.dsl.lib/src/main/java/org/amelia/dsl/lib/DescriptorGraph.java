@@ -147,7 +147,6 @@ public class DescriptorGraph
 			this.shutdown = true;
 			this.descriptor.deleteObserver(this);
 			this.handler.shutdownTaskQueue();
-
 			while (this.doneSignal.getCount() > 0)
 				this.doneSignal.countDown();
 		}
@@ -454,7 +453,7 @@ public class DescriptorGraph
 				Log.error("Deployment shutdown unsuccessful. See logs for more "
 						+ "information");
 				Log.error("Shutting system down abruptly");
-				logger.error(e.getMessage(), e.getCause());
+				logger.error(e);
 			}
 		}
 	}
