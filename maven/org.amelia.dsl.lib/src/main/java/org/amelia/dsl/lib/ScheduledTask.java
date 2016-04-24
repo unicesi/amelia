@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the Amelia project. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.amelia.dsl.lib.util;
+package org.amelia.dsl.lib;
 
 import java.util.UUID;
 

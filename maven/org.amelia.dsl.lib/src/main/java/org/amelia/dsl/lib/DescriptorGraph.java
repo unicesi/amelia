@@ -39,7 +39,6 @@ import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
-import org.amelia.dsl.lib.util.ScheduledTask;
 import org.amelia.dsl.lib.util.Strings;
 import org.amelia.dsl.lib.util.Threads;
 import org.apache.logging.log4j.LogManager;
