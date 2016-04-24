@@ -85,7 +85,6 @@ public class SingleThreadTaskQueue extends Thread {
 		if (!this.shutdown) {
 			this.shutdown = true;
 			this.executor.shutdown();
-
 			// release locks of canceled tasks
 			for (CallbackTask<?> task : dispatchQueue) {
 				task.callback.onCancel();
@@ -103,7 +102,6 @@ public class SingleThreadTaskQueue extends Thread {
 				_return.add(0, result);
 				signal.countDown();
 			}
-
 			public void onCancel() {
 				signal.countDown();
 			}

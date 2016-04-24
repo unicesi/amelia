@@ -19,8 +19,8 @@
 package org.amelia.dsl.lib;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +41,11 @@ import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.ScheduledTask;
 import org.amelia.dsl.lib.util.Strings;
+import org.amelia.dsl.lib.util.Threads;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.jcraft.jsch.JSchException;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -142,7 +147,6 @@ public class DescriptorGraph
 			this.shutdown = true;
 			this.descriptor.deleteObserver(this);
 			this.handler.shutdownTaskQueue();
-
 			while (this.doneSignal.getCount() > 0)
 				this.doneSignal.countDown();
 		}
@@ -162,10 +166,19 @@ public class DescriptorGraph
 	private final Set<Host> ftpHosts;
 
 	private final TreeSet<DependencyThread> threads;
-
-	private final ExecutionManager executionManager;
 	
 	private final Configuration configuration;
+
+	/**
+	 * The variable indicating whether the current deployment is being shutting
+	 * down
+	 */
+	private volatile boolean shuttingDown;
+	
+	/**
+	 * The logger
+	 */
+	private static Logger logger = LogManager.getLogger(DescriptorGraph.class);
 
 	public DescriptorGraph(String subsystem) {
 		this.configuration = new Configuration();
@@ -175,7 +188,7 @@ public class DescriptorGraph
 		this.sshHosts = new HashSet<Host>();
 		this.ftpHosts = new HashSet<Host>();
 		this.threads = new TreeSet<DependencyThread>();
-		this.executionManager = new ExecutionManager(this);
+		this.shuttingDown = false;
 	}
 	
 	public DescriptorGraph() {
@@ -212,63 +225,6 @@ public class DescriptorGraph
 		}
 		return added;
 	}
-
-	/**
-	 * @deprecated use {@link CommandDescriptor#runsOn(Host)} instead
-	 * @param a
-	 *            The command descriptor
-	 * @param hosts
-	 *            The hosts where the command runs
-	 * @return Whether or not the command was added
-	 */
-	@Deprecated
-	public boolean addDescriptor(CommandDescriptor a, Host... hosts) {
-		if (containsKey(a))
-			return false;
-
-		// The only known use of the FTP connection is the AssetBundle
-		if (a instanceof AssetBundle)
-			this.ftpHosts.addAll(Arrays.asList(hosts));
-		else
-			this.sshHosts.addAll(Arrays.asList(hosts));
-
-		// Add the element with an empty list of dependencies
-		put(a, new ArrayList<CommandDescriptor>());
-		this.tasks.put(a, new ArrayList<ScheduledTask<?>>());
-
-		// Add an executable task per host
-		for (Host host : hosts) {
-			ScheduledTask<?> task = new ScheduledTask<Object>(host, a);
-			this.tasks.get(a).add(task);
-		}
-
-		return true;
-	}
-
-	/**
-	 * @deprecated Use {@link CommandDescriptor#dependsOn(CommandDescriptor)}
-	 *             instead
-	 * @param a
-	 *            The dependent command
-	 * @param b
-	 *            The dependency
-	 * @return Whether or not the dependency was added
-	 */
-	@Deprecated
-	public boolean addDependency(CommandDescriptor a, CommandDescriptor b) {
-		if (!containsKey(a) || !containsKey(b))
-			return false;
-		else if(a == b)
-			return false;
-
-		// FIXME: search for transitive dependencies
-		if (get(b).contains(a))
-			throw new RuntimeException(String
-					.format("Circular reference detected: %s <-> %s", a, b));
-
-		get(a).add(b);
-		return true;
-	}
 	
 	/**
 	 * Checks that all of the command dependencies are satisfiable
@@ -297,16 +253,46 @@ public class DescriptorGraph
 			final boolean shutdownAfterDeployment,
 			final boolean stopExecutionsWhenFinish)
 					throws InterruptedException, IOException {
-		// Open SSH and FTP connections before dependencies resolution
+		if (!establishConnections())
+			return;
+		if (stopPreviousExecutions && this.sshHosts.size() > 0)
+			stopAllExecutions();
+		
+		int totalTasks = countTotalTasks();
+		CountDownLatch doneSignal = new CountDownLatch(totalTasks);
+		
+		for (CommandDescriptor e : keySet()) {
+			List<CommandDescriptor> dependencies = get(e);
+			List<ScheduledTask<?>> tasks = this.tasks.get(e);
+			int deps = countDependencyThreads(dependencies);
+			for (ScheduledTask<?> task : tasks) {
+				DependencyThread thread = new DependencyThread(e,
+						task.host().ssh(), task, dependencies, deps, doneSignal);
+				thread.setUncaughtExceptionHandler(
+						Threads.exceptionHandler());
+				threads.add(thread);
+			}
+		}
+		Log.info("Executing commands (" + totalTasks + ")");
+		for (DependencyThread thread : this.threads) {
+			thread.start();
+		}
+		doneSignal.await();
+		if(shutdownAfterDeployment)
+			shutdown(stopExecutionsWhenFinish);
+	}
+		
+	private boolean establishConnections() throws InterruptedException {
 		final List<Boolean> connectionOk = new ArrayList<Boolean>();
 		Thread setupThread = new Thread() {
 			public void run() {
 				// Handle setup errors
-				setDefaultUncaughtExceptionHandler(ExecutionManager.exceptionHandler());
+				setDefaultUncaughtExceptionHandler(Threads.exceptionHandler());
 				try {
 					validate();
-					executionManager.openSSHConnections(sshHosts.toArray(new Host[0]));
-					executionManager.openFTPConnections(ftpHosts.toArray(new Host[0]));
+					establishFixedWidth();
+					openSSHConnections();
+					openFTPConnections();
 					connectionOk.add(true);
 				} catch (Exception e) {
 					connectionOk.add(false);
@@ -316,39 +302,7 @@ public class DescriptorGraph
 		};
 		setupThread.start();
 		setupThread.join();
-		if (!connectionOk.get(0))
-			return;
-
-		if (stopPreviousExecutions && this.sshHosts.size() > 0)
-			stopAllExecutions();
-
-		int totalTasks = countTotalTasks();
-		CountDownLatch doneSignal = new CountDownLatch(totalTasks);
-
-		for (CommandDescriptor e : keySet()) {
-			List<CommandDescriptor> dependencies = get(e);
-			List<ScheduledTask<?>> tasks = this.tasks.get(e);
-			int deps = countDependencyThreads(dependencies);
-
-			for (ScheduledTask<?> task : tasks) {
-				DependencyThread thread = new DependencyThread(e,
-						task.host().ssh(), task, dependencies, deps, doneSignal);
-
-				// Handle uncaught exceptions
-				thread.setUncaughtExceptionHandler(
-						ExecutionManager.exceptionHandler());
-				threads.add(thread);
-			}
-		}
-
-		Log.info("Executing commands (" + totalTasks + ")");
-		for (DependencyThread thread : this.threads)
-			thread.start();
-
-		doneSignal.await();
-		
-		if(shutdownAfterDeployment)
-			this.executionManager.shutdown(stopExecutionsWhenFinish);
+		return connectionOk.get(0);
 	}
 	
 	private int countTotalTasks() {
@@ -364,6 +318,144 @@ public class DescriptorGraph
 		for (CommandDescriptor e : dependencies)
 			n += this.tasks.get(e).size();
 		return n;
+	}
+
+	/**
+	 * Closes the FTP connection with the corresponding hosts.
+	 * 
+	 * @throws IOException
+	 *             If an I/O error occurs while either sending a command to the
+	 *             server or receiving a reply from the server.
+	 */
+	private void closeFTPConnections() throws IOException {
+		if (!this.ftpHosts.isEmpty())
+			Log.info("Closing FTP connections");
+		for (Host host : this.ftpHosts) {
+			boolean connected = host.ftp() != null && host.ftp().isConnected();
+			if (host.closeFTPConnection() && connected) {
+				logger.info("FTP connection for " + host
+						+ " was successfully closed");
+			}
+		}
+	}
+
+	/**
+	 * Closes the SSH connection with the corresponding hosts.
+	 * 
+	 * @throws IOException
+	 *             If I/O error occurs.
+	 */
+	private void closeSSHConnections() throws IOException {
+		if (!this.sshHosts.isEmpty())
+			Log.info("Closing SSH connections");
+		for (Host host : this.sshHosts) {
+			boolean connected = host.ssh() != null && host.ssh().isConnected();
+			if (host.closeSSHConnection() && connected) {
+				logger.info("SSH connection for " + host
+						+ " was successfully closed");
+			}
+		}
+	}
+	
+	/**
+	 * (For pretty printing purposes) Finds the width of the longest host name
+	 * and update it in each host.
+	 */
+	private void establishFixedWidth() {
+		int hostFixedWidth = 0;
+		Set<Host> hosts = hosts();
+		for (Host host : hosts) {
+			if (hostFixedWidth < host.toString().length())
+				hostFixedWidth = host.toString().length();
+		}
+		// set a common (fixed) width for all hosts
+		for (Host host : hosts) {
+			host.setFixedWidth(hostFixedWidth);
+		}
+	}
+	
+	/**
+	 * Opens FTP connections with the corresponding hosts
+	 * 
+	 * @throws InterruptedException
+	 *             If any thread interrupts any of the handler threads
+	 * @throws IOException
+	 *             If there is a connection error
+	 * @throws SocketException
+	 *             If there is a connection error
+	 */
+	private void openFTPConnections()
+			throws InterruptedException, SocketException, IOException {
+		if (!this.ftpHosts.isEmpty())
+			Log.info("Establishing FTP connections (" + this.ftpHosts.size() + ")");
+		for (Host host : this.ftpHosts) {
+			boolean connected = host.ftp() != null && host.ftp().isConnected();
+			if (host.openFTPConnection() && !connected) {
+				logger.info("FTP connection for " + host
+						+ " was successfully established");
+			}
+		}
+	}
+
+	/**
+	 * Opens SSH connections with the corresponding hosts
+	 * 
+	 * @throws InterruptedException
+	 *             If any thread interrupts any of the handler threads
+	 * @throws IOException
+	 *             If there is an error while initiating the SSH connection
+	 * @throws JSchException
+	 *             If there is an error establishing the SSH connection
+	 */
+	private void openSSHConnections()
+			throws InterruptedException, JSchException, IOException {
+		if (!this.sshHosts.isEmpty())
+			Log.info("Establishing SSH connections (" + this.sshHosts.size() + ")");
+		for (Host host : this.sshHosts) {
+			boolean connected = host.ssh() != null && host.ssh().isConnected();
+			if (host.openSSHConnection(this.subsystem) && !connected) {
+				logger.info("SSH connection for " + host
+						+ " was successfully established");
+			}
+		}
+	}
+	
+	/**
+	 * Stop the given executed components and then terminates the execution
+	 */
+	public void shutdown(String... compositeNames) {
+		shutdown(false, compositeNames);
+	}
+
+	/**
+	 * (if requested) Stop all of the executed components, and then terminates
+	 * the execution
+	 */
+	public void shutdown(boolean stopAllCurrentExecutions) {
+		shutdown(stopAllCurrentExecutions, new String[0]);
+	}
+	
+	private void shutdown(boolean stopAllExecutedComponents,
+			String[] compositeNames) {
+		// Prevent shutting down more than once
+		if (!shuttingDown) {
+			shuttingDown = true;
+			Log.info("Shutting down deployment (" + this.subsystem + ")");
+			try {
+				if (stopAllExecutedComponents)
+					stopAllExecutions();
+				else
+					stopExecutions(compositeNames);
+				stopCurrentThreads();
+				closeFTPConnections();
+				closeSSHConnections();
+			} catch (Exception e) {
+				Log.error("Deployment shutdown unsuccessful. See logs for more "
+						+ "information");
+				Log.error("Shutting system down abruptly");
+				logger.error(e);
+			}
+		}
 	}
 	
 	public void stopExecutions(final String[] compositeNames) throws IOException {
@@ -418,8 +510,8 @@ public class DescriptorGraph
 			thread.join();
 	}
 	
-	public ExecutionManager executionManager() {
-		return this.executionManager;
+	public boolean isShuttingDown() {
+		return shuttingDown;
 	}
 	
 	public String subsystem() {
@@ -432,12 +524,5 @@ public class DescriptorGraph
 		hosts.addAll(this.sshHosts);
 		return hosts;
 	}
-	
-	public Set<Host> sshHosts() {
-		return this.sshHosts;
-	}
-	
-	public Set<Host> ftpHosts() {
-		return this.ftpHosts;
-	}
+
 }

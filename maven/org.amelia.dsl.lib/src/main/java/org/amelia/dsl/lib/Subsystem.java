@@ -37,16 +37,16 @@ public class Subsystem {
 				List<Subsystem> dependencies) throws Exception;
 		
 		public void shutdownAndStopComponents(String... compositeNames) {
-			this.graph.executionManager().shutdown(compositeNames);
+			this.graph.shutdown(compositeNames);
 		}
 		
 		public void shutdown(boolean stopAllExecutedComponents) {
-			this.graph.executionManager().shutdown(stopAllExecutedComponents);
+			this.graph.shutdown(stopAllExecutedComponents);
 		}
 		
 		public boolean isShutdown() {
 			return this.graph == null
-					|| this.graph.executionManager().isShuttingDown();
+					|| this.graph.isShuttingDown();
 		}
 		
 		public void releaseDependencies(Collection<Subsystem> dependencies) {
