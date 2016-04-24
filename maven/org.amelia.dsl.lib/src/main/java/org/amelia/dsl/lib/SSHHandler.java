@@ -25,7 +25,9 @@ import static net.sf.expectit.matcher.Matchers.regexp;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -77,6 +79,8 @@ public class SSHHandler extends Thread {
 	private final List<CommandDescriptor> executions;
 
 	private final SingleThreadTaskQueue taskQueue;
+	
+	private final SimpleDateFormat dateFormat;
 
 	/**
 	 * The logger
@@ -96,6 +100,7 @@ public class SSHHandler extends Thread {
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
 		this.executions = new ArrayList<CommandDescriptor>();
 		this.taskQueue = new SingleThreadTaskQueue();
+		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd@HH:mm:ss.SSS");
 
 		// Handle uncaught exceptions
 		this.taskQueue.setUncaughtExceptionHandler(Threads.exceptionHandler());
@@ -288,7 +293,8 @@ public class SSHHandler extends Thread {
 	}
 
 	private File createOutputFile() throws IOException {
-		String fileName = this.host + "-" + System.nanoTime() + ".txt";
+		String date = this.dateFormat.format(new Date());
+		String fileName = this.host + "-" + date + ".txt";
 		File parent = new File("sessions" + File.separator + this.subsystem);
 		File file = new File(parent, fileName);
 
