@@ -88,7 +88,7 @@ public class ExecutionManager {
 						message = ": " + e.getMessage().replaceAll(
 								"^((\\w)+(\\.\\w+)+:\\s)*", "");						
 					}
-					logger.error(e.getMessage(), e);
+					logger.error(message, e);
 					Log.error("Stopping deployment" + message);
 					SubsystemGraph.getInstance().shutdown(true);
 				}
