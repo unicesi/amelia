@@ -19,10 +19,15 @@
 package org.amelia.dsl.lib.util;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.amelia.dsl.lib.descriptors.Host;
+
+import com.google.common.collect.Range;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -49,14 +54,11 @@ public class Log {
 	}
 	
 	private static synchronized void print(String message, boolean showTime) {
-		// FIXME: bad coloring when there is already colored text before pairs
-		message = colorPairs(message, "['\"]", "['\"]", ANSI.CYAN);
-//		message = colorPairs(message, "\\[", "\\]", ANSI.MAGENTA);
-		message = colorPairs(message, "\\(", "\\)", ANSI.BLUE);
+		message = colorPairs(message);
 		if (showTime) {
 			long currentTime = System.currentTimeMillis();
 			String formattedTime = timeFormatter.format(currentTime);
-			formattedTime = ANSI.GRAY.format(formattedTime);
+//			formattedTime = ANSI.GRAY.format(formattedTime);
 			System.out.println(formattedTime + " " + message);
 		} else {
 			System.out.println(message);
@@ -89,33 +91,58 @@ public class Log {
 	
 	private static String formatHost(Host host) {
 		return host != null
-				? " [" + ANSI.MAGENTA.format(host.toFixedString()) + "] " : " ";
+				? " [" + host.toFixedString() + "] " : " ";
 	}
-
-	// Adapted from: http://stackoverflow.com/a/24080170/738968
-	private static String colorPairs(String text, String leftSymbol,
-			String rightSymbol, ANSI color) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("(" + leftSymbol + ")");
-		sb.append("((?:(?!\1).)*)");
-		sb.append("(" + rightSymbol + ")");
-
-		Pattern quotes = Pattern.compile(sb.toString());
-		Matcher matcher = quotes.matcher(text);
-
+	
+	private static String colorPairs(final String text) {
+		String result = text;
+		PairMatcher matcher = new PairMatcher();
+		Map<ANSI, char[]> pairs = new HashMap<ANSI, char[]>();
+		pairs.put(ANSI.BLUE, new char[] { '(', ')' });
+		pairs.put(ANSI.MAGENTA, new char[] { '[', ']' });
+		pairs.put(ANSI.GREEN, new char[] { '{', '}' });
+		pairs.put(ANSI.CYAN, new char[] { '\'', '\'' });
+		pairs.put(ANSI.YELLOW, new char[] { '"', '"' });
+		for (ANSI color : pairs.keySet()) {
+			char[] chars = pairs.get(color);
+			List<Range<Integer>> regions = matcher.regions(result, chars[0], chars[1]);
+			List<Range<Integer>> redundantRegions = matcher.redundantRegions(regions);
+			result = cleanRedundantRegions(redundantRegions, result);
+			for (Range<Integer> r : matcher.cleanRedundantRegions(regions)) {
+				String start = result.substring(0, r.lowerEndpoint() + 1);
+				String middle = result.substring(r.lowerEndpoint() + 1,
+						r.upperEndpoint());
+				String end = result.substring(r.upperEndpoint());
+				String lastUsedColor = lastUsedColor(start);
+				result = start + color.format(middle) + lastUsedColor + end;
+			}
+		}		
+		return result;
+	}
+	
+	private static String cleanRedundantRegions(final List<Range<Integer>> regions,
+			final String text) {
+		String result = text;
+		for (Range<Integer> r : regions) {
+			result = result.substring(0, r.lowerEndpoint()) + "\u200B"
+					+ result.substring(r.lowerEndpoint() + 1, r.upperEndpoint())
+					+ "\u200B" + result.substring(r.upperEndpoint() + 1);
+		}
+		return result;
+	}
+	
+	private static String lastUsedColor(final String text) {
+		String lastUsedColor = "";
+		String reset = "\u001b[1;0m";
+		Pattern color = Pattern.compile("\u001b" + "\\[1;[0-9]+m");
+		Matcher matcher = color.matcher(text);
 		if (matcher.find()) {
-			String left = matcher.group(1);
-			String right = matcher.group(3);
-			String coloredText = color.format(matcher.group(2));
-			if ((left.equals("'") && right.equals("'"))
-					|| (left.equals("\"") && right.equals("\""))) {
-				text = matcher.replaceAll(coloredText);
-			} else {
-				text = matcher.replaceAll(left + coloredText + right);
+			String matchedColor = matcher.group();
+			if (text.lastIndexOf(matchedColor) > text.lastIndexOf(reset)) {
+				lastUsedColor = matchedColor;
 			}
 		}
-
-		return text;
+		return lastUsedColor;
 	}
 
 	public static void printBanner() {
