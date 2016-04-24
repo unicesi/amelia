@@ -54,11 +54,9 @@ class AmeliaGenerator implements IGenerator {
 		val subsystems = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem).map [ d |
 			d.getEObject(resource) as Subsystem
 		]
-		val deployments = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.deploymentDeclaration)
-		if (!deployments.empty) {
-			val content = getDefaultMainImpl(subsystems)
-			fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)	
-		}
+//		val deployments = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.deploymentDeclaration)
+		val content = getDefaultMainImpl(subsystems)
+		fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
 	}
 	
 	def getDefaultMainImpl(Iterable<Subsystem> subsystems) {
@@ -66,6 +64,7 @@ class AmeliaGenerator implements IGenerator {
 		'''
 			public class Amelia {
 				public static void main(String[] args) throws InterruptedException {
+					System.setProperty("java.util.logging.config.file", "logging.properties");
 					«FOR subsystem : subsystems»
 						«s» «subsystem.fullyQualifiedName.toString("_")» = new «s»("«subsystem.fullyQualifiedName»", new «subsystem.fullyQualifiedName»());
 					«ENDFOR»

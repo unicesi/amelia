@@ -96,6 +96,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					parameters += deployment.toParameter("args", typeRef(String).addArrayTypeDimension)
 					exceptions += typeRef(Exception)
 					body = [
+						append('System.setProperty("java.util.logging.config.file", "logging.properties");').newLine
 						append(clazz).append(" main = new ").append(clazz).append("();").newLine
 						append("main.init();").newLine
 						append("main.custom();")
