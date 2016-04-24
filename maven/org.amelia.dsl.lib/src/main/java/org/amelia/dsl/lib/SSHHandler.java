@@ -189,7 +189,12 @@ public class SSHHandler extends Thread {
 			throws InterruptedException {
 		this.taskQueue.execute(new Callable<Object>() {
 			@Override public Object call() throws Exception {
-				return command.call(host, ShellUtils.ameliaPromptRegexp());
+				try {
+					return command.call(host, ShellUtils.ameliaPromptRegexp());
+				} catch (Exception e) {
+					logger.error(e);
+					throw e;
+				}
 			}
 		});
 
