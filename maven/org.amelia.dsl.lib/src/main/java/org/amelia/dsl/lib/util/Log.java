@@ -96,7 +96,6 @@ public class Log {
 	
 	private static String colorPairs(final String text) {
 		String result = text;
-		PairMatcher matcher = new PairMatcher();
 		Map<ANSI, char[]> pairs = new HashMap<ANSI, char[]>();
 		pairs.put(ANSI.BLUE, new char[] { '(', ')' });
 		pairs.put(ANSI.MAGENTA, new char[] { '[', ']' });
@@ -105,10 +104,10 @@ public class Log {
 		pairs.put(ANSI.YELLOW, new char[] { '"', '"' });
 		for (ANSI color : pairs.keySet()) {
 			char[] chars = pairs.get(color);
-			List<Range<Integer>> regions = matcher.regions(result, chars[0], chars[1]);
-			List<Range<Integer>> redundantRegions = matcher.redundantRegions(regions);
-			result = cleanRedundantRegions(redundantRegions, result);
-			for (Range<Integer> r : matcher.cleanRedundantRegions(regions)) {
+			PairMatcher matcher = new PairMatcher(result, chars[0], chars[1]);
+			result = cleanRedundantRegions(matcher.redundantRegions(), result);
+			matcher.removeRedundantRegions();
+			for (Range<Integer> r : matcher.getRegions()) {
 				String start = result.substring(0, r.lowerEndpoint() + 1);
 				String middle = result.substring(r.lowerEndpoint() + 1,
 						r.upperEndpoint());
