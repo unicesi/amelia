@@ -127,7 +127,7 @@
 					<descriptors>
 						<descriptor>src/main/resources/assembly/jar.xml</descriptor>
 					</descriptors>
-					<finalName>${jarFileName}-dependencies</finalName>
+					<finalName>${jar.name}-dependencies</finalName>
         			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 			</plugin>
@@ -142,6 +142,7 @@
           				<configuration>
           					<tasks>
           						<copy file="target/${jar.name}-dependencies.jar" tofile="${bundle.dir}/${jar.name}-dependencies.jar"/>
+          						<delete file="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
           						<unzip src="target/${jar.name}-sources.jar" dest="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
           					</tasks>
           				</configuration>
