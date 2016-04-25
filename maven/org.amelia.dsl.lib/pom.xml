@@ -30,9 +30,8 @@
 	<name>Amelia Runtime Library</name>
 	
 	<properties>
-		<jarFileName>${project.artifactId}-${project.version}</jarFileName>
-		<bundleDir>../../plugins/org.amelia.dsl.lib.osgi/</bundleDir>
-		<bundleSourceDir>../../plugins/org.amelia.dsl.lib.osgi.source/</bundleSourceDir>
+		<jar.name>${project.artifactId}-${project.version}</jar.name>
+		<bundle.dir>../../plugins/org.amelia.dsl.lib.osgi/</bundle.dir>
 	</properties>
 	
 	<dependencies>
@@ -142,8 +141,8 @@
           				</goals>
           				<configuration>
           					<tasks>
-          						<copy file="target/${jarFileName}-dependencies.jar" tofile="${bundleDir}/${jarFileName}-dependencies.jar"/>
-          						<unzip src="target/${jarFileName}-sources.jar" dest="${bundleDir}/OSGI-OPT/src"/>
+          						<copy file="target/${jar.name}-dependencies.jar" tofile="${bundle.dir}/${jar.name}-dependencies.jar"/>
+          						<unzip src="target/${jar.name}-sources.jar" dest="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
           					</tasks>
           				</configuration>
           			</execution>
