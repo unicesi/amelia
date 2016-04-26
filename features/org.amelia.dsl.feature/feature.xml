@@ -215,7 +215,7 @@ Library.
    </license>
 
    <url>
-      <update label="Amelia" url="http://migueljimenez.co/amelia/"/>
+      <update label="Amelia" url="http://unicesi.github.com/amelia/releases/"/>
       <discovery label="Xtext" url="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/"/>
    </url>
 
