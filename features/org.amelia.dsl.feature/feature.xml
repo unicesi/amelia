@@ -216,6 +216,7 @@ Library.
 
    <url>
       <update label="Amelia" url="http://unicesi.github.com/amelia/releases/"/>
+      <discovery label="Pascani" url="http://unicesi.github.com/pascani/releases/"/>
       <discovery label="Xtext" url="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/"/>
    </url>
 
@@ -244,6 +245,7 @@ Library.
       <import plugin="org.eclipse.xtext.xbase.ui"/>
       <import plugin="org.eclipse.xtext.xbase.ide"/>
       <import plugin="org.eclipse.xtext.ide"/>
+      <import plugin="org.pascani.dsl.lib.osgi"/>
    </requires>
 
    <plugin
