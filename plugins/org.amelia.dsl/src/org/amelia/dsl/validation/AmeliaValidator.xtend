@@ -216,7 +216,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			if (typeDecl instanceof Subsystem) {
 				if (typeDecl.extensions != null) {
 					val includes = typeDecl.extensions.declarations.filter(IncludeDeclaration)
-					val includedSubsystems = includes.map[i|i.element as Subsystem]
+					val includedSubsystems = includes.filter[i|i.element instanceof Subsystem].map[i|i.element as Subsystem]
 					val includedParams = includedSubsystems
 						.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
 						.filter[v|v.param]
