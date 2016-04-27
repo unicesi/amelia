@@ -44,6 +44,7 @@ import org.amelia.dsl.lib.descriptors.Version;
 import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
 import org.pascani.dsl.lib.sca.FrascatiUtils;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import net.sf.expectit.Expect;
@@ -91,8 +92,8 @@ public class Commands {
 			return this;
 		}
 		
-		public RunBuilder withLibpath(final List<String> libs) {
-			return withLibpath(libs.toArray(new String[0]));
+		public RunBuilder withLibpath(final Iterable<String> libs) {
+			return withLibpath(Iterables.toArray(libs, String.class));
 		}
 
 		public RunBuilder withLibpath(final String... libs) {
@@ -110,8 +111,8 @@ public class Commands {
 			return this;
 		}
 		
-		public RunBuilder withArguments(final List<String> arguments) {
-			return withArguments(arguments.toArray(new String[0]));
+		public RunBuilder withArguments(final Iterable<String> arguments) {
+			return withArguments(Iterables.toArray(arguments, String.class));
 		}
 
 		public RunBuilder withArguments(final String... arguments) {
@@ -139,8 +140,8 @@ public class Commands {
 			return this;
 		}
 		
-		public RunBuilder withErrorTexts(final List<String> errorTexts) {
-			return withErrorTexts(errorTexts.toArray(new String[0]));
+		public RunBuilder withErrorTexts(final Iterable<String> errorTexts) {
+			return withErrorTexts(Iterables.toArray(errorTexts, String.class));
 		}
 		
 		public RunBuilder withErrorTexts(String... errorTexts) {
