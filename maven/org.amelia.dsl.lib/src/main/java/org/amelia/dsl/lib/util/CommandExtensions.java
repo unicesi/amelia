@@ -21,7 +21,7 @@ package org.amelia.dsl.lib.util;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.eclipse.xtext.xbase.lib.Inline;
 import org.eclipse.xtext.xbase.lib.Pure;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import org.eclipse.xtext.xbase.lib.Procedures;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -56,7 +56,7 @@ public class CommandExtensions {
 	 */
 	public static CommandDescriptor operator_doubleArrow(
 			final CommandDescriptor.Builder builder,
-			final Procedure1<CommandDescriptor.Builder> procedure) {
+			final Procedures.Procedure1<CommandDescriptor.Builder> procedure) {
 		procedure.apply(builder);
 		return builder.build();
 	}
@@ -72,7 +72,7 @@ public class CommandExtensions {
 	 */
 	public static CommandDescriptor operator_doubleArrow(
 			final Commands.RunBuilder builder,
-			final Procedure1<Commands.RunBuilder> procedure) {
+			final Procedures.Procedure1<Commands.RunBuilder> procedure) {
 		procedure.apply(builder);
 		return builder.build();
 	}
