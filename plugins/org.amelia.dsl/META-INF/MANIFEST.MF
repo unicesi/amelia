@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.emf.common,
  org.eclipse.xtext.xbase.lib,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
- org.eclipse.xtext.common.types
+ org.eclipse.xtext.common.types,
+ org.amelia.dsl.lib.osgi
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.amelia.dsl.generator,
  org.amelia.dsl.parser.antlr.internal,
@@ -29,9 +30,5 @@ Export-Package: org.amelia.dsl.generator,
  org.amelia.dsl.amelia,
  org.amelia.dsl.amelia.util,
  org.amelia.dsl.jvmmodel
-Import-Package: org.apache.log4j,
- org.amelia.dsl.lib,
- org.amelia.dsl.lib.descriptors,
- org.amelia.dsl.lib.util,
- org.pascani.dsl.lib.sca
+Import-Package: org.apache.log4j
 Bundle-ClassPath: .

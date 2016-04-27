@@ -33,7 +33,6 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.Later
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
-import org.pascani.dsl.lib.sca.FrascatiUtils
 import org.amelia.dsl.amelia.TransferCommand
 
 /**
@@ -159,7 +158,9 @@ class AmeliaCompiler extends XbaseCompiler {
 		if (expr.uri != null)
 			internalToConvertedExpression(expr.uri, appendable)
 		else
-			appendable.append(FrascatiUtils).append(".DEFAULT_BINDING_URI")
+			appendable
+				.append("org.pascani.dsl.lib.sca.FrascatiUtils")
+				.append(".DEFAULT_BINDING_URI")
 		appendable.append(")")
 	}
 	
