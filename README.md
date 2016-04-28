@@ -1,13 +1,19 @@
 # Amelia
 Amelia is a Domain Specific Language for deploying SCA components, with custom commands to compile and execute FraSCAti applications.
 
-## Eclipse Update Site
+### Eclipse Update Site
 
 http://unicesi.github.io/amelia/releases
 
 Amelia requires Pascani, so please make sure you add the Pascani update site (http://unicesi.github.io/pascani/releases) before you install Amelia features.
 
-## Compiling From Sources
+### Clone
+
+```bash
+git clone -b "master" --single-branch https://github.com/unicesi/amelia
+```
+
+### Compiling From Sources
 
 If you want to build the Amelia sources locally, you need Maven.
 
