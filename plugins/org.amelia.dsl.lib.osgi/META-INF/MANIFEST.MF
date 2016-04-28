@@ -3,9 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Runtime library bundle
 Bundle-SymbolicName: org.amelia.dsl.lib.osgi
 Bundle-Version: 0.5.0.qualifier
-Bundle-ClassPath: org.amelia.dsl.lib-0.5.0-SNAPSHOT.jar
 Bundle-Vendor: Miguel Jiménez
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.amelia.dsl.lib,
  org.amelia.dsl.lib.descriptors,
  org.amelia.dsl.lib.util
+Bundle-ClassPath: org.amelia.dsl.lib-0.5.0-SNAPSHOT-dependencies.jar
