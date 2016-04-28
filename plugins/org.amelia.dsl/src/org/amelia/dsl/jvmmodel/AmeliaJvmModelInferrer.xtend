@@ -144,40 +144,15 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				members += deployment.toMethod("start", typeRef(boolean)) [
 					visibility = JvmVisibility.PRIVATE
 					parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
+					parameters += deployment.toParameter("shutdownAfterDeployment", typeRef(boolean))
 					exceptions += typeRef(Exception)
-					body = [
-						trace(deployment)
-							.append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine
-							.append('''
-								«FOR subsystem : subsystems»
-									«val dependencies = 
-										if(subsystem.extensions != null)
-											subsystem.extensions.declarations.filter(DependDeclaration)
-										else
-											Collections.EMPTY_LIST
-									»
-									«IF !dependencies.empty»
-										«dependencies.join(
-											'''«prefix»subsystems.get("«subsystem.fullyQualifiedName»").dependsOn(
-											''',
-											",\n",
-											"\n);",
-											[d|'''	«prefix»subsystems.get("«d.element.fullyQualifiedName»")''']
-										)»
-									«ENDIF»
-								«ENDFOR»
-							''')
-					    	.append("for (").append(Subsystem).append(''' subsystem : «prefix»subsystems.values()) {''')
-					    	.increaseIndentation.newLine
-					    	.append("subsystem.deployment().setup();")
-					    	.decreaseIndentation.newLine
-					    	.append("}").newLine
-							.append('''graph.addSubsystems(«prefix»subsystems.values().toArray(new ''')
-							.append(Subsystem).append("[0]));").newLine
-						append("boolean successful = graph.execute(stopExecutedComponents);")
-						trace(deployment)
-							.newLine.append("return successful;")
-					]
+					body = startMethodBody(deployment, subsystems, true)
+				]
+				members += deployment.toMethod("start", typeRef(boolean)) [
+					visibility = JvmVisibility.PRIVATE
+					parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
+					exceptions += typeRef(Exception)
+					body = startMethodBody(deployment, subsystems, false)
 				]
 			}
 		]
@@ -526,6 +501,46 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			} else if (!rules.empty) {
 				trace(subsystem).append('''super.graph.execute(true);''')
 			}
+		]
+	}
+	
+	def Procedure1<ITreeAppendable> startMethodBody(DeploymentDeclaration deployment,
+		Iterable<org.amelia.dsl.amelia.Subsystem> subsystems, boolean includeSecondParam) {
+		return [
+			trace(deployment)
+				.append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine
+				.append('''
+					«FOR subsystem : subsystems»
+						«val dependencies = 
+							if(subsystem.extensions != null)
+								subsystem.extensions.declarations.filter(DependDeclaration)
+							else
+								Collections.EMPTY_LIST
+						»
+						«IF !dependencies.empty»
+							«dependencies.join(
+								'''«prefix»subsystems.get("«subsystem.fullyQualifiedName»").dependsOn(
+								''',
+								",\n",
+								"\n);",
+								[d|'''	«prefix»subsystems.get("«d.element.fullyQualifiedName»")''']
+							)»
+						«ENDIF»
+					«ENDFOR»
+				''')
+			   	.append("for (").append(Subsystem).append(''' subsystem : «prefix»subsystems.values()) {''')
+			   	.increaseIndentation.newLine
+			  	.append("subsystem.deployment().setup();")
+			   	.decreaseIndentation.newLine
+			   	.append("}").newLine
+				.append('''graph.addSubsystems(«prefix»subsystems.values().toArray(new ''')
+				.append(Subsystem).append("[0]));").newLine
+			append("boolean successful = graph.execute(stopExecutedComponents")
+			if (includeSecondParam)
+				append(", shutdownAfterDeployment")
+			append(");")
+			trace(deployment)
+				.newLine.append("return successful;")
 		]
 	}
 	
