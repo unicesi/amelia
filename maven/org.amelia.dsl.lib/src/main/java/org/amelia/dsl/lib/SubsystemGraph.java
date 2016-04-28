@@ -183,11 +183,20 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		}
 		return valid;
 	}
-
+	
 	/**
 	 * @return whether the execution was successful or not
 	 */
-	public boolean execute(boolean stopExecutedComponents) throws InterruptedException {
+	public boolean execute(final boolean stopExecutedComponents)
+			throws InterruptedException {
+		return execute(stopExecutedComponents, true);
+	}
+	
+	/**
+	 * @return whether the execution was successful or not
+	 */
+	public boolean execute(final boolean stopExecutedComponents,
+			final boolean shutdownAfterDeployment) throws InterruptedException {
 		boolean successful = false;
 		Log.printBanner();
 		if (validate()) {
@@ -205,7 +214,15 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			}
 			// Wait for all threads to finish
 			doneSignal.await();
-			shutdown(stopExecutedComponents);
+			if (shutdownAfterDeployment) {
+				shutdown(stopExecutedComponents);
+			} else {
+				Runtime.getRuntime().addShutdownHook(new Thread() {
+					@Override public void run() {
+						shutdown(stopExecutedComponents);
+					}
+				});
+			}
 			// FIXME: find out why this line is reached without closing all SSH
 			// connections
 			Thread.sleep(500);
@@ -232,8 +249,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		sb.append(Log.SEPARATOR_LONG + "\n");
 		sb.append("Total time: "
 				+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s\n");
-		sb.append("Finished at: " + new Date() + "\n");
-		sb.append(Log.SEPARATOR_LONG);
+		sb.append("Finished at: " + new Date());
 		Log.print(sb.toString());
 	}
 
@@ -243,16 +259,18 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			this.taskQueue.shutdown();
 			for (DependencyThread thread : this.threads)
 				thread.shutdown();
-			boolean any = false;
-			for (Subsystem subsystem : this.subsystems) {
-				if(!subsystem.deployment().isShutdown()) {
-					if (!any) {
-						any = true;
-						Log.print(Log.SEPARATOR_LONG);
-					}
-					subsystem.deployment().shutdown(stopExecutedComponents);
+			
+			// There is at least one subsystem to shutdown
+			for (int i = 0, n = 0; n == 0 && i < this.subsystems.size(); i++)
+				if (!this.subsystems.get(i).deployment().isShutdown()) {
+					++n;
+					Log.print(Log.SEPARATOR_LONG + "\nDEPLOYMENT SHUTDOWN\n"
+							+ Log.SEPARATOR_LONG);
 				}
-			}
+					
+			for (Subsystem subsystem : this.subsystems)
+				if(!subsystem.deployment().isShutdown())
+					subsystem.deployment().shutdown(stopExecutedComponents);
 		}
 	}
 
