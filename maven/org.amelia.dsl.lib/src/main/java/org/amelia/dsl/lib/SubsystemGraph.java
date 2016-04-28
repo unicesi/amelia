@@ -18,6 +18,7 @@
  */
 package org.amelia.dsl.lib;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.amelia.dsl.lib.util.ANSI;
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.Threads;
@@ -217,16 +219,12 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			if (shutdownAfterDeployment) {
 				shutdown(stopExecutedComponents);
 			} else {
-				Runtime.getRuntime().addShutdownHook(new Thread() {
-					@Override public void run() {
-						shutdown(stopExecutedComponents);
-					}
-				});
+				shutdownHook(stopExecutedComponents);
 			}
 			// FIXME: find out why this line is reached without closing all SSH
 			// connections
 			Thread.sleep(500);
-			printExecutionSummary(start, System.nanoTime());
+			printExecutionSummary(start, System.nanoTime(), shutdownAfterDeployment);
 			successful = !Threads.isAnySubsystemAborting();
 			Threads.reset();
 		} else {
@@ -238,7 +236,21 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		return successful;
 	}
 	
-	private void printExecutionSummary(final long start, final long end) {
+	private void shutdownHook(final boolean stopExecutedComponents) {
+		new Thread() {
+			@Override public void run() {
+				try {
+					System.in.read();
+				} catch (IOException e) {
+				} finally {
+					shutdown(stopExecutedComponents);
+				}
+			}
+		}.start();
+	}
+	
+	private void printExecutionSummary(final long start, final long end,
+			final boolean shutdownAfterDeployment) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Log.SEPARATOR_LONG + "\n");
 		if (!Threads.isAnySubsystemAborting()) {
@@ -251,6 +263,10 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 				+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s\n");
 		sb.append("Finished at: " + new Date());
 		Log.print(sb.toString());
+		if (shutdownAfterDeployment)
+			Log.print(Log.SEPARATOR_LONG);
+		else
+			Log.print(ANSI.RED.format("Press Enter to shutdown deployment..."));
 	}
 
 	public void shutdown(final boolean stopExecutedComponents) {
