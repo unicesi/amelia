@@ -488,6 +488,16 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		}
 	}
 	
+	@Check
+	def checkDeploymentIncludes(DeploymentDeclaration deployment) {
+		var warn = true
+		if (deployment.extensions != null) {
+			warn = deployment.extensions.declarations.filter(IncludeDeclaration).empty
+		}
+		if (warn)
+			warning("Deployments should include at least one subsystem", AmeliaPackage.Literals.TYPE_DECLARATION__NAME)
+	}
+	
 	/**
 	 * Adapted from 
 	 * https://github.com/xtext/seven-languages-xtext/blob/master/languages/\
