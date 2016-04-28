@@ -32,7 +32,60 @@
 	<properties>
 		<jar.name>${project.artifactId}-${project.version}</jar.name>
 		<bundle.dir>../../plugins/org.amelia.dsl.lib.osgi/</bundle.dir>
+		<pascani.version>1.0.0-SNAPSHOT</pascani.version>
 	</properties>
+
+	<profiles>
+		<!-- Includes the Pascani runtime library in the assembly file -->
+		<profile>
+			<id>stand-alone-jar</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.pascani</groupId>
+					<artifactId>org.pascani.dsl.lib.sca</artifactId>
+					<version>${pascani.version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<!-- Excludes the Pascani runtime library from the assembly file, and copies 
+			the resulting jar into the runtime library bundle -->
+		<profile>
+			<id>eclipse-plugin</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.pascani</groupId>
+					<artifactId>org.pascani.dsl.lib.sca</artifactId>
+					<version>${pascani.version}</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+		          			<execution>
+		          				<phase>package</phase>
+		          				<goals>
+		          					<goal>run</goal>
+		          				</goals>
+		          				<configuration>
+		          					<tasks>
+		          						<copy file="target/${jar.name}-dependencies.jar" tofile="${bundle.dir}/${jar.name}-dependencies.jar"/>
+		          						<delete file="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
+		          						<unzip src="target/${jar.name}-sources.jar" dest="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
+		          					</tasks>
+		          				</configuration>
+		          			</execution>
+		          		</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	
 	<dependencies>
 		<dependency>
@@ -64,12 +117,6 @@
 			<groupId>org.eclipse.xtext</groupId>
 			<artifactId>org.eclipse.xtext.xbase.lib</artifactId>
 			<version>${xtextVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.pascani</groupId>
-			<artifactId>org.pascani.dsl.lib.sca</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -131,24 +178,6 @@
 					<finalName>${jar.name}-dependencies</finalName>
         			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-          			<execution>
-          				<phase>package</phase>
-          				<goals>
-          					<goal>run</goal>
-          				</goals>
-          				<configuration>
-          					<tasks>
-          						<copy file="target/${jar.name}-dependencies.jar" tofile="${bundle.dir}/${jar.name}-dependencies.jar"/>
-          						<delete file="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
-          						<unzip src="target/${jar.name}-sources.jar" dest="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
-          					</tasks>
-          				</configuration>
-          			</execution>
-          		</executions>
 			</plugin>
 		</plugins>
 	</build>
