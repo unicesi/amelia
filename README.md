@@ -13,7 +13,7 @@ If you want to build the Amelia sources locally, you need Maven.
 
 First of all, make sure to increase memory
 
-```
+```bash
 export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=256m"
 ```
 
@@ -21,6 +21,6 @@ Then install [Pascani](https://github.com/unicesi/pascani). This extra step is t
 
 And then run
 
-```
+```bash
 mvn install -file maven/org.amelia.tycho.parent/pom.xml
 ```
