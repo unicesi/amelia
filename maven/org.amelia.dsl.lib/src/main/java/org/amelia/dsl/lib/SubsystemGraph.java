@@ -147,7 +147,6 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 	public static SubsystemGraph getInstance() {
 		if (instance == null)
 			instance = new SubsystemGraph();
-
 		return instance;
 	}
 	
@@ -216,16 +215,15 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 			}
 			// Wait for all threads to finish
 			doneSignal.await();
-			if (shutdownAfterDeployment) {
-				shutdown(stopExecutedComponents);
-			} else {
-				shutdownHook(stopExecutedComponents);
-			}
-			// FIXME: find out why this line is reached without closing all SSH
-			// connections
-			Thread.sleep(500);
-			printExecutionSummary(start, System.nanoTime(), shutdownAfterDeployment);
 			successful = !Threads.isAnySubsystemAborting();
+			if (shutdownAfterDeployment || !successful) {
+				shutdown(stopExecutedComponents);
+				printExecutionSummary(start, System.nanoTime(), false);
+			} else {
+				Thread t = shutdownHook(stopExecutedComponents);
+				printExecutionSummary(start, System.nanoTime(), true);
+				t.join();
+			}
 			Threads.reset();
 		} else {
 			shutdown(stopExecutedComponents);
@@ -236,8 +234,8 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 		return successful;
 	}
 	
-	private void shutdownHook(final boolean stopExecutedComponents) {
-		new Thread() {
+	private Thread shutdownHook(final boolean stopExecutedComponents) {
+		Thread t = new Thread() {
 			@Override public void run() {
 				try {
 					System.in.read();
@@ -246,11 +244,16 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 					shutdown(stopExecutedComponents);
 				}
 			}
-		}.start();
+		};
+		t.start();
+		return t;
 	}
 	
 	private void printExecutionSummary(final long start, final long end,
-			final boolean shutdownAfterDeployment) {
+			final boolean waitAfterDeployment) throws InterruptedException {
+		// FIXME: find out why this line is reached without closing all SSH
+		// connections
+		Thread.sleep(500);
 		StringBuilder sb = new StringBuilder();
 		sb.append(Log.SEPARATOR_LONG + "\n");
 		if (!Threads.isAnySubsystemAborting()) {
@@ -263,10 +266,10 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 				+ TimeUnit.SECONDS.convert(end - start, TimeUnit.NANOSECONDS) + "s\n");
 		sb.append("Finished at: " + new Date());
 		Log.print(sb.toString());
-		if (shutdownAfterDeployment)
-			Log.print(Log.SEPARATOR_LONG);
-		else
+		if (waitAfterDeployment)
 			Log.print(ANSI.RED.format("Press Enter to shutdown deployment..."));
+		else
+			Log.print(Log.SEPARATOR_LONG);
 	}
 
 	public void shutdown(final boolean stopExecutedComponents) {
