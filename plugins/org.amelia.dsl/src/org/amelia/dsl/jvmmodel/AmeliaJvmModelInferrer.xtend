@@ -444,7 +444,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def Procedure1<ITreeAppendable> setupRules(org.amelia.dsl.amelia.Subsystem subsystem, String subsystemParam) {
 		return [
-			trace(subsystem).append("init();").newLine
 			if (subsystem.extensions != null) {
 				val setups = subsystem.extensions.declarations.filter(IncludeDeclaration).map [ d |
 					if (d.element instanceof org.amelia.dsl.amelia.Subsystem)
@@ -454,6 +453,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				])
 				trace(subsystem).append(setups)
 			}
+			trace(subsystem).append("init();").newLine
 			var currentHostBlock = 0
 			for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
 				if (currentHostBlock > 0)
