@@ -20,13 +20,13 @@ package org.amelia.dsl.lib.descriptors;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.amelia.dsl.lib.FTPHandler;
 import org.amelia.dsl.lib.SSHHandler;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.Strings;
+import org.amelia.dsl.lib.util.Threads;
 
 import com.jcraft.jsch.JSchException;
 
@@ -54,8 +54,6 @@ public class Host implements Comparable<Host> {
 	private FTPHandler ftp;
 
 	private int fixedWith;
-	
-	private final static List<String> pickedNames = new ArrayList<String>();
 
 	public Host(final String hostname, final int ftpPort, final int sshPort,
 			final String username, final String password,
@@ -67,12 +65,12 @@ public class Host implements Comparable<Host> {
 		this.password = password;
 		if (identifier == null) {
 			this.identifier = sequentialName(hostname);
-		} else if (pickedNames.contains(identifier)) {
+		} else if (Threads.hostNames().contains(identifier)) {
 			throw new RuntimeException(
 					"Duplicate host identifier '" + identifier + "'");
 		} else {
 			this.identifier = identifier;
-			pickedNames.add(this.identifier);
+			Threads.hostNames().add(this.identifier);
 		}
 		this.fixedWith = toString().length();
 	}
@@ -159,10 +157,10 @@ public class Host implements Comparable<Host> {
 		String name = hostname;
 		String proposal = name;
 		int i = 1;
-		while (pickedNames.contains(proposal)) {
+		while (Threads.hostNames().contains(proposal)) {
 			proposal = name + "-" + i++;
 		}
-		pickedNames.add(proposal);
+		Threads.hostNames().add(proposal);
 		return proposal;
 	}
 

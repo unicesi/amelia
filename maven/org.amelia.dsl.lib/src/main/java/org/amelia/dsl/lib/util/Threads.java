@@ -18,6 +18,9 @@
  */
 package org.amelia.dsl.lib.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.amelia.dsl.lib.SubsystemGraph;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +35,12 @@ public class Threads {
 	 * abortion
 	 */
 	private static volatile boolean globallyAborting = false;
+	
+	/**
+	 * The list of identifiers corresponding to all hosts included in the
+	 * current deployment
+	 */
+	private final static List<String> hostNames = new ArrayList<String>();
 	
 	/**
 	 * The logger
@@ -66,6 +75,11 @@ public class Threads {
 	 */
 	public static void reset() {
 		globallyAborting = false;
+		hostNames.clear();
+	}
+	
+	public static List<String> hostNames() {
+		return hostNames;
 	}
 	
 	public static boolean isAnySubsystemAborting() {
