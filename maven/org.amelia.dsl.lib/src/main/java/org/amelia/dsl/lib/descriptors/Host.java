@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.amelia.dsl.lib.FTPHandler;
 import org.amelia.dsl.lib.SSHHandler;
@@ -56,30 +55,31 @@ public class Host implements Comparable<Host> {
 
 	private int fixedWith;
 	
-	/*
-	 * From: https://en.wikipedia.org/wiki/List_of_Disney_animated_universe_characters
-	 */
-	private final static String[] randomNames = {"mandy", "billy", "nemo",
-		"doris","abby", "alice", "apollo", "ariel", "aurora", "bambi", "ben",
-		"blaze", "bobbie", "buster"};
-	
 	private final static List<String> pickedNames = new ArrayList<String>();
 
 	public Host(final String hostname, final int ftpPort, final int sshPort,
 			final String username, final String password,
 			final String identifier) {
-		this.identifier = identifier;
 		this.hostname = hostname;
 		this.ftpPort = ftpPort;
 		this.sshPort = sshPort;
 		this.username = username;
 		this.password = password;
+		if (identifier == null) {
+			this.identifier = sequentialName(hostname);
+		} else if (pickedNames.contains(identifier)) {
+			throw new RuntimeException(
+					"Duplicate host identifier '" + identifier + "'");
+		} else {
+			this.identifier = identifier;
+			pickedNames.add(this.identifier);
+		}
 		this.fixedWith = toString().length();
 	}
 
 	public Host(final String hostname, final int ftpPort, final int sshPort,
 			final String username, final String password) {
-		this(hostname, ftpPort, sshPort, username, password, randomName());
+		this(hostname, ftpPort, sshPort, username, password, null);
 	}
 
 	public boolean openSSHConnection(String subsystem)
@@ -147,16 +147,16 @@ public class Host implements Comparable<Host> {
 		this.ssh.stopExecutions();
 	}
 
-	public int stopExecutions(List<CommandDescriptor> executions) throws IOException {
+	public int stopExecutions(List<CommandDescriptor> executions)
+			throws IOException {
 		if (this.ssh != null && this.ssh.isConnected()) {			
 			return this.ssh.stopExecutions(executions);
 		}
 		return 0;
 	}
 	
-	private static String randomName() {
-		Random g = new Random();
-		String name = randomNames[g.nextInt(randomNames.length)];
+	private static synchronized String sequentialName(final String hostname) {
+		String name = hostname;
 		String proposal = name;
 		int i = 1;
 		while (pickedNames.contains(proposal)) {
