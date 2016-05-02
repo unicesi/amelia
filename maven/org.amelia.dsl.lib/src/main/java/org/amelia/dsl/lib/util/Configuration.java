@@ -66,10 +66,9 @@ public class Configuration {
 			if (!config.containsKey("known_hosts"))
 				config.put("known_hosts", home + "/.ssh/known_hosts");
 			if (!config.containsKey("connection_timeout"))
-				config.put("connection_timeout", "10000"); // 0 for no
-															// timeout
+				config.put("connection_timeout", "10000"); // 0 for no timeout
 			if (!config.containsKey("execution_timeout"))
-				config.put("execution_timeout", "15000");
+				config.put("execution_timeout", "15000"); // -1 for no timeout
 			if (!config.containsKey("color_output"))
 				config.put("color_output", "true");
 			if (!config.containsKey("debug_mode"))
