@@ -467,7 +467,7 @@ public class DescriptorGraph
 			if (descriptor.isExecution()) {
 				// FIXME: Can composite names contain other characters? (group 3)
 				Pattern pattern = Pattern.compile(
-						"(frascati run) (\\-r [0-9]+ )?([\\w\\-]+)(.*)");
+						"(frascati run) (\\-r [0-9]+ )?([\\w\\-\\.]+)(.*)");
 				Matcher matcher = pattern.matcher(descriptor.toCommandString());
 				if (matcher.find()) {
 					if (Strings.containsAnyOf(matcher.group(3), compositeNames)) {
