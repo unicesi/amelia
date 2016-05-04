@@ -35,5 +35,5 @@ Then install [Pascani](https://github.com/unicesi/pascani). This extra step is t
 And then run
 
 ```bash
-mvn install -file maven/org.amelia.tycho.parent/pom.xml
+mvn install
 ```
