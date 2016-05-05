@@ -74,7 +74,7 @@
 		          				</goals>
 		          				<configuration>
 		          					<tasks>
-		          						<copy file="target/${jar.name}-dependencies.jar" tofile="${bundle.dir}/${jar.name}-dependencies.jar"/>
+		          						<copy file="target/${jar.name}-dependencies.jar" tofile="${bundle.dir}/${project.artifactId}-dependencies.jar"/>
 		          						<delete file="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
 		          						<unzip src="target/${jar.name}-sources.jar" dest="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
 		          					</tasks>

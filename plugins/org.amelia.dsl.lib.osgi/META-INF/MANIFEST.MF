@@ -8,4 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.amelia.dsl.lib,
  org.amelia.dsl.lib.descriptors,
  org.amelia.dsl.lib.util
-Bundle-ClassPath: org.amelia.dsl.lib-0.5.0-SNAPSHOT-dependencies.jar
+Bundle-ClassPath: org.amelia.dsl.lib-dependencies.jar
