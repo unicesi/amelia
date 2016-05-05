@@ -8,7 +8,7 @@ env:
   MAVEN_OPTS: "-Xmx512m -XX:MaxPermSize=256m"
 release:
   script: |
-    mvn versions:set "-DnewVersion=${tag}"
+    mvn org.eclipse.tycho:tycho-versions-plugin:set-version "-DnewVersion=${tag}"
     git commit -am "${tag}"
     mvn clean deploy -PAmelia --settings /home/r/settings.xml
 merge:
