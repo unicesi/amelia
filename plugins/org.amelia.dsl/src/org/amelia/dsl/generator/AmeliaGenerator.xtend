@@ -19,12 +19,11 @@
 package org.amelia.dsl.generator
 
 import com.google.inject.Inject
+import java.util.Date
 import java.util.List
-import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.DependDeclaration
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.lib.SubsystemGraph
-import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
@@ -34,7 +33,6 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.resource.IContainer
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
-import java.util.Date
 
 /**
  * Generates code from your model files on save.
@@ -52,12 +50,13 @@ class AmeliaGenerator implements IGenerator {
 	@Inject extension IQualifiedNameProvider
 
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
-		val subsystems = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem).map [ d |
-			d.getEObject(resource) as Subsystem
-		]
-//		val deployments = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.deploymentDeclaration)
-		val content = getDefaultMainImpl(subsystems)
-		fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
+		// This automatic generation causes errors when .amelia files are removed,
+		// and the user has to manually save all files, so Amelia.java is generated again.
+//		val subsystems = getEObjectDescriptions(resource, AmeliaPackage.eINSTANCE.subsystem).map [ d |
+//			d.getEObject(resource) as Subsystem
+//		]
+//		val content = getDefaultMainImpl(subsystems)
+//		fsa.generateFile("Amelia.java", AmeliaOutputConfigurationProvider::AMELIA_OUTPUT, content)
 	}
 	
 	def getDefaultMainImpl(Iterable<Subsystem> subsystems) {
