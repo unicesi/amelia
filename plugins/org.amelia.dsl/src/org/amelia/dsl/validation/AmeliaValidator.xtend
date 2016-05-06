@@ -211,30 +211,29 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def checkConflictingParams(VariableDeclaration varDecl) {
-		if (varDecl.param) {
-			val typeDecl = (EcoreUtil2.getRootContainer(varDecl) as Model).typeDeclaration
-			if (typeDecl instanceof Subsystem) {
-				if (typeDecl.extensions != null) {
-					val includes = typeDecl.extensions.declarations.filter(IncludeDeclaration)
-					val includedSubsystems = includes.filter[i|i.element instanceof Subsystem].map[i|i.element as Subsystem]
-					val includedParams = includedSubsystems
-						.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
-						.filter[v|v.param]
-					if (includedParams.map[p|p.name].toList.contains(varDecl.name)) {
-						val conflictingParams = includedParams.filter[p|p.name.equals(varDecl.name)]
-						val subsystems = conflictingParams.map[ p |
-							((EcoreUtil2.getRootContainer(p) as Model).typeDeclaration) as Subsystem
-						]
-						val d = if(subsystems.size == 1) "" else "s"
-						var list = subsystems.join("'", "', '", "'", [s|s.fullyQualifiedName.toString])
-						val index = list.lastIndexOf("', '")
-						if (index > -1)
-							list = list.substring(0, index + 1) + " and " + list.substring(index + 3)
-						warning('''This parameter hides the direct access to parameter '«varDecl.name»' from the included subsystem«d» «list»''', 
-							AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME, CONFLICTING_PARAMETER)
-					}		
-				}
-			}	
+		val type = if(varDecl.param) "parameter" else "variable"
+		val typeDecl = (EcoreUtil2.getRootContainer(varDecl) as Model).typeDeclaration
+		if (typeDecl instanceof Subsystem) {
+			if (typeDecl.extensions != null) {
+				val includes = typeDecl.extensions.declarations.filter(IncludeDeclaration)
+				val includedSubsystems = includes.filter[i|i.element instanceof Subsystem].map[i|i.element as Subsystem]
+				val includedParams = includedSubsystems
+					.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
+					.filter[v|v.param]
+				if (includedParams.map[p|p.name].toList.contains(varDecl.name)) {
+					val conflictingParams = includedParams.filter[p|p.name.equals(varDecl.name)]
+					val subsystems = conflictingParams.map[ p |
+						((EcoreUtil2.getRootContainer(p) as Model).typeDeclaration) as Subsystem
+					]
+					val d = if(subsystems.size == 1) "" else "s"
+					var list = subsystems.join("'", "', '", "'", [s|s.fullyQualifiedName.toString])
+					val index = list.lastIndexOf("', '")
+					if (index > -1)
+						list = list.substring(0, index + 1) + " and " + list.substring(index + 3)
+					warning('''This «type» hides the direct access to parameter '«varDecl.name»' from the included subsystem«d» «list»''', 
+						AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME, CONFLICTING_PARAMETER)
+				}		
+			}
 		}
 	}
 	

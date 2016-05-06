@@ -273,7 +273,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					]
 				}
 				// Add a getter for non-duplicate parameters
-				val duplicates = (includedParams + params).groupBy[p|p.name]
+				val duplicates = (includedParams + subsystem.variables).groupBy[p|p.name]
 					.values.filter[l|l.size > 1]
 					.map[l|l.get(0).name]
 					.toList
@@ -605,8 +605,12 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			Collections.EMPTY_LIST
 	}
 	
+	def variables(org.amelia.dsl.amelia.Subsystem subsystem) {
+		return subsystem.body.expressions.filter(VariableDeclaration)
+	}
+	
 	def params(org.amelia.dsl.amelia.Subsystem subsystem) {
-		return subsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param]
+		return variables(subsystem).filter[v|v.param]
 	}
 	
 	def List<VariableDeclaration> includedParams(org.amelia.dsl.amelia.Subsystem subsystem, boolean recursive) {
