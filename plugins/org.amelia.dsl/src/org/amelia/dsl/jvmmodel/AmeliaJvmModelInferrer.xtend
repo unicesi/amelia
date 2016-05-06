@@ -299,6 +299,31 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						subsystem.toParameter(dependenciesParam, typeRef(List, typeRef(Subsystem)))
 					body = subsystem.setupGraph(subsystemParam)
 				]
+				methods += subsystem.toMethod("main", typeRef(void)) [
+					static = true
+					exceptions += typeRef(Exception)
+					parameters += subsystem.toParameter("args", typeRef(String).addArrayTypeDimension)
+					body = [
+						val allowed = subsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param && v.right == null].empty
+							&& (
+								subsystem.extensions == null
+								|| (subsystem.extensions != null && subsystem.extensions.declarations.filter(DependDeclaration).empty)
+							)
+						if (allowed) {
+							append(Subsystem).append(" subsystem = new ").append(Subsystem)
+								.append('''("«subsystem.fullyQualifiedName»", new «subsystem.name»());''').newLine
+							append("subsystem.deployment().setup();").newLine
+							append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine
+							append('''
+								graph.addSubsystems(subsystem);
+								graph.execute(true, false);''')
+						} else {
+							append('''
+								throw new Exception("Subsystems with dependencies or non-initialized" 
+									+ " parameters cannot be executed without using a deployment descriptor");''')
+						}
+					]
+				]
 				
 				// Method to return all rules from included subsystems
 				getters += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
