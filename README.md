@@ -37,3 +37,7 @@ And then run
 ```bash
 mvn install
 ```
+
+### Questions?
+
+If you have any questions about Amelia, or something doesn't work as expected, please [submit an issue here](https://github.com/unicesi/amelia/issues/new).
