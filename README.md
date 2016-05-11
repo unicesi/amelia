@@ -30,8 +30,6 @@ First of all, make sure to increase memory
 export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=256m"
 ```
 
-Then install [Pascani](https://github.com/unicesi/pascani). This extra step is temporarily necessary because Pascani has not been uploaded to Maven central yet. This wont be necessary in the future.
-
 And then run
 
 ```bash
