@@ -10,7 +10,6 @@ release:
   script: |
     mvn org.eclipse.tycho:tycho-versions-plugin:set-version "-DnewVersion=${tag}"
     git commit -am "${tag}"
-    git push origin master
     mvn clean deploy -PAmelia --settings /home/r/settings.xml
 merge:
   script:
