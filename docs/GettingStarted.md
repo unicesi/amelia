@@ -44,8 +44,8 @@ compilation:
 
 execution: compilation;
     cd "$FRASCATI_HOME/examples/helloworld-rmi"
-    run helloworld-rmi-server -libpath "server.jar"
-    run helloworld-rmi-client -libpath "client.jar" -s "r" -m "run"
+    run "helloworld-rmi-server" -libpath "server.jar"
+    run "helloworld-rmi-client" -libpath "client.jar" -s "r" -m "run"
 ```
 Notice that $FRASCATI_HOME is not related to Amelia in any way, it's just an environment variable that gets resolved during the SSH session.
 
@@ -54,12 +54,12 @@ Of course, different set of rules can express the same, that's how programming w
 server:
     cd "$FRASCATI_HOME/examples/helloworld-rmi"
     compile "server/src" "server"
-    run helloworld-rmi-server -libpath "server.jar"
+    run "helloworld-rmi-server" -libpath "server.jar"
 
 client: server;
     cd "$FRASCATI_HOME/examples/helloworld-rmi"
     compile "client/src" "client"
-    run helloworld-rmi-client -libpath "client.jar" -s "r" -m "run"
+    run "helloworld-rmi-client" -libpath "client.jar" -s "r" -m "run"
 ```
 In the first case the overall execution would be:
 1. Change the current directory to _$FRASCATI_HOME/examples/helloworld-rmi_
@@ -86,12 +86,12 @@ subsystem HelloworldRMI {
         server:
             cd "$FRASCATI_HOME/examples/helloworld-rmi"
             compile "server/src" "server"
-            run helloworld-rmi-server -libpath "server.jar"
+            run "helloworld-rmi-server" -libpath "server.jar"
 
         client: server;
             cd "$FRASCATI_HOME/examples/helloworld-rmi"
             compile "client/src" "client"
-            run helloworld-rmi-client -libpath "client.jar" -s "r" -m "run"
+            run "helloworld-rmi-client" -libpath "client.jar" -s "r" -m "run"
     }
 }
 ```
