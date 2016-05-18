@@ -41,6 +41,8 @@ import org.amelia.dsl.lib.descriptors.AssetBundle;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.amelia.dsl.lib.descriptors.Version;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
 import org.pascani.dsl.lib.sca.FrascatiUtils;
 
@@ -56,6 +58,11 @@ import net.sf.expectit.matcher.Matchers;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Commands {
+	
+	/**
+	 * The logger
+	 */
+	private static Logger logger = LogManager.getLogger(Commands.class);
 
 	/**
 	 * A builder class to configure the execution of SCA components
@@ -220,6 +227,7 @@ public class Commands {
 						if (Strings.containsAnyOf(response, errors)) {
 							String message = Strings.firstIn(errors, response);
 							Log.error(host, message);
+							logger.error(message);
 							throw new RuntimeException(message);
 						} else {
 							Log.success(host, successMessage);
@@ -233,6 +241,7 @@ public class Commands {
 											+ " in host " + host);
 							throw e;
 						} else {
+							logger.error(e);
 							throw new RuntimeException(message2);
 						}
 					}
@@ -431,6 +440,7 @@ public class Commands {
 								+ matcher.group(1) + ") is not compliant with "
 								+ version;
 						Log.error(host, message);
+						logger.error("[" + host + "] " + message);
 						throw new RuntimeException(
 								message + " in host " + host);
 					} else {
@@ -612,6 +622,7 @@ public class Commands {
 					bundle.add(data[0], data[1]);
 				} else {
 					String message = "Bad format in asset bundle: [" + l + "] " + line;
+					logger.error(message);
 					throw new RuntimeException(message);
 				}
 				++l;

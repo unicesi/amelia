@@ -112,6 +112,7 @@ public class DescriptorGraph
 					this.descriptor.notifyObservers();
 				}
 			} catch (Exception e) {
+				logger.error(e);
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
 				// Notify to main thread
@@ -298,6 +299,7 @@ public class DescriptorGraph
 					connectionOk.add(true);
 				} catch (Exception e) {
 					connectionOk.add(false);
+					logger.error(e);
 					throw new RuntimeException(e.getMessage(), e.getCause());
 				}
 			}

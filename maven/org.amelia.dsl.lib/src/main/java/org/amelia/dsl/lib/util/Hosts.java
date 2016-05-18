@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.amelia.dsl.lib.descriptors.Host;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -34,6 +36,11 @@ import org.amelia.dsl.lib.descriptors.Host;
  * TODO: document this class
  */
 public class Hosts {
+	
+	/**
+	 * The logger
+	 */
+	private static Logger logger = LogManager.getLogger(Hosts.class);
 
 	public static Host host(final String hostname, final int ftpPort,
 			final int sshPort, final String username, final String password,
@@ -96,6 +103,7 @@ public class Hosts {
 					hosts.add(new Host(d[0], ftpPort, sshPort, d[3], d[4], d[5]));
 				} else {
 					String message = "Bad format in hosts file: [" + l + "] " + line;
+					logger.error(message);
 					throw new RuntimeException(message);
 				}
 

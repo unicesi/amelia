@@ -27,10 +27,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class SingleThreadTaskQueue extends Thread {
+	
+	/**
+	 * The logger
+	 */
+	private static Logger logger = LogManager
+			.getLogger(SingleThreadTaskQueue.class);
 
 	private interface Callback<V> {
 		public void onComplete(V result);
@@ -53,6 +62,7 @@ public class SingleThreadTaskQueue extends Thread {
 				V result = this.task.call();
 				this.callback.onComplete(result);
 			} catch (Exception e) {
+				logger.error(e);
 				this.callback.onCancel();
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
@@ -76,6 +86,7 @@ public class SingleThreadTaskQueue extends Thread {
 				if (task != null)
 					this.executor.submit(task).get();
 			} catch (Exception e) {
+				logger.error(e);
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
 		}

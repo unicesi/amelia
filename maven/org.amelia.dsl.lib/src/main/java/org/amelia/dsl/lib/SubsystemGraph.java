@@ -35,11 +35,18 @@ import org.amelia.dsl.lib.util.ANSI;
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.Threads;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
+	
+	/**
+	 * The logger
+	 */
+	private static Logger logger = LogManager.getLogger(SubsystemGraph.class);
 
 	public class DependencyThread extends Thread
 			implements Observer, Comparable<DependencyThread> {
@@ -89,6 +96,7 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 					this.subsystem.deployment().notifyObservers();
 				}
 			} catch (Exception e) {
+				logger.error(e);
 				this.subsystem.error();
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			} finally {
