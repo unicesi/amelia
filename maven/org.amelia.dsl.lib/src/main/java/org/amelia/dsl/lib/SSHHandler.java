@@ -105,7 +105,7 @@ public class SSHHandler extends Thread {
 		this.taskQueue.setUncaughtExceptionHandler(Threads.exceptionHandler());
 	}
 	
-	public void setup() throws JSchException, IOException {
+	public void setup() throws Exception {
 		connect();
 		initialize();
 		configure();
@@ -147,7 +147,7 @@ public class SSHHandler extends Thread {
 		this.channel.connect(this.connectionTimeout);
 	}
 
-	private void initialize() throws IOException {
+	private void initialize() throws Exception {
 		this.output = createOutputFile();
 		PrintStream outputStream = new PrintStream(this.output, "UTF-8");
 
@@ -291,16 +291,27 @@ public class SSHHandler extends Thread {
 		return this.session.isConnected() && this.channel.isConnected();
 	}
 
-	private File createOutputFile() throws IOException {
+	private File createOutputFile() throws Exception {
 		String date = this.dateFormat.format(new Date());
 		String fileName = this.host + "-" + date + ".txt";
 		File parent = new File("sessions" + File.separator + this.subsystem);
 		File file = new File(parent, fileName);
 
-		if (!parent.exists())
-			parent.mkdirs();
+		if (!parent.exists()) {
+			if (parent.canWrite())
+				parent.mkdirs();
+			else
+				throw new Exception(
+						"The application does not have permission to create folder "
+								+ parent.getName());
+		}
 
-		file.createNewFile();
+		if (file.canWrite())
+			file.createNewFile();
+		else
+			throw new Exception(
+					"The application does not have permission to create session file "
+							+ file.getName());
 		return file;
 	}
 

@@ -28,8 +28,6 @@ import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.Strings;
 import org.amelia.dsl.lib.util.Threads;
 
-import com.jcraft.jsch.JSchException;
-
 /**
  * @author Miguel Jiménez - Initial contribution and API
  * 
@@ -81,7 +79,7 @@ public class Host implements Comparable<Host> {
 	}
 
 	public boolean openSSHConnection(String subsystem)
-			throws InterruptedException, JSchException, IOException {
+			throws Exception {
 		boolean opened = false;
 		if (this.ssh == null)
 			this.ssh = new SSHHandler(this, subsystem);

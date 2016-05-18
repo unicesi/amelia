@@ -402,15 +402,17 @@ public class DescriptorGraph
 	/**
 	 * Opens SSH connections with the corresponding hosts
 	 * 
-	 * @throws InterruptedException
-	 *             If any thread interrupts any of the handler threads
-	 * @throws IOException
-	 *             If there is an error while initiating the SSH connection
-	 * @throws JSchException
-	 *             If there is an error establishing the SSH connection
+	 * @throws Exception
+	 *             <ul>
+	 *             <li>{@link InterruptedException}: if any thread interrupts
+	 *             any of the handler threads
+	 *             <li>{@link IOException}: if there is an error while
+	 *             initiating the SSH connection
+	 *             <li>{@link JSchException}: if there is an error establishing
+	 *             the SSH connection
+	 *             </ul>
 	 */
-	private void openSSHConnections()
-			throws InterruptedException, JSchException, IOException {
+	private void openSSHConnections() throws Exception {
 		if (!this.sshHosts.isEmpty())
 			Log.info("Establishing SSH connections (" + this.sshHosts.size() + ")");
 		for (Host host : this.sshHosts) {
