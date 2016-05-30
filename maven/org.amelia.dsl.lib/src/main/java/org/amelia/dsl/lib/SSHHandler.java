@@ -296,22 +296,14 @@ public class SSHHandler extends Thread {
 		String fileName = this.host + "-" + date + ".txt";
 		File parent = new File("sessions" + File.separator + this.subsystem);
 		File file = new File(parent, fileName);
-
-		if (!parent.exists()) {
-			if (parent.canWrite())
+		try {
+			if (!parent.exists())
 				parent.mkdirs();
-			else
-				throw new Exception(
-						"The application does not have permission to create folder "
-								+ parent.getName());
-		}
-
-		if (file.canWrite())
 			file.createNewFile();
-		else
+		} catch (IOException e) {
 			throw new Exception(
-					"The application does not have permission to create session file "
-							+ file.getName());
+					"The application does not have permission to create files", e);
+		}
 		return file;
 	}
 
