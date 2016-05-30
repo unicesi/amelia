@@ -36,7 +36,7 @@ class AmeliaOutputConfigurationProvider implements IOutputConfigurationProvider 
 	 */
 	override Set<OutputConfiguration> getOutputConfigurations() {
 		val defaultOutput = configure(IFileSystemAccess.DEFAULT_OUTPUT, "Output folder", "./src-gen")
-		val pascaniOutput = configure(AMELIA_OUTPUT, "Output folder for Amelia elements", "./amelia-gen")
+		val pascaniOutput = configure(AMELIA_OUTPUT, "Output folder for Amelia elements", "./amelia")
 		val targetOutput = configure(TARGET_SYSTEM_OUTPUT, "Output folder for target-system components", "./src-gen-target")
 		return newHashSet(defaultOutput, pascaniOutput, targetOutput)
 	}
