@@ -7,6 +7,10 @@ http://unicesi.github.io/amelia/releases
 
 Amelia requires Pascani, so please make sure you add the Pascani update site (http://unicesi.github.io/pascani/releases) before you install Amelia features.
 
+### Getting Started Guide
+
+[Here](docs/GettingStarted.md) you will find an introduction to specifying deployment artifacts with the Amelia DSL.
+
 ### Clone
 
 Before cloning this repository, please notice two things: first, this repository does not contain generated sources, and second, the Eclipse update site is hosted in the `gh-pages` branch. That being said, my advice is to clone each branch separately; this avoids compiling the sources everytime you checkout the `gh-pages` branch. Additionally, this makes cloning the `master` branch lighter.
