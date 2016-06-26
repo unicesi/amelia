@@ -27,7 +27,7 @@ val Host localhost = new Host("localhost", 21, 22, "user", "pass", "Ubuntu-16.04
 ```
 Notice that you can specify hosts using either the constructors in [Host](https://github.com/unicesi/amelia/blob/master/maven/org.amelia.dsl.lib/src/main/java/org/amelia/dsl/lib/descriptors/Host.java) or the helper methods in [Hosts](https://github.com/unicesi/amelia/blob/master/maven/org.amelia.dsl.lib/src/main/java/org/amelia/dsl/lib/util/Hosts.java).
 
-Now, to specify deployment actions you only need to group command declarations as rules. An execution rule has three parts: target, dependencies (other targets), and commands. It's syntax look like this:
+Now, to specify deployment actions you only need to group command declarations as rules. An execution rule has three parts: target, dependencies (other targets), and commands. It's syntax looks like this:
 ```make
 target2: target0, target1, ...;
     command1
