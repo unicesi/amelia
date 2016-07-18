@@ -73,7 +73,7 @@ InternalSubsystemDeclaration returns xbase::XExpression
 
 VariableDeclaration
 	:	{VariableDeclaration}
-		(writeable?='var'|'val'|param?='param')
+		('var'|param?='param')
 		(=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
 	;
 
