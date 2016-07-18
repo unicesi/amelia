@@ -273,7 +273,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						}
 					]
 				]
-				if (!params.empty) {
+				if (!params.empty || !includedParams.empty) {
 					constructors += subsystem.toConstructor [
 						for (param : params) {
 							if (param.type != null || param.right != null)
