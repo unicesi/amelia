@@ -82,11 +82,11 @@ ConfigBlockExpression returns xbase::XBlockExpression
 	;
 
 OnHostBlockExpression
-	:	'on' hosts = XExpression '{' (rules += RuleDeclaration)* '}'
+	:	'on' hosts = XExpression ('?' condition = XExpression)? '{' (rules += RuleDeclaration)* '}'
 	;
 
 RuleDeclaration
-	:	name = ID ':' 
+	:	name = ID ('?' condition = XExpression)? ':'
 		(=> (dependencies += [RuleDeclaration | QualifiedName] (',' dependencies += [RuleDeclaration | QualifiedName])*)? ';')?
 		(commands += XExpression)*
 	;

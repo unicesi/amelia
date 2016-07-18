@@ -68,6 +68,9 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension IQualifiedNameProvider
 	
 	val prefix = "＿"
+	
+	val hostBlockIndexes = new HashMap<OnHostBlockExpression, String>
+	val ruleIndexes = new HashMap<RuleDeclaration, String>
 
 	def dispatch void infer(DeploymentDeclaration deployment, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val clazz = deployment.toClass(deployment.fullyQualifiedName)
@@ -212,13 +215,26 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							]
 						}
 						OnHostBlockExpression: {
+							// Store index for future references
+							hostBlockIndexes.put(e, currentHostBlock + "")
+							
 							// Transform rules inside on-host blocks into array fields
+							var currentRule = 0
 							for (rule : e.rules) {
+								// Store index for future references
+								ruleIndexes.put(rule, currentHostBlock + "" + currentRule)
+								
 								fields += rule.toField(rule.name, typeRef(CommandDescriptor).addArrayTypeDimension) [
 									initializer = '''new «CommandDescriptor»[«rule.commands.length»]'''
 									final = true
 									visibility = JvmVisibility.PUBLIC
 								]
+								if (rule.condition != null) {
+									getters += rule.condition.toMethod("getRuleCondition" + ruleIndexes.get(rule), rule.condition.inferredType) [
+										visibility = JvmVisibility.PRIVATE
+										body = rule.condition
+									]
+								}
 								var currentCommand = 0
 								for (command : rule.commands) {
 									getters += rule.toMethod("init" + rule.name.toFirstUpper + currentCommand++, typeRef(CommandDescriptor)) [
@@ -226,15 +242,23 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 										body = command
 									]
 								}
+								currentRule++
 							}
 							
 							// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
 							if (e.hosts != null) {
-								getters += e.hosts.toMethod("getHost" + currentHostBlock++, e.hosts.inferredType) [
+								getters += e.hosts.toMethod("getHost" + currentHostBlock, e.hosts.inferredType) [
 									visibility = JvmVisibility.PRIVATE
 									body = e.hosts
 								]	
 							}
+							if (e.condition != null) {
+								getters += e.condition.toMethod("getHostCondition" + currentHostBlock, e.condition.inferredType) [
+									visibility = JvmVisibility.PRIVATE
+									body = e.condition
+								]
+							}
+							currentHostBlock++
 						}
 					}
 				}
@@ -485,6 +509,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					trace(subsystem).newLine
 					append(List).append("<").append(Host).append(">").append(" hosts" + currentHostBlock)
 					append(" = ").append(Lists).append('''.newArrayList(getHost«currentHostBlock»());''').newLine
+				
+				// Conditional on-host blocks
+				if (hostBlock.condition != null) {
+					append("if (getHostCondition" + currentHostBlock + "()) {")
+					.increaseIndentation.newLine
+				}
+				
 				for (rule : hostBlock.rules) {
 					var currentCommand = 0
 					for (command : rule.commands) {
@@ -492,12 +523,33 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							.append('''«rule.name»[«currentCommand»]''')
 							.append('''.runsOn(hosts«currentHostBlock»);''')
 						if (currentCommand == 0 && !rule.dependencies.empty) {
-							val dependencies = newArrayList
-							for (dependency : rule.dependencies) {
-								dependencies += '''«dependency.javaName(subsystem)»[«dependency.commands.length - 1»]'''
+							val nonConditionalDeps = rule.dependencies.filter[r|(r.eContainer as OnHostBlockExpression).condition == null]
+							val conditionalDeps = rule.dependencies.filter[r|(r.eContainer as OnHostBlockExpression).condition != null]
+							
+							if (!nonConditionalDeps.empty) {
+								val dependencies = newArrayList
+								for (dependency : nonConditionalDeps) {
+									dependencies += '''«dependency.javaName(subsystem)»[«dependency.commands.length - 1»]'''
+								}
+								trace(subsystem).newLine
+								append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')	
 							}
-							trace(subsystem).newLine
-							append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')
+							
+							if (!conditionalDeps.empty) {
+								for (dependency : conditionalDeps) {
+									val d = '''«dependency.javaName(subsystem)»[«dependency.commands.length - 1»]'''
+									val index = hostBlockIndexes.get(dependency.eContainer as OnHostBlockExpression)
+									newLine.append('''if (getHostCondition«index»()''')
+									if (dependency.condition != null)
+										append(''' && getRuleCondition«ruleIndexes.get(dependency)»())''')
+									else
+										append(")")
+									increaseIndentation.newLine
+									append('''«rule.name»[«currentCommand»].dependsOn(«d»);''')
+									decreaseIndentation
+								}
+							}
+
 						} else if (currentCommand > 0) {
 							trace(subsystem).newLine
 							append('''«rule.name»[«currentCommand»].dependsOn(«rule.javaName(subsystem)»[«(currentCommand - 1)»]);''')
@@ -507,6 +559,11 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						currentCommand++
 					}
 				}
+				
+				if (hostBlock.condition != null) {
+					decreaseIndentation.newLine.append("}")
+				}
+				
 				currentHostBlock++
 			}
 		]
