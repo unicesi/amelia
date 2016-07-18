@@ -511,20 +511,24 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					append(" = ").append(Lists).append('''.newArrayList(getHost«currentHostBlock»());''').newLine
 				
 				// Conditional on-host blocks
-				if (hostBlock.condition != null) {
-					append("if (getHostCondition" + currentHostBlock + "()) {")
-					.increaseIndentation.newLine
-				}
+				if (hostBlock.condition != null)
+					append("if (getHostCondition" + currentHostBlock + "()) {").increaseIndentation.newLine
 				
 				for (rule : hostBlock.rules) {
 					var currentCommand = 0
+					
+					if (rule.condition != null)
+						append('''if (getRuleCondition«ruleIndexes.get(rule)»()) {''').increaseIndentation.newLine
+						
 					for (command : rule.commands) {
 						trace(subsystem)
 							.append('''«rule.name»[«currentCommand»]''')
 							.append('''.runsOn(hosts«currentHostBlock»);''')
 						if (currentCommand == 0 && !rule.dependencies.empty) {
 							val nonConditionalDeps = rule.dependencies.filter[r|(r.eContainer as OnHostBlockExpression).condition == null]
-							val conditionalDeps = rule.dependencies.filter[r|(r.eContainer as OnHostBlockExpression).condition != null]
+							val conditionalDeps = rule.dependencies.filter[ r |
+								r.condition != null || (r.eContainer as OnHostBlockExpression).condition != null
+							]
 							
 							if (!nonConditionalDeps.empty) {
 								val dependencies = newArrayList
@@ -539,11 +543,15 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								for (dependency : conditionalDeps) {
 									val d = '''«dependency.javaName(subsystem)»[«dependency.commands.length - 1»]'''
 									val index = hostBlockIndexes.get(dependency.eContainer as OnHostBlockExpression)
-									newLine.append('''if (getHostCondition«index»()''')
-									if (dependency.condition != null)
-										append(''' && getRuleCondition«ruleIndexes.get(dependency)»())''')
-									else
-										append(")")
+									
+									if ((dependency.eContainer as OnHostBlockExpression).condition != null) {
+										if (dependency.condition != null)
+											newLine.append('''if (getHostCondition«index»() && getRuleCondition«ruleIndexes.get(dependency)»())''')
+										else
+											newLine.append('''if (getHostCondition«index»())''')
+									} else if (dependency.condition != null) {
+										newLine.append('''if (getRuleCondition«ruleIndexes.get(dependency)»())''')
+									}
 									increaseIndentation.newLine
 									append('''«rule.name»[«currentCommand»].dependsOn(«d»);''')
 									decreaseIndentation
@@ -558,11 +566,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							trace(subsystem).newLine
 						currentCommand++
 					}
+					
+					if (rule.condition != null)
+						decreaseIndentation.newLine.append("}")
 				}
 				
-				if (hostBlock.condition != null) {
+				if (hostBlock.condition != null)
 					decreaseIndentation.newLine.append("}")
-				}
 				
 				currentHostBlock++
 			}
