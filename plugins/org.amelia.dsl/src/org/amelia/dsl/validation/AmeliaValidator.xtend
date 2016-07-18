@@ -497,6 +497,24 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			warning("Deployments should include at least one subsystem", AmeliaPackage.Literals.TYPE_DECLARATION__NAME)
 	}
 	
+	@Check
+	def checkCondition(OnHostBlockExpression onHostBlock) {
+		if (onHostBlock.condition.actualType.getSuperType(boolean) == null
+			&& onHostBlock.condition.actualType.getSuperType(Boolean) == null) {
+			error("Conditions must be of type boolean", AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__CONDITION,
+				INVALID_PARAMETER_TYPE)
+		}
+	}
+	
+	@Check
+	def checkCondition(RuleDeclaration rule) {
+		if (rule.condition.actualType.getSuperType(boolean) == null
+			&& rule.condition.actualType.getSuperType(Boolean) == null) {
+			error("Conditions must be of type boolean", AmeliaPackage.Literals.RULE_DECLARATION__CONDITION,
+				INVALID_PARAMETER_TYPE)
+		}
+	}
+	
 	/**
 	 * Adapted from 
 	 * https://github.com/xtext/seven-languages-xtext/blob/master/languages/\
