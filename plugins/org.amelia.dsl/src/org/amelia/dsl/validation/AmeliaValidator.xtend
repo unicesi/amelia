@@ -193,7 +193,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	def checkConflictingParams(Subsystem subsystem) {
 		if (subsystem.extensions != null) {
 			val includes = subsystem.extensions.declarations.filter(IncludeDeclaration)
-			val includedSubsystems = includes.map[i|i.element as Subsystem]
+			val includedSubsystems = includes.map[i| if(i.element instanceof Subsystem) i.element as Subsystem]
 			val conflictingParams = includedSubsystems
 				.map[s|s.body.expressions.filter(VariableDeclaration)].flatten.filter[v|v.param]
 				.groupBy[p|p.name].values.filter[l|l.size > 1]
