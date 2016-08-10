@@ -18,8 +18,8 @@
  */
 package org.amelia.dsl.validation
 
+import com.google.inject.Inject
 import java.net.URI
-import java.util.Arrays
 import java.util.Collection
 import java.util.List
 import java.util.Set
@@ -29,6 +29,7 @@ import org.amelia.dsl.amelia.CompileCommand
 import org.amelia.dsl.amelia.ConfigBlockExpression
 import org.amelia.dsl.amelia.CustomCommand
 import org.amelia.dsl.amelia.DependDeclaration
+import org.amelia.dsl.amelia.DeploymentDeclaration
 import org.amelia.dsl.amelia.EvalCommand
 import org.amelia.dsl.amelia.ExtensionDeclaration
 import org.amelia.dsl.amelia.ExtensionSection
@@ -40,10 +41,13 @@ import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.RunCommand
 import org.amelia.dsl.amelia.Subsystem
 import org.amelia.dsl.amelia.SubsystemBlockExpression
+import org.amelia.dsl.amelia.TransferCommand
+import org.amelia.dsl.amelia.TypeDeclaration
 import org.amelia.dsl.amelia.VariableDeclaration
 import org.amelia.dsl.lib.descriptors.Host
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBooleanLiteral
@@ -55,11 +59,6 @@ import org.eclipse.xtext.xbase.XNumberLiteral
 import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XbasePackage
-import org.amelia.dsl.amelia.DeploymentDeclaration
-import org.amelia.dsl.amelia.TypeDeclaration
-import org.amelia.dsl.amelia.TransferCommand
-import com.google.inject.Inject
-import org.eclipse.xtext.naming.IQualifiedNameProvider
 
 /**
  * This class contains custom validation rules. 
@@ -137,17 +136,17 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		}
 	}
 	
-	@Check
-	def checkPackageMatchesPhysicalDirectory(Model model) {
-		val packageSegments = model.name.split("\\.")
-		val fqn = ResourceUtils.fromURItoFQN(model.typeDeclaration.eResource.URI)
-		var expectedPackage = if(fqn.contains(".")) fqn.substring(0, fqn.lastIndexOf(".")) else ""
-
-		if (!Arrays.equals(expectedPackage.split("\\."), packageSegments)) {
-			error('''The declared package '«model.name»' does not match the expected package '«expectedPackage»' ''',
-				AmeliaPackage.Literals.MODEL__NAME, INVALID_PACKAGE_NAME)
-		}
-	}
+//	@Check
+//	def checkPackageMatchesPhysicalDirectory(Model model) {
+//		val packageSegments = model.name.split("\\.")
+//		val fqn = ResourceUtils.fromURItoFQN(model.typeDeclaration.eResource.URI)
+//		var expectedPackage = if(fqn.contains(".")) fqn.substring(0, fqn.lastIndexOf(".")) else ""
+//
+//		if (!Arrays.equals(expectedPackage.split("\\."), packageSegments)) {
+//			error('''The declared package '«model.name»' does not match the expected package '«expectedPackage»' ''',
+//				AmeliaPackage.Literals.MODEL__NAME, INVALID_PACKAGE_NAME)
+//		}
+//	}
 	
 	@Check
 	def checkVariableNameIsUnique(VariableDeclaration varDecl) {
