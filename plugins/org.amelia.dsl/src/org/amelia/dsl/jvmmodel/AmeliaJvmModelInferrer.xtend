@@ -52,6 +52,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 import org.eclipse.xtext.EcoreUtil2
 import org.amelia.dsl.amelia.Model
 import java.util.Map
+import com.google.common.collect.Iterables
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -89,12 +90,12 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				documentation = deployment.documentation
 				members +=
 					deployment.toField(prefix + "subsystems",
-						typeRef(HashMap, typeRef(String), typeRef(Subsystem))) [
+						typeRef(HashMap, typeRef(String), typeRef(List, typeRef(Subsystem)))) [
 					visibility = JvmVisibility.PRIVATE
 					initializer = [
 						trace(deployment)
 							.append("new ").append(HashMap).append("<").append(String).append(", ")
-							.append(Subsystem).append(">()")
+							.append(List).append("<").append(Subsystem).append(">>()")
 					]
 				]
 				members += deployment.toMethod("main", typeRef(void)) [
@@ -112,16 +113,16 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					visibility = JvmVisibility.PRIVATE
 					body = deployment.body
 				]
-				members += deployment.toMethod("set", typeRef(void)) [
+				members += deployment.toMethod("add", typeRef(void)) [
 					visibility = JvmVisibility.PRIVATE
 					parameters += deployment.toParameter("deployment", typeRef(Deployment))
 					body = [
 						trace(deployment)
 							.append("String clazz = deployment.getClass().getCanonicalName();")
 							.newLine
-							.append('''if («prefix»subsystems.get(clazz) != null) {''')
+							.append('''if («prefix»subsystems.containsKey(clazz)) {''')
 							.increaseIndentation.newLine
-						append('''«prefix»subsystems.put(clazz, new ''')
+						append('''«prefix»subsystems.get(clazz).add(new ''')
 							.append(Subsystem).append('''(clazz, deployment));''')
 						trace(deployment)
 							.decreaseIndentation.newLine
@@ -140,8 +141,8 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							val qualifiedName = subsystem.fullyQualifiedName
 							trace(deployment)
 								.append('''«prefix»subsystems.put("«qualifiedName»", new ''')
-								.append(Subsystem)
-								.append('''("«qualifiedName»", «qualifiedName».class.newInstance()));''')
+								.append(ArrayList)
+								.append('''());''')
 							if (!subsystems.last.equals(subsystem))
 								trace(deployment).newLine
 						}
@@ -158,7 +159,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					visibility = JvmVisibility.PRIVATE
 					parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
 					exceptions += typeRef(Exception)
-					body = startMethodBody(deployment, subsystems, false)
+					body = '''return start(stopExecutedComponents, true);'''
 				]
 			}
 		]
@@ -619,23 +620,25 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 								Collections.EMPTY_LIST
 						»
 						«IF !dependencies.empty»
-							«dependencies.join(
-								'''«prefix»subsystems.get("«subsystem.fullyQualifiedName»").dependsOn(
-								''',
-								",\n",
-								"\n);",
-								[d|'''	«prefix»subsystems.get("«d.element.fullyQualifiedName»")''']
-							)»
+							for (Subsystem s : «prefix»subsystems.get("«subsystem.fullyQualifiedName»")) {
+								s.dependsOn(
+									«FOR d : dependencies SEPARATOR ",\n"»
+										«prefix»subsystems.get("«d.element.fullyQualifiedName»").toArray(new «Subsystem.simpleName»[0])
+									«ENDFOR»
+								);
+							}
 						«ENDIF»
 					«ENDFOR»
 				''')
-			   	.append("for (").append(Subsystem).append(''' subsystem : «prefix»subsystems.values()) {''')
+				.append(Subsystem).append("[] subs = ").append(Lists)
+			   		.append(".newArrayList(").append(Iterables).append('''.concat(«prefix»subsystems.values())).toArray(new ''')
+			   		.append(Subsystem).append("[0]);").newLine
+			   	.append("for(").append(Subsystem).append(" s : subs) {")
 			   	.increaseIndentation.newLine
-			  	.append("subsystem.deployment().setup();")
+			  	.append("s.deployment().setup();")
 			   	.decreaseIndentation.newLine
 			   	.append("}").newLine
-				.append('''graph.addSubsystems(«prefix»subsystems.values().toArray(new ''')
-				.append(Subsystem).append("[0]));").newLine
+				.append('''graph.addSubsystems(subs);''').newLine
 			append("boolean successful = graph.execute(stopExecutedComponents")
 			if (includeSecondParam)
 				append(", shutdownAfterDeployment")
