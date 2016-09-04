@@ -21,6 +21,7 @@ package org.amelia.dsl.lib;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.amelia.dsl.lib.util.Log;
 
@@ -62,6 +63,8 @@ public class Subsystem {
 		 */
 		public void setup() {}
 	}
+	
+	private final UUID uuid;
 
 	private final String alias;
 
@@ -70,6 +73,7 @@ public class Subsystem {
 	private final List<Subsystem> dependencies;
 
 	public Subsystem(final String alias, final Deployment deployment) {
+		this.uuid = UUID.randomUUID();
 		this.alias = alias;
 		this.deployment = deployment;
 		this.dependencies = new ArrayList<Subsystem>();
@@ -111,7 +115,7 @@ public class Subsystem {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((alias == null) ? 0 : alias.hashCode());
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
 		return result;
 	}
 
@@ -124,10 +128,10 @@ public class Subsystem {
 		if (getClass() != obj.getClass())
 			return false;
 		Subsystem other = (Subsystem) obj;
-		if (alias == null) {
-			if (other.alias != null)
+		if (uuid == null) {
+			if (other.uuid != null)
 				return false;
-		} else if (!alias.equals(other.alias))
+		} else if (!uuid.equals(other.uuid))
 			return false;
 		return true;
 	}
