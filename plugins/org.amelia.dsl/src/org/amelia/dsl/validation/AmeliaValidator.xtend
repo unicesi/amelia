@@ -470,19 +470,29 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def checkDeploymentDeclExtensions(ExtensionDeclaration extensionDecl) {
+	def checkDeclExtensions(ExtensionDeclaration extensionDecl) {
 		val typeDecl = (EcoreUtil2.getRootContainer(extensionDecl) as Model).typeDeclaration
-		if (typeDecl instanceof DeploymentDeclaration) {
-			switch (extensionDecl) {
-				IncludeDeclaration case extensionDecl.element instanceof DeploymentDeclaration: {
-					error("Deployments can only include subsystems", AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
-						INVALID_EXTENSION_DECLARATION)
+		switch (typeDecl) {
+			DeploymentDeclaration: {
+				switch (extensionDecl) {
+					IncludeDeclaration case extensionDecl.element instanceof DeploymentDeclaration: {
+						error("Deployments can only include subsystems", AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
+							INVALID_EXTENSION_DECLARATION)
+					}
+					DependDeclaration: {
+						error("Deployments cannot have dependencies", AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
+							INVALID_EXTENSION_DECLARATION)
+					}
 				}
-				DependDeclaration: {
-					error("Deployments cannot have dependencies", AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
-						INVALID_EXTENSION_DECLARATION)
+			}
+			Subsystem: {
+				switch (extensionDecl) {
+					DependDeclaration: {
+						error("Subsystems cannot depend on deployment strategies", AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
+							INVALID_EXTENSION_DECLARATION)
+					}
 				}
-			}	
+			}
 		}
 	}
 	
