@@ -487,7 +487,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			}
 			Subsystem: {
 				switch (extensionDecl) {
-					DependDeclaration: {
+					DependDeclaration case extensionDecl.element instanceof DeploymentDeclaration: {
 						error("Subsystems cannot depend on deployment strategies", AmeliaPackage.Literals.EXTENSION_DECLARATION__ELEMENT,
 							INVALID_EXTENSION_DECLARATION)
 					}
