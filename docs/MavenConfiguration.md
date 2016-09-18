@@ -1,0 +1,75 @@
+This is the basic configuration to use Amelia in a maven project. Before compiling a project, update the Amelia and Pascani versions to the latest.
+
+```XML
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>test</groupId>
+	<artifactId>test</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>test</name>
+	<properties>
+		<xtext.version>2.9.2</xtext.version>
+		<pascani.version>1.6.9-SNAPSHOT</pascani.version>
+		<amelia.version>0.7.9-SNAPSHOT</amelia.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<artifactId>org.amelia.dsl.lib</artifactId>
+			<groupId>com.github.unicesi</groupId>
+			<version>${amelia.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.pascani</groupId>
+			<artifactId>org.pascani.dsl.lib.sca</artifactId>
+			<version>${pascani.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+			<version>${xtext.version}</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.xtext</groupId>
+				<artifactId>xtext-maven-plugin</artifactId>
+				<version>${xtext.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<languages>
+						<language>
+							<setup>org.amelia.dsl.AmeliaStandaloneSetupGenerated</setup>
+						</language>
+					</languages>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<artifactId>org.amelia.dsl</artifactId>
+						<groupId>com.github.unicesi</groupId>
+						<version>${amelia.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+	<repositories>
+		<repository>
+			<id>snapshots</id>
+			<name>Sonatype Snapshots Repository</name>
+			<layout>default</layout>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+</project>
+```
