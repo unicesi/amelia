@@ -23,7 +23,7 @@ First, let's specify the host in which the `Server` and `Client` components will
 
 **Note**: Amelia makes use of SSH to communicate with remote machines (including _localhost_), and FTP to transport resources. In this tutorial we use the default SSH & FTP ports 21 and 22.
 ```java
-val Host localhost = new Host("localhost", 21, 22, "user", "pass", "Ubuntu-16.04")
+var Host localhost = new Host("localhost", 21, 22, "user", "pass", "Ubuntu-16.04")
 ```
 Notice that you can specify hosts using either the constructors in [Host](https://github.com/unicesi/amelia/blob/master/maven/org.amelia.dsl.lib/src/main/java/org/amelia/dsl/lib/descriptors/Host.java) or the helper methods in [Hosts](https://github.com/unicesi/amelia/blob/master/maven/org.amelia.dsl.lib/src/main/java/org/amelia/dsl/lib/util/Hosts.java).
 
@@ -80,7 +80,7 @@ import org.amelia.dsl.lib.descriptors.Host
 
 subsystem HelloworldRMI {
     
-    val Host localhost = new Host("localhost", 21, 22, "user", "pass", "Ubuntu-16.04")
+    var Host localhost = new Host("localhost", 21, 22, "user", "pass", "Ubuntu-16.04")
     
     on localhost {
         server:
@@ -105,8 +105,8 @@ import org.amelia.dsl.lib.descriptors.Host
 
 subsystem Subsystem {
     
-    val Host localhost1 = new Host("localhost", 21, 22, "user", "pass", "local1")
-    val Host localhost2 = new Host("localhost", 21, 22, "user", "pass", "local2")
+    var Host localhost1 = new Host("localhost", 21, 22, "user", "pass", "local1")
+    var Host localhost2 = new Host("localhost", 21, 22, "user", "pass", "local2")
     
     on localhost1 {
         target1: ...
@@ -134,7 +134,7 @@ import org.amelia.dsl.lib.util.RetryOnFailure
 include subsystems.HelloworldRMI
 
 deployment RetryOnFailure {
-	val helper = new RetryableDeployment()
+	var helper = new RetryableDeployment()
 	helper.deploy([
 		start(true) // Deploy and stop executed components when finish
 	], 3) // In case of failure, retry 2 more times
