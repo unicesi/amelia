@@ -156,7 +156,7 @@ package deployments
 
 import org.amelia.dsl.lib.util.RetryOnFailure
 
-include subsystems.HelloworldRMI
+includes subsystems.HelloworldRMI
 
 deployment RetryOnFailure {
     add(new HelloworldRMI) // deploy one instance of the subsystem
@@ -172,7 +172,7 @@ package deployments
 
 import org.amelia.dsl.lib.util.RetryOnFailure
 
-include subsystems.HelloworldRMI
+includes subsystems.HelloworldRMI
 
 deployment SequentialDeployments {
     add(new HelloworldRMI)
@@ -189,9 +189,9 @@ package deployments
 
 import org.amelia.dsl.lib.util.RetryOnFailure
 
-include subsystems.HelloworldRMI
+includes subsystems.HelloworldRMI
 
-deployment SequentialDeployments {
+deployment SimpleDeployment {
     var Host host = new Host("localhost", 21, 22, "user", "pass", "Ubuntu-16.04")
     add(new HelloworldRMI(host))
     start(true) // Deploy and stop executed components when finish
