@@ -123,9 +123,34 @@ subsystem Subsystem {
 ```
 You can find a complete list of the supported commands [here](Commands.md).
 
+Subsystems are parameterizable. Parameters are useful for instantiating subsystems with different values. For example, the host may be a parameter, that way the components may be executed in several hosts abstracting the execution rules:
+```java
+package subsystems
+
+import org.amelia.dsl.lib.descriptors.Host
+
+subsystem HelloworldRMI {
+    
+    param Host host
+    
+    on host {
+        server:
+            cd "$FRASCATI_HOME/examples/helloworld-rmi"
+            compile "server/src" "server"
+            run "helloworld-rmi-server" -libpath "server.jar"
+
+        client: server;
+            cd "$FRASCATI_HOME/examples/helloworld-rmi"
+            compile "client/src" "client"
+            run "helloworld-rmi-client" -libpath "client.jar" -s "r" -m "run"
+    }
+}
+```
+In the next section, we will see how to pass a parameter value to the subsystem.
+
 ### Deployment
 
-When executing the subsystem `HelloworldRMI` you're getting the default deployment. That is, a single execution with no automatic shutdown. What about automatically repeating the same deployment? Or retrying on failure? these custom behaviors require a custom deployment strategy. For example:
+When executing the subsystem `HelloworldRMI` you're getting the default deployment. That is, a single execution with no automatic shutdown. However, if a subsystem has dependencies or parameters, it is necessary to create a deployment strategy. Deployment strategies are also useful for automatically repeating the same deployment, or retrying on failure; these are custom behaviors regarding how the deployment is executed. For example:
 ```java
 package deployments
 
@@ -134,6 +159,7 @@ import org.amelia.dsl.lib.util.RetryOnFailure
 include subsystems.HelloworldRMI
 
 deployment RetryOnFailure {
+    add(new HelloworldRMI) // deploy one instance of the subsystem
 	var helper = new RetryableDeployment()
 	helper.deploy([
 		start(true) // Deploy and stop executed components when finish
@@ -149,8 +175,27 @@ import org.amelia.dsl.lib.util.RetryOnFailure
 include subsystems.HelloworldRMI
 
 deployment SequentialDeployments {
+    add(new HelloworldRMI)
 	for (i : 1..5) {
 		start(true) // Deploy and stop executed components when finish
 	}
 }
 ```
+
+If the subsystem expects a parameter, this is the way to go:
+
+```java
+package deployments
+
+import org.amelia.dsl.lib.util.RetryOnFailure
+
+include subsystems.HelloworldRMI
+
+deployment SequentialDeployments {
+    var Host host = new Host("localhost", 21, 22, "user", "pass", "Ubuntu-16.04")
+    add(new HelloworldRMI(host))
+    start(true) // Deploy and stop executed components when finish
+}
+```
+
+In case a subsystem expects several parameters, they must be passed in the same order they were defined.
