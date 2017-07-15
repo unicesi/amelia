@@ -103,7 +103,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkSubsystemName(Subsystem subsystem) {
 		val model = EcoreUtil2.getRootContainer(subsystem) as Model
-		if (subsystem.name.equals("Amelia") && model.name == null) {
+		if (subsystem.name.equals("Amelia") && model.name === null) {
 			error("The fully qualified name 'Amelia' is reserved", AmeliaPackage.Literals.TYPE_DECLARATION__NAME,
 				RESERVED_TYPE_NAME)
 		}
@@ -125,7 +125,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		// e.g., platform:/resource/<project>/<source-folder>/org/example/.../Subsystem.amelia
 		val URI = declaration.eResource.URI
 		val fileName = URI.lastSegment.substring(0, URI.lastSegment.indexOf(URI.fileExtension) - 1)
-		val isPublic = declaration.eContainer != null && declaration.eContainer instanceof Model
+		val isPublic = declaration.eContainer !== null && declaration.eContainer instanceof Model
 
 		if (isPublic && !fileName.equals(declaration.name)) {
 			var name = declaration.eClass.name
@@ -174,7 +174,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkNonPrimitiveTypes(VariableDeclaration e) {
 		val primitives = #["int", "double", "float", "short", "byte", "boolean", "long", "char"]
-		if (e.type != null && primitives.contains(e.type.identifier)) {
+		if (e.type !== null && primitives.contains(e.type.identifier)) {
 			error("Primitive data types are not allowed", 
 				AmeliaPackage.Literals.VARIABLE_DECLARATION__TYPE, USING_PRIMITIVE_TYPE)
 		}
@@ -182,7 +182,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def checkExplicitTypes(VariableDeclaration e) {
-		if (e.type == null) {
+		if (e.type === null) {
 			error("Missing data type", 
 				AmeliaPackage.Literals.VARIABLE_DECLARATION__TYPE, MISSING_VARIABLE_TYPE)
 		}
@@ -190,7 +190,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def checkConflictingParams(Subsystem subsystem) {
-		if (subsystem.extensions != null) {
+		if (subsystem.extensions !== null) {
 			val includes = subsystem.extensions.declarations.filter(IncludeDeclaration)
 			val includedSubsystems = includes.map[i| if(i.element instanceof Subsystem) i.element as Subsystem]
 			val conflictingParams = includedSubsystems
@@ -201,7 +201,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				val index = names.lastIndexOf("', '")
 				if (index > -1)
 					names = names.substring(0, index + 1) + " and " + names.substring(index + 3)
-				val d = if(conflictingParams.size == 1) #["", "s", "Its"] else #["s", "", "Their"]
+				val d = if(conflictingParams.size === 1) #["", "s", "Its"] else #["s", "", "Their"]
 				warning('''Parameter«d.get(0)» «names» belong«d.get(1)» to several included subsystems. «d.get(2)» direct access has been hidden''',
 					AmeliaPackage.Literals.TYPE_DECLARATION__NAME)
 			}
@@ -213,7 +213,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		val type = if(varDecl.param) "parameter" else "variable"
 		val typeDecl = (EcoreUtil2.getRootContainer(varDecl) as Model).typeDeclaration
 		if (typeDecl instanceof Subsystem) {
-			if (typeDecl.extensions != null) {
+			if (typeDecl.extensions !== null) {
 				val includes = typeDecl.extensions.declarations.filter(IncludeDeclaration)
 				val includedSubsystems = includes.filter[i|i.element instanceof Subsystem].map[i|i.element as Subsystem]
 				val includedParams = includedSubsystems
@@ -224,7 +224,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 					val subsystems = conflictingParams.map[ p |
 						((EcoreUtil2.getRootContainer(p) as Model).typeDeclaration) as Subsystem
 					]
-					val d = if(subsystems.size == 1) "" else "s"
+					val d = if(subsystems.size === 1) "" else "s"
 					var list = subsystems.join("'", "', '", "'", [s|s.fullyQualifiedName.toString])
 					val index = list.lastIndexOf("', '")
 					if (index > -1)
@@ -256,8 +256,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (!allowed.map[type|type.isInstance(expr.directory)].exists[v|v]) {
 			error("This expression is not allowed in this context", AmeliaPackage.Literals.CD_COMMAND__DIRECTORY,
 				INVALID_PARAMETER_TYPE)
-		} else if (expr.directory.actualType.getSuperType(String) ==
-			null) {
+		} else if (expr.directory.actualType.getSuperType(String) === null) {
 			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.CD_COMMAND__DIRECTORY, INVALID_PARAMETER_TYPE)
 		}
@@ -265,14 +264,14 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkTransferCommand(TransferCommand expr) {
-		if (expr.source.actualType.getSuperType(String) == null) {
+		if (expr.source.actualType.getSuperType(String) === null) {
 			error('''The source parameter must be of type String, «expr.source.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.TRANSFER_COMMAND__SOURCE, INVALID_PARAMETER_TYPE)
 		}
 		val type = expr.destination.actualType
-		val isOk = type.getSuperType(String) != null || type.getSuperType(Iterable) != null
+		val isOk = type.getSuperType(String) !== null || type.getSuperType(Iterable) !== null
 		val msg = '''The destination parameter must be of type String or Iterable<String>, «type.simpleName» was found instead'''
-		val showError = !isOk || type.getSuperType(List).typeArguments.length == 0 ||
+		val showError = !isOk || type.getSuperType(List).typeArguments.length === 0 ||
 			!type.getSuperType(Iterable).typeArguments.get(0).identifier.equals(String.canonicalName)
 		if (showError) {
 			error(msg, AmeliaPackage.Literals.TRANSFER_COMMAND__DESTINATION, INVALID_PARAMETER_TYPE)
@@ -281,37 +280,37 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkRunCommand(RunCommand expr) {
-		if (expr.composite.actualType.getSuperType(String) == null) {
+		if (expr.composite.actualType.getSuperType(String) === null) {
 			error('''The composite parameter must be of type String, «expr.port.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.RUN_COMMAND__COMPOSITE, INVALID_PARAMETER_TYPE)
 		}
 		if (expr.hasPort 
-			&& expr.port.actualType.getSuperType(int) == null 
-			&& expr.port.actualType.getSuperType(Integer) == null) {
+			&& expr.port.actualType.getSuperType(int) === null 
+			&& expr.port.actualType.getSuperType(Integer) === null) {
 			error('''The port parameter must be of type integer, «expr.port.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.RUN_COMMAND__PORT, INVALID_PARAMETER_TYPE)
 		}
-		if (expr.hasService && expr.service.actualType.getSuperType(String) == null) {
+		if (expr.hasService && expr.service.actualType.getSuperType(String) === null) {
 			error('''The service parameter must be of type String, «expr.service.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.RUN_COMMAND__SERVICE, INVALID_PARAMETER_TYPE)
 		}
-		if (expr.hasMethod && expr.method.actualType.getSuperType(String) == null) {
+		if (expr.hasMethod && expr.method.actualType.getSuperType(String) === null) {
 			error('''The method parameter must be of type String, «expr.method.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.RUN_COMMAND__METHOD, INVALID_PARAMETER_TYPE)
 		}
 		var type = expr.params.actualType
-		var isOk = type.getSuperType(String) != null || type.getSuperType(Iterable) != null
+		var isOk = type.getSuperType(String) !== null || type.getSuperType(Iterable) !== null
 		var msg = '''The arguments parameter must be of type String or Iterable<String>, «type.simpleName» was found instead'''
-		var showError = !isOk || type.getSuperType(Iterable).typeArguments.length == 0 ||
+		var showError = !isOk || type.getSuperType(Iterable).typeArguments.length === 0 ||
 			!type.getSuperType(Iterable).typeArguments.get(0).identifier.equals(String.canonicalName)
 		if (showError) {
 			error(msg, AmeliaPackage.Literals.RUN_COMMAND__PARAMS, INVALID_PARAMETER_TYPE)
 		}
 		
 		type = expr.libpath.actualType
-		isOk = type.getSuperType(String) != null || type.getSuperType(Iterable) != null
+		isOk = type.getSuperType(String) !== null || type.getSuperType(Iterable) !== null
 		msg = '''The libpath parameter must be of type String or Iterable<String>, «type.simpleName» was found instead'''
-		showError = !isOk || type.getSuperType(Iterable).typeArguments.length == 0 ||
+		showError = !isOk || type.getSuperType(Iterable).typeArguments.length === 0 ||
 			!type.getSuperType(Iterable).typeArguments.get(0).identifier.equals(String.canonicalName)
 		if (showError) {
 			error(msg, AmeliaPackage.Literals.RUN_COMMAND__LIBPATH, INVALID_PARAMETER_TYPE)
@@ -320,18 +319,18 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 
 	@Check
 	def void checkCompileCommand(CompileCommand expr) {
-		if (expr.source.actualType.getSuperType(String) == null) {
+		if (expr.source.actualType.getSuperType(String) === null) {
 			error('''The source parameter must be of type String, «expr.source.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.COMPILE_COMMAND__SOURCE, INVALID_PARAMETER_TYPE)
 		}
-		if (expr.output.actualType.getSuperType(String) == null) {
+		if (expr.output.actualType.getSuperType(String) === null) {
 			error('''The output parameter must be of type String, «expr.output.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.COMPILE_COMMAND__OUTPUT, INVALID_PARAMETER_TYPE)
 		}
 		var type = expr.classpath.actualType
-		var isOk = type.getSuperType(String) != null || type.getSuperType(Iterable) != null
+		var isOk = type.getSuperType(String) !== null || type.getSuperType(Iterable) !== null
 		var msg = '''The classpath parameter must be of type String or Iterable<String>, «type.simpleName» was found instead'''
-		var showError = !isOk || type.getSuperType(Iterable).typeArguments.length == 0 ||
+		var showError = !isOk || type.getSuperType(Iterable).typeArguments.length === 0 ||
 			!type.getSuperType(Iterable).typeArguments.get(0).identifier.equals(String.canonicalName)
 		if (showError) {
 			error(msg, AmeliaPackage.Literals.COMPILE_COMMAND__CLASSPATH, INVALID_PARAMETER_TYPE)
@@ -340,12 +339,12 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkEvalCommand(EvalCommand expr) {
-		if (expr.uri != null && expr.uri.actualType.getSuperType(URI) == null) {
+		if (expr.uri !== null && expr.uri.actualType.getSuperType(URI) === null) {
 			error('''The binding URI must be of type URI, «expr.uri.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.EVAL_COMMAND__URI, INVALID_PARAMETER_TYPE)
 		}
 		
-		if (expr.script != null && expr.script.actualType.getSuperType(String) == null) {
+		if (expr.script !== null && expr.script.actualType.getSuperType(String) === null) {
 			error('''The script must be of type String, «expr.script.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.EVAL_COMMAND__SCRIPT, INVALID_PARAMETER_TYPE)
 		}
@@ -354,9 +353,9 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def void checkHost(OnHostBlockExpression blockExpression) {
 		val type = blockExpression.hosts.actualType
-		val isOk = type.getSuperType(Host) != null || type.getSuperType(Iterable) != null
+		val isOk = type.getSuperType(Host) !== null || type.getSuperType(Iterable) !== null
 		val msg = '''The hosts parameter must be of type «Host.simpleName» or Iterable<«Host.simpleName»>, «type.simpleName» was found instead'''
-		val showError = !isOk || type.getSuperType(List).typeArguments.length == 0 ||
+		val showError = !isOk || type.getSuperType(List).typeArguments.length === 0 ||
 			!type.getSuperType(Iterable).typeArguments.get(0).identifier.equals(Host.canonicalName)
 		if (showError) {
 			error(msg, AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__HOSTS, INVALID_PARAMETER_TYPE)
@@ -379,7 +378,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def void checkCustomCommand(CustomCommand command) {
-		if (command.value.actualType.getSuperType(String) == null) {
+		if (command.value.actualType.getSuperType(String) === null) {
 			error("The command expression must be of type String", AmeliaPackage.Literals.CUSTOM_COMMAND__VALUE,
 				INVALID_PARAMETER_TYPE)
 		}
@@ -388,7 +387,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def void checkNoRecursiveDependencies(Subsystem subsystem) {
 		subsystem.findDependentElements [ cycle |
-			if (cycle.size == 1) {
+			if (cycle.size === 1) {
 				error('''The subsystem '«subsystem.name»' cannot depend on itself.''', 
 					  cycle.head, AmeliaPackage.Literals.TYPE_DECLARATION__NAME, CYCLIC_DEPENDENCY)
 			} else {
@@ -401,7 +400,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def void checkNoRecursiveDependencies(RuleDeclaration rule) {
 		rule.findDependentElements [ cycle |
-			if (cycle.size == 1) {
+			if (cycle.size === 1) {
 				error('''The rule '«rule.name»' cannot depend on itself.''', 
 					  cycle.head, AmeliaPackage.Literals.RULE_DECLARATION__NAME, CYCLIC_DEPENDENCY)
 			} else {
@@ -499,7 +498,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkDeploymentIncludes(DeploymentDeclaration deployment) {
 		var warn = true
-		if (deployment.extensions != null) {
+		if (deployment.extensions !== null) {
 			warn = deployment.extensions.declarations.filter(IncludeDeclaration).empty
 		}
 		if (warn)
@@ -508,8 +507,8 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def checkCondition(OnHostBlockExpression onHostBlock) {
-		if (onHostBlock.condition.actualType.getSuperType(boolean) == null
-			&& onHostBlock.condition.actualType.getSuperType(Boolean) == null) {
+		if (onHostBlock.condition.actualType.getSuperType(boolean) === null
+			&& onHostBlock.condition.actualType.getSuperType(Boolean) === null) {
 			error("Conditions must be of type boolean", AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__CONDITION,
 				INVALID_PARAMETER_TYPE)
 		}
@@ -517,8 +516,8 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def checkCondition(RuleDeclaration rule) {
-		if (rule.condition.actualType.getSuperType(boolean) == null
-			&& rule.condition.actualType.getSuperType(Boolean) == null) {
+		if (rule.condition.actualType.getSuperType(boolean) === null
+			&& rule.condition.actualType.getSuperType(Boolean) === null) {
 			error("Conditions must be of type boolean", AmeliaPackage.Literals.RULE_DECLARATION__CONDITION,
 				INVALID_PARAMETER_TYPE)
 		}
@@ -551,7 +550,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				}
 			}
 		}
-		if (!elements.empty && cycleHandler != null)
+		if (!elements.empty && cycleHandler !== null)
 			cycleHandler.apply(elements)
 		result
 	}

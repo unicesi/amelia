@@ -34,7 +34,7 @@ class AmeliaStratumBreakpointSupport implements IStratumBreakpointSupport {
 	
 	override isValidLineForBreakPoint(XtextResource resource, int line) {
 		val parseResult = resource.getParseResult();
-		if (parseResult == null)
+		if (parseResult === null)
 			return false;
 		val node = parseResult.getRootNode();
 		return isValidLineForBreakpoint(node, line);
