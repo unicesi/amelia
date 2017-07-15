@@ -7,9 +7,10 @@ http://unicesi.github.io/amelia/releases
 
 Amelia requires Pascani, so please make sure you add the Pascani update site (http://unicesi.github.io/pascani/releases) before you install Amelia features.
 
-### Getting Started Guide
+### Documentation
 
-[Here](docs/GettingStarted.md) you will find an introduction to specifying deployment artifacts with the Amelia DSL.
+- [Getting started with the Amelia DSL](docs/GettingStarted.md). An introduction to specifying deployment artifacts with the Amelia DSL.
+- [Standalone compiler](docs/MavenConfiguration.md). Maven configuration to use Amelia as a Maven plugin.
 
 ### Clone
 
