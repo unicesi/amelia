@@ -81,7 +81,7 @@ class AmeliaGenerator implements IGenerator {
 					// Subsystem rules' setup
 					«FOR subsystem : subsystems»
 						«subsystem.javaName».deployment().setup();
-						«IF subsystem !== null && subsystem.extensions !== null»
+						«IF subsystem != null && subsystem.extensions != null»
 							«val dependencies = subsystem.extensions.declarations.filter(DependDeclaration).map[ i |
 								if (i.element instanceof Subsystem) (i.element as Subsystem).javaName
 							]»

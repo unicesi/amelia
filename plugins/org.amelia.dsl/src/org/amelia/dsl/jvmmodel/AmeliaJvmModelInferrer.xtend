@@ -81,7 +81,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
-				val subsystems = if(deployment.extensions !== null) 
+				val subsystems = if(deployment.extensions != null) 
 						deployment.extensions.declarations.filter(IncludeDeclaration).map [d|
 							d.element as org.amelia.dsl.amelia.Subsystem
 						]
@@ -167,7 +167,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 
 	def dispatch void infer(org.amelia.dsl.amelia.Subsystem subsystem, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val clazz = subsystem.toClass(subsystem.fullyQualifiedName)
-		if (clazz === null)
+		if (clazz == null)
 			return;
 		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
@@ -201,7 +201,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							_parameters += e.toField(e.name, e.type ?: inferredType) [
 								documentation = e.documentation
 							]
-							if (e.right !== null) {
+							if (e.right != null) {
 								getters += e.toMethod("init" + e.name.toFirstUpper, e.type ?: inferredType) [
 									visibility = JvmVisibility.PRIVATE
 									body = e.right
@@ -231,7 +231,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 									final = true
 									visibility = JvmVisibility.PUBLIC
 								]
-								if (rule.condition !== null) {
+								if (rule.condition != null) {
 									getters += rule.condition.toMethod("getRuleCondition" + ruleIndices.get(rule), rule.condition.inferredType) [
 										visibility = JvmVisibility.PUBLIC
 										body = rule.condition
@@ -247,13 +247,13 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 							}
 							
 							// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
-							if (e.hosts !== null) {
+							if (e.hosts != null) {
 								getters += e.hosts.toMethod("getHost" + hostBlockIndex, e.hosts.inferredType) [
 									visibility = JvmVisibility.PRIVATE
 									body = e.hosts
 								]	
 							}
-							if (e.condition !== null) {
+							if (e.condition != null) {
 								getters += e.condition.toMethod("getHostCondition" + hostBlockIndex, e.condition.inferredType) [
 									visibility = JvmVisibility.PUBLIC
 									body = e.condition
@@ -276,7 +276,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				if (!params.empty || !includedParams.empty) {
 					constructors += subsystem.toConstructor [
 						for (param : params) {
-							if (param.type !== null || param.right !== null)
+							if (param.type != null || param.right != null)
 								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
 						}
 						parameters += subsystem.includedParams(true).map[ p |
@@ -328,10 +328,10 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					exceptions += typeRef(Exception)
 					parameters += subsystem.toParameter("args", typeRef(String).addArrayTypeDimension)
 					body = [
-						val allowed = subsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param && v.right === null].empty
+						val allowed = subsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param && v.right == null].empty
 							&& (
-								subsystem.extensions === null
-								|| (subsystem.extensions !== null && subsystem.extensions.declarations.filter(DependDeclaration).empty)
+								subsystem.extensions == null
+								|| (subsystem.extensions != null && subsystem.extensions.declarations.filter(DependDeclaration).empty)
 							)
 						if (allowed) {
 							append(Subsystem).append(" subsystem = new ").append(Subsystem)
@@ -355,7 +355,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.map [r|
 							r.name
 						].toList
-						if (subsystem.extensions !== null) {
+						if (subsystem.extensions != null) {
 							val includes = subsystem.extensions.declarations.filter(IncludeDeclaration).map [d|
 								d.element as org.amelia.dsl.amelia.Subsystem
 							]
@@ -422,7 +422,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 											break;
 										}
 									}
-									if (dependency === null) {
+									if (dependency == null) {
 										throw new IllegalArgumentException("Subsystem " + fqn + " is not a dependency");
 									}
 									return dependency;''')
@@ -464,10 +464,10 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	def Procedure1<ITreeAppendable> initRules(org.amelia.dsl.amelia.Subsystem subsystem) {
 		return [
 			for (varDecl : subsystem.body.expressions.filter(VariableDeclaration)) {
-				if (varDecl.right !== null) {
+				if (varDecl.right != null) {
 					if (varDecl.param) {
 						trace(subsystem)
-							.append('''if (this.«varDecl.name» === null)''')
+							.append('''if (this.«varDecl.name» == null)''')
 							.increaseIndentation.newLine
 					}
 					trace(subsystem)
@@ -493,7 +493,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def Procedure1<ITreeAppendable> setupRules(org.amelia.dsl.amelia.Subsystem subsystem, String subsystemParam) {
 		return [
-			if (subsystem.extensions !== null) {
+			if (subsystem.extensions != null) {
 				val setups = subsystem.extensions.declarations.filter(IncludeDeclaration).map [ d |
 					if (d.element instanceof org.amelia.dsl.amelia.Subsystem)
 						d.element as org.amelia.dsl.amelia.Subsystem
@@ -511,23 +511,23 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					append(" = ").append(Lists).append('''.newArrayList(getHost«currentHostBlock»());''').newLine
 				
 				// Conditional on-host blocks
-				if (hostBlock.condition !== null)
+				if (hostBlock.condition != null)
 					append('''if (getHostCondition«hostBlockIndices.get(hostBlock)»()) {''').increaseIndentation.newLine
 				
 				for (rule : hostBlock.rules) {
 					var currentCommand = 0
 					
-					if (rule.condition !== null)
+					if (rule.condition != null)
 						append('''if (getRuleCondition«ruleIndices.get(rule)»()) {''').increaseIndentation.newLine
 						
 					for (command : rule.commands) {
 						trace(subsystem)
 							.append('''«rule.name»[«currentCommand»]''')
 							.append('''.runsOn(hosts«currentHostBlock»);''')
-						if (currentCommand === 0 && !rule.dependencies.empty) {
-							val nonConditionalDeps = rule.dependencies.filter[r|(r.eContainer as OnHostBlockExpression).condition === null]
+						if (currentCommand == 0 && !rule.dependencies.empty) {
+							val nonConditionalDeps = rule.dependencies.filter[r|(r.eContainer as OnHostBlockExpression).condition == null]
 							val conditionalDeps = rule.dependencies.filter[ r |
-								r.condition !== null || (r.eContainer as OnHostBlockExpression).condition !== null
+								r.condition != null || (r.eContainer as OnHostBlockExpression).condition != null
 							]
 							
 							if (!nonConditionalDeps.empty) {
@@ -554,12 +554,12 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 											ruleIndices.get(dependency)
 									val accessor = if (external) (parent as org.amelia.dsl.amelia.Subsystem).javaName + "."
 									
-									if ((dependency.eContainer as OnHostBlockExpression).condition !== null) {
-										if (dependency.condition !== null)
+									if ((dependency.eContainer as OnHostBlockExpression).condition != null) {
+										if (dependency.condition != null)
 											newLine.append('''if («accessor»getHostCondition«hostBlockindex»() && «accessor»getRuleCondition«ruleIndex»())''')
 										else
 											newLine.append('''if («accessor»getHostCondition«hostBlockindex»())''')
-									} else if (dependency.condition !== null) {
+									} else if (dependency.condition != null) {
 										newLine.append('''if («accessor»getRuleCondition«ruleIndex»())''')
 									}
 									increaseIndentation.newLine
@@ -577,11 +577,11 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						currentCommand++
 					}
 					
-					if (rule.condition !== null)
+					if (rule.condition != null)
 						decreaseIndentation.newLine.append("}")
 				}
 				
-				if (hostBlock.condition !== null)
+				if (hostBlock.condition != null)
 					decreaseIndentation.newLine.append("}")
 				
 				currentHostBlock++
@@ -614,7 +614,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				.append('''
 					«FOR subsystem : subsystems»
 						«val dependencies = 
-							if(subsystem.extensions !== null)
+							if(subsystem.extensions != null)
 								subsystem.extensions.declarations.filter(DependDeclaration)
 							else
 								Collections.EMPTY_LIST
@@ -650,7 +650,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def List<JvmField> includesAsFields(org.amelia.dsl.amelia.Subsystem subsystem) {
 		val members = newArrayList
-		if (subsystem.extensions !== null) {
+		if (subsystem.extensions != null) {
 			for (include : subsystem.extensions.declarations.filter(IncludeDeclaration)) {
 				if (include.element instanceof org.amelia.dsl.amelia.Subsystem) {
 					val includedSubsystem = include.element as org.amelia.dsl.amelia.Subsystem
@@ -688,7 +688,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def List<RuleDeclaration> includedRules(org.amelia.dsl.amelia.Subsystem subsystem) {
 		val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.toList
-		if (subsystem.extensions !== null) {
+		if (subsystem.extensions != null) {
 			val includes = subsystem.extensions.declarations.filter(IncludeDeclaration).map [ d |
 				d.element as org.amelia.dsl.amelia.Subsystem
 			]
@@ -699,7 +699,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	}
 	
 	def includedSubsystems(org.amelia.dsl.amelia.Subsystem subsystem) {
-		return if (subsystem.extensions !== null)
+		return if (subsystem.extensions != null)
 			subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
 				if (i.element instanceof org.amelia.dsl.amelia.Subsystem)
 					i.element as org.amelia.dsl.amelia.Subsystem
@@ -718,7 +718,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def List<VariableDeclaration> includedParams(org.amelia.dsl.amelia.Subsystem subsystem, boolean recursive) {
 		val parameters = newArrayList
-		val includedSubsystems = if (subsystem.extensions !== null)
+		val includedSubsystems = if (subsystem.extensions != null)
 				subsystem.extensions.declarations.filter(IncludeDeclaration).filter [ i |
 					i.element instanceof org.amelia.dsl.amelia.Subsystem
 				].map [ i |
@@ -729,7 +729,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		for (s : includedSubsystems) {
 			val includedParams = s.body.expressions.filter(VariableDeclaration).filter[v|v.param]
 			for (param : includedParams) {
-				if (param.type !== null || param.right !== null)
+				if (param.type != null || param.right != null)
 					parameters += param
 			}
 			if (recursive)
