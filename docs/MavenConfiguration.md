@@ -1,4 +1,4 @@
-This is the basic configuration to use Amelia in a maven project. Before compiling a project, update the Amelia and Pascani versions to the latest.
+This is the basic configuration to use Amelia in a maven project. Before compiling a project, update the Amelia and Pascani versions in the properties section. You may see the latest versions [here](https://github.com/unicesi/amelia/releases) and [here](https://github.com/unicesi/pascani/releases).
 
 ```XML
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

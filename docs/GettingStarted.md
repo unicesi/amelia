@@ -1,6 +1,6 @@
 # Getting Started with the Amelia DSL
 ## Installation
-The Amelia DSL is an Eclipse plugin, that means you need Eclipse in order to generate executable deployment artifacts. New technologies will be supported in the near future, including a stand-alone compiler and a Maven plugin. Stay tuned!
+The Amelia DSL is an Eclipse plugin, that means you need Eclipse in order to generate executable deployment artifacts. You may also use Amelia as a Maven plugin, that way it is configured as a stand-alone compiler (cf. [Maven configuration](MavenConfiguration.md)).
 
 **Note**: We recommend using Eclipse Mars. It's the one we use 😉
 
