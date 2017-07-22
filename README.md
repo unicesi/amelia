@@ -5,7 +5,7 @@ Amelia is a Domain Specific Language for deploying SCA components, with custom c
 
 http://unicesi.github.io/amelia/releases
 
-Amelia requires Pascani, so please make sure you add the Pascani update site (http://unicesi.github.io/pascani/releases) before you install Amelia features.
+Amelia requires Pascani and Xtext, so please make sure you add both update sites before you install Amelia features: http://unicesi.github.io/pascani/releases and http://download.eclipse.org/modeling/tmf/xtext/updates.
 
 ### Documentation
 
