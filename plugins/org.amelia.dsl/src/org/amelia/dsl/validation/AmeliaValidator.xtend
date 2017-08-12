@@ -202,7 +202,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				if (index > -1)
 					names = names.substring(0, index + 1) + " and " + names.substring(index + 3)
 				val d = if(conflictingVarDcls.size == 1) #["", "s", "Its"] else #["s", "", "Their"]
-				warning('''Variable«d.get(0)» «names» belong«d.get(1)» to several included subsystems. «d.get(2)» direct access has been hidden''',
+				info('''Variable«d.get(0)» «names» belong«d.get(1)» to several included subsystems. «d.get(2)» direct access has been hidden''',
 					AmeliaPackage.Literals.TYPE_DECLARATION__NAME)
 			}
 		}
@@ -228,7 +228,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 					val index = list.lastIndexOf("', '")
 					if (index > -1)
 						list = list.substring(0, index + 1) + " and " + list.substring(index + 3)
-					warning('''This «type» hides the direct access to parameter '«varDecl.name»' from the included subsystem«d» «list»''', 
+					info('''This «type» hides the direct access to parameter '«varDecl.name»' from the included subsystem«d» «list»''', 
 						AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME, CONFLICTING_PARAMETER)
 				}		
 			}
