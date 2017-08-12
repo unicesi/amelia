@@ -189,39 +189,38 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	}
 	
 	@Check
-	def checkConflictingParams(Subsystem subsystem) {
+	def checkConflictingVarDecl(Subsystem subsystem) {
 		if (subsystem.extensions != null) {
 			val includes = subsystem.extensions.declarations.filter(IncludeDeclaration)
 			val includedSubsystems = includes.map[i| if(i.element instanceof Subsystem) i.element as Subsystem]
-			val conflictingParams = includedSubsystems
-				.map[s|s.body.expressions.filter(VariableDeclaration)].flatten.filter[v|v.param]
+			val conflictingVarDcls = includedSubsystems
+				.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
 				.groupBy[p|p.name].values.filter[l|l.size > 1]
-			if (!conflictingParams.empty) {
-				var names = conflictingParams.join("'", "', '", "'", [l|l.get(0).name])
+			if (!conflictingVarDcls.empty) {
+				var names = conflictingVarDcls.join("'", "', '", "'", [l|l.get(0).name])
 				val index = names.lastIndexOf("', '")
 				if (index > -1)
 					names = names.substring(0, index + 1) + " and " + names.substring(index + 3)
-				val d = if(conflictingParams.size == 1) #["", "s", "Its"] else #["s", "", "Their"]
-				warning('''Parameter«d.get(0)» «names» belong«d.get(1)» to several included subsystems. «d.get(2)» direct access has been hidden''',
+				val d = if(conflictingVarDcls.size == 1) #["", "s", "Its"] else #["s", "", "Their"]
+				warning('''Variable«d.get(0)» «names» belong«d.get(1)» to several included subsystems. «d.get(2)» direct access has been hidden''',
 					AmeliaPackage.Literals.TYPE_DECLARATION__NAME)
 			}
 		}
 	}
 	
 	@Check
-	def checkConflictingParams(VariableDeclaration varDecl) {
+	def checkConflictingVarDecl(VariableDeclaration varDecl) {
 		val type = if(varDecl.param) "parameter" else "variable"
 		val typeDecl = (EcoreUtil2.getRootContainer(varDecl) as Model).typeDeclaration
 		if (typeDecl instanceof Subsystem) {
 			if (typeDecl.extensions != null) {
 				val includes = typeDecl.extensions.declarations.filter(IncludeDeclaration)
 				val includedSubsystems = includes.filter[i|i.element instanceof Subsystem].map[i|i.element as Subsystem]
-				val includedParams = includedSubsystems
+				val includedVarDecls = includedSubsystems
 					.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
-					.filter[v|v.param]
-				if (includedParams.map[p|p.name].toList.contains(varDecl.name)) {
-					val conflictingParams = includedParams.filter[p|p.name.equals(varDecl.name)]
-					val subsystems = conflictingParams.map[ p |
+				if (includedVarDecls.map[p|p.name].toList.contains(varDecl.name)) {
+					val conflictingVarDecl = includedVarDecls.filter[p|p.name.equals(varDecl.name)]
+					val subsystems = conflictingVarDecl.map[ p |
 						((EcoreUtil2.getRootContainer(p) as Model).typeDeclaration) as Subsystem
 					]
 					val d = if(subsystems.size == 1) "" else "s"

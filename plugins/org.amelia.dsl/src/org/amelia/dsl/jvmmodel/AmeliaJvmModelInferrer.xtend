@@ -177,6 +177,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				val params = subsystem.params
 				val includedSubsystems = subsystem.includedSubsystems
 				val includedParams = subsystem.includedParams(false)
+				val includedVars = subsystem.includedVars(false)
 				val _parameters = newArrayList
 				val fields = newArrayList
 				val constructors = newArrayList
@@ -207,9 +208,7 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 									body = e.right
 								]								
 							}
-							if (e.param) {
-								getters += e.toGetter(e.name, e.type ?: inferredType)
-							}
+							getters += e.toGetter(e.name, e.type ?: inferredType)
 						}
 						ConfigBlockExpression: {
 							// There is only one configuration block
@@ -297,14 +296,15 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					]
 				}
 				// Add a getter for non-duplicate parameters
-				val duplicates = (includedParams + subsystem.variables).groupBy[p|p.name]
+				val includedParamsAndVars = includedParams + includedVars
+				val duplicates = (includedParamsAndVars + subsystem.variables).groupBy[p|p.name]
 					.values.filter[l|l.size > 1]
 					.map[l|l.get(0).name]
 					.toList
-				for (param : includedParams) {
-					if (!duplicates.contains(param.name)) {
-						getters += param.toMethod("get" + param.name.toFirstUpper, param.type ?: inferredType) [
-							body = '''return this.«param.fullyQualifiedName.skipLast(1).javaName».get«param.name.toFirstUpper»();'''
+				for (paramOrVar : includedParamsAndVars) {
+					if (!duplicates.contains(paramOrVar.name)) {
+						getters += paramOrVar.toMethod("get" + paramOrVar.name.toFirstUpper, paramOrVar.type ?: inferredType) [
+							body = '''return this.«paramOrVar.fullyQualifiedName.skipLast(1).javaName».get«paramOrVar.name.toFirstUpper»();'''
 						]
 					}
 				}
@@ -715,9 +715,18 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	def params(org.amelia.dsl.amelia.Subsystem subsystem) {
 		return variables(subsystem).filter[v|v.param]
 	}
-	
+
 	def List<VariableDeclaration> includedParams(org.amelia.dsl.amelia.Subsystem subsystem, boolean recursive) {
-		val parameters = newArrayList
+		return includedVariableDecl(subsystem, recursive, true, false)
+	}
+
+	def List<VariableDeclaration> includedVars(org.amelia.dsl.amelia.Subsystem subsystem, boolean recursive) {
+		return includedVariableDecl(subsystem, recursive, false, true)
+	}
+
+	def List<VariableDeclaration> includedVariableDecl(org.amelia.dsl.amelia.Subsystem subsystem,
+		boolean recursive, boolean inclParams, boolean inclVars) {
+		val variableDecls = newArrayList
 		val includedSubsystems = if (subsystem.extensions != null)
 				subsystem.extensions.declarations.filter(IncludeDeclaration).filter [ i |
 					i.element instanceof org.amelia.dsl.amelia.Subsystem
@@ -727,15 +736,19 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 			else
 				Collections.EMPTY_LIST
 		for (s : includedSubsystems) {
-			val includedParams = s.body.expressions.filter(VariableDeclaration).filter[v|v.param]
-			for (param : includedParams) {
+			var includedVarDecls = s.body.expressions.filter(VariableDeclaration)
+			if (!inclParams) // filter out parameters
+				includedVarDecls = includedVarDecls.filter[v|!v.param]
+			if (!inclVars) // filter out variables
+				includedVarDecls = includedVarDecls.filter[v|v.param]
+			for (param : includedVarDecls) {
 				if (param.type != null || param.right != null)
-					parameters += param
+					variableDecls += param
 			}
 			if (recursive)
-				parameters += includedParams(s, recursive)
+				variableDecls += includedVariableDecl(s, recursive, inclParams, inclVars)
 		}
-		return parameters
+		return variableDecls
 	}
 	
 	def javaName(RuleDeclaration rule, org.amelia.dsl.amelia.Subsystem subsystem) {
