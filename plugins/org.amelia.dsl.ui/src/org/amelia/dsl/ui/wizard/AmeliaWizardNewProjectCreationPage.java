@@ -16,30 +16,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Amelia project. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.amelia.dsl.ui.wizard
+package org.amelia.dsl.ui.wizard;
 
-import com.google.inject.Inject
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.resource.FileExtensionProvider
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
-/**
- * @author Miguel Jiménez - Initial contribution and API
- */
-class AmeliaNewProjectWizardInitialContents {
+public class AmeliaWizardNewProjectCreationPage extends WizardNewProjectCreationPage {
 
-	@Inject
-	FileExtensionProvider fileExtensionProvider
-
-	def generateInitialContents(IFileSystemAccess2 fsa) {
-		fsa.generateFile(
-			"src/test/Default." + fileExtensionProvider.primaryFileExtension,
-			'''
-			package test
-
-			subsystem Default {
-				
-			}
-			'''
-		)
+	public AmeliaWizardNewProjectCreationPage(String pageName) {
+		super(pageName);
 	}
+
 }
