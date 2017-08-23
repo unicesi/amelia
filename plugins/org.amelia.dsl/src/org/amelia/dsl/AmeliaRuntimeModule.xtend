@@ -37,6 +37,10 @@ import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
 import org.amelia.dsl.debug.AmeliaStratumBreakpointSupport
 import org.eclipse.xtext.debug.IStratumBreakpointSupport
+import org.eclipse.xtext.xbase.resource.BatchLinkableResourceStorageFacade
+import org.eclipse.xtext.xbase.jvmmodel.JvmModelTargetURICollector
+import org.eclipse.xtext.resource.persistence.IResourceStorageFacade
+import org.eclipse.xtext.findReferences.TargetURICollector
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -51,11 +55,11 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 			.annotatedWith(LinkingScopeProviderBinding)
 			.to(AmeliaScopeProvider);
 	}
-	
+
 	override Class<? extends IScopeProvider> bindIScopeProvider() {
 		return AmeliaScopeProvider
 	}
-	
+
 	override void configure(Binder binder) {
 		super.configure(binder)
 		binder
@@ -66,11 +70,19 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 			.bind(ImplicitlyImportedFeatures)
 			.to(AmeliaImplicitlyImportedFeatures)
 	}
-	
+
 	override Class<? extends IGenerator> bindIGenerator() {
 		return OutputConfigurationAwaredGenerator
 	}
-	
+
+	override Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
+		return AmeliaQualifiedNameProvider
+	}
+
+	override Class<? extends IStratumBreakpointSupport> bindIStratumBreakpointSupport() {
+		return AmeliaStratumBreakpointSupport
+	}
+
 	def Class<? extends ITypeComputer> bindITypeComputer() {
 		return AmeliaTypeComputer
 	}
@@ -78,13 +90,12 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 	def Class<? extends XbaseCompiler> bindXbaseCompiler() {
 		return AmeliaCompiler
 	}
-	
-	override Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
-		return AmeliaQualifiedNameProvider
+
+	def Class<? extends IResourceStorageFacade> bindResourceStorageFacade() {
+		return BatchLinkableResourceStorageFacade
 	}
-	
-	override Class<? extends IStratumBreakpointSupport> bindIStratumBreakpointSupport() {
-		return AmeliaStratumBreakpointSupport
+
+	def Class<? extends TargetURICollector> bindTargetURICollector() {
+		return JvmModelTargetURICollector
 	}
-	
 }

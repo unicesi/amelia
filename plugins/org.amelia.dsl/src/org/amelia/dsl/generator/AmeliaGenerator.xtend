@@ -42,11 +42,11 @@ import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
  * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaGenerator implements IGenerator {
-	
+
 	@Inject ResourceDescriptionsProvider resourceDescriptionsProvider
-	
+
 	@Inject IContainer.Manager containerManager
-	
+
 	@Inject extension IQualifiedNameProvider
 
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
