@@ -52,12 +52,9 @@ class AmeliaImportSectionNamespaceScopeProvider extends XImportSectionNamespaceS
 	def List<ImportNormalizer> provideImportNormalizerList(ExtensionSection extensionSection, boolean ignoreCase) {
         val List<ImportNormalizer> result = Lists.newArrayList
         extensionSection.declarations.forEach[includeDecl|
-        	result.add(
-        		includeDecl.element
-        			.fullyQualifiedName
-        			.toString
-        			.createImportedNamespaceResolver(ignoreCase)
-        	)
+        	val fqn = includeDecl.element.fullyQualifiedName
+	        if (fqn != null)
+	        	result.add(fqn.toString.createImportedNamespaceResolver(ignoreCase))
         ]
         result
     }
