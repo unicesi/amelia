@@ -161,14 +161,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 					exceptions += typeRef(Exception)
 					body = '''return start(stopExecutedComponents, true);'''
 				]
-				// Create a method for each included subsystem as a mechanism
-				// to import the corresponding Java class automatically
-				subsystems.forEach[subsystem|
-					members += deployment.toMethod(prefix + subsystem.name, typeRef(subsystem.fullyQualifiedName.toString)) [
-						visibility = JvmVisibility.PRIVATE
-						body = '''throw new UnsupportedOperationException();'''
-					]
-				]
 			}
 		]
 	}

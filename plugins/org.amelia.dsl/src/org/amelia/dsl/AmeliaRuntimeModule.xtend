@@ -41,6 +41,9 @@ import org.eclipse.xtext.xbase.resource.BatchLinkableResourceStorageFacade
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelTargetURICollector
 import org.eclipse.xtext.resource.persistence.IResourceStorageFacade
 import org.eclipse.xtext.findReferences.TargetURICollector
+import com.google.inject.name.Names
+import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
+import org.amelia.dsl.scoping.AmeliaImportSectionNamespaceScopeProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -54,6 +57,13 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 			.bind(IScopeProvider)
 			.annotatedWith(LinkingScopeProviderBinding)
 			.to(AmeliaScopeProvider);
+	}
+
+	override void configureIScopeProviderDelegate(Binder binder) {
+		binder
+			.bind(IScopeProvider)
+			.annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE))
+			.to(AmeliaImportSectionNamespaceScopeProvider);
 	}
 
 	override Class<? extends IScopeProvider> bindIScopeProvider() {
