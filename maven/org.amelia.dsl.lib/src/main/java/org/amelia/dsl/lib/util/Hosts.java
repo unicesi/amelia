@@ -58,7 +58,17 @@ public class Hosts {
 			final String password) {
 		return new Host(hostname, 21, 22, username, password);
 	}
-	
+
+	/**
+	 * Instantiates a host with the hostname and username only.
+	 * @param hostname The hostname
+	 * @param username The username
+	 * @return A host object
+	 */
+	public static Host host(final String hostname, final String username) {
+		return new Host(hostname, 21, 22, username, null);
+	}
+
 	/**
 	 * Reads a plain file and instantiate as many hosts as lines are in the
 	 * file.
