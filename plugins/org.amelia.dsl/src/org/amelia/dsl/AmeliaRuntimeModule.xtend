@@ -20,30 +20,26 @@ package org.amelia.dsl
 
 import com.google.inject.Binder
 import com.google.inject.Singleton
+import com.google.inject.name.Names
 import org.amelia.dsl.compiler.AmeliaCompiler
+import org.amelia.dsl.debug.AmeliaStratumBreakpointSupport
 import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 import org.amelia.dsl.outputconfiguration.OutputConfigurationAwaredGenerator
 import org.amelia.dsl.runtime.AmeliaQualifiedNameProvider
 import org.amelia.dsl.scoping.AmeliaImplicitlyImportedFeatures
+import org.amelia.dsl.scoping.AmeliaImportSectionNamespaceScopeProvider
 import org.amelia.dsl.scoping.AmeliaScopeProvider
 import org.amelia.dsl.typesystem.AmeliaTypeComputer
+import org.eclipse.xtext.debug.IStratumBreakpointSupport
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.linking.LinkingScopeProviderBinding
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.scoping.IScopeProvider
+import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
-import org.amelia.dsl.debug.AmeliaStratumBreakpointSupport
-import org.eclipse.xtext.debug.IStratumBreakpointSupport
-import org.eclipse.xtext.xbase.resource.BatchLinkableResourceStorageFacade
-import org.eclipse.xtext.xbase.jvmmodel.JvmModelTargetURICollector
-import org.eclipse.xtext.resource.persistence.IResourceStorageFacade
-import org.eclipse.xtext.findReferences.TargetURICollector
-import com.google.inject.name.Names
-import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
-import org.amelia.dsl.scoping.AmeliaImportSectionNamespaceScopeProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -101,11 +97,4 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 		return AmeliaCompiler
 	}
 
-	def Class<? extends IResourceStorageFacade> bindResourceStorageFacade() {
-		return BatchLinkableResourceStorageFacade
-	}
-
-	def Class<? extends TargetURICollector> bindTargetURICollector() {
-		return JvmModelTargetURICollector
-	}
 }
