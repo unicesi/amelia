@@ -190,12 +190,16 @@ public class SSHHandler extends Thread {
 		this.expect.expect(regexp(prompt));
 	}
 
-	public void executeCommand(final CommandDescriptor descriptor, final ScheduledTask<?> command)
-			throws InterruptedException {
+	public void executeCommand(final CommandDescriptor descriptor,
+		final ScheduledTask<?> command) throws InterruptedException {
 		this.taskQueue.execute(new Callable<Object>() {
 			@Override public Object call() throws Exception {
 				try {
-					return command.call(host, ShellUtils.ameliaPromptRegexp());
+					return command.call(
+						host,
+						ShellUtils.ameliaPromptRegexp(),
+						false
+					);
 				} catch (Exception e) {
 					logger.error(e);
 					throw e;

@@ -93,11 +93,12 @@ public class CommandExtensions {
             .withSuccessMessage("TryOrElse command executed successfully")
             .withErrorMessage("Unknown error in TryOrElse procedure")
             .withCommand(command.toCommandString())
-            .withCallable(new CallableTask<Void>() {
+            .withCallable(new CallableTask<Object>() {
                 @Override
-                public Void call(Host host, String prompt) throws Exception {
+                public Object call(Host host, String prompt, boolean quiet)
+                	throws Exception {
                     try {
-                        command.callable().call(host, prompt);
+                        command.callable().call(host, prompt, true);
                         Log.success(host, command.doneMessage());
                     } catch(Exception e) {
                         procedure.apply(e);
@@ -109,7 +110,7 @@ public class CommandExtensions {
                             )
                         );
                     }
-                    return null;
+                    return new Object(); // prevent null pointer exceptions
                 }
             }).build();
     }

@@ -28,7 +28,15 @@ import org.amelia.dsl.lib.descriptors.Host;
  *            The return type
  */
 public interface CallableTask<V> {
-	
-	public V call(Host host, String prompt) throws Exception;
+
+	/**
+	 * Call this task.
+	 * @param host the host where this task is being executed
+	 * @param prompt the current prompt
+	 * @param quiet whether to print success and error messages
+	 * @return an object
+	 * @throws Exception is case there's an error executing this task
+	 */
+	public V call(Host host, String prompt, boolean quiet) throws Exception;
 	
 }

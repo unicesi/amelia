@@ -43,17 +43,18 @@ public class AssetBundle extends CommandDescriptor {
 		this.transfers = transfers;
 		this.overwrite = overwrite;
 		final AssetBundle that = this;
-		this.callable = new CallableTask<Void>() {
+		this.callable = new CallableTask<Object>() {
 			@Override
-			public Void call(Host host, String prompt) throws Exception {
+			public Object call(Host host, String prompt, boolean quiet)
+				throws Exception {
 				try {
 					host.ftp().upload(that);
-					Log.success(host, that.doneMessage());
+					if (!quiet) Log.success(host, that.doneMessage());
 				} catch (Exception e) {
-					Log.error(host, that.failMessage());
+					if (!quiet) Log.error(host, that.failMessage());
 					throw e;
 				}
-				return null;
+				return new Object(); // prevent null pointer errors
 			}
 		};
 	}

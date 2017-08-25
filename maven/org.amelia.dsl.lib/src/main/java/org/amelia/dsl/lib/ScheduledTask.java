@@ -50,8 +50,9 @@ public class ScheduledTask<T> implements CallableTask<T> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	@Override public T call(Host host, String prompt) throws Exception {
-		return (T) descriptor.callable().call(host, prompt);
+	@Override public T call(Host host, String prompt, boolean quiet)
+		throws Exception {
+		return (T) descriptor.callable().call(host, prompt, quiet);
 	}
 	
 	public Host host() {

@@ -193,7 +193,7 @@ public class Commands {
 			return run;
 		}
 		
-		private CallableTask<Integer> callableTask(final List<String> arguments) {
+		private CallableTask<Object> callableTask(final List<String> arguments) {
 			final String[] errors = Arrays.concatAll(errorTexts,
 					new String[] {
 							"Error when parsing the composite file '" + compositeName + "'",
@@ -201,9 +201,8 @@ public class Commands {
 							"Could not start Jetty server",
 							"Address already in use",
 							"Cannot instantiate the FraSCAti factory" });
-			return new CallableTask<Integer>() {
-
-				@Override public Integer call(Host host, String prompt)
+			return new CallableTask<Object>() {
+				@Override public Integer call(Host host, String prompt, boolean quiet)
 						throws Exception {
 					int PID = -1;
 					Expect expect = host.ssh().expect();
@@ -226,19 +225,20 @@ public class Commands {
 						String response = expect.expect(regexp(releaseRegexp)).getBefore();
 						if (Strings.containsAnyOf(response, errors)) {
 							String message = Strings.firstIn(errors, response);
-							Log.error(host, message);
+							if(!quiet) Log.error(host, message);
 							logger.error(message);
 							throw new RuntimeException(message);
 						} else {
-							Log.success(host, successMessage);
+							if(!quiet) Log.success(host, successMessage);
 						}
 					} catch (ExpectIOException e) {
 						String message2 = "Operation timeout waiting for \""
 								+ releaseRegexp + "\" in host " + host;
 
 						if (Strings.containsAnyOf(e.getInputBuffer(), errors)) {
-							Log.error(host, Strings.firstIn(errors, e.getInputBuffer())
-											+ " in host " + host);
+							if(!quiet)
+								Log.error(host, Strings.firstIn(errors, e.getInputBuffer())
+									+ " in host " + host);
 							throw e;
 						} else {
 							logger.error(e);
@@ -426,8 +426,8 @@ public class Commands {
 	private static CommandDescriptor checkVersion(final Version version,
 			final String programName, final String versionCommand,
 			final String regexp) {
-		CallableTask<Void> callable = new CallableTask<Void>() {
-			@Override public Void call(Host host, String prompt)
+		CallableTask<Object> callable = new CallableTask<Object>() {
+			@Override public Object call(Host host, String prompt, boolean quiet)
 					throws Exception {
 				Expect expect = host.ssh().expect();
 				expect.sendLine(versionCommand);
@@ -439,20 +439,21 @@ public class Commands {
 						String message = "The " + programName + " version ("
 								+ matcher.group(1) + ") is not compliant with "
 								+ version;
-						Log.error(host, message);
+						if(!quiet) Log.error(host, message);
 						logger.error("[" + host + "] " + message);
 						throw new RuntimeException(
 								message + " in host " + host);
 					} else {
-						Log.success(host, "The " + programName + " version is Ok");
+						if(!quiet) Log.success(host, "The " + programName + " version is Ok");
 					}
 				} else {
-					Log.warning(host,
+					if(!quiet)
+						Log.warning(host,
 							"The " + programName
-									+ " version could not be verified. Unknown version "
-									+ actualVersion.getBefore());
+								+ " version could not be verified. Unknown version "
+								+ actualVersion.getBefore());
 				}
-				return null;
+				return new Object(); // prevent null pointer exceptions
 			}
 		};
 		CommandDescriptor check = new CommandDescriptor.Builder()
@@ -493,9 +494,9 @@ public class Commands {
 	 */
 	public static CommandDescriptor evalFScript(final String script, final URI bindingUri) {
 		CommandDescriptor eval = new CommandDescriptor.Builder()
-				.withCallable(new CallableTask<Collection<SCANamedNode>>() {
+				.withCallable(new CallableTask<Object>() {
 					@Override public Collection<SCANamedNode> call(Host host,
-							String prompt) throws Exception {
+							String prompt, boolean quiet) throws Exception {
 						return FrascatiUtils.eval(script, bindingUri);
 					}
 				}).build();
@@ -515,9 +516,9 @@ public class Commands {
 	 */
 	public static CommandDescriptor registerFScript(final File script, final URI bindingUri) {
 		CommandDescriptor register = new CommandDescriptor.Builder()
-				.withCallable(new CallableTask<List<String>>() {
+				.withCallable(new CallableTask<Object>() {
 					@Override public List<String> call(Host host,
-							String prompt) throws Exception {
+							String prompt, boolean quiet) throws Exception {
 						return FrascatiUtils.registerScript(script, bindingUri);
 					}
 				}).build();
@@ -537,9 +538,9 @@ public class Commands {
 	 */
 	public static CommandDescriptor registerFScript(final String script, final URI bindingUri) {
 		CommandDescriptor register = new CommandDescriptor.Builder()
-				.withCallable(new CallableTask<List<String>>() {
+				.withCallable(new CallableTask<Object>() {
 					@Override public List<String> call(Host host,
-							String prompt) throws Exception {
+							String prompt, boolean quiet) throws Exception {
 						return FrascatiUtils.registerScript(script, bindingUri);
 					}
 				}).build();

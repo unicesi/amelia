@@ -52,7 +52,7 @@ public class CommandDescriptor extends Observable {
 		public String[] errorTexts;
 		public String errorMessage;
 		public String successMessage;
-		public CallableTask<?> callable;
+		public CallableTask<Object> callable;
 		public boolean execution;
 
 		public Builder() {
@@ -106,7 +106,7 @@ public class CommandDescriptor extends Observable {
 			return this;
 		}
 		
-		public Builder withCallable(CallableTask<?> callable) {
+		public Builder withCallable(CallableTask<Object> callable) {
 			this.callable = callable;
 			return this;
 		}
@@ -124,11 +124,12 @@ public class CommandDescriptor extends Observable {
 			return new CommandDescriptor(this);
 		}
 		
-		protected CallableTask<Void> defaultCallableTask() {
-			return new CallableTask<Void>() {
-				@Override public Void call(Host host, String prompt)
-						throws Exception {
-					Expect expect = host.ssh().expect();	
+		protected CallableTask<Object> defaultCallableTask() {
+			return new CallableTask<Object>() {
+				@Override public String call(Host host, String prompt, boolean quiet)
+					throws Exception {
+					String output = new String();
+					Expect expect = host.ssh().expect();
 					if (timeout == -1)
 						expect = expect.withInfiniteTimeout();
 					else if (timeout > 0)
@@ -141,7 +142,7 @@ public class CommandDescriptor extends Observable {
 						String response = expect.expect(regexp(releaseRegexp)).getBefore();
 						
 						if (Strings.containsAnyOf(response, errorTexts)) {
-							Log.error(host, errorMessage);
+							if(!quiet) Log.error(host, errorMessage);
 							throw new RuntimeException(errorMessage);
 						} else {
 							// Check non-zero error code
@@ -154,16 +155,17 @@ public class CommandDescriptor extends Observable {
 										returnCode
 									)
 								);
-							Log.success(
-								host,
-								successMessage == null || successMessage.isEmpty()
-									? _command : successMessage
-							);
+							if(!quiet)
+								Log.success(
+									host,
+									successMessage == null || successMessage.isEmpty()
+										? _command : successMessage
+								);
 						}
 					} catch(ExpectIOException e) {
 						String response = e.getInputBuffer();
 						if (Strings.containsAnyOf(response, errorTexts)) {
-							Log.error(host, errorMessage);
+							if(!quiet) Log.error(host, errorMessage);
 							throw new Exception(errorMessage);
 						} else {
 							String regexp = releaseRegexp.equals(prompt)
@@ -189,7 +191,7 @@ public class CommandDescriptor extends Observable {
 	protected final String releaseRegexp;
 	protected final String successMessage;
 	protected final long timeout;
-	protected CallableTask<?> callable;
+	protected CallableTask<Object> callable;
 	protected final boolean execution;
 	private final List<CommandDescriptor> dependencies;
 	private final List<Host> hosts;
@@ -397,7 +399,7 @@ public class CommandDescriptor extends Observable {
 		return this.successMessage;
 	}
 	
-	public CallableTask<?> callable() {
+	public CallableTask<Object> callable() {
 		return this.callable;
 	}
 	
