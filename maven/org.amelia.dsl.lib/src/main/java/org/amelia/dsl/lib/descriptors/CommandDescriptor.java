@@ -117,6 +117,8 @@ public class CommandDescriptor extends Observable {
 		}	
 
 		public CommandDescriptor build() {
+			if (this.errorMessage == null || this.errorMessage.isEmpty())
+				this.errorMessage = this.command;
 			if (this.callable == null)
 				this.callable = defaultCallableTask();
 			return new CommandDescriptor(this);
@@ -137,23 +139,21 @@ public class CommandDescriptor extends Observable {
 						String _command = command + " " + Arrays.join(arguments, " ");
 						expect.sendLine(_command);
 						String response = expect.expect(regexp(releaseRegexp)).getBefore();
-
-						// Check non-zero error code
-						expect.expect(regexp(prompt));
-						expect.sendLine("echo $?");
-						String returnCode = expect.expect(regexp("([0-9]+)")).group(1);
 						
 						if (Strings.containsAnyOf(response, errorTexts)) {
 							Log.error(host, errorMessage);
 							throw new RuntimeException(errorMessage);
-						} else if (!returnCode.equals("0")) {
-							throw new RuntimeException(
-								String.format(
-									"The command returned a non-zero error code (%s)",
-									returnCode
-								)
-							);
 						} else {
+							// Check non-zero error code
+							expect.sendLine("echo --$?--");
+							String returnCode = expect.expect(regexp("\\-\\-([0-9]+)\\-\\-")).group(1);
+							if (!returnCode.equals("0"))
+								throw new RuntimeException(
+									String.format(
+										"The command returned a non-zero error code (%s)",
+										returnCode
+									)
+								);
 							Log.success(
 								host,
 								successMessage == null || successMessage.isEmpty()
