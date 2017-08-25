@@ -18,10 +18,13 @@
  */
 package org.amelia.dsl.lib.util;
 
+import org.amelia.dsl.lib.CallableTask;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
+import org.amelia.dsl.lib.descriptors.Host;
 import org.eclipse.xtext.xbase.lib.Inline;
 import org.eclipse.xtext.xbase.lib.Pure;
 import org.eclipse.xtext.xbase.lib.Procedures;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -77,4 +80,37 @@ public class CommandExtensions {
 		return builder.build();
 	}
 
+	/**
+     * Executes the given procedure in case the command is not executed
+     * successfully.
+     * @param command The command to execute
+     * @param procedure The callback
+     * @return a command descriptor
+     */
+    public static CommandDescriptor tryOrElse(final CommandDescriptor command,
+        final Procedure1<Exception> procedure) {
+        return new CommandDescriptor.Builder()
+            .withSuccessMessage("TryOrElse command executed successfully")
+            .withErrorMessage("Unknown error in TryOrElse procedure")
+            .withCommand(command.toCommandString())
+            .withCallable(new CallableTask<Void>() {
+                @Override
+                public Void call(Host host, String prompt) throws Exception {
+                    try {
+                        command.callable().call(host, prompt);
+                        Log.success(host, command.doneMessage());
+                    } catch(Exception e) {
+                        procedure.apply(e);
+                        Log.error(
+                            host,
+                            String.format(
+                                "fallback executed: %s",
+                                command.errorMessage()
+                            )
+                        );
+                    }
+                    return null;
+                }
+            }).build();
+    }
 }
