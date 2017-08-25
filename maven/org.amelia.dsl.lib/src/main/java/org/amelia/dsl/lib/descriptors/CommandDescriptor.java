@@ -130,20 +130,33 @@ public class CommandDescriptor extends Observable {
 						expect = expect.withInfiniteTimeout();
 					else if (timeout > 0)
 						expect = expect.withTimeout(timeout, TimeUnit.MILLISECONDS);
-					
+
 					try {
 						// Execute the command and expect for a successful execution
 						String _command = command + " " + Arrays.join(arguments, " ");
 						expect.sendLine(_command);
 						String response = expect.expect(regexp(releaseRegexp)).getBefore();
+
+						// Check non-zero error code
+						expect.sendLine("echo $?");
+						String returnCode = expect.expect(regexp("([0-9]+)")).group(1);
+						
 						if (Strings.containsAnyOf(response, errorTexts)) {
 							Log.error(host, errorMessage);
 							throw new RuntimeException(errorMessage);
+						} else if (!returnCode.equals("0")) {
+							throw new RuntimeException(
+								String.format(
+									"The command returned a non-zero error code (%s)",
+									returnCode
+								)
+							);
 						} else {
-							Log.success(host,
-									successMessage == null
-											|| successMessage.isEmpty()
-													? _command : successMessage);
+							Log.success(
+								host,
+								successMessage == null || successMessage.isEmpty()
+									? _command : successMessage
+							);
 						}
 					} catch(ExpectIOException e) {
 						String response = e.getInputBuffer();
@@ -152,9 +165,12 @@ public class CommandDescriptor extends Observable {
 							throw new Exception(errorMessage);
 						} else {
 							String regexp = releaseRegexp.equals(prompt)
-									? "the amelia prompt" : "\"" + releaseRegexp + "\"";
-							String message = "Operation timeout waiting for "
-									+ regexp + " in host " + host;
+									? "the amelia prompt" : String.format("\"%s\"", releaseRegexp);
+							String message = String.format(
+								"Operation timeout waiting for %s in host %s",
+								regexp,
+								host
+							);
 							throw new RuntimeException(message);
 						}
 					}
