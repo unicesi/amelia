@@ -59,6 +59,83 @@ import net.sf.expectit.Result;
  */
 public class SSHHandler extends Thread {
 
+	/**
+	 * @author Miguel Jiménez - Initial contribution and API
+	 */
+	public static final class OutputLog implements Appendable {
+
+		/**
+		 * All lines read by the SSH channel.
+		 */
+		private final List<CharSequence> logs;
+
+		/**
+		 * Sinks fed by this appendable.
+		 */
+		private final List<Appendable> replicas;
+
+		/**
+		 * Default constructor.
+		 */
+		public OutputLog() {
+			this.logs = new ArrayList<CharSequence>();
+			this.replicas = new ArrayList<Appendable>();
+		}
+
+		/**
+		 * Echo any char sequence that gets appended to this appendable.
+		 * @param appendable The appendable
+		 * @return if the appendable is added to the list of replicas
+		 */
+		public boolean echoTo(Appendable appendable) {
+			return this.replicas.add(appendable);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Appendable#append(java.lang.CharSequence)
+		 */
+		@Override
+		public Appendable append(CharSequence csq) throws IOException {
+			if (!csq.toString().isEmpty() && !csq.toString().equals("\n")) {
+				this.logs.add(csq);
+				for (Appendable tmp: this.replicas)
+					tmp.append(csq);
+			}
+			return this;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Appendable#append(char)
+		 */
+		@Override
+		public Appendable append(char c) throws IOException {
+			this.append(String.valueOf(c));
+			return this;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Appendable#append(java.lang.CharSequence, int, int)
+		 */
+		@Override
+		public Appendable append(CharSequence csq, int start, int end)
+			throws IOException {
+			this.append(csq.subSequence(start, end));
+			return this;
+		}
+
+		public List<CharSequence> logs() {
+			return this.logs;
+		}
+
+		public List<Appendable> replicas() {
+			return this.replicas;
+		}
+		
+	}
+
 	private final Host host;
 	
 	private final String subsystem;
@@ -82,25 +159,31 @@ public class SSHHandler extends Thread {
 	private final SimpleDateFormat dateFormat;
 
 	/**
+	 * A runtime representation of the shell channel.
+	 */
+	private final OutputLog outputLog;
+
+	/**
 	 * The logger
 	 */
 	private final static Logger logger = LogManager.getLogger(SSHHandler.class);
 
-	public SSHHandler(final Host host, final String subsystem) {
+	public SSHHandler(final Host host, final String subsystem) throws Exception {
 		this.host = host;
 		this.subsystem = subsystem;
-		
 		String _connectionTimeout = System
 				.getProperty("amelia.connection_timeout");
 		String _executionTimeout = System
 				.getProperty("amelia.execution_timeout");
-
 		this.connectionTimeout = Integer.parseInt(_connectionTimeout);
 		this.executionTimeout = Integer.parseInt(_executionTimeout);
 		this.executions = new ArrayList<CommandDescriptor>();
 		this.taskQueue = new SingleThreadTaskQueue();
 		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd@HH:mm:ss.SSS");
-
+		// prepare the output log and file
+		this.output = createOutputFile();
+		this.outputLog = new OutputLog();
+		this.outputLog.echoTo(new PrintStream(this.output, "UTF-8"));
 		// Handle uncaught exceptions
 		this.taskQueue.setUncaughtExceptionHandler(Threads.exceptionHandler());
 	}
@@ -148,18 +231,16 @@ public class SSHHandler extends Thread {
 	}
 
 	private void initialize() throws Exception {
-		this.output = createOutputFile();
-		PrintStream outputStream = new PrintStream(this.output, "UTF-8");
-
 		this.expect = new ExpectBuilder()
-				.withOutput(this.channel.getOutputStream())
-				.withInputs(this.channel.getInputStream(),
-						this.channel.getExtInputStream())
-				.withEchoInput(outputStream).withEchoOutput(outputStream)
-				.withInputFilters(removeColors(), removeNonPrintable())
-				.withExceptionOnFailure()
-				.withTimeout(this.executionTimeout, TimeUnit.MILLISECONDS)
-				.build();
+			.withOutput(this.channel.getOutputStream())
+			.withInputs(this.channel.getInputStream(),
+				this.channel.getExtInputStream())
+			.withEchoInput(this.outputLog)
+			.withEchoOutput(this.outputLog)
+			.withInputFilters(removeColors(), removeNonPrintable())
+			.withExceptionOnFailure()
+			.withTimeout(this.executionTimeout, TimeUnit.MILLISECONDS)
+			.build();
 	}
 
 	private void configure() throws IOException {
@@ -313,6 +394,13 @@ public class SSHHandler extends Thread {
 
 	public Host host() {
 		return this.host;
+	}
+
+	/**
+	 * @return a runtime representation of the shell channel
+	 */
+	public OutputLog outputLog() {
+		return this.outputLog;
 	}
 
 }

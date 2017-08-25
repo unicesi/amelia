@@ -134,12 +134,22 @@ public class CommandDescriptor extends Observable {
 						expect = expect.withInfiniteTimeout();
 					else if (timeout > 0)
 						expect = expect.withTimeout(timeout, TimeUnit.MILLISECONDS);
-
 					try {
 						// Execute the command and expect for a successful execution
 						String _command = command + " " + Arrays.join(arguments, " ");
+						// There is only one command being executed in this connection
 						expect.sendLine(_command);
+						int from = host.ssh().outputLog().logs().size();
 						String response = expect.expect(regexp(releaseRegexp)).getBefore();
+
+						// Make sure to receive the output: send an empty line to wait while
+						// expect finishes feeding the appendable
+						expect.sendLine();
+						expect.expect(regexp(prompt));
+						
+						int to = host.ssh().outputLog().logs().size() - 1;
+						for (CharSequence csq: host.ssh().outputLog().logs().subList(from, to))
+							output += csq;
 						
 						if (Strings.containsAnyOf(response, errorTexts)) {
 							if(!quiet) Log.error(host, errorMessage);
@@ -178,7 +188,7 @@ public class CommandDescriptor extends Observable {
 							throw new RuntimeException(message);
 						}
 					}
-					return null;
+					return output;
 				}
 			};
 		}

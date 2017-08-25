@@ -22,9 +22,9 @@ import org.amelia.dsl.lib.CallableTask;
 import org.amelia.dsl.lib.descriptors.CommandDescriptor;
 import org.amelia.dsl.lib.descriptors.Host;
 import org.eclipse.xtext.xbase.lib.Inline;
-import org.eclipse.xtext.xbase.lib.Pure;
 import org.eclipse.xtext.xbase.lib.Procedures;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import org.eclipse.xtext.xbase.lib.Pure;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -114,4 +114,31 @@ public class CommandExtensions {
                 }
             }).build();
     }
+
+    /**
+     * Applies a function on the output of the given command.
+     * @param command the command to execute
+     * @param function the function
+     * @return a command wrapping the original command
+     */
+    public static CommandDescriptor fetch(final CommandDescriptor command,
+    	final Procedure1<String> procedure) {
+        return new CommandDescriptor.Builder()
+            .withSuccessMessage(command.doneMessage())
+            .withErrorMessage(command.errorMessage())
+            .withCommand(command.toCommandString())
+            .withCallable(new CallableTask<Object>() {
+                @Override
+                public Object call(Host host, String prompt, boolean quiet)
+                	throws Exception {
+                	final Object response = command.callable()
+                		.call(host, prompt, true);
+                	String fetched = String.class.isInstance(response)
+                		? (String) response : response.toString();
+                	procedure.apply(fetched);
+                    return new Object();
+                }
+            }).build();
+    }
+
 }
