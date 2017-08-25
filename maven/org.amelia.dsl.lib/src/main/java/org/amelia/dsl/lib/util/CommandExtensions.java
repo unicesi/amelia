@@ -85,13 +85,13 @@ public class CommandExtensions {
      * successfully.
      * @param command The command to execute
      * @param procedure The callback
-     * @return a command descriptor
+     * @return a command wrapping the original command
      */
-    public static CommandDescriptor tryOrElse(final CommandDescriptor command,
+    public static CommandDescriptor fallback(final CommandDescriptor command,
         final Procedure1<Exception> procedure) {
         return new CommandDescriptor.Builder()
-            .withSuccessMessage("TryOrElse command executed successfully")
-            .withErrorMessage("Unknown error in TryOrElse procedure")
+        	.withSuccessMessage(command.doneMessage())
+            .withErrorMessage(command.errorMessage())
             .withCommand(command.toCommandString())
             .withCallable(new CallableTask<Object>() {
                 @Override
