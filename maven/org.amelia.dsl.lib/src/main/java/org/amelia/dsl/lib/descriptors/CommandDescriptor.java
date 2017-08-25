@@ -138,6 +138,7 @@ public class CommandDescriptor extends Observable {
 						String response = expect.expect(regexp(releaseRegexp)).getBefore();
 
 						// Check non-zero error code
+						expect.expect(regexp(prompt));
 						expect.sendLine("echo $?");
 						String returnCode = expect.expect(regexp("([0-9]+)")).group(1);
 						
