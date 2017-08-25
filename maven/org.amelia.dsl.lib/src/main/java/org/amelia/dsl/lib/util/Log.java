@@ -69,6 +69,10 @@ public class Log {
 		print(INFO + " " + message, true);
 	}
 
+	public static void info(Host host, String message) {
+		print(INFO + formatHost(host) + message, true);
+	}
+
 	public static void error(Host host, String message) {
 		print(ERROR + formatHost(host) + message, true);
 	}
