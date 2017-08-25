@@ -59,6 +59,7 @@ import org.eclipse.xtext.xbase.XNumberLiteral
 import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XbasePackage
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * This class contains custom validation rules. 
@@ -508,18 +509,26 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkCondition(OnHostBlockExpression onHostBlock) {
 		if (onHostBlock.condition.actualType.getSuperType(boolean) == null
-			&& onHostBlock.condition.actualType.getSuperType(Boolean) == null) {
-			error("Conditions must be of type boolean", AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__CONDITION,
-				INVALID_PARAMETER_TYPE)
+			&& onHostBlock.condition.actualType.getSuperType(Boolean) == null
+			&& onHostBlock.condition.actualType.getSuperType(AtomicBoolean) == null) {
+			error(
+				"Conditions must be either of type boolean or AtomicBoolean",
+				AmeliaPackage.Literals.ON_HOST_BLOCK_EXPRESSION__CONDITION,
+				INVALID_PARAMETER_TYPE
+			)
 		}
 	}
 	
 	@Check
 	def checkCondition(RuleDeclaration rule) {
 		if (rule.condition.actualType.getSuperType(boolean) == null
-			&& rule.condition.actualType.getSuperType(Boolean) == null) {
-			error("Conditions must be of type boolean", AmeliaPackage.Literals.RULE_DECLARATION__CONDITION,
-				INVALID_PARAMETER_TYPE)
+			&& rule.condition.actualType.getSuperType(Boolean) == null
+			&& rule.condition.actualType.getSuperType(AtomicBoolean) == null) {
+			error(
+				"Conditions must be either of type boolean or AtomicBoolean",
+				AmeliaPackage.Literals.RULE_DECLARATION__CONDITION,
+				INVALID_PARAMETER_TYPE
+			)
 		}
 	}
 	

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.amelia.dsl.lib.CallableTask;
 import org.amelia.dsl.lib.util.Arrays;
@@ -193,6 +194,12 @@ public class CommandDescriptor extends Observable {
 	private final List<CommandDescriptor> dependencies;
 	private final List<Host> hosts;
 
+	/**
+	 * A boolean condition to decide whether this command should be executed.
+	 * This boolean expression should be evaluated before executing the command.
+	 */
+	private List<AtomicBoolean> executionConditions;
+
 	public CommandDescriptor(final Builder builder) {
 		this.internalId = UUID.randomUUID();
 		this.command = builder.command + (builder.arguments.length > 0
@@ -206,6 +213,7 @@ public class CommandDescriptor extends Observable {
 		this.execution = builder.execution;
 		this.dependencies = new ArrayList<CommandDescriptor>();
 		this.hosts = new ArrayList<Host>();
+		this.executionConditions = new ArrayList<AtomicBoolean>();
 	}
 	
 	/**
@@ -291,6 +299,38 @@ public class CommandDescriptor extends Observable {
 	
 	public boolean runsOn(Iterable<Host> hosts) {
 		return runsOn(Iterables.toArray(hosts, Host.class));
+	}
+
+	/**
+	 * Adds an execution condition that is evaluated before executing this
+	 * command.
+	 * @param condition the execution condition
+	 */
+	public void addExecutionCondition(final AtomicBoolean condition) {
+		this.executionConditions.add(condition);
+	}
+
+	/**
+	 * Adds an execution condition that is evaluated before executing this
+	 * command.
+	 * @param condition the execution condition
+	 */
+	public void addExecutionCondition(final boolean condition) {
+		this.executionConditions.add(new AtomicBoolean(condition));
+	}
+
+	/**
+	 * Determines whether this command should be executed.
+	 * @return a boolean value
+	 */
+	public Boolean shouldExecute() {
+		Boolean result = true;
+		for (AtomicBoolean condition : this.executionConditions) {
+			result = condition.get() && result;
+			if (!result)
+				break;
+		}
+		return this.executionConditions.isEmpty() || result;
 	}
 	
 	public List<Host> hosts() {

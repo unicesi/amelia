@@ -18,12 +18,14 @@
  */
 package org.amelia.dsl.jvmmodel
 
+import com.google.common.collect.Iterables
 import com.google.common.collect.Lists
 import com.google.inject.Inject
 import java.util.ArrayList
 import java.util.Collections
 import java.util.HashMap
 import java.util.List
+import java.util.Map
 import org.amelia.dsl.amelia.ConfigBlockExpression
 import org.amelia.dsl.amelia.DependDeclaration
 import org.amelia.dsl.amelia.DeploymentDeclaration
@@ -49,10 +51,6 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
-import org.eclipse.xtext.EcoreUtil2
-import org.amelia.dsl.amelia.Model
-import java.util.Map
-import com.google.common.collect.Iterables
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -502,88 +500,64 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 				])
 				trace(subsystem).append(setups)
 			}
-			trace(subsystem).append("init();").newLine
+			trace(subsystem).append("init();")
 			var currentHostBlock = 0
 			for (hostBlock : subsystem.body.expressions.filter(OnHostBlockExpression)) {
-				if (currentHostBlock > 0)
-					trace(subsystem).newLine
-					append(List).append("<").append(Host).append(">").append(" hosts" + currentHostBlock)
-					append(" = ").append(Lists).append('''.newArrayList(getHost«currentHostBlock»());''').newLine
-				
-				// Conditional on-host blocks
-				if (hostBlock.condition != null)
-					append('''if (getHostCondition«hostBlockIndices.get(hostBlock)»()) {''').increaseIndentation.newLine
-				
+				trace(subsystem)
+					.newLine
+					.append(List).append("<").append(Host).append(">").append(" hosts" + currentHostBlock)
+					.append(" = ").append(Lists).append('''.newArrayList(getHost«currentHostBlock»());''')
 				for (rule : hostBlock.rules) {
 					var currentCommand = 0
-					
-					if (rule.condition != null)
-						append('''if (getRuleCondition«ruleIndices.get(rule)»()) {''').increaseIndentation.newLine
-						
 					for (command : rule.commands) {
 						trace(subsystem)
+							.newLine
 							.append('''«rule.name»[«currentCommand»]''')
 							.append('''.runsOn(hosts«currentHostBlock»);''')
+						if (hostBlock.condition != null) { // condition on host
+							trace(subsystem)
+								.newLine
+								.append('''«rule.name»[«currentCommand»]''')
+								.append('''.addExecutionCondition(getHostCondition«hostBlockIndices.get(hostBlock)»());''')
+						}
+						if (rule.condition != null) { // condition on rule
+							trace(subsystem)
+								.newLine
+								.append('''«rule.name»[«currentCommand»]''')
+								.append('''.addExecutionCondition(getRuleCondition«ruleIndices.get(rule)»());''')
+						}
 						if (currentCommand == 0 && !rule.dependencies.empty) {
 							val nonConditionalDeps = rule.dependencies.filter[r|(r.eContainer as OnHostBlockExpression).condition == null]
 							val conditionalDeps = rule.dependencies.filter[ r |
 								r.condition != null || (r.eContainer as OnHostBlockExpression).condition != null
 							]
-							
 							if (!nonConditionalDeps.empty) {
 								val dependencies = newArrayList
 								for (dependency : nonConditionalDeps) {
 									dependencies += '''«dependency.javaName(subsystem)»[«dependency.commands.length - 1»]'''
 								}
-								trace(subsystem).newLine
-								append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')	
+								trace(subsystem)
+									.newLine
+									.append('''«rule.name»[«currentCommand»].dependsOn(«dependencies.join(", ")»);''')	
 							}
 							
 							if (!conditionalDeps.empty) {
 								for (dependency : conditionalDeps) {
-									val d = '''«dependency.javaName(subsystem)»[«dependency.commands.length - 1»]'''
-									val parent = (EcoreUtil2.getRootContainer(dependency) as Model).typeDeclaration as org.amelia.dsl.amelia.Subsystem
-									val external = !parent.fullyQualifiedName.equals(subsystem.fullyQualifiedName)
-									val hostBlockindex = if (external)
-											parent.hostBlocksIndices.get(dependency.eContainer as OnHostBlockExpression)
-										else
-											hostBlockIndices.get(dependency.eContainer as OnHostBlockExpression)
-									val ruleIndex = if (external)
-											parent.rulesIndices.get(dependency)
-										else
-											ruleIndices.get(dependency)
-									val accessor = if (external) (parent as org.amelia.dsl.amelia.Subsystem).javaName + "."
-									
-									if ((dependency.eContainer as OnHostBlockExpression).condition != null) {
-										if (dependency.condition != null)
-											newLine.append('''if («accessor»getHostCondition«hostBlockindex»() && «accessor»getRuleCondition«ruleIndex»())''')
-										else
-											newLine.append('''if («accessor»getHostCondition«hostBlockindex»())''')
-									} else if (dependency.condition != null) {
-										newLine.append('''if («accessor»getRuleCondition«ruleIndex»())''')
-									}
-									increaseIndentation.newLine
-									append('''«rule.name»[«currentCommand»].dependsOn(«d»);''')
-									decreaseIndentation
+									val getter = '''«dependency.javaName(subsystem)»[«dependency.commands.length - 1»]'''
+									trace(subsystem)
+										.newLine
+										.append('''«rule.name»[«currentCommand»].dependsOn(«getter»);''')
 								}
 							}
 
 						} else if (currentCommand > 0) {
-							trace(subsystem).newLine
-							append('''«rule.name»[«currentCommand»].dependsOn(«rule.javaName(subsystem)»[«(currentCommand - 1)»]);''')
+							trace(subsystem)
+								.newLine
+								.append('''«rule.name»[«currentCommand»].dependsOn(«rule.javaName(subsystem)»[«(currentCommand - 1)»]);''')
 						}
-						if (!rule.commands.last.equals(command))
-							trace(subsystem).newLine
 						currentCommand++
 					}
-					
-					if (rule.condition != null)
-						decreaseIndentation.newLine.append("}")
 				}
-				
-				if (hostBlock.condition != null)
-					decreaseIndentation.newLine.append("}")
-				
 				currentHostBlock++
 			}
 		]

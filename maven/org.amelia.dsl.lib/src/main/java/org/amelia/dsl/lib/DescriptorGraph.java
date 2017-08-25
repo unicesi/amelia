@@ -101,8 +101,15 @@ public class DescriptorGraph
 									+ this.descriptor.toCommandString());
 						}
 					}
-					this.handler.executeCommand(this.descriptor, this.command);
+					if (this.descriptor.shouldExecute())
+						this.handler.executeCommand(this.descriptor, this.command);
 					this.descriptor.done(this.handler.host());
+					// Notify when command is not executed
+					if (!this.descriptor.shouldExecute())
+						Log.info(
+							this.handler.host(),
+							String.format("not executed: %s", this.descriptor.toCommandString())
+						);
 					// Release this dependency
 					if (this.descriptor.isExecution()) {
 						// FIXME: Temporary workaround to avoid service-not-bound
