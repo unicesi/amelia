@@ -28,6 +28,9 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.Scopes
+import org.eclipse.xtext.naming.IQualifiedNameProvider
+import com.google.inject.Inject
+import org.eclipse.xtext.naming.QualifiedName
 
 /**
  * This class contains custom scoping description.
@@ -38,6 +41,8 @@ import org.eclipse.xtext.scoping.Scopes
  * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaScopeProvider extends AbstractAmeliaScopeProvider {
+
+	@Inject extension IQualifiedNameProvider
 
 	override getScope(EObject context, EReference reference) {
 		switch (context) {
@@ -52,7 +57,20 @@ class AmeliaScopeProvider extends AbstractAmeliaScopeProvider {
 							Collections.EMPTY_LIST
 					].flatten
 				}
-				return Scopes.scopeFor(candidates)
+				// Allow to reference rules by using both their names and their FQN
+				return Scopes.scopeFor(
+					candidates,
+					[ r |
+						// If the rule is defined within the subsystem, return its name only
+						// otherwise, return its fully qualified name
+						if (r.fullyQualifiedName.skipLast(1).equals(subsystem.fullyQualifiedName))
+							QualifiedName.create(r.name)
+						else
+							r.fullyQualifiedName
+					],
+					// Both defined & included rules can be accessed by using their names directly
+					Scopes.scopeFor(candidates)
+				)
 			}
 			default:
 				return super.getScope(context, reference)
