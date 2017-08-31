@@ -30,6 +30,10 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.AbstractAntlrTokenToAttributeI
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 import org.eclipse.xtext.ui.wizard.IProjectCreator
 import org.amelia.dsl.ui.wizard.AmeliaPluginCreator
+import org.amelia.dsl.ui.hover.AmeliaDispatchingEObjectTextHover
+import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider
+import org.eclipse.xtext.ui.editor.hover.IEObjectHover
+import org.amelia.dsl.ui.hover.AmeliaHoverProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -62,4 +66,13 @@ class AmeliaUiModule extends AbstractAmeliaUiModule {
 	override Class<? extends IProjectCreator> bindIProjectCreator() {
 		return AmeliaPluginCreator
 	}
+
+	override Class<? extends IEObjectHover> bindIEObjectHover() {
+        return AmeliaDispatchingEObjectTextHover
+    }
+ 
+    override Class<? extends IEObjectHoverProvider> bindIEObjectHoverProvider() {
+        return AmeliaHoverProvider
+    }
+
 }

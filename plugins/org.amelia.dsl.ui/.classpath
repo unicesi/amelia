@@ -5,6 +5,7 @@
 		<accessrules>
 			<accessrule kind="accessible" pattern="org/eclipse/xtext/xbase/**"/>
 			<accessrule kind="accessible" pattern="org/eclipse/xtext/ide/**"/>
+			<accessrule kind="accessible" pattern="org/eclipse/jface/internal/text/html/**"/>
 		</accessrules>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
