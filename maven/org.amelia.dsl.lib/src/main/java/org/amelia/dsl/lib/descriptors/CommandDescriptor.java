@@ -135,9 +135,9 @@ public class CommandDescriptor extends Observable {
 						expect = expect.withInfiniteTimeout();
 					else if (timeout > 0)
 						expect = expect.withTimeout(timeout, TimeUnit.MILLISECONDS);
+					// Execute the command and expect for a successful execution
+					String _command = command + " " + Arrays.join(arguments, " ");
 					try {
-						// Execute the command and expect for a successful execution
-						String _command = command + " " + Arrays.join(arguments, " ");
 						// There is only one command being executed in this connection
 						expect.sendLine(_command);
 						int from = host.ssh().outputLog().logs().size();
@@ -162,7 +162,8 @@ public class CommandDescriptor extends Observable {
 							if (!returnCode.equals("0"))
 								throw new RuntimeException(
 									String.format(
-										"The command returned a non-zero error code (%s)",
+										"The command '%s...' returned a non-zero error code (%s)",
+										_command.substring(0, Math.min(_command.length(), 10)).trim(),
 										returnCode
 									)
 								);
