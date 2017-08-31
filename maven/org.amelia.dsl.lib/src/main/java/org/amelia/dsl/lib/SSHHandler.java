@@ -67,7 +67,7 @@ public class SSHHandler extends Thread {
 		/**
 		 * All lines read by the SSH channel.
 		 */
-		private final List<CharSequence> logs;
+		private final ArrayList<CharSequence> logs;
 
 		/**
 		 * Sinks fed by this appendable.
@@ -126,8 +126,12 @@ public class SSHHandler extends Thread {
 			return this;
 		}
 
-		public List<CharSequence> logs() {
-			return this.logs;
+		/**
+		 * @return a cloned version of the current list of logs
+		 */
+		@SuppressWarnings("unchecked")
+		public synchronized List<CharSequence> logs() {
+			return (List<CharSequence>) this.logs.clone();
 		}
 
 		public List<Appendable> replicas() {
