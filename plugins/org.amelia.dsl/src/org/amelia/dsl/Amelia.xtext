@@ -36,12 +36,12 @@ TypeDeclaration
 
 DeploymentDeclaration
 	:	extensions = ExtensionSection?
-		'deployment' name = ID body = XBlockExpression
+		'deployment' name = ValidID body = XBlockExpression
 	;
 
 SubsystemDeclaration returns Subsystem
 	:	extensions = ExtensionSection?
-		'subsystem' name = ID body = SubsystemBlockExpression
+		'subsystem' name = ValidID body = SubsystemBlockExpression
 	;
 
 ExtensionSection
@@ -86,7 +86,7 @@ OnHostBlockExpression
 	;
 
 RuleDeclaration
-	:	name = ID ('?' condition = XExpression)? ':'
+	:	name = ValidID ('?' condition = XExpression)? ':'
 		(=> (dependencies += [RuleDeclaration | QualifiedName] (',' dependencies += [RuleDeclaration | QualifiedName])*)? ';')?
 		(commands += XExpression)*
 	;
