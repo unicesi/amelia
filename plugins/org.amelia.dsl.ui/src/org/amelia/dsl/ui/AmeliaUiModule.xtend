@@ -28,6 +28,8 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculat
 import org.eclipse.xtext.service.SingletonBinding
 import org.eclipse.xtext.ui.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+import org.eclipse.xtext.ui.wizard.IProjectCreator
+import org.amelia.dsl.ui.wizard.AmeliaPluginCreator
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -55,5 +57,9 @@ class AmeliaUiModule extends AbstractAmeliaUiModule {
 	
 	@SingletonBinding override Class<? extends IBracePairProvider> bindIBracePairProvider() {
 		return AmeliaBracePairProvider
+	}
+
+	override Class<? extends IProjectCreator> bindIProjectCreator() {
+		return AmeliaPluginCreator
 	}
 }

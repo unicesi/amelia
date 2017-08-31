@@ -28,7 +28,8 @@ Export-Package: org.amelia.dsl.generator,
  org.amelia.dsl.scoping,
  org.amelia.dsl.amelia,
  org.amelia.dsl.amelia.util,
- org.amelia.dsl.jvmmodel
+ org.amelia.dsl.jvmmodel,
+ org.amelia.dsl.outputconfiguration
 Import-Package: org.amelia.dsl.lib,
  org.amelia.dsl.lib.descriptors,
  org.amelia.dsl.lib.util,

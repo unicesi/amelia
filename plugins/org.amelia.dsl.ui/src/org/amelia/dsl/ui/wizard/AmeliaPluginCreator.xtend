@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Universidad Icesi
+ * Copyright © 2017 Universidad Icesi
  * 
  * This file is part of the Amelia project.
  * 
@@ -16,17 +16,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Amelia project. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.amelia.dsl.ui.wizard;
+package org.amelia.dsl.ui.wizard
 
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import com.google.common.collect.Lists
+import com.google.inject.Inject
+import org.eclipse.xtext.generator.IOutputConfigurationProvider
+import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class AmeliaWizardNewProjectCreationPage extends WizardNewProjectCreationPage {
+class AmeliaPluginCreator extends AmeliaProjectCreator {
 
-	public AmeliaWizardNewProjectCreationPage(String pageName) {
-		super(pageName);
+	@Inject IOutputConfigurationProvider outputConfigurationProvider
+
+	override getRequiredBundles() {
+		Lists.newArrayList("org.amelia.dsl.lib.osgi", "org.eclipse.xtend.lib")
+	}
+
+	override getAllFolders() {
+		var ameliaConf = outputConfigurationProvider
+			.getOutputConfigurations()
+			.findFirst[ outputConf |
+				AmeliaOutputConfigurationProvider::AMELIA_OUTPUT.equals(outputConf.name)
+			]
+		Lists.newArrayList(super.modelFolderName, ameliaConf.outputDirectory)
 	}
 
 }
