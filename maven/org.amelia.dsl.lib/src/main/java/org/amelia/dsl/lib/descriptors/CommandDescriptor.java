@@ -33,6 +33,7 @@ import org.amelia.dsl.lib.util.Log;
 import org.amelia.dsl.lib.util.ShellUtils;
 import org.amelia.dsl.lib.util.Strings;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 
 import net.sf.expectit.Expect;
@@ -207,10 +208,11 @@ public class CommandDescriptor extends Observable {
 	private final List<Host> hosts;
 
 	/**
-	 * A boolean condition to decide whether this command should be executed.
-	 * This boolean expression should be evaluated before executing the command.
+	 * A list of boolean conditions to decide whether this command should be executed.
+	 * These boolean values should be requested to the suppliers before
+	 * executing the command.
 	 */
-	private List<AtomicBoolean> executionConditions;
+	private List<Supplier<Boolean>> executionConditions;
 
 	public CommandDescriptor(final Builder builder) {
 		this.internalId = UUID.randomUUID();
@@ -225,7 +227,7 @@ public class CommandDescriptor extends Observable {
 		this.execution = builder.execution;
 		this.dependencies = new ArrayList<CommandDescriptor>();
 		this.hosts = new ArrayList<Host>();
-		this.executionConditions = new ArrayList<AtomicBoolean>();
+		this.executionConditions = new ArrayList<Supplier<Boolean>>();
 	}
 	
 	/**
@@ -316,10 +318,24 @@ public class CommandDescriptor extends Observable {
 	/**
 	 * Adds an execution condition that is evaluated before executing this
 	 * command.
+	 * @param supplier the condition supplier
+	 */
+	public void addExecutionCondition(final Supplier<Boolean> supplier) {
+		this.executionConditions.add(supplier);
+	}
+
+	/**
+	 * Adds an execution condition that is evaluated before executing this
+	 * command.
 	 * @param condition the execution condition
 	 */
 	public void addExecutionCondition(final AtomicBoolean condition) {
-		this.executionConditions.add(condition);
+		this.executionConditions.add(new Supplier<Boolean>() {
+			@Override
+			public Boolean get() {
+				return condition.get();
+			}
+		});
 	}
 
 	/**
@@ -328,7 +344,12 @@ public class CommandDescriptor extends Observable {
 	 * @param condition the execution condition
 	 */
 	public void addExecutionCondition(final boolean condition) {
-		this.executionConditions.add(new AtomicBoolean(condition));
+		this.executionConditions.add(new Supplier<Boolean>() {
+			@Override
+			public Boolean get() {
+				return condition;
+			}
+		});
 	}
 
 	/**
@@ -337,8 +358,8 @@ public class CommandDescriptor extends Observable {
 	 */
 	public Boolean shouldExecute() {
 		Boolean result = true;
-		for (AtomicBoolean condition : this.executionConditions) {
-			result = condition.get() && result;
+		for (Supplier<Boolean> supplier : this.executionConditions) {
+			result = supplier.get() && result;
 			if (!result)
 				break;
 		}

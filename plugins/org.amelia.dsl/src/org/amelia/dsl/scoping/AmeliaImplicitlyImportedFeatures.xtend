@@ -32,7 +32,10 @@ class AmeliaImplicitlyImportedFeatures extends ImplicitlyImportedFeatures {
 	}
 	
 	override protected getExtensionClasses() {
-		return (super.getExtensionClasses() + #[CommandExtensions]).toList
+		return (super.getExtensionClasses() + #[
+			CommandExtensions,
+			org.amelia.dsl.lib.util.BooleanExtensions
+		]).toList
 	}
 	
 }
