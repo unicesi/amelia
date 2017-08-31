@@ -33,7 +33,6 @@ import org.amelia.dsl.typesystem.AmeliaTypeComputer
 import org.eclipse.xtext.debug.IStratumBreakpointSupport
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
-import org.eclipse.xtext.linking.LinkingScopeProviderBinding
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
@@ -47,13 +46,6 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
  * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
-	
-	override void configureLinkingIScopeProvider(Binder binder) {
-		binder
-			.bind(IScopeProvider)
-			.annotatedWith(LinkingScopeProviderBinding)
-			.to(AmeliaScopeProvider);
-	}
 
 	override void configureIScopeProviderDelegate(Binder binder) {
 		binder
