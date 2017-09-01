@@ -586,12 +586,12 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	
 	def Procedure1<ITreeAppendable> startMethodBody(DeploymentDeclaration deployment,
 		Iterable<org.amelia.dsl.amelia.Subsystem> subsystems, boolean includeSecondParam) {
-		val model = deployment.eContainer as Model
 		return [
 			trace(deployment)
 				.append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine
 				.append('''
 					«FOR subsystem : subsystems»
+						«val model = subsystem.eContainer as Model»
 						«val dependencies = 
 							if(model.extensions !== null)
 								model.extensions.declarations.filter(DependDeclaration)
