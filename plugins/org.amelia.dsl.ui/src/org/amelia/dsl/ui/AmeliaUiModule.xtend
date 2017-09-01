@@ -34,6 +34,8 @@ import org.amelia.dsl.ui.hover.AmeliaDispatchingEObjectTextHover
 import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider
 import org.eclipse.xtext.ui.editor.hover.IEObjectHover
 import org.amelia.dsl.ui.hover.AmeliaHoverProvider
+import org.eclipse.xtext.documentation.IEObjectDocumentationProvider
+import org.amelia.dsl.ui.hover.AmeliaEObjectDocumentationProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -73,6 +75,10 @@ class AmeliaUiModule extends AbstractAmeliaUiModule {
  
     override Class<? extends IEObjectHoverProvider> bindIEObjectHoverProvider() {
         return AmeliaHoverProvider
+    }
+
+	def Class<? extends IEObjectDocumentationProvider> bindIEObjectDocumentationProviderr() {
+        return AmeliaEObjectDocumentationProvider
     }
 
 }
