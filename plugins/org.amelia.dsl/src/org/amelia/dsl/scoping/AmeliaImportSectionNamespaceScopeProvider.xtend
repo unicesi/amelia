@@ -25,8 +25,8 @@ class AmeliaImportSectionNamespaceScopeProvider extends XImportSectionNamespaceS
 			// If changed to XExpression the class can be used as any imported class (not only for constructor calls)
 			XConstructorCall: {
 				val container = context.model as Model
-				if (container.typeDeclaration.extensions != null)
-					container.typeDeclaration.extensions.provideImportNormalizerList(ignoreCase)
+				if (container.extensions != null)
+					container.extensions.provideImportNormalizerList(ignoreCase)
 				else
 					Collections.emptyList
 			}

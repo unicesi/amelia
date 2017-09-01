@@ -33,6 +33,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.resource.IContainer
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
+import org.amelia.dsl.amelia.Model
 
 /**
  * Generates code from your model files on save.
@@ -80,12 +81,13 @@ class AmeliaGenerator implements IGenerator {
 					
 					// Subsystem rules' setup
 					«FOR subsystem : subsystems»
+						«val model = subsystem.eContainer as Model»
 						«subsystem.javaName».deployment().setup();
-						«IF subsystem != null && subsystem.extensions != null»
-							«val dependencies = subsystem.extensions.declarations.filter(DependDeclaration).map[ i |
+						«IF subsystem != null && model.extensions != null»
+							«val dependencies = model.extensions.declarations.filter(DependDeclaration).map[ i |
 								if (i.element instanceof Subsystem) (i.element as Subsystem).javaName
 							]»
-							«IF !subsystem.extensions.declarations.filter(DependDeclaration).empty»
+							«IF !model.extensions.declarations.filter(DependDeclaration).empty»
 								«subsystem.javaName».dependsOn(«dependencies.join(", ")»);
 							«ENDIF»
 						«ENDIF»

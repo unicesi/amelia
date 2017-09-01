@@ -47,10 +47,11 @@ class AmeliaScopeProvider extends AbstractAmeliaScopeProvider {
 	override getScope(EObject context, EReference reference) {
 		switch (context) {
 			RuleDeclaration case reference == AmeliaPackage.Literals.RULE_DECLARATION__DEPENDENCIES: {
-				val subsystem = (EcoreUtil2.getRootContainer(context) as Model).typeDeclaration as Subsystem
+				val model = EcoreUtil2.getRootContainer(context) as Model
+				val subsystem = model.typeDeclaration as Subsystem
 				var candidates = EcoreUtil2.getAllContentsOfType(subsystem, RuleDeclaration)
-				if (subsystem.extensions != null) {
-					candidates += subsystem.extensions.declarations.filter(IncludeDeclaration).map [ i |
+				if (model.extensions != null) {
+					candidates += model.extensions.declarations.filter(IncludeDeclaration).map [ i |
 						if (i.element instanceof Subsystem)
 							EcoreUtil2.getAllContentsOfType((i.element as Subsystem), RuleDeclaration)
 						else

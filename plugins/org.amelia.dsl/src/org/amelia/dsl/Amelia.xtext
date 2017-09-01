@@ -26,22 +26,8 @@ generate amelia "http://www.amelia.org/dsl/Amelia"
 Model
 	:	'package' name = QualifiedName ->';'?
 		importSection = XImportSection?
+		extensions = ExtensionSection?
 		typeDeclaration = TypeDeclaration?
-	;
-
-TypeDeclaration
-	:	SubsystemDeclaration
-	|	DeploymentDeclaration
-	;
-
-DeploymentDeclaration
-	:	extensions = ExtensionSection?
-		'deployment' name = ValidID body = XBlockExpression
-	;
-
-SubsystemDeclaration returns Subsystem
-	:	extensions = ExtensionSection?
-		'subsystem' name = ValidID body = SubsystemBlockExpression
 	;
 
 ExtensionSection
@@ -59,6 +45,19 @@ IncludeDeclaration
 
 DependDeclaration
 	:	'depends' 'on' element = [TypeDeclaration | QualifiedName] ->';'?
+	;
+
+TypeDeclaration
+	:	SubsystemDeclaration
+	|	DeploymentDeclaration
+	;
+
+DeploymentDeclaration
+	:	'deployment' name = ValidID body = XBlockExpression
+	;
+
+SubsystemDeclaration returns Subsystem
+	:	'subsystem' name = ValidID body = SubsystemBlockExpression
 	;
 
 SubsystemBlockExpression

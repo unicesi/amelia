@@ -192,8 +192,9 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	
 	@Check
 	def checkConflictingVarDecl(Subsystem subsystem) {
-		if (subsystem.extensions !== null) {
-			val includes = subsystem.extensions.declarations.filter(IncludeDeclaration)
+		val model = subsystem.eContainer as Model
+		if (model.extensions !== null) {
+			val includes = model.extensions.declarations.filter(IncludeDeclaration)
 			val includedSubsystems = includes.map[i| if(i.element instanceof Subsystem) i.element as Subsystem]
 			val conflictingVarDcls = includedSubsystems
 				.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
@@ -213,10 +214,11 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkConflictingVarDecl(VariableDeclaration varDecl) {
 		val type = if(varDecl.param) "parameter" else "variable"
-		val typeDecl = (EcoreUtil2.getRootContainer(varDecl) as Model).typeDeclaration
+		val model = EcoreUtil2.getRootContainer(varDecl) as Model
+		val typeDecl = model.typeDeclaration
 		if (typeDecl instanceof Subsystem) {
-			if (typeDecl.extensions !== null) {
-				val includes = typeDecl.extensions.declarations.filter(IncludeDeclaration)
+			if (model.extensions !== null) {
+				val includes = model.extensions.declarations.filter(IncludeDeclaration)
 				val includedSubsystems = includes.filter[i|i.element instanceof Subsystem].map[i|i.element as Subsystem]
 				val includedVarDecls = includedSubsystems
 					.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
@@ -500,8 +502,9 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 	@Check
 	def checkDeploymentIncludes(DeploymentDeclaration deployment) {
 		var warn = true
-		if (deployment.extensions !== null) {
-			warn = deployment.extensions.declarations.filter(IncludeDeclaration).empty
+		val model = deployment.eContainer as Model
+		if (model.extensions !== null) {
+			warn = model.extensions.declarations.filter(IncludeDeclaration).empty
 		}
 		if (warn)
 			warning("Deployments should include at least one subsystem", AmeliaPackage.Literals.TYPE_DECLARATION__NAME)
@@ -570,7 +573,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			changed = false
 			for (t : elements.toList) {
 				val dependencies = if (t instanceof Subsystem)
-						t.extensions.declarations.map[d|d.element]
+						(t.eContainer as Model).extensions.declarations.map[d|d.element]
 					else if (t instanceof RuleDeclaration)
 						t.dependencies
 				if (result.containsAll(dependencies)) {
@@ -589,7 +592,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (!set.add(e))
 			return;
 		val dependencies = if (e instanceof Subsystem)
-				e.extensions.declarations.map[d|d.element]
+				(e.eContainer as Model).extensions.declarations.map[d|d.element]
 			else if (e instanceof RuleDeclaration)
 				e.dependencies
 		for (t : dependencies) 

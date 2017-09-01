@@ -31,7 +31,7 @@ class AmeliaKeywordHovers {
 
 	def hoverText(Keyword k) {
 		val result = switch (k) {
-			case ga.subsystemDeclarationAccess.subsystemKeyword_1: '''
+			case ga.subsystemDeclarationAccess.subsystemKeyword_0: '''
 				A <b>subsystem</b> is a modular unit representing the operations
 				required to deploy a cohesive set of software artefacts. It <ul>
 				<li>can <code>include</code> another subsystem, i.e., use its execution rules.</li>
@@ -42,7 +42,7 @@ class AmeliaKeywordHovers {
 				<li>has an optional configuration block, specification syntax <code>config { ... }</code></li>
 				</ul>
 			'''
-			case ga.deploymentDeclarationAccess.deploymentKeyword_1: '''
+			case ga.deploymentDeclarationAccess.deploymentKeyword_0: '''
 				A <b>deployment</b> is an execution flow specification that
 				dictates how to perform the deployment. For example, it allows
 				to retry on failure or systematically repeat the same deployment,
