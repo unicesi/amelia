@@ -217,34 +217,34 @@ Library.
    <url>
       <update label="Amelia" url="http://unicesi.github.com/amelia/releases/"/>
       <discovery label="Pascani" url="http://unicesi.github.com/pascani/releases/"/>
-      <discovery label="Xtext" url="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.10.0/"/>
+      <discovery label="Xtext" url="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/"/>
    </url>
 
    <requires>
-      <import plugin="org.eclipse.xtext" version="2.10.0" match="equivalent"/>
-      <import plugin="org.eclipse.xtext.xbase" version="2.10.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext" version="2.12.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.xbase" version="2.12.0" match="equivalent"/>
       <import plugin="org.eclipse.equinox.common" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.emf.ecore"/>
-      <import plugin="org.eclipse.xtext.util" version="2.10.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.util" version="2.12.0" match="equivalent"/>
       <import plugin="org.antlr.runtime"/>
-      <import plugin="org.eclipse.xtend.lib" version="2.10.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtend.lib" version="2.12.0" match="equivalent"/>
       <import plugin="org.eclipse.emf.common"/>
-      <import plugin="org.eclipse.xtext.xbase.lib" version="2.10.0" match="equivalent"/>
-      <import plugin="org.eclipse.xtext.common.types" version="2.10.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.xbase.lib" version="2.12.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.common.types" version="2.12.0" match="equivalent"/>
       <import plugin="org.apache.log4j"/>
-      <import plugin="org.eclipse.xtext.ui" version="2.10.0" match="equivalent"/>
-      <import plugin="org.eclipse.xtext.ui.shared" version="2.10.0" match="equivalent"/>
-      <import plugin="org.eclipse.xtext.ui.codetemplates.ui" version="2.10.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.ui" version="2.12.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.ui.shared" version="2.12.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.ui.codetemplates.ui" version="2.12.0" match="equivalent"/>
       <import plugin="org.eclipse.ui.editors" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.ide" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.compare"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.xtext.builder" version="2.10.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.builder" version="2.12.0" match="equivalent"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
-      <import plugin="org.eclipse.xtext.common.types.ui" version="2.10.0" match="equivalent"/>
-      <import plugin="org.eclipse.xtext.xbase.ui" version="2.10.0" match="equivalent"/>
-      <import plugin="org.eclipse.xtext.xbase.ide" version="2.10.0" match="equivalent"/>
-      <import plugin="org.eclipse.xtext.ide" version="2.10.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.common.types.ui" version="2.12.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.xbase.ui" version="2.12.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.xbase.ide" version="2.12.0" match="equivalent"/>
+      <import plugin="org.eclipse.xtext.ide" version="2.12.0" match="equivalent"/>
       <import plugin="org.pascani.dsl.lib.osgi"/>
    </requires>
 
