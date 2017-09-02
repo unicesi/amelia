@@ -9,7 +9,7 @@ This is the basic configuration to use Amelia in a maven project. Before compili
 	<version>0.0.1-SNAPSHOT</version>
 	<name>test</name>
 	<properties>
-		<xtext.version>2.9.2</xtext.version>
+		<xtext.version>2.12.0</xtext.version>
 		<pascani.version>1.6.9-SNAPSHOT</pascani.version>
 		<amelia.version>0.7.9-SNAPSHOT</amelia.version>
 	</properties>
