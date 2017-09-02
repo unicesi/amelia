@@ -1,7 +1,7 @@
 docker:
   image: mostalive/ubuntu-14.04-oracle-jdk8
 install: |-
-  sudo apt-get install maven
+  sudo apt-get install -y maven
 architect:
 - jachinte
 decrypt:
