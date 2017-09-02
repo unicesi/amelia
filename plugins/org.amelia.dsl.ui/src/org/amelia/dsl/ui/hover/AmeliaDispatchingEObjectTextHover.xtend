@@ -42,7 +42,7 @@ class AmeliaDispatchingEObjectTextHover extends XbaseDispatchingEObjectTextHover
 	override getHoverInfo(EObject first, ITextViewer textViewer, IRegion hoverRegion) {
 		if (first instanceof Keyword) {
 			lastCreatorProvider = hoverProvider.getHoverInfo(first, textViewer, hoverRegion)
-			return if(lastCreatorProvider == null) null else lastCreatorProvider.getInfo()
+			return if(lastCreatorProvider === null) null else lastCreatorProvider.getInfo()
 		}
 		lastCreatorProvider = null
 		super.getHoverInfo(first, textViewer, hoverRegion)

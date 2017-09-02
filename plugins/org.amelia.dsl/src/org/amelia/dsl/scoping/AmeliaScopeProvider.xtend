@@ -50,7 +50,7 @@ class AmeliaScopeProvider extends AbstractAmeliaScopeProvider {
 				val model = EcoreUtil2.getRootContainer(context) as Model
 				val subsystem = model.typeDeclaration as Subsystem
 				var candidates = EcoreUtil2.getAllContentsOfType(subsystem, RuleDeclaration)
-				if (model.extensions != null) {
+				if (model.extensions !== null) {
 					candidates += model.extensions.declarations.filter(IncludeDeclaration).map [ i |
 						if (i.element instanceof Subsystem)
 							EcoreUtil2.getAllContentsOfType((i.element as Subsystem), RuleDeclaration)

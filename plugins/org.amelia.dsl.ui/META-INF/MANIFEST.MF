@@ -23,7 +23,7 @@ Require-Bundle: org.amelia.dsl,
  org.eclipse.core.runtime,
  org.eclipse.core.resources
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.amelia.dsl.ui.quickfix,
  org.amelia.dsl.ui.internal,
  org.amelia.dsl.ui.contentassist

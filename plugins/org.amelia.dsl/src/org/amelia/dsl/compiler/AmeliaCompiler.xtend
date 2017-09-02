@@ -61,10 +61,10 @@ class AmeliaCompiler extends XbaseCompiler {
 		}
 	}
 	
-	override protected boolean isVariableDeclarationRequired(XExpression expr, ITreeAppendable appendable) {
+	override protected boolean isVariableDeclarationRequired(XExpression expr, ITreeAppendable b, boolean recursive) {
 		switch (expr) {
 			CommandLiteral: return false
-			default: return super.isVariableDeclarationRequired(expr, appendable)
+			default: return super.isVariableDeclarationRequired(expr, b, true)
 		}
 	}
 	
@@ -73,7 +73,7 @@ class AmeliaCompiler extends XbaseCompiler {
 		if (!isReferenced) {
 			internalToConvertedExpression(expr, appendable);
 			appendable.append(";");
-		} else if (isVariableDeclarationRequired(expr, appendable)) {
+		} else if (isVariableDeclarationRequired(expr, appendable, true)) {
 			val later = new Later() {
 				override void exec(ITreeAppendable appendable) {
 					internalToConvertedExpression(expr, appendable);
@@ -155,7 +155,7 @@ class AmeliaCompiler extends XbaseCompiler {
 		appendable.append(".evalFScript(")
 		internalToConvertedExpression(expr.script, appendable)
 		appendable.append(", ")
-		if (expr.uri != null)
+		if (expr.uri !== null)
 			internalToConvertedExpression(expr.uri, appendable)
 		else
 			appendable
@@ -198,7 +198,7 @@ class AmeliaCompiler extends XbaseCompiler {
 		internalToConvertedExpression(expr.source, appendable)
 		appendable.append(", ")
 		internalToConvertedExpression(expr.output, appendable)
-		if (expr.classpath != null) {
+		if (expr.classpath !== null) {
 			appendable.append(", ")
 			internalToConvertedExpression(expr.classpath, appendable)
 		}

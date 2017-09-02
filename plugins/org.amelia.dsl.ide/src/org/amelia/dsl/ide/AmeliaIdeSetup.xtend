@@ -16,26 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Amelia project. If not, see <http://www.gnu.org/licenses/>.
  */
- package org.amelia.dsl.scoping
+package org.amelia.dsl.ide
 
-import org.amelia.dsl.lib.util.CommandExtensions
-import org.amelia.dsl.lib.util.Hosts
-import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
+import com.google.inject.Guice
+import org.amelia.dsl.AmeliaRuntimeModule
+import org.amelia.dsl.AmeliaStandaloneSetup
+import org.eclipse.xtext.util.Modules2
 
 /**
- * @author Miguel Jiménez - Initial contribution and API
+ * Initialization support for running Xtext languages as language servers.
  */
-class AmeliaImplicitlyImportedFeatures extends ImplicitlyImportedFeatures {
-	
-	override protected getStaticImportClasses() {
-		return (super.getStaticImportClasses() + #[Hosts]).toList
-	}
+class AmeliaIdeSetup extends AmeliaStandaloneSetup {
 
-	override protected getExtensionClasses() {
-		return (super.getExtensionClasses() + #[
-			CommandExtensions,
-			org.amelia.dsl.lib.util.BooleanExtensions
-		]).toList
+	override createInjector() {
+		Guice.createInjector(Modules2.mixin(new AmeliaRuntimeModule, new AmeliaIdeModule))
 	}
 	
 }

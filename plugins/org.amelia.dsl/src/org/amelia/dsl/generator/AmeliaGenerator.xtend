@@ -83,7 +83,7 @@ class AmeliaGenerator implements IGenerator {
 					«FOR subsystem : subsystems»
 						«val model = subsystem.eContainer as Model»
 						«subsystem.javaName».deployment().setup();
-						«IF subsystem != null && model.extensions != null»
+						«IF subsystem !== null && model.extensions !== null»
 							«val dependencies = model.extensions.declarations.filter(DependDeclaration).map[ i |
 								if (i.element instanceof Subsystem) (i.element as Subsystem).javaName
 							]»

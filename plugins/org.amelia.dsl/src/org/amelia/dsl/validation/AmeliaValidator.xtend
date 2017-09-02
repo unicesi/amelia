@@ -259,7 +259,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		if (!allowed.map[type|type.isInstance(expr.directory)].exists[v|v]) {
 			error("This expression is not allowed in this context", AmeliaPackage.Literals.CD_COMMAND__DIRECTORY,
 				INVALID_PARAMETER_TYPE)
-		} else if (expr.directory.actualType.getSuperType(String) ==
+		} else if (expr.directory.actualType.getSuperType(String) ===
 			null) {
 			error('''The directory parameter must be of type String, «expr.directory.actualType.simpleName» was found instead''',
 				AmeliaPackage.Literals.CD_COMMAND__DIRECTORY, INVALID_PARAMETER_TYPE)

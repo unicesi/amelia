@@ -20,26 +20,20 @@ package org.amelia.dsl.web
 
 import com.google.inject.Guice
 import com.google.inject.Injector
-import com.google.inject.Provider
 import com.google.inject.util.Modules
-import java.util.concurrent.ExecutorService
 import org.amelia.dsl.AmeliaRuntimeModule
 import org.amelia.dsl.AmeliaStandaloneSetup
-import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 
 /**
  * Initialization support for running Xtext languages in web applications.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-@FinalFieldsConstructor
 class AmeliaWebSetup extends AmeliaStandaloneSetup {
-	
-	val Provider<ExecutorService> executorServiceProvider;
 	
 	override Injector createInjector() {
 		val runtimeModule = new AmeliaRuntimeModule()
-		val webModule = new AmeliaWebModule(executorServiceProvider)
+		val webModule = new AmeliaWebModule()
 		return Guice.createInjector(Modules.override(runtimeModule).with(webModule))
 	}
 	

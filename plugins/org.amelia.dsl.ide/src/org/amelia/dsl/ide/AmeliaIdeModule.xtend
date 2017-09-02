@@ -16,26 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Amelia project. If not, see <http://www.gnu.org/licenses/>.
  */
- package org.amelia.dsl.scoping
+package org.amelia.dsl.ide
 
-import org.amelia.dsl.lib.util.CommandExtensions
-import org.amelia.dsl.lib.util.Hosts
-import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 
 /**
- * @author Miguel Jiménez - Initial contribution and API
+ * Use this class to register ide components.
  */
-class AmeliaImplicitlyImportedFeatures extends ImplicitlyImportedFeatures {
-	
-	override protected getStaticImportClasses() {
-		return (super.getStaticImportClasses() + #[Hosts]).toList
-	}
-
-	override protected getExtensionClasses() {
-		return (super.getExtensionClasses() + #[
-			CommandExtensions,
-			org.amelia.dsl.lib.util.BooleanExtensions
-		]).toList
-	}
-	
+class AmeliaIdeModule extends AbstractAmeliaIdeModule {
 }

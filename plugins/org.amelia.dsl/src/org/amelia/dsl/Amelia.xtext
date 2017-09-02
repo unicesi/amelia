@@ -162,6 +162,7 @@ RichStringLiteralEnd
 	:	{RichStringLiteral} value = RICH_TEXT_END
 	;
 
+@Override 
 XLiteral returns xbase::XExpression
 	:	XCollectionLiteral
 	|	XClosure
@@ -190,6 +191,7 @@ terminal RICH_TEXT_END
 	:	'»' ('\\' . | !('\\' | "'" | '«') )* "'"
 	;
 
+@Override 
 terminal STRING
 	:	'"' ( '\\' . /* ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') */ | !('\\'|'"') )* '"'?
 	;

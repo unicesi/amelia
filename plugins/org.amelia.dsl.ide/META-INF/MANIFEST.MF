@@ -7,8 +7,9 @@ Bundle-SymbolicName: org.amelia.dsl.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.amelia.dsl,
  org.eclipse.xtext.ide,
- org.eclipse.xtext.xbase.ide
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+ org.eclipse.xtext.xbase.ide,
+ org.antlr.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.amelia.dsl.ide.contentassist.antlr,
  org.amelia.dsl.ide.contentassist.antlr.internal
 
