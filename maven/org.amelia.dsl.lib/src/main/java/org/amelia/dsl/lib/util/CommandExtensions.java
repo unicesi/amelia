@@ -98,14 +98,13 @@ public class CommandExtensions {
                 public Object call(Host host, String prompt, boolean quiet)
                 	throws Exception {
                     try {
-                        command.callable().call(host, prompt, true);
-                        Log.success(host, command.doneMessage());
+                        command.callable().call(host, prompt, false);
                     } catch(Exception e) {
                         procedure.apply(e);
                         Log.error(
                             host,
                             String.format(
-                                "fallback executed: %s",
+                                "fallback executed (%s)",
                                 command.errorMessage()
                             )
                         );
