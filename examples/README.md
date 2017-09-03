@@ -10,6 +10,6 @@ mvn package
 
 Then, perform the necessary actions to run specific projects. You may find instructions inside each project's directory:
 
-- (Base library)[base] defines both Java files and Amelia subsystems that are reused within each example project
-- (Docker's helloworld)[docker-hello-world] installs Docker Community Edition and runs the hello-world container
-- (Eclipse plugin project)[eclipse-plugin-project] shows the basic configuration to use Amelia within an Eclipse plugin project
+- [Base library](base) defines both Java files and Amelia subsystems that are reused within each example project
+- [Docker's helloworld](docker-hello-world) installs Docker Community Edition and runs the hello-world container
+- [Eclipse plugin project](eclipse-plugin-project) shows the basic configuration to use Amelia within an Eclipse plugin project
