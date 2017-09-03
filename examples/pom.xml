@@ -92,9 +92,16 @@
 					</execution>
 				</executions>
 				<configuration>
+					<javaSourceRoots>
+						<javaSourceRoot>src/main/java</javaSourceRoot>
+					</javaSourceRoots>
+					<sourceRoots>
+						<sourceRoot>src/main/amelia</sourceRoot>
+					</sourceRoots>
 					<languages>
 						<language>
 							<setup>org.amelia.dsl.AmeliaStandaloneSetupGenerated</setup>
+							<javaSupport>true</javaSupport>
 						</language>
 					</languages>
 				</configuration>

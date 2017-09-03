@@ -25,7 +25,7 @@ subsystem DockerCE {
     param Arch arch
 
     /*
-     * The docker version to install. e.g., 17.06.1~ce-0~ubuntu
+     * The docker version to install. e.g., 17.07.0
      */
     param String version
 
@@ -65,7 +65,7 @@ subsystem DockerCE {
 
         installation: repository;
             cmd 'apt-get update'... => [ withoutTimeout ]
-            cmd 'apt-get install -y --allow-downgrades docker-ce=«version»'... => [ withoutTimeout ]
+            cmd 'apt-get install -y --allow-downgrades docker-ce=«version»*'... => [ withoutTimeout ]
 
         configuration? user !== null: installation;
             cmd 'usermod -aG docker «user»'
