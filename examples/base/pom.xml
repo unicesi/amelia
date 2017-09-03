@@ -4,10 +4,10 @@
 	<parent>
 		<groupId>com.github.unicesi</groupId>
 		<artifactId>org.amelia.dsl.examples</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.9.10-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.amelia.dsl.examples.base</artifactId>
-	<name>Base library</name>
+	<name>Amelia Base library</name>
 	<description>Base subsystems used by the examples</description>
 </project>

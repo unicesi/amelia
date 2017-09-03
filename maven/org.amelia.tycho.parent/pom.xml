@@ -43,6 +43,7 @@
 		<module>../org.amelia.dsl.feature</module>
 		<module>../org.amelia.dsl.repository</module>
 		<module>../org.amelia.dsl.lib</module>
+		<module>../../examples</module>
 	</modules>
 	<licenses>
 		<license>

@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: eclipse-plugin-project
-Bundle-Vendor: My Company
+Bundle-Name: org.amelia.dsl.examples.eclipse-plugin
+Bundle-Vendor: Universidad Icesi
 Bundle-Version: 1.0.0.qualifier
-Bundle-SymbolicName: docker-eclipse-plugin; singleton:=true
+Bundle-SymbolicName: org.amelia.dsl.examples.eclipse-plugin; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.amelia.dsl.lib.osgi,
  org.eclipse.xtend.lib

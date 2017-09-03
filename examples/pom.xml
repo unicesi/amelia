@@ -1,22 +1,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.github.unicesi</groupId>
-	<artifactId>org.amelia.dsl.examples</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<parent>
+		<groupId>com.github.unicesi</groupId>
+		<artifactId>org.amelia.tycho.parent</artifactId>
+		<version>0.9.10-SNAPSHOT</version>
+		<relativePath>../../maven/org.amelia.tycho.parent/pom.xml</relativePath>
+	</parent>
 	<packaging>pom</packaging>
 
+	<artifactId>org.amelia.dsl.examples</artifactId>
 	<name>Amelia DSL Examples</name>
 	<description>Set of projects to demonstrate features of the Amelia DSL</description>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<xtext.version>2.12.0</xtext.version>
-		<amelia.version>0.9.10-SNAPSHOT</amelia.version>
-		<amelia.output.directory>amelia/</amelia.output.directory>
 		<pascani.version>1.6.15-SNAPSHOT</pascani.version>
+		<amelia.output.directory>amelia/</amelia.output.directory>
 		<mainClass><!-- override within modules --></mainClass>
 	</properties>
 
@@ -29,7 +28,7 @@
 		<dependency>
 			<artifactId>org.amelia.dsl.lib</artifactId>
 			<groupId>com.github.unicesi</groupId>
-			<version>${amelia.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pascani</groupId>
@@ -39,7 +38,7 @@
 		<dependency>
 			<groupId>org.eclipse.xtext</groupId>
 			<artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-			<version>${xtext.version}</version>
+			<version>${xtextVersion}</version>
 		</dependency>
 	</dependencies>
 
@@ -65,7 +64,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.5</version>
 				<executions>
 					<execution>
 						<phase>clean</phase>
@@ -85,7 +83,7 @@
 			<plugin>
 				<groupId>org.eclipse.xtext</groupId>
 				<artifactId>xtext-maven-plugin</artifactId>
-				<version>${xtext.version}</version>
+				<version>${xtextVersion}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -104,7 +102,7 @@
 					<dependency>
 						<artifactId>org.amelia.dsl</artifactId>
 						<groupId>com.github.unicesi</groupId>
-						<version>${amelia.version}</version>
+						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

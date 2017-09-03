@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>com.github.unicesi</groupId>
 		<artifactId>org.amelia.dsl.examples</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.9.10-SNAPSHOT</version>
 	</parent>
 	<artifactId>org.amelia.dsl.examples.docker</artifactId>
 
-	<name>Docker's hello-world</name>
+	<name>Example: Docker's hello-world</name>
 	<description>
 		Amelia subsystems to install Docker Community Edition and run the hello-world container
 	</description>
