@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature url="features/org.amelia.dsl.feature_0.0.0.jar" id="org.amelia.dsl.feature" version="0.0.0">
-      <category name="amelia"/>
-   </feature>
-   <category-def name="amelia" label="Amelia"/>
-</site>
