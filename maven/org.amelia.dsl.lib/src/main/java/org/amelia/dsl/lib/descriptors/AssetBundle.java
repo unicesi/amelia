@@ -71,7 +71,8 @@ public class AssetBundle extends CommandDescriptor {
 		return "Unsuccessful transfer" + (this.transfers.size() == 1 ? "" : "s");
 	}
 
-	public AssetBundle resolveVariables(Pair<String, String>... variables) {
+	@SuppressWarnings("unchecked")
+	public AssetBundle resolveVariables(final Pair<String, String>... variables) {
 		Map<String, String> _variables = new HashMap<String, String>();
 
 		for (Pair<String, String> variable : variables)
