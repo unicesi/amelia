@@ -20,8 +20,8 @@ package org.amelia.dsl.ui.wizard
 
 import com.google.common.collect.Lists
 import com.google.inject.Inject
+import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
-import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -38,7 +38,7 @@ class AmeliaPluginCreator extends AmeliaProjectCreator {
 		var ameliaConf = outputConfigurationProvider
 			.getOutputConfigurations()
 			.findFirst[ outputConf |
-				AmeliaOutputConfigurationProvider::AMELIA_OUTPUT.equals(outputConf.name)
+				IFileSystemAccess.DEFAULT_OUTPUT.equals(outputConf.name)
 			]
 		Lists.newArrayList(super.modelFolderName, ameliaConf.outputDirectory)
 	}

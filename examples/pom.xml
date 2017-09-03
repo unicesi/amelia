@@ -15,7 +15,7 @@
 
 	<properties>
 		<pascani.version>1.6.15-SNAPSHOT</pascani.version>
-		<amelia.output.directory>amelia/</amelia.output.directory>
+		<amelia.output.directory>amelia-gen/</amelia.output.directory>
 		<mainClass><!-- override within modules --></mainClass>
 	</properties>
 

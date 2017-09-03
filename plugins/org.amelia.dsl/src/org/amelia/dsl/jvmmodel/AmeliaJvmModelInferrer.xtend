@@ -30,6 +30,7 @@ import org.amelia.dsl.amelia.ConfigBlockExpression
 import org.amelia.dsl.amelia.DependDeclaration
 import org.amelia.dsl.amelia.DeploymentDeclaration
 import org.amelia.dsl.amelia.IncludeDeclaration
+import org.amelia.dsl.amelia.Model
 import org.amelia.dsl.amelia.OnHostBlockExpression
 import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.VariableDeclaration
@@ -40,8 +41,6 @@ import org.amelia.dsl.lib.SubsystemGraph
 import org.amelia.dsl.lib.descriptors.CommandDescriptor
 import org.amelia.dsl.lib.descriptors.Host
 import org.amelia.dsl.lib.util.Arrays
-import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
-import org.amelia.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
@@ -51,7 +50,6 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
-import org.amelia.dsl.amelia.Model
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -77,7 +75,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 
 	def dispatch void infer(DeploymentDeclaration deployment, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val clazz = deployment.toClass(deployment.fullyQualifiedName)
-		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				val model = deployment.eContainer as Model
@@ -169,7 +166,6 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 		val clazz = subsystem.toClass(subsystem.fullyQualifiedName)
 		if (clazz === null)
 			return;
-		clazz.eAdapters.add(new OutputConfigurationAdapter(AmeliaOutputConfigurationProvider::AMELIA_OUTPUT))
 		acceptor.accept(clazz) [
 			if (!isPreIndexingPhase) {
 				val model = subsystem.eContainer as Model

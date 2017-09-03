@@ -28,15 +28,12 @@ import org.eclipse.xtext.generator.OutputConfiguration
  */
 class AmeliaOutputConfigurationProvider implements IOutputConfigurationProvider {
 
-	public static val AMELIA_OUTPUT = "amelia"
-
 	/**
 	 * @return a set of {@link OutputConfiguration} available for the generator
 	 */
 	override Set<OutputConfiguration> getOutputConfigurations() {
-		val defaultOutput = configure(IFileSystemAccess.DEFAULT_OUTPUT, "Output folder", "./src-gen")
-		val ameliaOutput = configure(AMELIA_OUTPUT, "Output folder for Amelia elements", "./amelia")
-		return newHashSet(defaultOutput, ameliaOutput)
+		val defaultOutput = configure(IFileSystemAccess.DEFAULT_OUTPUT, "Output folder", "./amelia-gen")
+		return newHashSet(defaultOutput)
 	}
 
 	def configure(String name, String description, String outputDirectory) {

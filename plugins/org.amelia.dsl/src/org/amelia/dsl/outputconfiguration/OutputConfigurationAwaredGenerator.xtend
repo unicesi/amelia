@@ -37,7 +37,7 @@ class OutputConfigurationAwaredGenerator extends JvmModelGenerator {
 			val adapters = obj.eAdapters.filter(OutputConfigurationAdapter)
 			for (adapter : adapters) {
 				var outputConfiguration = adapter.getOutputConfigurationName()
-				if (outputConfiguration == AmeliaOutputConfigurationProvider::AMELIA_OUTPUT) {
+				if (outputConfiguration == IFileSystemAccess.DEFAULT_OUTPUT) {
 					val sfsa = new SingleOutputConfigurationFileSystemAccess(fsa, outputConfiguration)
 					this.internalDoGenerate(obj, sfsa) // AmeliaJvmModelInferrer
 					this.generator.doGenerate(input, fsa) // AmeliaGenerator
