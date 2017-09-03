@@ -34,13 +34,15 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 	<modules>
-		<module>../org.amelia.dsl.target</module>
-		<module>../org.amelia.dsl.lib</module>
 		<module>../../plugins/org.amelia.dsl</module>
 		<module>../../plugins/org.amelia.dsl.ide</module>
 		<module>../../plugins/org.amelia.dsl.lib.osgi</module>
 		<module>../../plugins/org.amelia.dsl.ui</module>
 		<module>../../web/org.amelia.dsl.web</module>
+		<module>../org.amelia.dsl.target</module>
+		<module>../org.amelia.dsl.feature</module>
+		<module>../org.amelia.dsl.repository</module>
+		<module>../org.amelia.dsl.lib</module>
 	</modules>
 	<licenses>
 		<license>
@@ -93,33 +95,6 @@
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-source-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<executions>
-					<execution>
-						<id>plugin-source</id>
-						<goals>
-							<goal>plugin-source</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-source-feature-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<executions>
-					<execution>
-						<id>source-feature</id>
-						<phase>package</phase>
-						<goals>
-							<goal>source-feature</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
