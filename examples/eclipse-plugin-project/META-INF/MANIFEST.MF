@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: eclipse-plugin-project
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: docker-eclipse-plugin; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.amelia.dsl.lib.osgi,
+ org.eclipse.xtend.lib
+Import-Package: org.apache.log4j,
+ org.apache.commons.logging
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

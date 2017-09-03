@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.github.unicesi</groupId>
+		<artifactId>org.amelia.dsl.examples</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>org.amelia.dsl.examples.docker</artifactId>
+
+	<name>Docker's hello-world</name>
+	<description>
+		Amelia subsystems to install Docker Community Edition and run the hello-world container
+	</description>
+
+	<properties>
+		<mainClass>org.amelia.dsl.examples.ubuntu.containers.Deployment</mainClass>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.github.unicesi</groupId>
+			<artifactId>org.amelia.dsl.examples.base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+</project>

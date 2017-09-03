@@ -1,0 +1,26 @@
+package org.amelia.dsl.examples.ubuntu.containers
+
+import org.amelia.dsl.lib.descriptors.Host
+
+depends on org.amelia.dsl.examples.ubuntu.containers.DockerCE
+
+/*
+ * Runs a container based on the helloworld docker image.
+ *
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ * @date 2017-09-02
+ */
+subsystem Helloworld {
+
+	/*
+	 * The host in which the container is executed.
+	 */
+	param Host host
+
+	on host {
+		execution:
+			(cmd 'docker run hello-world')
+				.fetch [ output | println(output) ]
+	}
+
+}

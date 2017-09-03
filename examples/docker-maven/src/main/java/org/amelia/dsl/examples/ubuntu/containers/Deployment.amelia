@@ -1,0 +1,32 @@
+package org.amelia.dsl.examples.ubuntu.containers
+
+import org.amelia.dsl.examples.ubuntu.Arch
+
+includes org.amelia.dsl.examples.ubuntu.containers.DockerCE
+includes org.amelia.dsl.examples.ubuntu.containers.Helloworld
+
+/*
+ * Simple deployment to run the hello-world container.
+ * <p>
+ * This deployment expects the following parameters:
+ * <ul>
+ * <li> host: the host name to install docker and run the container
+ * <li> privileged-user: a privileged user to install Docker
+ * <li> unprivileged-user: an unprivileged user to run the container
+ * </ul>
+ * 
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ * @date 2017-09-02
+ */
+deployment Deployment {
+	// hosts
+	val priviledged = host(System.getProperty('host'), System.getProperty('privileged-user'))
+	val unprivileged = host(System.getProperty('host'), System.getProperty('unprivileged-user'))
+
+	// configure subsystems
+	add(new Helloworld(unprivileged))
+	add(new DockerCE(Arch.amd64, '17.06.1~ce-0~ubuntu', unprivileged.username, priviledged))
+	
+	// Deploy the subsystems
+	start(true)
+}

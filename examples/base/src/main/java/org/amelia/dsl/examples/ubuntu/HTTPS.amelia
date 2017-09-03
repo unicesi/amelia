@@ -1,0 +1,33 @@
+package org.amelia.dsl.examples.ubuntu
+
+import org.amelia.dsl.lib.descriptors.Host
+
+/*
+ * Installs basic packages to work with HTTPS connections.
+ * 
+ * @date 2017-09-02
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ */
+subsystem HTTPS {
+
+	/*
+     * The host in which the packages will be installed.
+     */
+    param Host host
+
+	/*
+	 * The packages to install.
+	 */
+	var String[] packages = #[
+		'apt-transport-https',
+		'ca-certificates',
+		'curl',
+		'software-properties-common'
+	]
+
+    on host {
+        installation:
+            cmd 'apt-get update'... => [ withoutTimeout ]
+            cmd 'apt-get install -y «packages.join(' ')»'... => [ withoutTimeout ]
+    }
+}
