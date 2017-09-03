@@ -20,7 +20,7 @@
 <feature
       id="org.amelia.dsl.feature"
       label="Amelia DSL"
-      version="0.10.11.qualifier"
+      version="0.11.11.qualifier"
       provider-name="Miguel Jiménez">
 
    <description url="https://gitub.com/unicesi/amelia">

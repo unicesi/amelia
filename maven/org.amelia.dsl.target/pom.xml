@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>com.github.unicesi</groupId>
 		<artifactId>org.amelia.tycho.parent</artifactId>
-		<version>0.10.11-SNAPSHOT</version>
+		<version>0.11.11-SNAPSHOT</version>
 		<relativePath>../org.amelia.tycho.parent/pom.xml</relativePath>
 	</parent>
 	<packaging>eclipse-target-definition</packaging>
