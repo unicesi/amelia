@@ -132,7 +132,7 @@ public class CommandExtensions {
                 public Object call(Host host, String prompt, boolean quiet)
                 	throws Exception {
                 	final Object response = command.callable()
-                		.call(host, prompt, true);
+                		.call(host, prompt, false);
                 	String fetched = String.class.isInstance(response)
                 		? (String) response : response.toString();
                 	procedure.apply(fetched);
