@@ -8,6 +8,6 @@
 	</parent>
 
 	<artifactId>org.amelia.dsl.examples.base</artifactId>
-	<name>Amelia Base library</name>
+	<name>Base Library for Examples</name>
 	<description>Base subsystems used by the examples</description>
 </project>
