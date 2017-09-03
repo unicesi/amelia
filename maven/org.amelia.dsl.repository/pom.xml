@@ -30,7 +30,39 @@
 	<name>Amelia Repository</name>
 	<packaging>eclipse-repository</packaging>
 
+	<properties>
+		<github.global.server>github</github.global.server>
+		<github.site.repositoryName>amelia</github.site.repositoryName>
+		<github.site.repositoryOwner>unicesi</github.site.repositoryOwner>
+	</properties>
+
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.12</version>
+				<configuration>
+					<message>Update artefacts for ${project.version}</message>
+					<branch>refs/heads/gh-pages</branch>
+					<merge>true</merge>
+					<outputDirectory>${project.build.directory}/repository</outputDirectory>
+					<path>releases/</path>
+					<noJekyll>true</noJekyll>
+					<includes>
+						<include>**/*</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
