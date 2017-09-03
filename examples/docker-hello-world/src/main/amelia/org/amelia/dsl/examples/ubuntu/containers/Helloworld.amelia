@@ -5,7 +5,7 @@ import org.amelia.dsl.lib.descriptors.Host
 depends on org.amelia.dsl.examples.ubuntu.containers.DockerCE
 
 /*
- * Runs a container based on the helloworld docker image.
+ * Runs a container based on the hello-world docker image.
  *
  * @author Miguel Jimenez (miguel@uvic.ca)
  * @date 2017-09-02
