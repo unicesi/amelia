@@ -74,387 +74,379 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 	var Map<RuleDeclaration, String> ruleIndices = new HashMap<RuleDeclaration, String>
 
 	def dispatch void infer(DeploymentDeclaration deployment, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		val clazz = deployment.toClass(deployment.fullyQualifiedName)
-		acceptor.accept(clazz) [
-			if (!isPreIndexingPhase) {
-				val model = deployment.eContainer as Model
-				val subsystems = if(model.extensions !== null) 
-						model.extensions.declarations.filter(IncludeDeclaration).map [d|
-							d.element as org.amelia.dsl.amelia.Subsystem
-						]
-					else
-						Collections.EMPTY_LIST
-				documentation = deployment.documentation
-				members +=
-					deployment.toField(prefix + "subsystems",
-						typeRef(HashMap, typeRef(String), typeRef(List, typeRef(Subsystem)))) [
-					visibility = JvmVisibility.PRIVATE
-					initializer = [
+		acceptor.accept(deployment.toClass(deployment.fullyQualifiedName)) [
+			val model = deployment.eContainer as Model
+			val subsystems = if(model.extensions !== null) 
+					model.extensions.declarations.filter(IncludeDeclaration).map [d|
+						d.element as org.amelia.dsl.amelia.Subsystem
+					]
+				else
+					Collections.EMPTY_LIST
+			documentation = deployment.documentation
+			members +=
+				deployment.toField(prefix + "subsystems",
+					typeRef(HashMap, typeRef(String), typeRef(List, typeRef(Subsystem)))) [
+				visibility = JvmVisibility.PRIVATE
+				initializer = [
+					trace(deployment)
+						.append("new ").append(HashMap).append("<").append(String).append(", ")
+						.append(List).append("<").append(Subsystem).append(">>()")
+				]
+			]
+			members += deployment.toMethod("main", typeRef(void)) [
+				static = true
+				parameters += deployment.toParameter("args", typeRef(String).addArrayTypeDimension)
+				exceptions += typeRef(Exception)
+				body = [
+					append('System.setProperty("java.util.logging.config.file", "logging.properties");').newLine
+					append(deployment.name).append(" main = new ").append(deployment.name).append("();").newLine
+					append("main.init();").newLine
+					append("main.custom();")
+				]
+			]
+			members += deployment.toMethod("custom", typeRef(void)) [
+				visibility = JvmVisibility.PRIVATE
+				body = deployment.body
+			]
+			members += deployment.toMethod("add", typeRef(void)) [
+				visibility = JvmVisibility.PRIVATE
+				parameters += deployment.toParameter("deployment", typeRef(Deployment))
+				body = [
+					trace(deployment)
+						.append("String clazz = deployment.getClass().getCanonicalName();")
+						.newLine
+						.append('''if («prefix»subsystems.containsKey(clazz)) {''')
+						.increaseIndentation.newLine
+					append('''«prefix»subsystems.get(clazz).add(new ''')
+						.append(Subsystem).append('''(clazz, deployment));''')
+					trace(deployment)
+						.decreaseIndentation.newLine
+						.append('''
+						} else {
+							throw new RuntimeException("Subsystem '" + clazz + "' has not been included in " + 
+								"deployment '«deployment.fullyQualifiedName»'");
+						}''')
+				]
+			]
+			members += deployment.toMethod("init", typeRef(void)) [
+				visibility = JvmVisibility.PRIVATE
+				exceptions += typeRef(Exception)
+				body = [
+					for (subsystem : subsystems) {
+						val qualifiedName = subsystem.fullyQualifiedName
 						trace(deployment)
-							.append("new ").append(HashMap).append("<").append(String).append(", ")
-							.append(List).append("<").append(Subsystem).append(">>()")
-					]
+							.append('''«prefix»subsystems.put("«qualifiedName»", new ''')
+							.append(ArrayList)
+							.append('''());''')
+						if (!subsystems.last.equals(subsystem))
+							trace(deployment).newLine
+					}
 				]
-				members += deployment.toMethod("main", typeRef(void)) [
-					static = true
-					parameters += deployment.toParameter("args", typeRef(String).addArrayTypeDimension)
-					exceptions += typeRef(Exception)
-					body = [
-						append('System.setProperty("java.util.logging.config.file", "logging.properties");').newLine
-						append(clazz).append(" main = new ").append(clazz).append("();").newLine
-						append("main.init();").newLine
-						append("main.custom();")
-					]
-				]
-				members += deployment.toMethod("custom", typeRef(void)) [
-					visibility = JvmVisibility.PRIVATE
-					body = deployment.body
-				]
-				members += deployment.toMethod("add", typeRef(void)) [
-					visibility = JvmVisibility.PRIVATE
-					parameters += deployment.toParameter("deployment", typeRef(Deployment))
-					body = [
-						trace(deployment)
-							.append("String clazz = deployment.getClass().getCanonicalName();")
-							.newLine
-							.append('''if («prefix»subsystems.containsKey(clazz)) {''')
-							.increaseIndentation.newLine
-						append('''«prefix»subsystems.get(clazz).add(new ''')
-							.append(Subsystem).append('''(clazz, deployment));''')
-						trace(deployment)
-							.decreaseIndentation.newLine
-							.append('''
-							} else {
-								throw new RuntimeException("Subsystem '" + clazz + "' has not been included in " + 
-									"deployment '«deployment.fullyQualifiedName»'");
-							}''')
-					]
-				]
-				members += deployment.toMethod("init", typeRef(void)) [
-					visibility = JvmVisibility.PRIVATE
-					exceptions += typeRef(Exception)
-					body = [
-						for (subsystem : subsystems) {
-							val qualifiedName = subsystem.fullyQualifiedName
-							trace(deployment)
-								.append('''«prefix»subsystems.put("«qualifiedName»", new ''')
-								.append(ArrayList)
-								.append('''());''')
-							if (!subsystems.last.equals(subsystem))
-								trace(deployment).newLine
-						}
-					]
-				]
-				members += deployment.toMethod("start", typeRef(boolean)) [
-					visibility = JvmVisibility.PRIVATE
-					parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
-					parameters += deployment.toParameter("shutdownAfterDeployment", typeRef(boolean))
-					exceptions += typeRef(Exception)
-					body = startMethodBody(deployment, subsystems, true)
-				]
-				members += deployment.toMethod("start", typeRef(boolean)) [
-					visibility = JvmVisibility.PRIVATE
-					parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
-					exceptions += typeRef(Exception)
-					body = '''return start(stopExecutedComponents, true);'''
-				]
-			}
+			]
+			members += deployment.toMethod("start", typeRef(boolean)) [
+				visibility = JvmVisibility.PRIVATE
+				parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
+				parameters += deployment.toParameter("shutdownAfterDeployment", typeRef(boolean))
+				exceptions += typeRef(Exception)
+				body = startMethodBody(deployment, subsystems, true)
+			]
+			members += deployment.toMethod("start", typeRef(boolean)) [
+				visibility = JvmVisibility.PRIVATE
+				parameters += deployment.toParameter("stopExecutedComponents", typeRef(boolean))
+				exceptions += typeRef(Exception)
+				body = '''return start(stopExecutedComponents, true);'''
+			]
 		]
 	}
 
-	def dispatch void infer(org.amelia.dsl.amelia.Subsystem subsystem, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		val clazz = subsystem.toClass(subsystem.fullyQualifiedName)
-		if (clazz === null)
-			return;
-		acceptor.accept(clazz) [
-			if (!isPreIndexingPhase) {
-				val model = subsystem.eContainer as Model
-				val subsystemParam = prefix + "subsystem"
-				val dependenciesParam = prefix + "dependencies"
-				val params = subsystem.params
-				val includedSubsystems = subsystem.includedSubsystems
-				val includedParams = subsystem.includedParams(false)
-				val includedVars = subsystem.includedVars(false)
-				val _parameters = newArrayList
-				val fields = newArrayList
-				val constructors = newArrayList
-				val methods = newArrayList
-				val getters = newArrayList
-				val hasConfigBlock = newArrayList(false)
-				
-				// count blocks and rules (indices)
-				hostBlockIndices = subsystem.hostBlocksIndices
-				ruleIndices = subsystem.rulesIndices
-				
-				documentation = subsystem.documentation
-				superTypes += typeRef(Subsystem.Deployment)
+	def dispatch void infer(org.amelia.dsl.amelia.Subsystem subsystem, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) { 
+		acceptor.accept(subsystem.toClass(subsystem.fullyQualifiedName)) [
+			val model = subsystem.eContainer as Model
+			val subsystemParam = prefix + "subsystem"
+			val dependenciesParam = prefix + "dependencies"
+			val params = subsystem.params
+			val includedSubsystems = subsystem.includedSubsystems
+			val includedParams = subsystem.includedParams(false)
+			val includedVars = subsystem.includedVars(false)
+			val _parameters = newArrayList
+			val fields = newArrayList
+			val constructors = newArrayList
+			val methods = newArrayList
+			val getters = newArrayList
+			val hasConfigBlock = newArrayList(false)
+			
+			// count blocks and rules (indices)
+			hostBlockIndices = subsystem.hostBlocksIndices
+			ruleIndices = subsystem.rulesIndices
+			
+			documentation = subsystem.documentation
+			superTypes += typeRef(Subsystem.Deployment)
 
-				// Transform includes into fields
-				fields += subsystem.includesAsFields
-				
-				for (e : subsystem.body.expressions) {
-					switch (e) {
-						VariableDeclaration: {
-							// Transform variable declarations into fields
-							_parameters += e.toField(e.name, e.type ?: inferredType) [
-								documentation = e.documentation
-							]
-							if (e.right !== null) {
-								getters += e.toMethod("init" + e.name.toFirstUpper, e.type ?: inferredType) [
-									visibility = JvmVisibility.PRIVATE
-									body = e.right
-								]								
-							}
-							getters += e.toGetter(e.name, e.type ?: inferredType)
+			// Transform includes into fields
+			fields += subsystem.includesAsFields
+			
+			for (e : subsystem.body.expressions) {
+				switch (e) {
+					VariableDeclaration: {
+						// Transform variable declarations into fields
+						_parameters += e.toField(e.name, e.type ?: inferredType) [
+							documentation = e.documentation
+						]
+						if (e.right !== null) {
+							getters += e.toMethod("init" + e.name.toFirstUpper, e.type ?: inferredType) [
+								visibility = JvmVisibility.PRIVATE
+								body = e.right
+							]								
 						}
-						ConfigBlockExpression: {
-							// There is only one configuration block
-							hasConfigBlock.add(0, true)
-							methods += e.toMethod("configure", typeRef(void)) [
-								exceptions += typeRef(Exception)
-								parameters +=
-									e.toParameter("dependencies", typeRef(List, typeRef(Subsystem)))
-								body = e
+						getters += e.toGetter(e.name, e.type ?: inferredType)
+					}
+					ConfigBlockExpression: {
+						// There is only one configuration block
+						hasConfigBlock.add(0, true)
+						methods += e.toMethod("configure", typeRef(void)) [
+							exceptions += typeRef(Exception)
+							parameters +=
+								e.toParameter("dependencies", typeRef(List, typeRef(Subsystem)))
+							body = e
+						]
+					}
+					OnHostBlockExpression: {
+						val hostBlockIndex = hostBlockIndices.get(e)
+						
+						// Transform rules inside on-host blocks into array fields
+						for (rule : e.rules) {
+							fields += rule.toField(rule.name, typeRef(CommandDescriptor).addArrayTypeDimension) [
+								initializer = '''new «CommandDescriptor»[«rule.commands.length»]'''
+								final = true
+								visibility = JvmVisibility.PUBLIC
 							]
-						}
-						OnHostBlockExpression: {
-							val hostBlockIndex = hostBlockIndices.get(e)
-							
-							// Transform rules inside on-host blocks into array fields
-							for (rule : e.rules) {
-								fields += rule.toField(rule.name, typeRef(CommandDescriptor).addArrayTypeDimension) [
-									initializer = '''new «CommandDescriptor»[«rule.commands.length»]'''
-									final = true
+							if (rule.condition !== null) {
+								getters += rule.condition.toMethod("getRuleCondition" + ruleIndices.get(rule), rule.condition.inferredType) [
 									visibility = JvmVisibility.PUBLIC
-								]
-								if (rule.condition !== null) {
-									getters += rule.condition.toMethod("getRuleCondition" + ruleIndices.get(rule), rule.condition.inferredType) [
-										visibility = JvmVisibility.PUBLIC
-										body = rule.condition
-									]
-								}
-								var currentCommand = 0
-								for (command : rule.commands) {
-									getters += rule.toMethod("init" + rule.name.toFirstUpper + currentCommand++, typeRef(CommandDescriptor)) [
-										visibility = JvmVisibility::PRIVATE
-										body = command
-									]
-								}
-							}
-							
-							// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
-							if (e.hosts !== null) {
-								getters += e.hosts.toMethod("getHost" + hostBlockIndex, e.hosts.inferredType) [
-									visibility = JvmVisibility.PRIVATE
-									body = e.hosts
-								]	
-							}
-							if (e.condition !== null) {
-								getters += e.condition.toMethod("getHostCondition" + hostBlockIndex, e.condition.inferredType) [
-									visibility = JvmVisibility.PUBLIC
-									body = e.condition
+									body = rule.condition
 								]
 							}
+							var currentCommand = 0
+							for (command : rule.commands) {
+								getters += rule.toMethod("init" + rule.name.toFirstUpper + currentCommand++, typeRef(CommandDescriptor)) [
+									visibility = JvmVisibility::PRIVATE
+									body = command
+								]
+							}
+						}
+						
+						// Helper methods. Replace this when Xtext allows to compile XExpressions in specific places
+						if (e.hosts !== null) {
+							getters += e.hosts.toMethod("getHost" + hostBlockIndex, e.hosts.inferredType) [
+								visibility = JvmVisibility.PRIVATE
+								body = e.hosts
+							]	
+						}
+						if (e.condition !== null) {
+							getters += e.condition.toMethod("getHostCondition" + hostBlockIndex, e.condition.inferredType) [
+								visibility = JvmVisibility.PUBLIC
+								body = e.condition
+							]
 						}
 					}
 				}
-				// Setup rules' commands
+			}
+			// Setup rules' commands
+			constructors += subsystem.toConstructor [
+				body = [
+					for (includedSubsystem : includedSubsystems) {
+						val fqn = includedSubsystem.fullyQualifiedName
+						trace(subsystem)
+							.append('''this.«includedSubsystem.javaName» = new «fqn»();''')
+							.newLine
+					}
+				]
+			]
+			if (!params.empty || !includedParams.empty) {
 				constructors += subsystem.toConstructor [
+					for (param : params) {
+						if (param.type !== null || param.right !== null)
+							parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
+					}
+					parameters += subsystem.includedParams(true).map[ p |
+						p.toParameter(p.fullyQualifiedName.javaName, p.type ?: p.right.inferredType)
+					].groupBy[p|p.name].values.map[l|l.get(0)]
 					body = [
+						trace(subsystem)
+							.append(params.join("\n", [p|'''this.«p.name» = «p.name»;''']))
+							.newLine
 						for (includedSubsystem : includedSubsystems) {
 							val fqn = includedSubsystem.fullyQualifiedName
+							val _params = includedSubsystem.params + includedSubsystem.includedParams(true)
 							trace(subsystem)
-								.append('''this.«includedSubsystem.javaName» = new «fqn»();''')
+								.append('''this.«includedSubsystem.javaName» = new «fqn»(«_params.join(", ", [p|p.fullyQualifiedName.javaName])»);''')
 								.newLine
 						}
 					]
 				]
-				if (!params.empty || !includedParams.empty) {
-					constructors += subsystem.toConstructor [
-						for (param : params) {
-							if (param.type !== null || param.right !== null)
-								parameters += param.toParameter(param.name, param.type ?: param.right.inferredType)
-						}
-						parameters += subsystem.includedParams(true).map[ p |
-							p.toParameter(p.fullyQualifiedName.javaName, p.type ?: p.right.inferredType)
-						].groupBy[p|p.name].values.map[l|l.get(0)]
-						body = [
-							trace(subsystem)
-								.append(params.join("\n", [p|'''this.«p.name» = «p.name»;''']))
-								.newLine
-							for (includedSubsystem : includedSubsystems) {
-								val fqn = includedSubsystem.fullyQualifiedName
-								val _params = includedSubsystem.params + includedSubsystem.includedParams(true)
-								trace(subsystem)
-									.append('''this.«includedSubsystem.javaName» = new «fqn»(«_params.join(", ", [p|p.fullyQualifiedName.javaName])»);''')
-									.newLine
-							}
-						]
-					]
-				}
-				// Add a getter for non-duplicate parameters
-				val includedParamsAndVars = includedParams + includedVars
-				val duplicates = (includedParamsAndVars + subsystem.variables).groupBy[p|p.name]
-					.values.filter[l|l.size > 1]
-					.map[l|l.get(0).name]
-					.toList
-				for (paramOrVar : includedParamsAndVars) {
-					if (!duplicates.contains(paramOrVar.name)) {
-						getters += paramOrVar.toMethod("get" + paramOrVar.name.toFirstUpper, paramOrVar.type ?: inferredType) [
-							body = '''return this.«paramOrVar.fullyQualifiedName.skipLast(1).javaName».get«paramOrVar.name.toFirstUpper»();'''
-						]
-					}
-				}
-				methods += subsystem.toMethod("init", typeRef(void)) [
-					visibility = JvmVisibility.PRIVATE
-					body = initRules(subsystem)
-				]
-				methods += subsystem.toMethod("setup", typeRef(void)) [
-					annotations += annotationRef(Override)
-					body = setupRules(subsystem, subsystemParam)
-				]
-				methods += subsystem.toMethod("deploy", typeRef(void)) [
-					exceptions += typeRef(Exception)
-					parameters += subsystem.toParameter(subsystemParam, typeRef(String))
-					parameters +=
-						subsystem.toParameter(dependenciesParam, typeRef(List, typeRef(Subsystem)))
-					body = subsystem.setupGraph(subsystemParam)
-				]
-				methods += subsystem.toMethod("main", typeRef(void)) [
-					static = true
-					exceptions += typeRef(Exception)
-					parameters += subsystem.toParameter("args", typeRef(String).addArrayTypeDimension)
-					body = [
-						val allowed = subsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param && v.right === null].empty
-							&& (
-								model.extensions === null
-								|| (model.extensions !== null && model.extensions.declarations.filter(DependDeclaration).empty)
-							)
-						if (allowed) {
-							append(Subsystem).append(" subsystem = new ").append(Subsystem)
-								.append('''("«subsystem.fullyQualifiedName»", new «subsystem.name»());''').newLine
-							append("subsystem.deployment().setup();").newLine
-							append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine
-							append('''
-								graph.addSubsystems(subsystem);
-								graph.execute(true, false);''')
-						} else {
-							append('''
-								throw new Exception("Subsystems with dependencies or non-initialized" 
-									+ " parameters cannot be executed without using a deployment descriptor");''')
-						}
-					]
-				]
-				
-				// Method to return all rules from included subsystems
-				getters += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
-					body = [
-						val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.map [r|
-							r.name
-						].toList
-						if (model.extensions !== null) {
-							val includes = model.extensions.declarations.filter(IncludeDeclaration).map [d|
-								d.element as org.amelia.dsl.amelia.Subsystem
-							]
-							for (includedSubsystem : includes) {
-								rules += '''«includedSubsystem.javaName».getAllRules()'''
-							}
-						}
-						if (rules.empty) {
-							trace(subsystem).append("return new ").append(CommandDescriptor).append("[0];")
-						} else {
-							trace(subsystem)
-								.append("return ").append(Arrays).append(".concatAll(")
-								.increaseIndentation.newLine
-								.append(rules.join(",\n")).decreaseIndentation.newLine
-								.append(");")
-						}
-					]
-				]
-				// Wrapper methods to hide the internal implementation
-				if (hasConfigBlock.get(0)) {
-					fields +=
-						subsystem.toField(prefix + "dependencies", typeRef(List, typeRef(Subsystem))) [
-							initializer = [
-								trace(subsystem)
-									.append("new ").append(ArrayList).append("<").append(Subsystem).append(">()")
-							]
-						]
-					methods += subsystem.toMethod("execute", typeRef(void)) [
-						exceptions += typeRef(Exception)
-						parameters += subsystem.toParameter("stopPreviousExecutions", typeRef(boolean))
-						body = [
-							trace(subsystem)
-								.append("super.graph.execute(stopPreviousExecutions);")
-						]
-					]
-					methods += subsystem.toMethod("execute", typeRef(void)) [
-						exceptions += typeRef(Exception)
-						parameters += subsystem.toParameter("stopPreviousExecutions", typeRef(boolean))
-						parameters += subsystem.toParameter("shutdownAfterDeployment", typeRef(boolean))
-						parameters += subsystem.toParameter("stopExecutionsWhenFinish", typeRef(boolean))
-						body = [
-							trace(subsystem)
-								.append('''
-									super.graph.execute(
-										stopPreviousExecutions, 
-										shutdownAfterDeployment, 
-										stopExecutionsWhenFinish);
-								''')
-						]
-					]
-					methods += subsystem.toMethod("searchDependency", typeRef(Subsystem)) [
-						visibility = JvmVisibility.PRIVATE
-						parameters +=
-							subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
-						body = [
-							trace(subsystem)
-								.append(Subsystem).append(''' dependency = null;''').newLine
-								.append('''String fqn = clazz.getCanonicalName();''').newLine
-								.append("for (").append(Subsystem).append(''' subsystem : this.«prefix»dependencies) {''')
-								.newLine
-								.append('''
-										if (subsystem.alias().equals(fqn)) {
-											dependency = subsystem;
-											break;
-										}
-									}
-									if (dependency == null) {
-										throw new IllegalArgumentException("Subsystem " + fqn + " is not a dependency");
-									}
-									return dependency;''')
-						]
-					]
-					methods += subsystem.toMethod("release", typeRef(void)) [
-						parameters +=
-							subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
-						parameters += subsystem.toParameter("compositeNames", typeRef(List, typeRef(String)))
-						body = [
-							trace(subsystem)
-								.append(Subsystem).append(''' dependency = searchDependency(clazz);''')
-								.newLine
-								.append('''dependency.deployment().shutdownAndStopComponents(compositeNames.toArray(new String[0]));''')
-						]
-					]
-					methods += subsystem.toMethod("release", typeRef(void)) [
-						parameters +=
-							subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
-						parameters += subsystem.toParameter("stopAllComponents", typeRef(boolean))
-						body = [
-							trace(subsystem)
-								.append(Subsystem).append(" dependency = searchDependency(clazz);")
-								.newLine
-								.append('''dependency.deployment().shutdown(stopAllComponents);''')
-						]
-					]
-				}
-				// Add class members
-				members += _parameters
-				members += fields
-				members += constructors
-				members += methods
-				members += getters
 			}
+			// Add a getter for non-duplicate parameters
+			val includedParamsAndVars = includedParams + includedVars
+			val duplicates = (includedParamsAndVars + subsystem.variables).groupBy[p|p.name]
+				.values.filter[l|l.size > 1]
+				.map[l|l.get(0).name]
+				.toList
+			for (paramOrVar : includedParamsAndVars) {
+				if (!duplicates.contains(paramOrVar.name)) {
+					getters += paramOrVar.toMethod("get" + paramOrVar.name.toFirstUpper, paramOrVar.type ?: inferredType) [
+						body = '''return this.«paramOrVar.fullyQualifiedName.skipLast(1).javaName».get«paramOrVar.name.toFirstUpper»();'''
+					]
+				}
+			}
+			methods += subsystem.toMethod("init", typeRef(void)) [
+				visibility = JvmVisibility.PRIVATE
+				body = initRules(subsystem)
+			]
+			methods += subsystem.toMethod("setup", typeRef(void)) [
+				annotations += annotationRef(Override)
+				body = setupRules(subsystem, subsystemParam)
+			]
+			methods += subsystem.toMethod("deploy", typeRef(void)) [
+				exceptions += typeRef(Exception)
+				parameters += subsystem.toParameter(subsystemParam, typeRef(String))
+				parameters +=
+					subsystem.toParameter(dependenciesParam, typeRef(List, typeRef(Subsystem)))
+				body = subsystem.setupGraph(subsystemParam)
+			]
+			methods += subsystem.toMethod("main", typeRef(void)) [
+				static = true
+				exceptions += typeRef(Exception)
+				parameters += subsystem.toParameter("args", typeRef(String).addArrayTypeDimension)
+				body = [
+					val allowed = subsystem.body.expressions.filter(VariableDeclaration).filter[v|v.param && v.right === null].empty
+						&& (
+							model.extensions === null
+							|| (model.extensions !== null && model.extensions.declarations.filter(DependDeclaration).empty)
+						)
+					if (allowed) {
+						append(Subsystem).append(" subsystem = new ").append(Subsystem)
+							.append('''("«subsystem.fullyQualifiedName»", new «subsystem.name»());''').newLine
+						append("subsystem.deployment().setup();").newLine
+						append(SubsystemGraph).append(" graph = ").append(SubsystemGraph).append(".getInstance();").newLine
+						append('''
+							graph.addSubsystems(subsystem);
+							graph.execute(true, false);''')
+					} else {
+						append('''
+							throw new Exception("Subsystems with dependencies or non-initialized" 
+								+ " parameters cannot be executed without using a deployment descriptor");''')
+					}
+				]
+			]
+			
+			// Method to return all rules from included subsystems
+			getters += subsystem.toMethod("getAllRules", typeRef(CommandDescriptor).addArrayTypeDimension) [
+				body = [
+					val rules = subsystem.body.expressions.filter(OnHostBlockExpression).map[h|h.rules].flatten.map [r|
+						r.name
+					].toList
+					if (model.extensions !== null) {
+						val includes = model.extensions.declarations.filter(IncludeDeclaration).map [d|
+							d.element as org.amelia.dsl.amelia.Subsystem
+						]
+						for (includedSubsystem : includes) {
+							rules += '''«includedSubsystem.javaName».getAllRules()'''
+						}
+					}
+					if (rules.empty) {
+						trace(subsystem).append("return new ").append(CommandDescriptor).append("[0];")
+					} else {
+						trace(subsystem)
+							.append("return ").append(Arrays).append(".concatAll(")
+							.increaseIndentation.newLine
+							.append(rules.join(",\n")).decreaseIndentation.newLine
+							.append(");")
+					}
+				]
+			]
+			// Wrapper methods to hide the internal implementation
+			if (hasConfigBlock.get(0)) {
+				fields +=
+					subsystem.toField(prefix + "dependencies", typeRef(List, typeRef(Subsystem))) [
+						initializer = [
+							trace(subsystem)
+								.append("new ").append(ArrayList).append("<").append(Subsystem).append(">()")
+						]
+					]
+				methods += subsystem.toMethod("execute", typeRef(void)) [
+					exceptions += typeRef(Exception)
+					parameters += subsystem.toParameter("stopPreviousExecutions", typeRef(boolean))
+					body = [
+						trace(subsystem)
+							.append("super.graph.execute(stopPreviousExecutions);")
+					]
+				]
+				methods += subsystem.toMethod("execute", typeRef(void)) [
+					exceptions += typeRef(Exception)
+					parameters += subsystem.toParameter("stopPreviousExecutions", typeRef(boolean))
+					parameters += subsystem.toParameter("shutdownAfterDeployment", typeRef(boolean))
+					parameters += subsystem.toParameter("stopExecutionsWhenFinish", typeRef(boolean))
+					body = [
+						trace(subsystem)
+							.append('''
+								super.graph.execute(
+									stopPreviousExecutions, 
+									shutdownAfterDeployment, 
+									stopExecutionsWhenFinish);
+							''')
+					]
+				]
+				methods += subsystem.toMethod("searchDependency", typeRef(Subsystem)) [
+					visibility = JvmVisibility.PRIVATE
+					parameters +=
+						subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
+					body = [
+						trace(subsystem)
+							.append(Subsystem).append(''' dependency = null;''').newLine
+							.append('''String fqn = clazz.getCanonicalName();''').newLine
+							.append("for (").append(Subsystem).append(''' subsystem : this.«prefix»dependencies) {''')
+							.newLine
+							.append('''
+									if (subsystem.alias().equals(fqn)) {
+										dependency = subsystem;
+										break;
+									}
+								}
+								if (dependency == null) {
+									throw new IllegalArgumentException("Subsystem " + fqn + " is not a dependency");
+								}
+								return dependency;''')
+					]
+				]
+				methods += subsystem.toMethod("release", typeRef(void)) [
+					parameters +=
+						subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
+					parameters += subsystem.toParameter("compositeNames", typeRef(List, typeRef(String)))
+					body = [
+						trace(subsystem)
+							.append(Subsystem).append(''' dependency = searchDependency(clazz);''')
+							.newLine
+							.append('''dependency.deployment().shutdownAndStopComponents(compositeNames.toArray(new String[0]));''')
+					]
+				]
+				methods += subsystem.toMethod("release", typeRef(void)) [
+					parameters +=
+						subsystem.toParameter("clazz", typeRef(Class, wildcardExtends(typeRef(Deployment))))
+					parameters += subsystem.toParameter("stopAllComponents", typeRef(boolean))
+					body = [
+						trace(subsystem)
+							.append(Subsystem).append(" dependency = searchDependency(clazz);")
+							.newLine
+							.append('''dependency.deployment().shutdown(stopAllComponents);''')
+					]
+				]
+			}
+			// Add class members
+			members += _parameters
+			members += fields
+			members += constructors
+			members += methods
+			members += getters
 		]
 	}
 	
