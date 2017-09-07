@@ -1,16 +1,15 @@
 package org.amelia.dsl.scoping
 
-import org.eclipse.xtext.xbase.scoping.XImportSectionNamespaceScopeProvider
-import org.eclipse.xtext.naming.IQualifiedNameProvider
+import com.google.common.collect.Lists
 import com.google.inject.Inject
-import java.util.Collections
-import org.eclipse.xtext.scoping.impl.ImportNormalizer
-import org.eclipse.xtext.xbase.XConstructorCall
+import java.util.List
+import org.amelia.dsl.amelia.ExtensionSection
 import org.amelia.dsl.amelia.Model
 import org.eclipse.emf.ecore.EObject
-import java.util.List
-import com.google.common.collect.Lists
-import org.amelia.dsl.amelia.ExtensionSection
+import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.eclipse.xtext.scoping.impl.ImportNormalizer
+import org.eclipse.xtext.xbase.XConstructorCall
+import org.eclipse.xtext.xbase.scoping.XImportSectionNamespaceScopeProvider
 
 /**
  * See more at https://www.eclipse.org/forums/index.php/m/1771411/
@@ -26,13 +25,10 @@ class AmeliaImportSectionNamespaceScopeProvider extends XImportSectionNamespaceS
 			XConstructorCall: {
 				val container = context.model as Model
 				if (container.extensions !== null)
-					container.extensions.provideImportNormalizerList(ignoreCase)
-				else
-					Collections.emptyList
+					return container.extensions.provideImportNormalizerList(ignoreCase)
 			}
-			default:
-				super.internalGetImportedNamespaceResolvers(context, ignoreCase)
 		}
+		return super.internalGetImportedNamespaceResolvers(context, ignoreCase)
 	}
 
 	/*
