@@ -24,6 +24,7 @@
 	<modules>
 		<module>base</module>
 		<module>docker-hello-world</module>
+		<module>frascati-helloworld-rmi</module>
 	</modules>
 
 	<dependencies>

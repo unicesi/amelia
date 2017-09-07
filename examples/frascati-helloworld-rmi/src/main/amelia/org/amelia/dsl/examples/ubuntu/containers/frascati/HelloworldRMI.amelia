@@ -1,0 +1,51 @@
+package org.amelia.dsl.examples.ubuntu.containers.frascati
+
+import org.amelia.dsl.lib.descriptors.Host
+
+depends on org.amelia.dsl.examples.ubuntu.containers.DockerCE
+
+/*
+ * Runs FraSCAti 1.4 on docker and compiles and executes the helloworld-rmi
+ * project from the FraSCAti distribution.
+ *
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ * @date 2017-09-03
+ */
+subsystem HelloworldRMI {
+
+	/*
+	 * The host in which the container is executed.
+	 */
+	param Host host
+
+	/*
+	 * The FraSCAti 1.4 (Docker) image.
+	 */
+	var String image = 'jachinte/frascati-1.4'
+
+	/*
+	 * Path to the helloworld-rmi project.
+	 */
+	var String path = '/opt/frascati-runtime-1.4/examples/helloworld-rmi/'
+
+	/*
+	 * The script to compile and run the example.
+	 */
+	var String script = '"
+		frascati compile server/src server;
+		frascati compile client/src client;
+		frascati run helloworld-rmi-server --libpath server.jar
+	"'
+
+	on host {
+		pull:
+			cmd 'docker pull «image»'... => [ withoutTimeout ]
+
+		execution: pull;
+			cmd 'docker run --rm -ti --workdir=«path» «image» /bin/bash -c «script»'... => [
+				withReleaseRegexp('FraSCAti is running in a server mode')
+				withTimeout(30000)
+			]
+	}
+
+}
