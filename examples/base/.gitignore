@@ -1,4 +1,4 @@
-amelia-gen/*
+src-gen/*
 logs/*
 sessions/*
 target/*

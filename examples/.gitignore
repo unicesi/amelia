@@ -8,7 +8,7 @@
 *.ear
 
 # Local directories
-amelia/*
+src-gen/*
 logs/*
 sessions/*
 target/*
