@@ -17,8 +17,7 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.emf.common,
  org.eclipse.xtext.common.types
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: org.amelia.dsl.generator,
- org.amelia.dsl.parser.antlr.internal,
+Export-Package: org.amelia.dsl.parser.antlr.internal,
  org.amelia.dsl.serializer,
  org.amelia.dsl.parser.antlr,
  org.amelia.dsl.services,
@@ -28,8 +27,7 @@ Export-Package: org.amelia.dsl.generator,
  org.amelia.dsl.scoping,
  org.amelia.dsl.amelia,
  org.amelia.dsl.amelia.util,
- org.amelia.dsl.jvmmodel,
- org.amelia.dsl.outputconfiguration
+ org.amelia.dsl.jvmmodel
 Import-Package: org.amelia.dsl.lib,
  org.amelia.dsl.lib.descriptors,
  org.amelia.dsl.lib.util,

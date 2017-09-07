@@ -19,20 +19,15 @@
 package org.amelia.dsl
 
 import com.google.inject.Binder
-import com.google.inject.Singleton
 import com.google.inject.name.Names
 import org.amelia.dsl.compiler.AmeliaCompiler
 import org.amelia.dsl.debug.AmeliaStratumBreakpointSupport
-import org.amelia.dsl.outputconfiguration.AmeliaOutputConfigurationProvider
-import org.amelia.dsl.outputconfiguration.OutputConfigurationAwaredGenerator
 import org.amelia.dsl.runtime.AmeliaQualifiedNameProvider
 import org.amelia.dsl.scoping.AmeliaImplicitlyImportedFeatures
 import org.amelia.dsl.scoping.AmeliaImportSectionNamespaceScopeProvider
 import org.amelia.dsl.scoping.AmeliaScopeProvider
 import org.amelia.dsl.typesystem.AmeliaTypeComputer
 import org.eclipse.xtext.debug.IStratumBreakpointSupport
-import org.eclipse.xtext.generator.IGenerator
-import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
@@ -61,16 +56,8 @@ class AmeliaRuntimeModule extends AbstractAmeliaRuntimeModule {
 	override void configure(Binder binder) {
 		super.configure(binder)
 		binder
-			.bind(IOutputConfigurationProvider)
-			.to(AmeliaOutputConfigurationProvider)
-			.in(Singleton)
-		binder
 			.bind(ImplicitlyImportedFeatures)
 			.to(AmeliaImplicitlyImportedFeatures)
-	}
-
-	override Class<? extends IGenerator> bindIGenerator() {
-		return OutputConfigurationAwaredGenerator
 	}
 
 	override Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
