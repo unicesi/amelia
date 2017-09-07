@@ -33,7 +33,7 @@
 					</sourceRoots>
 					<languages>
 						<language>
-							<setup>org.amelia.dsl.AmeliaStandaloneSetupGenerated</setup>
+							<setup>org.amelia.dsl.AmeliaStandaloneSetup</setup>
 							<javaSupport>true</javaSupport>
 							<outputConfigurations>
 								<outputConfiguration>
