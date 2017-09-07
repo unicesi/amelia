@@ -10,4 +10,47 @@
 	<artifactId>org.amelia.dsl.examples.base</artifactId>
 	<name>Base Library for Examples</name>
 	<description>Base subsystems used by the examples</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.xtext</groupId>
+				<artifactId>xtext-maven-plugin</artifactId>
+				<version>${xtextVersion}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<javaSourceRoots>
+						<javaSourceRoot>${java.source.directory}</javaSourceRoot>
+					</javaSourceRoots>
+					<sourceRoots>
+						<sourceRoot>${amelia.source.directory}</sourceRoot>
+					</sourceRoots>
+					<languages>
+						<language>
+							<setup>org.amelia.dsl.AmeliaStandaloneSetupGenerated</setup>
+							<javaSupport>true</javaSupport>
+							<outputConfigurations>
+								<outputConfiguration>
+									<outputDirectory>${amelia.output.directory}</outputDirectory>
+								</outputConfiguration>
+							</outputConfigurations>
+						</language>
+					</languages>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<artifactId>org.amelia.dsl</artifactId>
+						<groupId>com.github.unicesi</groupId>
+						<version>${project.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
 </project>
