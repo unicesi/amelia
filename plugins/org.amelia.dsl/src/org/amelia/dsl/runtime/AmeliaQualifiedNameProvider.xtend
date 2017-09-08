@@ -23,9 +23,9 @@ import org.amelia.dsl.amelia.RuleDeclaration
 import org.amelia.dsl.amelia.Subsystem
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.xtext.naming.DefaultDeclarativeQualifiedNameProvider
+import org.eclipse.xtext.xbase.scoping.XbaseQualifiedNameProvider
 
-class AmeliaQualifiedNameProvider extends DefaultDeclarativeQualifiedNameProvider {
+class AmeliaQualifiedNameProvider extends XbaseQualifiedNameProvider {
 
 	override getFullyQualifiedName(EObject obj) {
 		switch (obj) {
