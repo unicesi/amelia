@@ -149,9 +149,10 @@ public class CommandDescriptor extends Observable {
 						expect.expect(regexp(prompt));
 						
 						int to = host.ssh().outputLog().logs().size() - 1;
-						for (CharSequence csq: host.ssh().outputLog().logs().subList(from, to))
-							output += csq;
-						
+						if (from <= to) {
+							for (CharSequence csq: host.ssh().outputLog().logs().subList(from, to))
+								output += csq;
+						}
 						if (Strings.containsAnyOf(response, errorTexts)) {
 							if(!quiet) Log.error(host, errorMessage);
 							throw new RuntimeException(errorMessage);
