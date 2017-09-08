@@ -10,5 +10,10 @@ package org.amelia.dsl.examples.ubuntu;
 public enum Arch {
     amd64,
     armhf,
+    arm32v5,
+ 	arm32v7,
+ 	arm64v8,
+ 	i386,
+ 	ppc64le,
     s390x
 }
