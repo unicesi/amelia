@@ -29,23 +29,37 @@ subsystem HelloworldRMI {
 	var String path = '/opt/frascati-runtime-1.4/examples/helloworld-rmi/'
 
 	/*
-	 * The script to compile and run the example.
+	 * The scripts to compile and run the example.
 	 */
-	var String script = '"
+	var String serverScript = '"
 		frascati compile server/src server;
-		frascati compile client/src client;
 		frascati run helloworld-rmi-server --libpath server.jar
+	"'
+	var String clientScript = '"
+		sed -i \\"s/localhost/server/g\\" client/src/main/resources/helloworld-rmi-client.composite;
+		frascati compile client/src client;
+		frascati run helloworld-rmi-client --libpath client.jar -s r -m run
 	"'
 
 	on host {
-		pull:
+		init:
 			cmd 'docker pull «image»'... => [ withoutTimeout ]
+			cmd 'docker network create --driver bridge helloworld'
 
-		execution: pull;
-			cmd 'docker run --rm -ti --workdir=«path» «image» /bin/bash -c «script»'... => [
-				withReleaseRegexp('FraSCAti is running in a server mode')
-				withTimeout(30000)
-			]
+		cleanup: client;
+			cmd 'docker kill server'
+			cmd 'docker network rm helloworld'
+			cmd 'docker rmi «image»'
 	}
 
+	on host {
+		server: init;
+			cmd 'docker run --rm -d --net=helloworld --name=server -p 0.0.0.0:1099:1099
+				--workdir=«path» «image» /bin/bash -c «serverScript»'
+			cmd 'until (docker logs server | grep "Press Ctrl+C to quit"); do : ; done'
+
+		client: server;
+			(cmd 'docker run --rm --net=helloworld --name=client
+				--workdir=«path» «image» /bin/bash -c «clientScript»').fetch [ output | println(output) ]
+	}
 }
