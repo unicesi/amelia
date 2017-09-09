@@ -1,4 +1,4 @@
-# Docker's hello-world
+# Docker hello-world
 
 This example installs Docker Community Edition and runs the hello-world container. It requires specifying the following parameters:
 
