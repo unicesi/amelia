@@ -19,55 +19,55 @@ includes org.amelia.dsl.examples.ubuntu.HTTPS
  */
 subsystem DockerCE {
 
-    /*
-     * The target architecture.
-     */
-    param Arch arch
+	/*
+	 * The target architecture.
+	 */
+	param Arch arch
 
-    /*
-     * The docker version to install. e.g., 17.07.0
-     */
-    param String version
+	/*
+	 * The docker version to install. e.g., 17.07.0
+	 */
+	param String version
 
-    /*
-     * The user that shall be added to the docker group (optional).
-     */
-    param String user
+	/*
+	 * The user that shall be added to the docker group (optional).
+	 */
+	param String user
 
-    /*
-     * Whether Docker is already installed or not and should be
-     * upgraded/downgraded.
-     */
-    var AtomicBoolean install = new AtomicBoolean
-    var AtomicBoolean replace = new AtomicBoolean
+	/*
+	 * Whether Docker is already installed or not and should be
+	 * upgraded/downgraded.
+	 */
+	var AtomicBoolean install = new AtomicBoolean
+	var AtomicBoolean replace = new AtomicBoolean
 
 	/*
 	 * Docker's GPG key.
 	 */
 	var String gpgKey = '9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88'
 
-    on host {
-        init:
-            (cmd 'docker --version')
-                .fetch [ v | replace.set(!v.contains(version)) ]
-                .fallback [ install.set(true) ]
-    }
+	on host {
+		init:
+			(cmd 'docker --version')
+				.fetch [ v | replace.set(!v.contains(version)) ]
+				.fallback [ install.set(true) ]
+	}
 
-    on host? install || replace {
-    		verification: init, org.amelia.dsl.examples.ubuntu.HTTPS.installation;
+	on host? install || replace {
+		verification: init, org.amelia.dsl.examples.ubuntu.HTTPS.installation;
 			cmd 'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -'
 			(cmd 'apt-key fingerprint 0EBFCD88')
 				.fetch [ o | raiseif(!o.contains(gpgKey), 'GPG key cannot be trusted!\n«o»') ]
 
-        repository: verification;
-            cmd 'add-apt-repository "deb [arch=«arch»]
-                    https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"'
+		repository: verification;
+			cmd 'add-apt-repository "deb [arch=«arch»]
+					https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"'
 
-        installation: repository;
-            cmd 'apt-get update'... => [ withoutTimeout ]
-            cmd 'apt-get install -y --allow-downgrades docker-ce=«version»*'... => [ withoutTimeout ]
+		installation: repository;
+			cmd 'apt-get update'... => [ withoutTimeout ]
+			cmd 'apt-get install -y --allow-downgrades docker-ce=«version»*'... => [ withoutTimeout ]
 
-        configuration? user !== null: installation;
-            cmd 'usermod -aG docker «user»'
-    }
+		configuration? user !== null: installation;
+			cmd 'usermod -aG docker «user»'
+	}
 }
