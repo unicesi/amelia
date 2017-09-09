@@ -8,13 +8,16 @@
 	</parent>
 	<artifactId>org.amelia.dsl.examples.docker</artifactId>
 
-	<name>Example: Docker's hello-world</name>
+	<name>Example: Docker hello-world</name>
 	<description>
 		Amelia subsystems to install Docker Community Edition and run the hello-world container
 	</description>
 
 	<properties>
 		<mainClass>org.amelia.dsl.examples.ubuntu.containers.Deployment</mainClass>
+		<host>localhost</host>
+		<privileged-user>root</privileged-user>
+		<unprivileged-user>${user.name}</unprivileged-user>
 	</properties>
 
 	<dependencies>
@@ -69,6 +72,35 @@
 						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>${mainClass}</mainClass>
+					<systemProperties>
+						<systemProperty>
+							<key>host</key>
+							<value>${host}</value>
+						</systemProperty>
+						<systemProperty>
+							<key>privileged-user</key>
+							<value>${privileged-user}</value>
+						</systemProperty>
+						<systemProperty>
+							<key>unprivileged-user</key>
+							<value>${unprivileged-user}</value>
+						</systemProperty>
+					</systemProperties>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

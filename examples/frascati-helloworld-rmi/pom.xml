@@ -16,6 +16,9 @@
 
 	<properties>
 		<mainClass>org.amelia.dsl.examples.ubuntu.containers.frascati.Deployment</mainClass>
+		<host>localhost</host>
+		<privileged-user>root</privileged-user>
+		<unprivileged-user>${user.name}</unprivileged-user>
 	</properties>
 
 	<dependencies>
@@ -70,6 +73,39 @@
 						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>${mainClass}</mainClass>
+					<systemProperties>
+						<systemProperty>
+							<key>host</key>
+							<value>${host}</value>
+						</systemProperty>
+						<systemProperty>
+							<key>privileged-user</key>
+							<value>${privileged-user}</value>
+						</systemProperty>
+						<systemProperty>
+							<key>unprivileged-user</key>
+							<value>${unprivileged-user}</value>
+						</systemProperty>
+						<systemProperty>
+							<key>amelia.execution_timeout</key>
+							<value>30000</value>
+						</systemProperty>
+					</systemProperties>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
