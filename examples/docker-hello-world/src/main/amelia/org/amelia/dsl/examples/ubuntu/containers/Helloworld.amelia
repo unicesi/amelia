@@ -18,9 +18,17 @@ subsystem Helloworld {
 	param Host host
 
 	on host {
-		execution:
-			(cmd 'docker run hello-world')
-				.fetch [ output | println(output) ]
+		init:
+			// in case a previous execution didn't finish
+			cmd 'docker rm -f hello-world || true'
+
+		execution: init;
+			(cmd 'docker run --name=hello-world hello-world')
+				.fetch [ println(it) ]
+
+		cleanup: execution;
+			cmd 'docker rm -f hello-world'
+			cmd 'docker rmi hello-world'
 	}
 
 }
