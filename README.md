@@ -8,7 +8,7 @@ http://unicesi.github.io/amelia/releases
 ### Documentation
 
 - [Getting started with the Amelia DSL](docs/GettingStarted.md). An introduction to specifying deployment artifacts with the Amelia DSL.
-- [Standalone compiler](docs/MavenConfiguration.md). Maven configuration to use Amelia as a Maven plugin.
+- [Examples](examples). Explore the examples to discover how to use Amelia with third-party technologies.
 
 ### Clone
 
