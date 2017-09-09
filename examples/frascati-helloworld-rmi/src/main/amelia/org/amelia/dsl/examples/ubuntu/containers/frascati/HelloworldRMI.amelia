@@ -29,12 +29,16 @@ subsystem HelloworldRMI {
 	var String path = '/opt/frascati-runtime-1.4/examples/helloworld-rmi/'
 
 	/*
-	 * The scripts to compile and run the example.
+	 * The script to compile and run the server component.
 	 */
 	var String serverScript = '"
 		frascati compile server/src server;
 		frascati run helloworld-rmi-server --libpath server.jar
 	"'
+
+	/*
+	 * The script to compile and run the client component.
+	 */
 	var String clientScript = '"
 		sed -i \\"s/localhost/server/g\\" client/src/main/resources/helloworld-rmi-client.composite;
 		frascati compile client/src client;
@@ -43,6 +47,11 @@ subsystem HelloworldRMI {
 
 	on host {
 		init:
+			// just in case a previous execution didn't finish
+			cmd 'docker kill client || true'
+			cmd 'docker kill server || true'
+			cmd 'docker network rm helloworld || true'
+
 			cmd 'docker pull «image»'... => [ withoutTimeout ]
 			cmd 'docker network create --driver bridge helloworld'
 
@@ -60,6 +69,11 @@ subsystem HelloworldRMI {
 
 		client: server;
 			(cmd 'docker run --rm --net=helloworld --name=client
-				--workdir=«path» «image» /bin/bash -c «clientScript»').fetch [ output | println(output) ]
+				--workdir=«path» «image» /bin/bash -c «clientScript»').fetch [ println(it) ]
+	}
+
+	config {
+		println("\nBeware this example may take several minutes downloading the Docker image\n")
+		execute(true, true, true)
 	}
 }
