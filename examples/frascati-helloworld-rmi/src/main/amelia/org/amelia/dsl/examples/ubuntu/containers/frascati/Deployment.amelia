@@ -25,7 +25,7 @@ deployment Deployment {
 
 	// configure subsystems
 	add(new HelloworldRMI(unprivileged))
-	add(new DockerCE(Arch.amd64, '17.06.1~ce-0~ubuntu', unprivileged.username, priviledged))
+	add(new DockerCE(Arch.amd64, '17.06.1', unprivileged.username, priviledged))
 
 	// Deploy the subsystems
 	start(true)
