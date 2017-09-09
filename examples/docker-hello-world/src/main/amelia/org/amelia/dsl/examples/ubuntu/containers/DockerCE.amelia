@@ -49,7 +49,7 @@ subsystem DockerCE {
 	on host {
 		init:
 			(cmd 'docker --version')
-				.fetch [ v | replace.set(!v.contains(version)) ]
+				.fetch [ replace.set(!it.contains(version)) ]
 				.fallback [ install.set(true) ]
 	}
 
@@ -57,7 +57,7 @@ subsystem DockerCE {
 		verification: init, org.amelia.dsl.examples.ubuntu.HTTPS.installation;
 			cmd 'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -'
 			(cmd 'apt-key fingerprint 0EBFCD88')
-				.fetch [ o | raiseif(!o.contains(gpgKey), 'GPG key cannot be trusted!\n«o»') ]
+				.fetch [ raiseif(!it.contains(gpgKey), 'GPG key cannot be trusted!\n«it»') ]
 
 		repository: verification;
 			cmd 'add-apt-repository "deb [arch=«arch»]
