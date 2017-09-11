@@ -46,14 +46,14 @@ subsystem DockerCE {
 	 */
 	var String gpgKey = '9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88'
 
-	on host {
+	on hosts {
 		init:
 			(cmd 'docker --version')
 				.fetch [ replace.set(!it.contains(version)) ]
 				.fallback [ install.set(true) ]
 	}
 
-	on host? install || replace {
+	on hosts? install || replace {
 		verification: init, org.amelia.dsl.examples.ubuntu.HTTPS.installation;
 			cmd 'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -'
 			(cmd 'apt-key fingerprint 0EBFCD88')
