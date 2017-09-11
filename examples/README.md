@@ -2,6 +2,14 @@
 
 These examples are intended to demonstrate features of the Amelia DSL. Keep in mind that most of them assume the remote hosts to run on Ubuntu (e.g., apt-get as package manager). However, these assumptions are made only to keep them as simple as possible; updating the examples to support other platforms should not be complicated.
 
+To run the examples, first execute:
+
+```
+mvn clean install
+```
+
+And then follow the instructions within each example.
+
 ## List of Examples
 
 - [Base library](base) defines both Java files and Amelia subsystems that are reused within some example projects.
