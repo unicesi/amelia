@@ -130,12 +130,11 @@ public class CommandExtensions {
                 @Override
                 public Object call(Host host, String prompt, boolean quiet)
                 	throws Exception {
-                	final Object response = command.callable()
-                		.call(host, prompt, false);
-                	String fetched = String.class.isInstance(response)
-                		? (String) response : response.toString();
-                	procedure.apply(fetched);
-                    return new Object();
+                	final String response = command.callable()
+                		.call(host, prompt, false)
+                		.toString();
+                	procedure.apply(response);
+                    return response;
                 }
             }).build();
     }
