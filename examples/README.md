@@ -8,5 +8,5 @@ To run the examples, first [package and install the language artefacts](/README.
 
 - [Base library](base) defines both Java files and Amelia subsystems that are reused within other example projects.
 - [Eclipse plugin project](eclipse-plugin-project) shows the basic configuration to use Amelia within an Eclipse plugin project.
-- [Docker helloworld](docker-hello-world) installs Docker Community Edition and runs the [hello-world](https://hub.docker.com/_/hello-world/) container.
+- [Docker hello-world](docker-hello-world) installs Docker Community Edition and runs the [hello-world](https://hub.docker.com/_/hello-world/) container.
 - [FraSCAti helloworld-rmi](frascati-helloworld-rmi) runs FraSCAti 1.4 on docker and compiles and executes the helloworld-rmi project from the FraSCAti distribution.
