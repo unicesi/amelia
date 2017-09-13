@@ -10,8 +10,8 @@ package org.amelia.dsl.examples;
 public final class Util {
 
 	/**
-	 * Throws an exception with the given message, when shouldThrow evaluates
-	 * to {@code true}.
+	 * Throws an exception with the given message, when {@code shouldThrow}
+	 * resolves to {@code true}.
 	 * @param shouldThrow whether this method should throw an exception
 	 * @param message The error message
 	 * @throws Exception when shouldThrow evaluates to {@code true}

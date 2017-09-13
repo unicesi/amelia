@@ -3,7 +3,7 @@ package org.amelia.dsl.examples.ubuntu
 import org.amelia.dsl.lib.descriptors.Host
 
 /*
- * Install packages to allow apt to use a repository over HTTPS.
+ * Installs packages to allow apt to use a repository over HTTPS.
  * 
  * @date 2017-09-02
  * @author Miguel Jimenez (miguel@uvic.ca)

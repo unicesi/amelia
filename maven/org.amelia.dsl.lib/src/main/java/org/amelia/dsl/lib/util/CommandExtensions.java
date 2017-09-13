@@ -84,7 +84,7 @@ public class CommandExtensions {
      * Executes the given procedure in case the command is not executed
      * successfully.
      * @param command The command to execute
-     * @param procedure The callback
+     * @param procedure The fallback
      * @return a command wrapping the original command
      */
     public static CommandDescriptor fallback(final CommandDescriptor command,
@@ -115,9 +115,9 @@ public class CommandExtensions {
     }
 
     /**
-     * Applies a function on the output of the given command.
+     * Applies a procedure to the output of the given command.
      * @param command the command to execute
-     * @param function the function
+     * @param procedure the procedure to apply
      * @return a command wrapping the original command
      */
     public static CommandDescriptor fetch(final CommandDescriptor command,
