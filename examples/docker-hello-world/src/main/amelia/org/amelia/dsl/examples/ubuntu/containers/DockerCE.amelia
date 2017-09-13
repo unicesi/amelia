@@ -3,6 +3,7 @@ package org.amelia.dsl.examples.ubuntu.containers
 import org.amelia.dsl.examples.ubuntu.Arch
 import java.util.concurrent.atomic.AtomicBoolean
 import static org.amelia.dsl.examples.Util.raiseif
+import static extension org.amelia.dsl.examples.Util.warn
 
 includes org.amelia.dsl.examples.ubuntu.HTTPS
 
@@ -64,7 +65,8 @@ subsystem DockerCE {
 					https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"'
 
 		installation: repository;
-			cmd 'apt-get update'... => [ withoutTimeout ]
+			(cmd 'apt-get update'... => [ withoutTimeout ])
+				.warn ('Updating the package lists may take several minutes')
 			cmd 'apt-get install -y --allow-downgrades docker-ce=«version»*'... => [ withoutTimeout ]
 
 		configuration? user !== null: installation;

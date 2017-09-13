@@ -1,6 +1,7 @@
 package org.amelia.dsl.examples.ubuntu.containers.frascati
 
 import org.amelia.dsl.lib.descriptors.Host
+import static extension org.amelia.dsl.examples.Util.warn
 
 depends on org.amelia.dsl.examples.ubuntu.containers.DockerCE
 
@@ -52,7 +53,8 @@ subsystem HelloworldRMI {
 			cmd 'docker kill server || true'
 			cmd 'docker network rm helloworld || true'
 
-			cmd 'docker pull «image»'... => [ withoutTimeout ]
+			(cmd 'docker pull «image»'... => [ withoutTimeout ])
+				.warn ('Pulling the Docker image may take several minutes')
 			cmd 'docker network create --driver bridge helloworld'
 
 		cleanup: client;
@@ -72,8 +74,4 @@ subsystem HelloworldRMI {
 				--workdir=«path» «image» /bin/bash -c «clientScript»').fetch [ println(it) ]
 	}
 
-	config {
-		println("\nBeware this example may take several minutes downloading the Docker image\n")
-		execute(true, true, true)
-	}
 }
