@@ -21,38 +21,75 @@ a:hover {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	margin: 20px;
-}
-
-.header {
-	display: block;
-	position: absolute;
-	background-color: #e8e8e8;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 60px;
-	padding: 10px;
 }
 
 .content {
 	display: block;
-	position: absolute;
-	top: 90px;
-	bottom: 0;
-	left: 0;
-	width: 640px;
+    position: absolute;
+    top: 10px;
+    bottom: 0;
+    left: 0;
+    width: 640px;
 }
 
 #xtext-editor {
 	display: block;
 	position: absolute;
 	top: 0;
-	bottom: 0;
+	bottom: 100px;
 	left: 0;
 	right: 0;
 	padding: 4px;
 	border: 1px solid #aaa;
+}
+
+.status-wrapper {
+	display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+	height: 20px;
+}
+
+.button-wrapper {
+	display: block;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	margin: 5px;
+	z-index: 999;
+}
+
+#generator-result {
+	display: block;
+	position: absolute;
+    top: 20px;
+    bottom: 50px;
+    left: 680px;
+	right: 20px;
+}
+
+#dirty-indicator {
+	display: none;
+	background: gray;
+	color: #eee;
+	padding: 1px 8px 1px 8px;
+	border: 1px solid #ccc;
+	margin-left: 10px;
+}
+
+#dirty-indicator.dirty {
+	display: block;
+}
+
+#status {
+	display: inline;
+}
+
+.output-icon {
+	background-image: url("images/output.gif");
+	background-repeat: no-repeat;
 }
 
 /************* Examples for custom icons *************/

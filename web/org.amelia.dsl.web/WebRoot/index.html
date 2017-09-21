@@ -25,6 +25,14 @@
 				xtext.createEditor({
 					baseUrl: baseUrl,
 					syntaxDefinition: "xtext-resources/generated/amelia-syntax"
+				}).done(function(editorViewer) {
+					var xtextServices = editorViewer.xtextServices;
+					$("#save-button").click(function() {
+						xtextServices.saveResource();
+					});
+					$("#revert-button").click(function() {
+						xtextServices.revertResource();
+					});
 				});
 			});
 		});
@@ -33,12 +41,26 @@
 <body>
 
 <div class="container">
-	<div class="header">
-		<h1>Example Amelia Web Editor</h1>
-	</div>
 	<div class="content">
-		<div id="xtext-editor" data-editor-xtext-lang="amelia"></div>
+		<div class="xtext-editor"
+			data-editor-resource-id="Test.amelia"
+			data-editor-dirty-element="dirty-indicator"
+			data-editor-enable-save-action="true"
+			data-editor-enable-formatting-action="true"
+			data-editor-show-error-dialogs="true"
+			data-editor-content-assist-char-triggers="[.]"
+			data-editor-content-assist-excluded-styles="(comment.*|string.*)"></div>
+		<div class="status-wrapper">
+			<div id="dirty-indicator">modified</div>
+			<div id="status">Welcome to Xtext-Web</div>
+		</div>
+		<div class="button-wrapper">
+			<button id="save-button">Save</button>
+			<button id="revert-button">Revert</button>
+		</div>
 	</div>
+</div>
+<div id="generator-result">
 </div>
 
 </body>

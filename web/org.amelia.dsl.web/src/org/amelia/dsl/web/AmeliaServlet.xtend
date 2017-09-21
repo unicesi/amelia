@@ -21,6 +21,7 @@ package org.amelia.dsl.web
 import javax.servlet.annotation.WebServlet
 import org.eclipse.xtext.util.DisposableRegistry
 import org.eclipse.xtext.web.servlet.XtextServlet
+import org.eclipse.xtext.web.server.persistence.ResourceBaseProviderImpl
 
 /**
  * Deploy this class into a servlet container to enable DSL-specific services.
@@ -34,7 +35,8 @@ class AmeliaServlet extends XtextServlet {
 	
 	override init() {
 		super.init()
-		val injector = new AmeliaWebSetup().createInjectorAndDoEMFRegistration()
+		val resourceBaseProvider = new ResourceBaseProviderImpl('./test-files')
+		val injector = new AmeliaWebSetup(resourceBaseProvider).createInjectorAndDoEMFRegistration()
 		disposableRegistry = injector.getInstance(DisposableRegistry)
 	}
 	

@@ -1,0 +1,22 @@
+package test
+
+import org.amelia.dsl.lib.descriptors.Host
+
+/**
+ * This is an example.
+ * 
+ * @author Miguel Jiménez
+ * @date 2017-09-20
+ */
+subsystem Test {
+
+	/**
+	 * The host.
+	 */
+	param Host host
+
+	on host {
+		init:
+			cmd 'echo hello world'
+	}
+}

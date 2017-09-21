@@ -24,16 +24,22 @@ import org.amelia.dsl.AmeliaRuntimeModule
 import org.amelia.dsl.AmeliaStandaloneSetup
 import org.eclipse.xtext.util.Modules2
 import org.amelia.dsl.ide.AmeliaIdeModule
+import org.eclipse.xtext.web.server.persistence.IResourceBaseProvider
+import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 
 /**
  * Initialization support for running Xtext languages in web applications.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
+@FinalFieldsConstructor
 class AmeliaWebSetup extends AmeliaStandaloneSetup {
+
+	val IResourceBaseProvider resourceBaseProvider
 	
 	override Injector createInjector() {
-		return Guice.createInjector(Modules2.mixin(new AmeliaRuntimeModule, new AmeliaIdeModule, new AmeliaWebModule))
+		val webModule = new AmeliaWebModule(resourceBaseProvider)
+		return Guice.createInjector(Modules2.mixin(new AmeliaRuntimeModule, new AmeliaIdeModule, webModule))
 	}
 	
 }
