@@ -47,6 +47,7 @@ class ServerLauncher {
 				new MetaInfConfiguration
 			]
 			setAttribute(WebInfConfiguration.CONTAINER_JAR_PATTERN, '.*/org\\.amelia\\.dsl\\.web/.*,.*\\.jar')
+			setInitParameter("org.mortbay.jetty.servlet.Default.useFileMappedBuffer", "false")
 		]
 		val log = new Slf4jLog(ServerLauncher.name)
 		try {

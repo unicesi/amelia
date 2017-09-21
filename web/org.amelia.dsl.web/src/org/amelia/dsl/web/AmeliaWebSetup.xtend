@@ -20,9 +20,10 @@ package org.amelia.dsl.web
 
 import com.google.inject.Guice
 import com.google.inject.Injector
-import com.google.inject.util.Modules
 import org.amelia.dsl.AmeliaRuntimeModule
 import org.amelia.dsl.AmeliaStandaloneSetup
+import org.eclipse.xtext.util.Modules2
+import org.amelia.dsl.ide.AmeliaIdeModule
 
 /**
  * Initialization support for running Xtext languages in web applications.
@@ -32,9 +33,7 @@ import org.amelia.dsl.AmeliaStandaloneSetup
 class AmeliaWebSetup extends AmeliaStandaloneSetup {
 	
 	override Injector createInjector() {
-		val runtimeModule = new AmeliaRuntimeModule()
-		val webModule = new AmeliaWebModule()
-		return Guice.createInjector(Modules.override(runtimeModule).with(webModule))
+		return Guice.createInjector(Modules2.mixin(new AmeliaRuntimeModule, new AmeliaIdeModule, new AmeliaWebModule))
 	}
 	
 }

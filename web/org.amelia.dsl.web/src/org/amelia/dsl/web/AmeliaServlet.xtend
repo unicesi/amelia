@@ -18,9 +18,8 @@
  */
 package org.amelia.dsl.web
 
-import java.util.List
-import java.util.concurrent.ExecutorService
 import javax.servlet.annotation.WebServlet
+import org.eclipse.xtext.util.DisposableRegistry
 import org.eclipse.xtext.web.servlet.XtextServlet
 
 /**
@@ -31,16 +30,19 @@ import org.eclipse.xtext.web.servlet.XtextServlet
 @WebServlet(name = 'XtextServices', urlPatterns = '/xtext-service/*')
 class AmeliaServlet extends XtextServlet {
 	
-	val List<ExecutorService> executorServices = newArrayList
+	DisposableRegistry disposableRegistry
 	
 	override init() {
 		super.init()
-		new AmeliaWebSetup().createInjectorAndDoEMFRegistration()
+		val injector = new AmeliaWebSetup().createInjectorAndDoEMFRegistration()
+		disposableRegistry = injector.getInstance(DisposableRegistry)
 	}
 	
 	override destroy() {
-		executorServices.forEach[shutdown()]
-		executorServices.clear()
+		if (disposableRegistry !== null) {
+			disposableRegistry.dispose()
+			disposableRegistry = null
+		}
 		super.destroy()
 	}
 	
