@@ -3,7 +3,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta http-equiv="Content-Language" content="en-us">
 	<title>Example Web Editor</title>
-	<link rel="stylesheet" type="text/css" href="xtext/2.12.0/xtext-ace.css"/>
+	<link rel="stylesheet" type="text/css" href="orion/code_edit/built-codeEdit.css"/>
+	<link rel="stylesheet" type="text/css" href="xtext/2.12.0/xtext-orion.css"/>
 	<link rel="stylesheet" type="text/css" href="style.css"/>
 	<script src="webjars/requirejs/2.3.2/require.min.js"></script>
 	<script type="text/javascript">
@@ -14,16 +15,16 @@
 		require.config({
 			baseUrl: baseUrl,
 			paths: {
+				"text": "webjars/requirejs-text/2.0.15/text",
 				"jquery": "webjars/jquery/2.2.4/jquery.min",
-				"ace/ext/language_tools": "webjars/ace/1.2.3/src/ext-language_tools",
-				"xtext/xtext-ace": "xtext/2.12.0/xtext-ace"
+				"xtext/xtext-orion": "xtext/2.12.0/xtext-orion"
 			}
 		});
-		require(["webjars/ace/1.2.3/src/ace"], function() {
-			require(["xtext/xtext-ace"], function(xtext) {
+		require(["orion/code_edit/built-codeEdit-amd"], function() {
+			require(["xtext/xtext-orion"], function(xtext) {
 				xtext.createEditor({
 					baseUrl: baseUrl,
-					syntaxDefinition: "xtext-resources/generated/mode-amelia"
+					syntaxDefinition: "xtext-resources/generated/amelia-syntax"
 				});
 			});
 		});
