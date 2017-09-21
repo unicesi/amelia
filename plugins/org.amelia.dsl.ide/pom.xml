@@ -30,13 +30,76 @@
 	<artifactId>org.amelia.dsl.ide</artifactId>
 	<name>Amelia Eclipse IDE plugin</name>
 
+	<dependencies>
+		<dependency>
+			<groupId>com.github.unicesi</groupId>
+			<artifactId>org.amelia.dsl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext.ide</artifactId>
+			<version>${xtextVersion}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.inject</groupId>
+					<artifactId>guice</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext.xbase.ide</artifactId>
+			<version>${xtextVersion}</version>
+		</dependency>
+		<!-- Temporary workaround while Xtext upgrades Guice to 4 -->
+		<!-- read more: https://github.com/eclipse/xtext-core/issues/393 -->
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<version>1.10</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>assemble</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<assembleDirectory>${project.build.directory}/amelia-lsp-server</assembleDirectory>
+					<generateRepository>true</generateRepository>
+					<repositoryName>lib</repositoryName>
+					<repositoryLayout>flat</repositoryLayout>
+					<platforms>
+						<platform>windows</platform>
+						<platform>unix</platform>
+					</platforms>
+					<programs>
+						<program>
+							<id>run</id>
+							<mainClass>org.eclipse.xtext.ide.server.ServerLauncher</mainClass>
+						</program>
+					</programs>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 </project>
