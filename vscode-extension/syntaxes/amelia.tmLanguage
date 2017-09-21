@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string>*.amelia</string>
+	</array>
+	<key>name</key>
+	<string>amelia</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>keyword.control.amelia</string>
+			<key>match</key>
+			<string>\b(as|case|catch|cd|cmd|compile|config|default|depends|deployment|do|else|eval|extends|extension|false|finally|for|if|import|includes|instanceof|new|null|on|package|param|return|run|scp|static|subsystem|super|switch|synchronized|throw|to|true|try|typeof|val|var|while)\b</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>text.amelia</string>
+</dict>
+</plist>

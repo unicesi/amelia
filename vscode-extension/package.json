@@ -1,0 +1,38 @@
+{
+	"name": "amelia",
+	"displayName": "Amelia",
+	"description": "Amelia Language",
+	"version": "0.1.0",
+	"publisher": "MiguelJimenez",
+	"license": "LGPL-3.0",
+	"engines": {
+		"vscode": "^1.2.0"
+	},
+	"categories": [
+		"Languages"
+	],
+	"activationEvents": [
+		"onLanguage:amelia"
+	],
+	"main": "src/extension",
+	"contributes": {
+		"languages": [{
+			"id": "amelia",
+			"aliases": ["amelia"],
+			"extensions": [".amelia"],
+			"configuration": "./amelia.configuration.json"
+		}],
+		"grammars": [{
+			"language": "amelia",
+			"scopeName": "text.amelia",
+			"path": "./syntaxes/amelia.tmLanguage"
+		}]
+	},
+	"devDependencies": {
+		"typescript": "^1.8.10",
+		"vscode": "^0.11.13"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^2.3.0"
+	}
+}
