@@ -8,6 +8,7 @@ http://unicesi.github.io/amelia/releases
 ### Documentation
 
 - [Getting started with the Amelia DSL](docs/GettingStarted.md). An introduction to specifying deployment artifacts with the Amelia DSL.
+- [Style guide](docs/StyleGuide.md). A list of "good practices".
 - [Examples](examples). Explore the examples to discover how to use Amelia with third-party technologies.
 
 ### Clone
