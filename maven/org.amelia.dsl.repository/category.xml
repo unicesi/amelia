@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-	<feature id="org.amelia.dsl.feature" version="0.0.0">
-		<category name="main"/>
-	</feature>
-	<category-def name="main" label="Amelia"/>
+   <feature id="org.amelia.dsl.feature" version="0.0.0">
+      <category name="main"/>
+   </feature>
+   <category-def name="main" label="Amelia"/>
+   <repository-reference location="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/" enabled="true" />
 </site>
