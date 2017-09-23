@@ -6,7 +6,7 @@
 		<artifactId>org.amelia.dsl.examples</artifactId>
 		<version>0.13.13-SNAPSHOT</version>
 	</parent>
-	<artifactId>frascati-docker-helloworld-rmi</artifactId>
+	<artifactId>org.amelia.dsl.examples.docker.frascati</artifactId>
 
 	<name>Example: FraSCAti helloworld-rmi (Docker)</name>
 	<description>
