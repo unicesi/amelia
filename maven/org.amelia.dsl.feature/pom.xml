@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>com.github.unicesi</groupId>
 		<artifactId>org.amelia.tycho.parent</artifactId>
-		<version>0.12.12-SNAPSHOT</version>
+		<version>0.13.13-SNAPSHOT</version>
 		<relativePath>../org.amelia.tycho.parent/pom.xml</relativePath>
 	</parent>
 
