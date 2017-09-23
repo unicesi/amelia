@@ -1,10 +1,4 @@
 # Getting Started with the Amelia DSL
-## Installation
-The Amelia DSL is an Eclipse plugin, that means you need Eclipse in order to generate executable deployment artifacts. You may also use Amelia as a Maven plugin, that way it is configured as a stand-alone compiler (cf. [Maven configuration](MavenConfiguration.md)).
-
-**Note**: We recommend using Eclipse Mars. It's the one we use 😉
-
-In Eclipse, add the Amelia Update Site URL: http://unicesi.github.io/amelia/releases and follow the steps in the installation wizard. If you've never done that before, the [Eclipse help site](http://help.eclipse.org/mars/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/tasks-124.htm) can give you a hand.
 
 ## The helloworld-rmi Example
 The `helloworld-rmi` example is a small project that comes with the FraSCAti distribution. During this tutorial we will use this example to explain the basics of specifying deployment artifacts with the Amelia DSL.
