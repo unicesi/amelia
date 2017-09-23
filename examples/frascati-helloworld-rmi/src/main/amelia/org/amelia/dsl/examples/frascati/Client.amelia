@@ -32,7 +32,7 @@ subsystem Client {
 	config {
 		/*
 		 * This is a special configuration to stop the Server component. As both
-		 * subsystems reuse the same SSH connection, when the Client subsystem is
+		 * subsystems use the same SSH connection, when the Client subsystem is
 		 * shutdown, the connection is closed. For this reason, the Server component
 		 * cannot be stopped when shutting the Server subsystem down.
 		 */
