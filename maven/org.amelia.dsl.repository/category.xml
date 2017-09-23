@@ -4,5 +4,4 @@
       <category name="main"/>
    </feature>
    <category-def name="main" label="Amelia"/>
-   <repository-reference location="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/" enabled="true" />
 </site>
