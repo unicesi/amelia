@@ -6,19 +6,28 @@
 		<artifactId>org.amelia.dsl.examples</artifactId>
 		<version>0.13.13-SNAPSHOT</version>
 	</parent>
-	<artifactId>frascati-helloworld-rmi</artifactId>
+	<artifactId>frascati-docker-helloworld-rmi</artifactId>
 
-	<name>Example: FraSCAti helloworld-rmi</name>
+	<name>Example: FraSCAti helloworld-rmi (Docker)</name>
 	<description>
-		This example compiles and executes the 
+		This example runs FraSCAti 1.4 on docker and compiles and executes the 
 		helloworld-rmi project from the FraSCAti distribution.
 	</description>
 
 	<properties>
-		<mainClass>org.amelia.dsl.examples.frascati.Deployment</mainClass>
+		<mainClass>org.amelia.dsl.examples.ubuntu.containers.frascati.Deployment</mainClass>
 		<host>localhost</host>
-		<user>${user.name}</user>
+		<privileged-user>root</privileged-user>
+		<unprivileged-user>${user.name}</unprivileged-user>
 	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.github.unicesi</groupId>
+			<artifactId>org.amelia.dsl.examples.docker</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -58,6 +67,11 @@
 						<groupId>com.github.unicesi</groupId>
 						<version>${project.version}</version>
 					</dependency>
+					<dependency>
+						<groupId>com.github.unicesi</groupId>
+						<artifactId>org.amelia.dsl.examples.docker</artifactId>
+						<version>${project.version}</version>
+					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
@@ -79,8 +93,12 @@
 							<value>${host}</value>
 						</systemProperty>
 						<systemProperty>
-							<key>user</key>
-							<value>${user}</value>
+							<key>privileged-user</key>
+							<value>${privileged-user}</value>
+						</systemProperty>
+						<systemProperty>
+							<key>unprivileged-user</key>
+							<value>${unprivileged-user}</value>
 						</systemProperty>
 						<systemProperty>
 							<key>amelia.execution_timeout</key>

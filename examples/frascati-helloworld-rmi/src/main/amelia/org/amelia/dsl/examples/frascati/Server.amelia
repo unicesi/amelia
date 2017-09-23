@@ -1,0 +1,34 @@
+package org.amelia.dsl.examples.frascati
+
+import org.amelia.dsl.lib.descriptors.Host
+
+/*
+ * Compiles and executes the helloworld-rmi Server component.
+ *
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ * @date 2017-09-22
+ */
+subsystem Server {
+
+	/*
+	 * The host to which the component is deployed.
+	 */
+	param Host host
+
+	on host {
+		verify:
+			(cmd 'frascati --version')
+				.fallback [ throw new Exception('FraSCAti is not installed') ]
+	}
+
+	on host {
+		init: verify;
+			cd '$FRASCATI_HOME/examples/helloworld-rmi'
+
+		compilation: init;
+			compile 'server/src' 'server'
+
+		execution: compilation;
+			run 'helloworld-rmi-server' -libpath 'server.jar'
+	}
+}

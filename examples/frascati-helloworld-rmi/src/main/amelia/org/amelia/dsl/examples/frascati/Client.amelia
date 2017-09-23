@@ -1,0 +1,36 @@
+package org.amelia.dsl.examples.frascati
+
+import org.amelia.dsl.lib.descriptors.Host
+
+depends on org.amelia.dsl.examples.frascati.Server
+
+/*
+ * Compiles and executes the helloworld-rmi Client component.
+ *
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ * @date 2017-09-22
+ */
+subsystem Client {
+
+	/*
+	 * The host to which the component is deployed.
+	 */
+	param Host host
+
+	on host {
+		init:
+			cd '$FRASCATI_HOME/examples/helloworld-rmi'
+
+		compilation: init;
+			compile 'client/src' 'client'
+
+		execution: compilation;
+			(run 'helloworld-rmi-client' -libpath 'client.jar' -s 'r' -m 'run')
+				.fetch [ println('Client process running on PID «it»') ]
+	}
+
+	config {
+		execute(true, true, true) // stop previous and posterior executions
+		releaseDependencies(dependencies) // shutdown the server component
+	}
+}

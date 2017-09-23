@@ -1,0 +1,4 @@
+src-gen/*
+logs/*
+sessions/*
+target/*
