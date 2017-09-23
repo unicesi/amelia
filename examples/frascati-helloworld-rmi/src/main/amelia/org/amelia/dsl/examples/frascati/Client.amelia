@@ -28,9 +28,4 @@ subsystem Client {
 			(run 'helloworld-rmi-client' -libpath 'client.jar' -s 'r' -m 'run')
 				.fetch [ println('Client process running on PID «it»') ]
 	}
-
-	config {
-		execute(true, true, true) // stop previous and posterior executions
-		releaseDependencies(dependencies) // shutdown the server component
-	}
 }
