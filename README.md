@@ -4,9 +4,9 @@ Amelia is a Domain Specific Language for deploying distributed systems.
 
 ### Installation
 
-The Amelia DSL is an Eclipse plugin, that means you need Eclipse in order to edit deployment specifications. You may also use Amelia as a Maven plugin, that way it is configured as a stand-alone compiler. Please refer to the [examples](examples/) to know more about how to configure an Amelia project.
+The Amelia editor is an Eclipse plugin. To develop deployment specifications, you need to install Amelia first. In Eclipse, add the Xtext update site (http://download.eclipse.org/modeling/tmf/xtext/updates/releases/) and the Amelia update site (http://unicesi.github.io/amelia/releases). Then, list the features in the latter and follow the steps in the installation Wizard. If you have never installed Eclipse plugins before, the [Eclipse help site](http://help.eclipse.org/mars/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/tasks-124.htm) can give you a hand.
 
-In Eclipse, add the Xtext & Amelia Update Sites (http://download.eclipse.org/modeling/tmf/xtext/updates/releases/, http://unicesi.github.io/amelia/releases) and follow the steps in the Amelia installation wizard. If you've never done that before, the [Eclipse help site](http://help.eclipse.org/mars/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/tasks-124.htm) can give you a hand.
+Amelia is also available as a stand-alone compile through Maven. Please refer to the [examples](examples/) to know more about the Maven configuration.
 
 ### Documentation
 
