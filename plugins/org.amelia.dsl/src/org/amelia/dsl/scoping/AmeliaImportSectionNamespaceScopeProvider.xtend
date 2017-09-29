@@ -10,6 +10,8 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.scoping.impl.ImportNormalizer
 import org.eclipse.xtext.xbase.XConstructorCall
 import org.eclipse.xtext.xbase.scoping.XImportSectionNamespaceScopeProvider
+import org.amelia.dsl.amelia.IncludeDeclaration
+import org.amelia.dsl.amelia.DeploymentDeclaration
 
 /**
  * See more at https://www.eclipse.org/forums/index.php/m/1771411/
@@ -24,8 +26,12 @@ class AmeliaImportSectionNamespaceScopeProvider extends XImportSectionNamespaceS
 			// If changed to XExpression the class can be used as any imported class (not only for constructor calls)
 			XConstructorCall: {
 				val container = context.model as Model
-				if (container.extensions !== null)
+				// Auto-import generated classes if the container is a deployment,
+				// and it includes at least one subsystem
+				if (container.extensions !== null
+					&& container.typeDeclaration instanceof DeploymentDeclaration) {
 					return container.extensions.provideImportNormalizerList(ignoreCase)
+				}
 			}
 		}
 		return super.internalGetImportedNamespaceResolvers(context, ignoreCase)
@@ -47,11 +53,11 @@ class AmeliaImportSectionNamespaceScopeProvider extends XImportSectionNamespaceS
 	 */
 	def List<ImportNormalizer> provideImportNormalizerList(ExtensionSection extensionSection, boolean ignoreCase) {
         val List<ImportNormalizer> result = Lists.newArrayList
-        extensionSection.declarations.forEach[includeDecl|
-        	val fqn = includeDecl.element.fullyQualifiedName
-	        if (fqn !== null)
-	        	result.add(fqn.toString.createImportedNamespaceResolver(ignoreCase))
-        ]
+        extensionSection.declarations.filter(IncludeDeclaration).forEach [ includeDecl |
+			val fqn = includeDecl.element.fullyQualifiedName
+			if (fqn !== null)
+				result.add(fqn.toString.createImportedNamespaceResolver(ignoreCase))
+		]
         result
     }
 
