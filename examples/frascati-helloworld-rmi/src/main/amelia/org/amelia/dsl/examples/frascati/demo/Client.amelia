@@ -1,8 +1,9 @@
-package org.amelia.dsl.examples.frascati
+package org.amelia.dsl.examples.frascati.demo
 
 import org.amelia.dsl.lib.descriptors.Host
 
-depends on org.amelia.dsl.examples.frascati.Server
+depends on org.amelia.dsl.examples.frascati.FraSCAti
+depends on org.amelia.dsl.examples.frascati.demo.Server
 
 /*
  * Compiles and executes the helloworld-rmi Client component.
@@ -18,10 +19,8 @@ subsystem Client {
 	param Host host
 
 	on host {
-		init:
+		compilation:
 			cd '$FRASCATI_HOME/examples/helloworld-rmi'
-
-		compilation: init;
 			compile 'client/src' 'client'
 
 		execution: compilation;

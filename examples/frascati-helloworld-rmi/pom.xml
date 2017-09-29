@@ -15,10 +15,19 @@
 	</description>
 
 	<properties>
-		<mainClass>org.amelia.dsl.examples.frascati.Deployment</mainClass>
+		<mainClass>org.amelia.dsl.examples.frascati.demo.Deployment</mainClass>
 		<host>localhost</host>
-		<user>${user.name}</user>
+		<privileged-user>root</privileged-user>
+		<unprivileged-user>${user.name}</unprivileged-user>
 	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.github.unicesi</groupId>
+			<artifactId>org.amelia.dsl.examples.base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -58,6 +67,11 @@
 						<groupId>com.github.unicesi</groupId>
 						<version>${project.version}</version>
 					</dependency>
+					<dependency>
+						<groupId>com.github.unicesi</groupId>
+						<artifactId>org.amelia.dsl.examples.base</artifactId>
+						<version>${project.version}</version>
+					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
@@ -79,12 +93,12 @@
 							<value>${host}</value>
 						</systemProperty>
 						<systemProperty>
-							<key>user</key>
-							<value>${user}</value>
+							<key>privileged-user</key>
+							<value>${privileged-user}</value>
 						</systemProperty>
 						<systemProperty>
-							<key>amelia.execution_timeout</key>
-							<value>30000</value>
+							<key>unprivileged-user</key>
+							<value>${unprivileged-user}</value>
 						</systemProperty>
 					</systemProperties>
 				</configuration>

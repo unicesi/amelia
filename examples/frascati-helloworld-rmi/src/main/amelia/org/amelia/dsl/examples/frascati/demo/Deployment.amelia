@@ -1,0 +1,36 @@
+package org.amelia.dsl.examples.frascati.demo
+
+import org.amelia.dsl.examples.frascati.FraSCAti
+import org.amelia.dsl.examples.frascati.demo.Server
+import org.amelia.dsl.examples.frascati.demo.Client
+
+includes org.amelia.dsl.examples.frascati.FraSCAti
+includes org.amelia.dsl.examples.frascati.demo.Server
+includes org.amelia.dsl.examples.frascati.demo.Client
+
+/*
+ * Simple deployment to run the FraSCAti helloworld-rmi project.
+ * <p>
+ * This deployment expects the following parameters:
+ * <ul>
+ * <li> host: the host name to install docker and run the container
+ * <li> privileged-user: a privileged user to install Docker
+ * <li> unprivileged-user: an unprivileged user to run the container
+ * </ul>
+ * 
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ * @date 2017-09-22
+ */
+deployment Deployment {
+	// hosts
+	val priviledged = host(System.getProperty('host'), System.getProperty('privileged-user'))
+	val unprivileged = host(System.getProperty('host'), System.getProperty('unprivileged-user'))
+
+	// configure subsystems
+	add(new FraSCAti(#[ priviledged ], unprivileged.username))
+	add(new Server(unprivileged))
+	add(new Client(unprivileged))
+
+	// Deploy the subsystems & stop the executed components
+	start(true)
+}

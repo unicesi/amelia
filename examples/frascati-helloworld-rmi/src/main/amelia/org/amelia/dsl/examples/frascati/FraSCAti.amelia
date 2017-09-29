@@ -1,0 +1,53 @@
+package org.amelia.dsl.examples.frascati
+
+import java.util.concurrent.atomic.AtomicBoolean
+
+includes org.amelia.dsl.examples.frascati.Java1_6u23
+
+/*
+ * Installs FraSCAti 1.4 with enhanced binaries.
+ *
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ * @date 2017-09-23
+ */
+subsystem FraSCAti {
+
+	/*
+	 * Whether to proceed with the installation or not.
+	 */
+	var AtomicBoolean install = new AtomicBoolean
+
+	/*
+	 * The FraSCAti 1.4 binary distribution.
+	 */
+	var String zip = 'https://github.com/jachinte/frascati-1.4/raw/master/frascati-1.4-bin.zip'
+
+	/*
+	 * The enhanced binary.
+	 */
+	var String binary = 'https://github.com/jachinte/frascati-binaries/raw/master/frascati'
+
+	on hosts {
+		verification: //org.amelia.dsl.examples.frascati.Java1_6u23.configuration;
+			// Install FraSCAti unless it is already installed
+			(cmd 'frascati --version').fallback [ install.set(true) ]
+	}
+
+	on hosts? install {
+		download: verification;
+			cmd 'curl -L -o /tmp/frascati-1.4-bin.zip «zip»'
+
+		installation: download;
+			cmd 'unzip /tmp/frascati-1.4-bin.zip -d /opt/'
+
+		update: installation;
+			cmd 'curl -L -o /opt/frascati-runtime-1.4/bin/frascati «binary»'
+			cmd 'chmod a+x /opt/frascati-runtime-1.4/bin/frascati'
+
+		configuration: update;
+			cmd 'chown -R «user» /opt/frascati-runtime-1.4'
+			cmd 'echo "export FRASCATI_HOME=/opt/frascati-runtime-1.4" >> /etc/profile'
+			cmd 'echo "export PATH=$PATH:$FRASCATI_HOME/bin" >> /etc/profile'
+			cmd 'source /etc/profile'
+	}
+}

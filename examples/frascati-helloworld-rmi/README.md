@@ -2,13 +2,15 @@
 
 This example compiles and executes the helloworld-rmi project from the FraSCAti distribution. It requires specifying the following parameters:
 
-- __host__: the host name to install docker and run the container
-- __user__: a user to open the SSH connection to the host
+- __host__: the target host name
+- __privileged-user__: a privileged user to install Java and FraSCAti
+- __unprivileged-user__: an unprivileged user to execute the components
 
 By default, the project pom defines these parameters as follow:
 
 - host = localhost
-- user = ${user.name} # the user running maven
+- privileged-user = root
+- unprivileged-user = ${user.name} # the user running maven
 
 To run the example:
 
