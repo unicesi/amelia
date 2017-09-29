@@ -35,6 +35,7 @@
 	</properties>
 	<modules>
 		<module>../../plugins/org.amelia.dsl</module>
+		<module>../../plugins/org.amelia.dsl.tests</module>
 		<module>../../plugins/org.amelia.dsl.ide</module>
 		<module>../../plugins/org.amelia.dsl.lib.osgi</module>
 		<module>../../plugins/org.amelia.dsl.ui</module>

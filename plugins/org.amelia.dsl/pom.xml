@@ -101,6 +101,12 @@
 							</includes>
 						</fileset>
 						<fileset>
+							<directory>${basedir}/../org.amelia.dsl.test/src-gen/</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</fileset>
+						<fileset>
 							<directory>${basedir}/../org.amelia.dsl.ide/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
