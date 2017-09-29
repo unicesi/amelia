@@ -61,6 +61,7 @@ import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XbasePackage
 import java.util.concurrent.atomic.AtomicBoolean
 import com.google.common.base.Supplier
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * This class contains custom validation rules. 
@@ -587,7 +588,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 			cycleHandler.apply(elements)
 		result
 	}
-	
+
 	def private void internalFindDependentTasksRec(EObject e, Set<EObject> set) {
 		if (!set.add(e))
 			return;
@@ -595,8 +596,13 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				(e.eContainer as Model).extensions.declarations.map[d|d.element]
 			else if (e instanceof RuleDeclaration)
 				e.dependencies
-		for (t : dependencies) 
+		for (t : dependencies) {
+			// Resolve all resources before recursively traverse the dependencies
+			// This avoids cyclic dependencies
+			// More at https://www.eclipse.org/forums/index.php/m/1773598/
+			EcoreUtil.resolveAll(t.eResource)
 			internalFindDependentTasksRec(t, set)
+		}
 	}
 	
 }
