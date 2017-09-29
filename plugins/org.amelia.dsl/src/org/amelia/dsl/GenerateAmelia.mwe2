@@ -31,6 +31,9 @@ Workflow {
 			project = StandardProjectConfig {
 				baseName = "org.amelia.dsl"
 				rootPath = rootPath
+				runtimeTest = {
+					enabled = true
+				}
 				eclipsePlugin = {
 					enabled = true
 				}
@@ -43,7 +46,7 @@ Workflow {
 			code = {
 				encoding = "UTF-8"
 				fileHeader = "/*
- * Copyright © 2015 Universidad Icesi
+ * Copyright © 2017 Universidad Icesi
  * 
  * This file is part of the Amelia project.
  * 
