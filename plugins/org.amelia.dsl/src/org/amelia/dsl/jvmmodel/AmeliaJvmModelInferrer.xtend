@@ -589,9 +589,14 @@ class AmeliaJvmModelInferrer extends AbstractModelInferrer {
 						«IF !dependencies.empty»
 							for (Subsystem s : «prefix»subsystems.get("«subsystem.fullyQualifiedName»")) {
 								s.dependsOn(
-									«FOR d : dependencies SEPARATOR ",\n"»
-										«prefix»subsystems.get("«d.element.fullyQualifiedName»").toArray(new «Subsystem.simpleName»[0])
-									«ENDFOR»
+									«typeRef(Iterables).simpleName».toArray(
+										«Iterables.simpleName».concat(
+											«FOR d : dependencies SEPARATOR ","»
+												«prefix»subsystems.get("«d.element.fullyQualifiedName»")
+											«ENDFOR»
+										),
+										«Subsystem.simpleName».class
+									)
 								);
 							}
 						«ENDIF»
