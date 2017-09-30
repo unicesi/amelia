@@ -1,8 +1,10 @@
 docker:
   image: mostalive/ubuntu-14.04-oracle-jdk8
 install: |-
+  sudo apt-get purge maven maven2 maven3
+  sudo apt-add-repository ppa:andrei-pozolotin/maven3
   sudo apt-get update
-  sudo apt-get install -y maven git
+  sudo apt-get install -y maven3 git
 architect:
 - jachinte
 decrypt:
@@ -14,11 +16,12 @@ env:
 release:
   script: |
     mvn org.eclipse.tycho:tycho-versions-plugin:set-version "-DnewVersion=${tag}"
-    git commit -am "${tag}"
     mvn clean deploy -PAmelia --settings /home/r/settings.xml
+    git commit -am "${tag}"
+    git push
 merge:
-  script:
-    - "mvn clean install"
+  script: |
+    mvn clean install
 deploy:
-  script:
-    - "mvn clean deploy"
+  script: |
+    mvn clean deploy -PAmelia --settings /home/r/settings.xml
