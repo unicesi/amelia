@@ -100,6 +100,10 @@
 							<key>unprivileged-user</key>
 							<value>${unprivileged-user}</value>
 						</systemProperty>
+						<systemProperty>
+							<key>amelia.execution_timeout</key>
+							<value>120000</value>
+						</systemProperty>
 					</systemProperties>
 				</configuration>
 			</plugin>

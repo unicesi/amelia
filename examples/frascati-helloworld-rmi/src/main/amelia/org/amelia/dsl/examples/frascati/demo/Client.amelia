@@ -1,6 +1,7 @@
 package org.amelia.dsl.examples.frascati.demo
 
 import org.amelia.dsl.lib.descriptors.Host
+import org.amelia.dsl.lib.util.Log
 
 depends on org.amelia.dsl.examples.frascati.FraSCAti
 depends on org.amelia.dsl.examples.frascati.demo.Server
@@ -25,7 +26,7 @@ subsystem Client {
 
 		execution: compilation;
 			(run 'helloworld-rmi-client' -libpath 'client.jar' -s 'r' -m 'run')
-				.fetch [ println('Client process running on PID «it»') ]
+				.fetch [ Log.success(host, 'Client process running on PID «it»') ]
 	}
 
 	config {

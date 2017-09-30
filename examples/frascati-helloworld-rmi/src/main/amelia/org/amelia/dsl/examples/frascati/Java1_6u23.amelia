@@ -3,6 +3,7 @@ package org.amelia.dsl.examples.frascati
 import org.amelia.dsl.lib.descriptors.Host
 import java.util.concurrent.atomic.AtomicBoolean
 import static org.amelia.dsl.examples.Util.raiseif
+import static extension org.amelia.dsl.examples.Util.warn
 
 /*
  * Installs Oracle JDK 2.6.0_23.
@@ -41,18 +42,19 @@ subsystem Java1_6u23 {
 
 	on hosts? install {
 		download: verification;
-			cmd 'curl -L -o /tmp/jdk-6u23-linux-x64.bin «binary»'
+			cd '/tmp'
+			(cmd 'curl -L -o jdk-6u23-linux-x64.bin «binary»')
+				.warn('Downloading Java... This may take several minutes')
 
 		installation: download;
-			cmd 'chmod a+x /tmp/jdk-6u23-linux-x64.bin'
-			cmd './jdk-6u23-linux-x64.bin'
-			cmd 'mv jdk1.6.0_23 /opt/'
+			cmd 'chmod a+x jdk-6u23-linux-x64.bin'
+			cmd 'rm -rf jdk1.6.0_23 && ./jdk-6u23-linux-x64.bin'
+			cmd 'cp -r jdk1.6.0_23 /opt/'
 
 		configuration: installation;
 			cmd 'chown -R «user» /opt/jdk1.6.0_23'
-			cmd 'echo "JAVA_HOME=/opt/jdk1.6.0_23" >> /etc/profile'
-			cmd 'echo "PATH=$PATH:$JAVA_HOME/bin" >> /etc/profile'
-			cmd 'source /etc/profile'
+			cmd 'echo "export JAVA_HOME=/opt/jdk1.6.0_23" >> /etc/profile'
+			cmd 'echo "export PATH=\$PATH:\$JAVA_HOME/bin" >> /etc/profile'
 	}
 
 }

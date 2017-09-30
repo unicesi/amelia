@@ -1,9 +1,5 @@
 package org.amelia.dsl.examples.frascati.demo
 
-import org.amelia.dsl.examples.frascati.FraSCAti
-import org.amelia.dsl.examples.frascati.demo.Server
-import org.amelia.dsl.examples.frascati.demo.Client
-
 includes org.amelia.dsl.examples.frascati.FraSCAti
 includes org.amelia.dsl.examples.frascati.demo.Server
 includes org.amelia.dsl.examples.frascati.demo.Client
