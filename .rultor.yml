@@ -1,10 +1,12 @@
 docker:
   image: mostalive/ubuntu-14.04-oracle-jdk8
 install: |-
-  sudo apt-get purge maven maven2 maven3
-  sudo apt-add-repository ppa:andrei-pozolotin/maven3
+  sudo apt-get purge -y maven
   sudo apt-get update
-  sudo apt-get install -y maven3 git
+  sudo apt-get install -y git
+  curl -O http://www-us.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+  sudo tar -zxf apache-maven-3.3.9-bin.tar.gz -C /usr/local/
+  sudo ln -s /usr/local/apache-maven-3.3.9/bin/mvn /usr/bin/mvn
 architect:
 - jachinte
 decrypt:
