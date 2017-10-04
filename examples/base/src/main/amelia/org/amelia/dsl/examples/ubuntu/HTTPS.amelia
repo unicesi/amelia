@@ -1,6 +1,7 @@
 package org.amelia.dsl.examples.ubuntu
 
 import org.amelia.dsl.lib.descriptors.Host
+import static extension org.amelia.dsl.examples.Util.warn
 
 /*
  * Installs packages to allow apt to use a repository over HTTPS.
@@ -27,7 +28,8 @@ subsystem HTTPS {
 
 	on hosts {
 		installation:
-			cmd 'apt-get update'... => [ withoutTimeout ]
+			(cmd 'apt-get update'... => [ withoutTimeout ])
+				.warn('Updating package lists... This may take several minutes')
 			cmd 'apt-get install -y «packages.join(' ')»'... => [ withoutTimeout ]
 	}
 }

@@ -66,7 +66,7 @@ subsystem DockerCE {
 
 		installation: repository;
 			(cmd 'apt-get update'... => [ withoutTimeout ])
-				.warn ('Updating the package lists may take several minutes')
+				.warn ('Updating package lists... This may take several minutes')
 			cmd 'apt-get install -y --allow-downgrades docker-ce=«version»*'... => [ withoutTimeout ]
 
 		configuration? user !== null: installation;

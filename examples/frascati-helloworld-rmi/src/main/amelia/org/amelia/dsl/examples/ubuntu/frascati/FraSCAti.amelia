@@ -41,8 +41,8 @@ subsystem FraSCAti {
 				.warn('Downloading FraSCAti... This may take several minutes')
 
 		installation: download;
-			(cmd 'apt-get update')
-				.warn('Updating packages. This may take several minutes')
+			(cmd 'apt-get update'... => [ withoutTimeout ])
+				.warn('Updating package lists... This may take several minutes')
 			cmd 'apt-get install -y unzip'
 			cmd 'rm -rf /opt/frascati-runtime-1.4 && unzip frascati-1.4-bin.zip -d /opt/'
 
