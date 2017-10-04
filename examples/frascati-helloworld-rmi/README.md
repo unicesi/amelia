@@ -1,6 +1,6 @@
 # FraSCAti helloworld-rmi
 
-This example compiles and executes the helloworld-rmi project from the FraSCAti distribution. It requires specifying the following parameters:
+This example installs Java 1.6.0_23 & FraSCAti 1.4 (if not installed) and compiles and executes the helloworld-rmi project from the FraSCAti distribution. It requires specifying the following parameters:
 
 - __host__: the target host name
 - __privileged-user__: a privileged user to install Java and FraSCAti
