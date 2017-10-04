@@ -1,8 +1,8 @@
-package org.amelia.dsl.examples.frascati.demo
+package org.amelia.dsl.examples.ubuntu.frascati.demo
 
-includes org.amelia.dsl.examples.frascati.FraSCAti
-includes org.amelia.dsl.examples.frascati.demo.Server
-includes org.amelia.dsl.examples.frascati.demo.Client
+includes org.amelia.dsl.examples.ubuntu.frascati.FraSCAti
+includes org.amelia.dsl.examples.ubuntu.frascati.demo.Server
+includes org.amelia.dsl.examples.ubuntu.frascati.demo.Client
 
 /*
  * Simple deployment to run the FraSCAti helloworld-rmi project.

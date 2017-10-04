@@ -1,9 +1,9 @@
-package org.amelia.dsl.examples.frascati
+package org.amelia.dsl.examples.ubuntu.frascati
 
 import java.util.concurrent.atomic.AtomicBoolean
 import static extension org.amelia.dsl.examples.Util.warn
 
-includes org.amelia.dsl.examples.frascati.Java1_6u23
+includes org.amelia.dsl.examples.ubuntu.frascati.Java1_6u23
 
 /*
  * Installs FraSCAti 1.4 with enhanced binaries.
@@ -29,7 +29,7 @@ subsystem FraSCAti {
 	var String binary = 'https://github.com/jachinte/frascati-binaries/raw/master/frascati'
 
 	on hosts {
-		verification: org.amelia.dsl.examples.frascati.Java1_6u23.configuration;
+		verification: org.amelia.dsl.examples.ubuntu.frascati.Java1_6u23.configuration;
 			// Install FraSCAti unless it is already installed
 			(cmd 'frascati --version').fallback [ install.set(true) ]
 	}

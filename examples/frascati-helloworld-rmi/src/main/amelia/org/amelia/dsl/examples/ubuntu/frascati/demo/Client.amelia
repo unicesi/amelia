@@ -1,10 +1,10 @@
-package org.amelia.dsl.examples.frascati.demo
+package org.amelia.dsl.examples.ubuntu.frascati.demo
 
 import org.amelia.dsl.lib.descriptors.Host
 import org.amelia.dsl.lib.util.Log
 
-depends on org.amelia.dsl.examples.frascati.FraSCAti
-depends on org.amelia.dsl.examples.frascati.demo.Server
+depends on org.amelia.dsl.examples.ubuntu.frascati.FraSCAti
+depends on org.amelia.dsl.examples.ubuntu.frascati.demo.Server
 
 /*
  * Compiles and executes the helloworld-rmi Client component.

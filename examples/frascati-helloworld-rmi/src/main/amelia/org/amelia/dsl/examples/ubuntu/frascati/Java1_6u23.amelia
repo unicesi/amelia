@@ -1,4 +1,4 @@
-package org.amelia.dsl.examples.frascati
+package org.amelia.dsl.examples.ubuntu.frascati
 
 import org.amelia.dsl.lib.descriptors.Host
 import java.util.concurrent.atomic.AtomicBoolean
