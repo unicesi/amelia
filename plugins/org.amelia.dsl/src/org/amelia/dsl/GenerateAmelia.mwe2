@@ -46,7 +46,7 @@ Workflow {
 			code = {
 				encoding = "UTF-8"
 				fileHeader = "/*
- * Copyright © 2017 Universidad Icesi
+ * Copyright (c) 2017 Universidad Icesi
  * 
  * This file is part of the Amelia project.
  * 
