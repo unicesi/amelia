@@ -1,0 +1,36 @@
+package org.amelia.dsl.examples.ubuntu.frascati.demo
+
+includes org.amelia.dsl.examples.ubuntu.frascati.FraSCAti
+includes org.amelia.dsl.examples.ubuntu.frascati.demo.Server
+includes org.amelia.dsl.examples.ubuntu.frascati.demo.Client
+
+/*
+ * Distributed deployment to run the FraSCAti helloworld-rmi project
+ * in two hosts.
+ * <p>
+ * This deployment expects the following parameters:
+ * <ul>
+ * <li> host-server: the host name to install Java & FraSCAti, and execute the server component
+ * <li> host-client: the host name to install Java & FraSCAti, and execute the client component
+ * <li> privileged-user: a privileged user to install the required software in both hosts
+ * <li> unprivileged-user: an unprivileged user to run the components in both hosts
+ * </ul>
+ * 
+ * @author Miguel Jimenez (miguel@uvic.ca)
+ * @date 2017-09-22
+ */
+deployment DistributedDeployment {
+	// Input data
+	val privileged = System.getProperty('privileged-user')
+	val unprivileged = System.getProperty('unprivileged-user')
+	val server = System.getProperty('host-server')
+	val client = System.getProperty('host-client')
+
+	// configure subsystems
+	add(new FraSCAti(unprivileged, #[ host(server, privileged), host(client, privileged) ]))
+	add(new Server(host(server, unprivileged)))
+	add(new Client(host(client, unprivileged)))
+
+	// Deploy the subsystems & stop the executed components
+	start(true)
+}

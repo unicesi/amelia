@@ -9,9 +9,9 @@ includes org.amelia.dsl.examples.ubuntu.frascati.demo.Client
  * <p>
  * This deployment expects the following parameters:
  * <ul>
- * <li> host: the host name to install docker and run the container
- * <li> privileged-user: a privileged user to install Docker
- * <li> unprivileged-user: an unprivileged user to run the container
+ * <li> host: the host name to install Java & FraSCAti, and execute the components
+ * <li> privileged-user: a privileged user to install the required software
+ * <li> unprivileged-user: an unprivileged user to run the components
  * </ul>
  * 
  * @author Miguel Jimenez (miguel@uvic.ca)

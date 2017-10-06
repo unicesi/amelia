@@ -20,8 +20,12 @@ subsystem Client {
 	param Host host
 
 	on host {
-		compilation:
+		configuration:
 			cd '$FRASCATI_HOME/examples/helloworld-rmi'
+			// ensure the right host name
+			cmd 'sed -i \\"s/localhost/«host.hostname»/g\\" client/src/main/resources/helloworld-rmi-client.composite;'
+
+		compilation:
 			compile 'client/src' 'client'
 
 		execution: compilation;

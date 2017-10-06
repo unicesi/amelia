@@ -17,6 +17,8 @@
 	<properties>
 		<mainClass>org.amelia.dsl.examples.ubuntu.frascati.demo.Deployment</mainClass>
 		<host>localhost</host>
+		<host-server>localhost</host-server>
+		<host-client>localhost</host-client>
 		<privileged-user>root</privileged-user>
 		<unprivileged-user>${user.name}</unprivileged-user>
 	</properties>
@@ -91,6 +93,14 @@
 						<systemProperty>
 							<key>host</key>
 							<value>${host}</value>
+						</systemProperty>
+						<systemProperty>
+							<key>host-server</key>
+							<value>${host-server}</value>
+						</systemProperty>
+						<systemProperty>
+							<key>host-client</key>
+							<value>${host-client}</value>
 						</systemProperty>
 						<systemProperty>
 							<key>privileged-user</key>
