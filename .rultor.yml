@@ -3,7 +3,6 @@ docker:
 install: |-
   sudo apt-get update
   sudo apt-get install -y git curl
-  sudo apt-get purge -y maven
   curl -o /tmp/apache-maven-3.3.9-bin.tar.gz http://www-us.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
   sudo tar -zxf /tmp/apache-maven-3.3.9-bin.tar.gz -C /usr/local/
   sudo ln -s /usr/local/apache-maven-3.3.9/bin/mvn /usr/bin/mvn
