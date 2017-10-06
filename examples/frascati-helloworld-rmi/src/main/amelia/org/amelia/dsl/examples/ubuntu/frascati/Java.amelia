@@ -12,7 +12,7 @@ includes org.amelia.dsl.examples.ubuntu.HTTPS
  * @author Miguel Jimenez (miguel@uvic.ca)
  * @date 2017-09-23
  */
-subsystem Java1_6u23 {
+subsystem Java {
 
 	/*
 	 * The user that shall own the installation folder.

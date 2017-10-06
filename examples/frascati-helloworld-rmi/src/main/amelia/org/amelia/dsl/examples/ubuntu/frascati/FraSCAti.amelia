@@ -3,7 +3,7 @@ package org.amelia.dsl.examples.ubuntu.frascati
 import java.util.concurrent.atomic.AtomicBoolean
 import static extension org.amelia.dsl.examples.Util.warn
 
-includes org.amelia.dsl.examples.ubuntu.frascati.Java1_6u23
+includes org.amelia.dsl.examples.ubuntu.frascati.Java
 
 /*
  * Installs FraSCAti 1.4 with enhanced binaries.
@@ -28,13 +28,13 @@ subsystem FraSCAti {
 	 */
 	var String binary = 'https://github.com/jachinte/frascati-binaries/raw/master/frascati'
 
-	on Java1_6u23.HTTPS.hosts {
-		verification: org.amelia.dsl.examples.ubuntu.frascati.Java1_6u23.configuration;
+	on Java.HTTPS.hosts {
+		verification: org.amelia.dsl.examples.ubuntu.frascati.Java.configuration;
 			// Install FraSCAti unless it is already installed
 			(cmd 'frascati --version').fallback [ install.set(true) ]
 	}
 
-	on Java1_6u23.HTTPS.hosts? install {
+	on Java.HTTPS.hosts? install {
 		download: verification;
 			cd '/tmp'
 			(cmd 'curl -L -o frascati-1.4-bin.zip «zip»')
@@ -51,7 +51,7 @@ subsystem FraSCAti {
 			cmd 'chmod a+x /opt/frascati-runtime-1.4/bin/frascati'
 
 		configuration: update;
-			cmd 'chown -R «Java1_6u23.user» /opt/frascati-runtime-1.4'
+			cmd 'chown -R «Java.user» /opt/frascati-runtime-1.4'
 			cmd 'echo "export FRASCATI_HOME=/opt/frascati-runtime-1.4" >> /etc/profile'
 			cmd 'echo "export PATH=\$PATH:\$FRASCATI_HOME/bin" >> /etc/profile'
 	}
