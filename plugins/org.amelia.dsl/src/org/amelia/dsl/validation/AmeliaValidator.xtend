@@ -18,11 +18,12 @@
  */
 package org.amelia.dsl.validation
 
-import com.google.inject.Inject
+import com.google.common.base.Supplier
 import java.net.URI
 import java.util.Collection
 import java.util.List
 import java.util.Set
+import java.util.concurrent.atomic.AtomicBoolean
 import org.amelia.dsl.amelia.AmeliaPackage
 import org.amelia.dsl.amelia.CdCommand
 import org.amelia.dsl.amelia.CompileCommand
@@ -46,8 +47,8 @@ import org.amelia.dsl.amelia.TypeDeclaration
 import org.amelia.dsl.amelia.VariableDeclaration
 import org.amelia.dsl.lib.descriptors.Host
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBooleanLiteral
@@ -59,9 +60,6 @@ import org.eclipse.xtext.xbase.XNumberLiteral
 import org.eclipse.xtext.xbase.XStringLiteral
 import org.eclipse.xtext.xbase.XTypeLiteral
 import org.eclipse.xtext.xbase.XbasePackage
-import java.util.concurrent.atomic.AtomicBoolean
-import com.google.common.base.Supplier
-import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * This class contains custom validation rules. 
@@ -71,8 +69,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil
  * @author Miguel Jiménez - Initial contribution and API
  */
 class AmeliaValidator extends AbstractAmeliaValidator {
-	
-	@Inject extension IQualifiedNameProvider
 	
 	public static val CONFIGURE_NOT_ALLOWED = "amelia.issue.configureNotAllowed"
 	public static val CONFLICTING_PARAMETER = "amelia.issue.conflictingParam"
@@ -156,16 +152,26 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 		val parent = varDecl.eContainer.eContainer
 		switch (parent) {
 			Subsystem: {
-				val duplicateVars = (parent.body as SubsystemBlockExpression).expressions.filter [ v |
-					switch (v) {
-						VariableDeclaration case v.name.equals(varDecl.name):
-							return !v.equals(varDecl)
-						RuleDeclaration case v.name.equals(varDecl.name):
-							return true
-						default:
-							return false
-					}
-				]
+				val model = parent.eContainer as Model
+				var duplicateVars = (parent.body as SubsystemBlockExpression).expressions
+					.filter [ v |
+						switch (v) {
+							VariableDeclaration case v.name.equals(varDecl.name):
+								return !v.equals(varDecl)
+							RuleDeclaration case v.name.equals(varDecl.name):
+								return true
+							default:
+								return false
+						}
+					]
+					.map[w|1]
+					.toList
+				if (model.extensions !== null) {
+					duplicateVars += model.extensions.declarations
+						.filter(IncludeDeclaration)
+						.filter[s|s.element.name.equals(varDecl.name)]
+						.map[w|1]
+				}
 				if (!duplicateVars.isEmpty) {
 					error("Duplicate local variable " + varDecl.name, AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME,
 						DUPLICATE_LOCAL_VARIABLE)
@@ -190,56 +196,7 @@ class AmeliaValidator extends AbstractAmeliaValidator {
 				AmeliaPackage.Literals.VARIABLE_DECLARATION__TYPE, MISSING_VARIABLE_TYPE)
 		}
 	}
-	
-	@Check
-	def checkConflictingVarDecl(Subsystem subsystem) {
-		val model = subsystem.eContainer as Model
-		if (model.extensions !== null) {
-			val includes = model.extensions.declarations.filter(IncludeDeclaration)
-			val includedSubsystems = includes.map[i| if(i.element instanceof Subsystem) i.element as Subsystem]
-			val conflictingVarDcls = includedSubsystems
-				.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
-				.groupBy[p|p.name].values.filter[l|l.size > 1]
-			if (!conflictingVarDcls.empty) {
-				var names = conflictingVarDcls.join("'", "', '", "'", [l|l.get(0).name])
-				val index = names.lastIndexOf("', '")
-				if (index > -1)
-					names = names.substring(0, index + 1) + " and " + names.substring(index + 3)
-				val d = if(conflictingVarDcls.size == 1) #["", "s", "Its"] else #["s", "", "Their"]
-				info('''Variable«d.get(0)» «names» belong«d.get(1)» to several included subsystems. «d.get(2)» direct access has been hidden''',
-					AmeliaPackage.Literals.TYPE_DECLARATION__NAME)
-			}
-		}
-	}
-	
-	@Check
-	def checkConflictingVarDecl(VariableDeclaration varDecl) {
-		val type = if(varDecl.param) "parameter" else "variable"
-		val model = EcoreUtil2.getRootContainer(varDecl) as Model
-		val typeDecl = model.typeDeclaration
-		if (typeDecl instanceof Subsystem) {
-			if (model.extensions !== null) {
-				val includes = model.extensions.declarations.filter(IncludeDeclaration)
-				val includedSubsystems = includes.filter[i|i.element instanceof Subsystem].map[i|i.element as Subsystem]
-				val includedVarDecls = includedSubsystems
-					.map[s|s.body.expressions.filter(VariableDeclaration)].flatten
-				if (includedVarDecls.map[p|p.name].toList.contains(varDecl.name)) {
-					val conflictingVarDecl = includedVarDecls.filter[p|p.name.equals(varDecl.name)]
-					val subsystems = conflictingVarDecl.map[ p |
-						((EcoreUtil2.getRootContainer(p) as Model).typeDeclaration) as Subsystem
-					]
-					val d = if(subsystems.size == 1) "" else "s"
-					var list = subsystems.join("'", "', '", "'", [s|s.fullyQualifiedName.toString])
-					val index = list.lastIndexOf("', '")
-					if (index > -1)
-						list = list.substring(0, index + 1) + " and " + list.substring(index + 3)
-					info('''This «type» hides the direct access to parameter '«varDecl.name»' from the included subsystem«d» «list»''', 
-						AmeliaPackage.Literals.VARIABLE_DECLARATION__NAME, CONFLICTING_PARAMETER)
-				}		
-			}
-		}
-	}
-	
+
 	@Check
 	def checkRuleNameIsUnique(RuleDeclaration rule) {
 		val subsystem = (EcoreUtil2.getRootContainer(rule) as Model).typeDeclaration as Subsystem

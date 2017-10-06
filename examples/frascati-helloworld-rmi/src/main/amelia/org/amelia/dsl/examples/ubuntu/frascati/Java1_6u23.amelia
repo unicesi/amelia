@@ -1,9 +1,10 @@
 package org.amelia.dsl.examples.ubuntu.frascati
 
-import org.amelia.dsl.lib.descriptors.Host
 import java.util.concurrent.atomic.AtomicBoolean
 import static org.amelia.dsl.examples.Util.raiseif
 import static extension org.amelia.dsl.examples.Util.warn
+
+includes org.amelia.dsl.examples.ubuntu.HTTPS
 
 /*
  * Installs Oracle JDK 2.6.0_23.
@@ -12,11 +13,6 @@ import static extension org.amelia.dsl.examples.Util.warn
  * @date 2017-09-23
  */
 subsystem Java1_6u23 {
-
-	/*
-	 * The hosts in which Java is installed.
-	 */
-	param Iterable<Host> hosts
 
 	/*
 	 * The user that shall own the installation folder.
@@ -33,14 +29,14 @@ subsystem Java1_6u23 {
 	 */
 	var String binary = 'https://github.com/jachinte/oracle-jdk-1.6.0_23/raw/master/jdk-6u23-linux-x64.bin'
 
-	on hosts {
+	on HTTPS.hosts {
 		verification:
 			(cmd 'java -version')
 				.fetch [ raiseif(!it.contains('1.6.0_23'), 'Different JDK already installed') ]
 				.fallback [ install.set(true) ]
 	}
 
-	on hosts? install {
+	on HTTPS.hosts? install {
 		download: verification;
 			cd '/tmp'
 			(cmd 'curl -L -o jdk-6u23-linux-x64.bin «binary»')

@@ -23,7 +23,7 @@ deployment Deployment {
 	val unprivileged = host(System.getProperty('host'), System.getProperty('unprivileged-user'))
 
 	// configure subsystems
-	add(new FraSCAti(#[ priviledged ], unprivileged.username))
+	add(new FraSCAti(unprivileged.username, #[ priviledged ]))
 	add(new Server(unprivileged))
 	add(new Client(unprivileged))
 
