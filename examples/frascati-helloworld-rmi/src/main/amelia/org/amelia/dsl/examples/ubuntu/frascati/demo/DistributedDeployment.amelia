@@ -17,7 +17,7 @@ includes org.amelia.dsl.examples.ubuntu.frascati.demo.Client
  * </ul>
  * 
  * @author Miguel Jimenez (miguel@uvic.ca)
- * @date 2017-09-22
+ * @date 2017-10-06
  */
 deployment DistributedDeployment {
 	// Input data
