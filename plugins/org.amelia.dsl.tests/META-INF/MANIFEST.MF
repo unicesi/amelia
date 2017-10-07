@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.amelia.dsl.tests
 Bundle-Vendor: Miguel Jiménez
-Bundle-Version: 0.13.13.qualifier
+Bundle-Version: 0.14.15.qualifier
 Bundle-SymbolicName: org.amelia.dsl.tests;singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.amelia.dsl,
