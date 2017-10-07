@@ -17,8 +17,11 @@ env:
 release:
   script: |
     mvn org.eclipse.tycho:tycho-versions-plugin:set-version "-DnewVersion=${tag}"
-    git commit -am "${tag}"
     mvn clean deploy -PAmelia --settings /home/r/settings.xml
+    git commit -am "${tag}"
+    git checkout master
+    git merge __rultor
+    git push -u origin master
 merge:
   script: |
     mvn clean install
