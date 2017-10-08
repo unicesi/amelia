@@ -103,20 +103,23 @@ public class DescriptorGraph
 					}
 					if (this.descriptor.shouldExecute())
 						this.handler.executeCommand(this.descriptor, this.command);
-					this.descriptor.done(this.handler.host());
+
 					// Notify when command is not executed
 					if (!this.descriptor.shouldExecute())
 						Log.info(
 							this.handler.host(),
 							String.format("not executed: %s", this.descriptor.toCommandString())
 						);
-					// Release this dependency
-					if (this.descriptor.isExecution()) {
-						// FIXME: Temporary workaround to avoid service-not-bound
-						// errors (RMI)
-						Thread.sleep(2000);
+					// prevent dependencies from missing the notification
+					synchronized(this.descriptor) {
+						if (this.descriptor.isExecution()) {
+							// FIXME: Temporary workaround to avoid service-not-bound
+							// errors (RMI) in FraSCAti executions
+							Thread.sleep(2000);
+						}
+						this.descriptor.done(this.handler.host());
+						this.descriptor.notifyObservers();
 					}
-					this.descriptor.notifyObservers();
 				}
 			} catch (Exception e) {
 				logger.error(e);
