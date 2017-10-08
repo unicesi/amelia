@@ -19,13 +19,20 @@ subsystem Client {
 	 */
 	param Host host
 
+    /*
+     * Whether client and server are deployed in different hosts
+     */
+    param Boolean distributed
+
 	on host {
-		configuration:
-			cd '$FRASCATI_HOME/examples/helloworld-rmi'
+	    init:
+	       cd '$FRASCATI_HOME/examples/helloworld-rmi'
+
+		configuration? distributed: init;
 			// ensure the right host name
 			cmd 'sed -i \\"s/localhost/«host.hostname»/g\\" client/src/main/resources/helloworld-rmi-client.composite;'
 
-		compilation:
+		compilation: configuration;
 			compile 'client/src' 'client'
 
 		execution: compilation;

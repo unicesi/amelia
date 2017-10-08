@@ -29,7 +29,7 @@ deployment DistributedDeployment {
 	// configure subsystems
 	add(new FraSCAti(unprivileged, #[ host(server, privileged), host(client, privileged) ]))
 	add(new Server(host(server, unprivileged)))
-	add(new Client(host(client, unprivileged)))
+	add(new Client(host(client, unprivileged), true))
 
 	// Deploy the subsystems & stop the executed components
 	start(true)

@@ -25,7 +25,7 @@ deployment Deployment {
 	// configure subsystems
 	add(new FraSCAti(unprivileged.username, #[ priviledged ]))
 	add(new Server(unprivileged))
-	add(new Client(unprivileged))
+	add(new Client(unprivileged, false))
 
 	// Deploy the subsystems & stop the executed components
 	start(true)

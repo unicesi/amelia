@@ -30,7 +30,7 @@ subsystem Java {
 	var String binary = 'https://github.com/jachinte/oracle-jdk-1.6.0_23/raw/master/jdk-6u23-linux-x64.bin'
 
 	on HTTPS.hosts {
-		verification:
+		verification: org.amelia.dsl.examples.ubuntu.HTTPS.installation;
 			(cmd 'java -version')
 				.fetch [ raiseif(!it.contains('1.6.0_23'), 'Different JDK already installed') ]
 				.fallback [ install.set(true) ]
@@ -45,11 +45,11 @@ subsystem Java {
 		installation: download;
 			cmd 'chmod a+x jdk-6u23-linux-x64.bin'
 			cmd 'rm -rf jdk1.6.0_23 && ./jdk-6u23-linux-x64.bin'
-			cmd 'cp -r jdk1.6.0_23 /opt/'
+			cmd 'cp -r jdk1.6.0_23 /usr/local/'
 
 		configuration: installation;
-			cmd 'chown -R «user» /opt/jdk1.6.0_23'
-			cmd 'echo "export JAVA_HOME=/opt/jdk1.6.0_23" >> /etc/profile'
+			cmd 'chown -R «user» /usr/local/jdk1.6.0_23'
+			cmd 'echo "export JAVA_HOME=/usr/local/jdk1.6.0_23" >> /etc/profile'
 			cmd 'echo "export PATH=\$PATH:\$JAVA_HOME/bin" >> /etc/profile'
 	}
 
