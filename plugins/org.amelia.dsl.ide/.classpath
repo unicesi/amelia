@@ -6,8 +6,8 @@
 			<accessrule kind="accessible" pattern="org/eclipse/xtext/xbase/**"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="src" path="src-gen"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="xtend-gen"/>
+	<classpathentry kind="src" path="src/"/>
+	<classpathentry kind="src" path="src-gen/"/>
+	<classpathentry kind="src" path="xtend-gen/"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

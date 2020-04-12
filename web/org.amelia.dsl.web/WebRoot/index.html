@@ -33,6 +33,16 @@
 					$("#revert-button").click(function() {
 						xtextServices.revertResource();
 					});
+					xtextServices.successListeners.push(function(serviceType, result) {
+						if (serviceType == 'validate' && result.issues.every(function(issue) {issue.severity != 'error'})) {
+							// Option 1: use a simple GET request
+							// $('#generator-result').html('<iframe src="http://' + location.host + '/xtext-service/generate?resource=Test.amelia"></iframe>');
+							// Option 2: use the 'generate' function
+							xtextServices.generate({artifact: '/hidden.txt'}).done(function(result) {
+								console.log(result);
+							});
+						}
+					});
 				});
 			});
 		});

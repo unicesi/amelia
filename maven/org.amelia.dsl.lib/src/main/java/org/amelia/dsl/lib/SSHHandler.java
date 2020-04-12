@@ -241,7 +241,7 @@ public class SSHHandler extends Thread {
 				this.channel.getExtInputStream())
 			.withEchoInput(this.outputLog)
 			.withEchoOutput(this.outputLog)
-			.withInputFilters(removeColors(), removeNonPrintable())
+			//.withInputFilters(removeColors(), removeNonPrintable())
 			.withExceptionOnFailure()
 			.withTimeout(this.executionTimeout, TimeUnit.MILLISECONDS)
 			.build();

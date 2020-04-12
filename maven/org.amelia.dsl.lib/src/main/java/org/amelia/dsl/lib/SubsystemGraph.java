@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.amelia.dsl.lib.explorer.ExplorerWindow;
 import org.amelia.dsl.lib.util.ANSI;
 import org.amelia.dsl.lib.util.Configuration;
 import org.amelia.dsl.lib.util.Log;
@@ -144,8 +145,14 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 
 	private static SubsystemGraph instance;
 
+	/**
+	 * A graphical explorer to display the SSH connections.
+	 */
+	private final ExplorerWindow explorer;
+
 	private SubsystemGraph() {
 		new Configuration().setProperties();
+		this.explorer = new ExplorerWindow();
 		this.subsystems = new ArrayList<Subsystem>();
 		this.threads = new TreeSet<DependencyThread>();
 		this.taskQueue = new SingleThreadTaskQueue();
@@ -217,6 +224,10 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 				threads.add(thread);
 			}
 			Log.info("Resolving subsystems (" + this.subsystems.size() + ")");
+
+			// Display the explorer
+			this.explorer.setVisible(true);
+
 			long start = System.nanoTime();
 			for (DependencyThread thread : this.threads) {
 				thread.start();
@@ -299,6 +310,13 @@ public class SubsystemGraph extends HashMap<Subsystem, List<Subsystem>> {
 				if(!subsystem.deployment().isShutdown())
 					subsystem.deployment().shutdown(stopExecutedComponents);
 		}
+	}
+
+	/**
+	 * @return This graph's explorer.
+	 */
+	public ExplorerWindow explorer() {
+		return this.explorer;
 	}
 
 }

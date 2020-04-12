@@ -101,6 +101,9 @@ public class DescriptorGraph
 									+ this.descriptor.toCommandString());
 						}
 					}
+					// Request focus
+					SubsystemGraph.getInstance().explorer().focus(this.handler.host());
+
 					if (this.descriptor.shouldExecute())
 						this.handler.executeCommand(this.descriptor, this.command);
 
@@ -367,6 +370,7 @@ public class DescriptorGraph
 			if (host.closeSSHConnection() && connected) {
 				logger.info("SSH connection for " + host
 						+ " was successfully closed");
+				// SubsystemGraph.getInstance().explorer().remove(host);
 			}
 		}
 	}
@@ -433,6 +437,8 @@ public class DescriptorGraph
 				logger.info("SSH connection for " + host
 						+ " was successfully established");
 			}
+			// Display host in explorer
+			SubsystemGraph.getInstance().explorer().display(host);
 		}
 	}
 	
